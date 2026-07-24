@@ -41,6 +41,10 @@ class DemographicController extends Controller
                 ->distinct()->orderByDesc('year')->pluck('year');
         }
 
+        if ($availableYears->isEmpty()) {
+            $availableYears = collect([(int) date('Y')]);
+        }
+
         $selectedYear = $request->integer('year', $availableYears->first() ?? date('Y'));
 
         $availableSemesters = DemographicDataset::published()
@@ -48,6 +52,10 @@ class DemographicController extends Controller
             ->where('region_code', $regionCode)
             ->where('year', $selectedYear)
             ->distinct()->orderBy('semester')->pluck('semester');
+
+        if ($availableSemesters->isEmpty()) {
+            $availableSemesters = collect([1, 2]);
+        }
 
         $requestedSemester = $request->integer('semester', $availableSemesters->last() ?? 1);
         $selectedSemester  = $availableSemesters->contains($requestedSemester)

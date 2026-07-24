@@ -381,14 +381,14 @@ class DemographicSeeder extends Seeder
             }
         };
 
-        // Seed datasets for all semesters from 2024 to 2026 (6 semesters in total)
-        $seedYearDatasets(2024, 1);
-        $seedYearDatasets(2024, 2);
-        $seedYearDatasets(2025, 1);
-        $seedYearDatasets(2025, 2);
-        $seedYearDatasets(2026, 1);
-        $seedYearDatasets(2026, 2);
+        // Dataset auto-seeding disabled to ensure production datasets start clean without dummy data.
+        // $seedYearDatasets(2024, 1);
+        // $seedYearDatasets(2024, 2);
+        // $seedYearDatasets(2025, 1);
+        // $seedYearDatasets(2025, 2);
+        // $seedYearDatasets(2026, 1);
+        // $seedYearDatasets(2026, 2);
 
-        $this->command->info('✓ DemographicSeeder: 8 kecamatan, desa, dan dataset 2024-2026 (Semester 1 & 2) berhasil di-seed.');
+        $this->command->info('✓ DemographicSeeder: 8 kecamatan dan 81 desa/kelurahan berhasil di-seed.');
     }
 }
