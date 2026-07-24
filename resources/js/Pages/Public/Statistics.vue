@@ -160,23 +160,23 @@
               <div>
                 <div class="flex items-center gap-1.5 mb-1">
                   <span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full text-[8px] font-bold">
-                    {{ (charts.akta_lahir?.percentage ?? 93.8) >= 90 ? '🟢 Sesuai Target' : '🟡 Perlu Akselerasi' }}
+                    {{ charts.akta_lahir?.percentage !== undefined ? (charts.akta_lahir.percentage >= 90 ? '🟢 Sesuai Target' : '🟡 Perlu Akselerasi') : '⚪ Belum Ada Data' }}
                   </span>
                 </div>
                 <p class="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Akta Lahir (0-17 Thn)</p>
                 <p class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight mt-1">
-                  {{ charts.akta_lahir?.percentage ?? 93.8 }}%
+                  {{ charts.akta_lahir?.percentage !== undefined ? charts.akta_lahir.percentage + '%' : '-' }}
                 </p>
               </div>
               <span class="p-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 rounded-2xl text-xl shadow-inner">📜</span>
             </div>
             <div class="space-y-1.5">
               <div class="h-2.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden p-0.5">
-                <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500 shadow-sm" :style="{ width: Math.min(100, (charts.akta_lahir?.percentage ?? 93.8)) + '%' }"></div>
+                <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500 shadow-sm" :style="{ width: Math.min(100, (charts.akta_lahir?.percentage || 0)) + '%' }"></div>
               </div>
               <div class="flex justify-between text-[10px] text-gray-500 dark:text-zinc-400 font-medium">
-                <span>Terbit: <strong class="text-gray-700 dark:text-zinc-200 font-mono">{{ formatNumber(charts.akta_lahir?.owned ?? 81043) }}</strong></span>
-                <span>Target: <strong class="text-gray-400 font-mono">{{ formatNumber(charts.akta_lahir?.target ?? 86400) }}</strong></span>
+                <span>Terbit: <strong class="text-gray-700 dark:text-zinc-200 font-mono">{{ formatNumber(charts.akta_lahir?.owned || 0) }}</strong></span>
+                <span>Target: <strong class="text-gray-400 font-mono">{{ formatNumber(charts.akta_lahir?.target || 0) }}</strong></span>
               </div>
             </div>
           </div>
@@ -187,23 +187,23 @@
               <div>
                 <div class="flex items-center gap-1.5 mb-1">
                   <span class="px-2 py-0.5 bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 rounded-full text-[8px] font-bold">
-                    {{ (charts.kia?.percentage ?? 85.0) >= 80 ? '🔵 Sangat Baik' : '🟡 Cukup' }}
+                    {{ charts.kia?.percentage !== undefined ? (charts.kia.percentage >= 80 ? '🔵 Sangat Baik' : '🟡 Cukup') : '⚪ Belum Ada Data' }}
                   </span>
                 </div>
                 <p class="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Kartu Identitas Anak (KIA)</p>
                 <p class="text-3xl font-black text-sky-600 dark:text-sky-400 font-mono tracking-tight mt-1">
-                  {{ charts.kia?.percentage ?? 85.0 }}%
+                  {{ charts.kia?.percentage !== undefined ? charts.kia.percentage + '%' : '-' }}
                 </p>
               </div>
               <span class="p-3 bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 rounded-2xl text-xl shadow-inner">🪪</span>
             </div>
             <div class="space-y-1.5">
               <div class="h-2.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden p-0.5">
-                <div class="h-full bg-gradient-to-r from-sky-500 to-blue-500 rounded-full transition-all duration-500 shadow-sm" :style="{ width: Math.min(100, (charts.kia?.percentage ?? 85.0)) + '%' }"></div>
+                <div class="h-full bg-gradient-to-r from-sky-500 to-blue-500 rounded-full transition-all duration-500 shadow-sm" :style="{ width: Math.min(100, (charts.kia?.percentage || 0)) + '%' }"></div>
               </div>
               <div class="flex justify-between text-[10px] text-gray-500 dark:text-zinc-400 font-medium">
-                <span>Terbit: <strong class="text-gray-700 dark:text-zinc-200 font-mono">{{ formatNumber(charts.kia?.owned ?? 73440) }}</strong></span>
-                <span>Target: <strong class="text-gray-400 font-mono">{{ formatNumber(charts.kia?.target ?? 86400) }}</strong></span>
+                <span>Terbit: <strong class="text-gray-700 dark:text-zinc-200 font-mono">{{ formatNumber(charts.kia?.owned || 0) }}</strong></span>
+                <span>Target: <strong class="text-gray-400 font-mono">{{ formatNumber(charts.kia?.target || 0) }}</strong></span>
               </div>
             </div>
           </div>
@@ -219,18 +219,18 @@
                 </div>
                 <p class="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Identitas Digital (IKD)</p>
                 <p class="text-3xl font-black text-purple-600 dark:text-purple-400 font-mono tracking-tight mt-1">
-                  {{ charts.ikd?.percentage ?? 34.3 }}%
+                  {{ charts.ikd?.percentage !== undefined ? charts.ikd.percentage + '%' : '-' }}
                 </p>
               </div>
               <span class="p-3 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 rounded-2xl text-xl shadow-inner">📱</span>
             </div>
             <div class="space-y-1.5">
               <div class="h-2.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden p-0.5">
-                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500 shadow-sm" :style="{ width: Math.min(100, (charts.ikd?.percentage ?? 34.3)) + '%' }"></div>
+                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500 shadow-sm" :style="{ width: Math.min(100, (charts.ikd?.percentage || 0)) + '%' }"></div>
               </div>
               <div class="flex justify-between text-[10px] text-gray-500 dark:text-zinc-400 font-medium">
-                <span>Aktivasi: <strong class="text-gray-700 dark:text-zinc-200 font-mono">{{ formatNumber(charts.ikd?.owned ?? 64964) }}</strong></span>
-                <span>Wajib KTP: <strong class="text-gray-400 font-mono">{{ formatNumber(charts.ikd?.target ?? 189400) }}</strong></span>
+                <span>Aktivasi: <strong class="text-gray-700 dark:text-zinc-200 font-mono">{{ formatNumber(charts.ikd?.owned || 0) }}</strong></span>
+                <span>Wajib KTP: <strong class="text-gray-400 font-mono">{{ formatNumber(charts.ikd?.target || 0) }}</strong></span>
               </div>
             </div>
           </div>
@@ -241,23 +241,23 @@
               <div>
                 <div class="flex items-center gap-1.5 mb-1">
                   <span class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-[8px] font-bold">
-                    {{ (charts.wajib_ktp?.recorded_percentage ?? 97.8) >= 95 ? '🟢 Hampir Tuntas' : '🟡 Proses' }}
+                    {{ charts.wajib_ktp?.recorded_percentage !== undefined ? (charts.wajib_ktp.recorded_percentage >= 95 ? '🟢 Hampir Tuntas' : '🟡 Proses') : '⚪ Belum Ada Data' }}
                   </span>
                 </div>
                 <p class="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">Perekaman KTP-el</p>
                 <p class="text-3xl font-black text-indigo-600 dark:text-indigo-400 font-mono tracking-tight mt-1">
-                  {{ charts.wajib_ktp?.recorded_percentage ?? 97.8 }}%
+                  {{ charts.wajib_ktp?.recorded_percentage !== undefined ? charts.wajib_ktp.recorded_percentage + '%' : '-' }}
                 </p>
               </div>
               <span class="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 rounded-2xl text-xl shadow-inner">💳</span>
             </div>
             <div class="space-y-1.5">
               <div class="h-2.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden p-0.5">
-                <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500 shadow-sm" :style="{ width: Math.min(100, (charts.wajib_ktp?.recorded_percentage ?? 97.8)) + '%' }"></div>
+                <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500 shadow-sm" :style="{ width: Math.min(100, (charts.wajib_ktp?.recorded_percentage || 0)) + '%' }"></div>
               </div>
               <div class="flex justify-between text-[10px] text-gray-500 dark:text-zinc-400 font-medium">
-                <span>Terekam: <strong class="text-gray-700 dark:text-zinc-200 font-mono">{{ formatNumber(charts.wajib_ktp?.recorded ?? 185233) }}</strong></span>
-                <span>Wajib KTP: <strong class="text-gray-400 font-mono">{{ formatNumber(charts.wajib_ktp?.total ?? 189400) }}</strong></span>
+                <span>Terekam: <strong class="text-gray-700 dark:text-zinc-200 font-mono">{{ formatNumber(charts.wajib_ktp?.recorded || 0) }}</strong></span>
+                <span>Wajib KTP: <strong class="text-gray-400 font-mono">{{ formatNumber(charts.wajib_ktp?.total || 0) }}</strong></span>
               </div>
             </div>
           </div>
@@ -281,11 +281,13 @@
                 <span class="text-sm">🏠</span>
               </div>
               <p class="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight mt-1">
-                {{ formatNumber(charts.households?.total ?? 73889) }}
+                {{ formatNumber(charts.households?.total || 0) }}
               </p>
             </div>
             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-800 text-[10px] text-gray-500 dark:text-zinc-400">
-              <p class="font-semibold text-emerald-700 dark:text-emerald-300">Rata-rata {{ summary.total_population && (charts.households?.total ?? 73889) ? (summary.total_population / (charts.households?.total ?? 73889)).toFixed(2) : '3.65' }} jiwa/KK</p>
+              <p class="font-semibold text-emerald-700 dark:text-emerald-300">
+                {{ summary.total_population && charts.households?.total ? 'Rata-rata ' + (summary.total_population / charts.households.total).toFixed(2) + ' jiwa/KK' : 'Data KK belum diunggah' }}
+              </p>
             </div>
           </div>
 
@@ -297,11 +299,13 @@
                 <span class="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded">15-59 Thn</span>
               </div>
               <p class="text-2xl font-black text-blue-600 dark:text-blue-400 font-mono tracking-tight mt-1">
-                {{ formatNumber(charts.productive_age?.total ?? 174571) }}
+                {{ formatNumber(charts.productive_age?.total || 0) }}
               </p>
             </div>
             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-800 text-[10px]">
-              <p class="font-bold text-blue-600 dark:text-blue-400">⚡ {{ charts.productive_age?.percentage ?? 64.8 }}% Bonus Demografi</p>
+              <p class="font-bold text-blue-600 dark:text-blue-400">
+                ⚡ {{ charts.productive_age?.percentage !== undefined ? charts.productive_age.percentage + '% Bonus Demografi' : 'Data produktif belum ada' }}
+              </p>
             </div>
           </div>
 
@@ -313,11 +317,13 @@
                 <span class="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded">60+ Thn</span>
               </div>
               <p class="text-2xl font-black text-amber-600 dark:text-amber-400 font-mono tracking-tight mt-1">
-                {{ formatNumber(charts.lansia?.total ?? 23820) }}
+                {{ formatNumber(charts.lansia?.total || 0) }}
               </p>
             </div>
             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-800 text-[10px]">
-              <p class="font-bold text-amber-600 dark:text-amber-400">👴 {{ charts.lansia?.percentage ?? 8.8 }}% Dari Total Penduduk</p>
+              <p class="font-bold text-amber-600 dark:text-amber-400">
+                👴 {{ charts.lansia?.percentage !== undefined ? charts.lansia.percentage + '% Dari Total Penduduk' : 'Data lansia belum ada' }}
+              </p>
             </div>
           </div>
 
@@ -329,11 +335,13 @@
                 <span class="text-sm">📉</span>
               </div>
               <p class="text-2xl font-black text-rose-600 dark:text-rose-400 font-mono tracking-tight mt-1">
-                {{ charts.dependency_ratio?.ratio ?? 54.32 }}%
+                {{ charts.dependency_ratio?.ratio !== undefined ? charts.dependency_ratio.ratio + '%' : '-' }}
               </p>
             </div>
             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-800 text-[10px] text-gray-500 dark:text-zinc-400">
-              <p class="font-semibold text-rose-600 dark:text-rose-400">54,3 jiwa non-produktif per 100 produktif</p>
+              <p class="font-semibold text-rose-600 dark:text-rose-400">
+                {{ charts.dependency_ratio?.ratio !== undefined ? charts.dependency_ratio.ratio + ' jiwa non-produktif per 100 produktif' : 'Rasio belum diunggah' }}
+              </p>
             </div>
           </div>
 
@@ -345,11 +353,13 @@
                 <span class="text-sm">♿</span>
               </div>
               <p class="text-2xl font-black text-teal-600 dark:text-teal-400 font-mono tracking-tight mt-1">
-                {{ formatNumber(charts.disability?.total ?? 2022) }}
+                {{ formatNumber(charts.disability?.total || 0) }}
               </p>
             </div>
             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-800 text-[10px] text-gray-500 dark:text-zinc-400">
-              <p class="font-semibold text-teal-600 dark:text-teal-400">Terbagi dalam 5 ragam disabilitas</p>
+              <p class="font-semibold text-teal-600 dark:text-teal-400">
+                {{ charts.disability?.total ? 'Terbagi dalam ragam disabilitas' : 'Data disabilitas belum ada' }}
+              </p>
             </div>
           </div>
         </div>
