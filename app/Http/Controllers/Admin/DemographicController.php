@@ -207,7 +207,6 @@ class DemographicController extends Controller
     }
 
     public function storeDataset(Request $request): RedirectResponse
-    public function storeDataset(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'region_level' => 'required|in:regency,district,village',
