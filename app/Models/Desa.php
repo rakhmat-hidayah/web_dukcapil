@@ -10,11 +10,12 @@ class Desa extends Model
 {
     protected $fillable = [
         'kecamatan_id', 'name', 'code', 'type',
-        'population_total', 'male_count', 'female_count',
+        'area_km2', 'population_total', 'male_count', 'female_count',
         'dusun_count', 'sort_order',
     ];
 
     protected $casts = [
+        'area_km2'         => 'float',
         'population_total' => 'integer',
         'male_count'       => 'integer',
         'female_count'     => 'integer',

@@ -24,8 +24,30 @@ class DemographicController extends Controller
             ->orderBy('sort_order')
             ->get();
 
+        $totalArea = $kecamatans->sum('area_km2') ?: 2324.55;
+        $totalKelurahans = Desa::where('type', 'kelurahan')->count();
+        $totalDesas = Desa::where('type', 'desa')->count();
+        $totalWilayah = Desa::count();
+
+        $kecamatans->transform(function ($kec) use ($totalArea) {
+            $kec->percentage = $totalArea > 0 ? round(($kec->area_km2 / $totalArea) * 100, 2) : 0;
+            $kec->desas->transform(function ($desa) use ($kec) {
+                $desa->percentage_kecamatan = ($kec->area_km2 && $kec->area_km2 > 0) ? round(($desa->area_km2 / $kec->area_km2) * 100, 2) : 0;
+                return $desa;
+            });
+            return $kec;
+        });
+
         return Inertia::render('Demographics/Hierarchy', [
             'kecamatans' => $kecamatans,
+            'summary' => [
+                'total_area' => $totalArea,
+                'total_kecamatans' => $kecamatans->count(),
+                'total_kelurahans' => $totalKelurahans,
+                'total_desas' => $totalDesas,
+                'total_wilayah' => $totalWilayah,
+                'bps_code' => '5205',
+            ]
         ]);
     }
 
@@ -81,6 +103,7 @@ class DemographicController extends Controller
             'name'             => 'required|string|max:150',
             'code'             => 'nullable|string|max:20|unique:desas,code',
             'type'             => 'required|in:desa,kelurahan',
+            'area_km2'         => 'nullable|numeric|min:0',
             'population_total' => 'nullable|integer|min:0',
             'male_count'       => 'nullable|integer|min:0',
             'female_count'     => 'nullable|integer|min:0',
@@ -102,6 +125,7 @@ class DemographicController extends Controller
             'name'             => 'required|string|max:150',
             'code'             => 'nullable|string|max:20|unique:desas,code,' . $desa->id,
             'type'             => 'required|in:desa,kelurahan',
+            'area_km2'         => 'nullable|numeric|min:0',
             'population_total' => 'nullable|integer|min:0',
             'male_count'       => 'nullable|integer|min:0',
             'female_count'     => 'nullable|integer|min:0',
@@ -122,6 +146,12 @@ class DemographicController extends Controller
             ?->update(['desa_count' => Desa::where('kecamatan_id', $kecamatanId)->count()]);
 
         return back()->with('success', 'Desa/Kelurahan dihapus.');
+    }
+
+    public function desasByKecamatan(Kecamatan $kecamatan): \Illuminate\Http\JsonResponse
+    {
+        $desas = $kecamatan->desas()->orderBy('sort_order')->orderBy('name')->get();
+        return response()->json($desas);
     }
 
     // ─────────────────────────────────────────────────────────
