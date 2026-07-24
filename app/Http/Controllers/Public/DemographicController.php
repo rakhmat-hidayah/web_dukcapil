@@ -142,6 +142,7 @@ class DemographicController extends Controller
                 'total_female'     => $totalFemale,
                 'total_households' => $totalHouseholds,
                 'total_kecamatan'  => $kecamatans->count(),
+                'total_desa'       => $desas->count(),
             ],
             'charts'              => $charts,
             'heatmapData'         => $heatmapData,

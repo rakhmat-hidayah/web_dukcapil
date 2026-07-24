@@ -48,7 +48,7 @@
       </div>
 
       <!-- Data Belum Tersedia -->
-      <div v-if="!dataAvailable" class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-12 shadow-sm text-center">
+      <div v-if="!dataAvailable || !summary.total_population" class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-12 shadow-sm text-center">
         <div class="text-5xl mb-4">📭</div>
         <h3 class="text-lg font-black text-gray-700 dark:text-zinc-200 mb-2">Data Belum Tersedia</h3>
         <p class="text-sm text-gray-400 max-w-md mx-auto">
@@ -73,7 +73,7 @@
           <div class="mt-4 pt-3 border-t border-indigo-500/20 flex items-center justify-between text-[10px] text-indigo-200/80">
             <span>Terdaftar di Dukcapil</span>
             <span class="font-bold text-indigo-300 font-mono">
-              Sex Ratio: {{ (summary.total_male && summary.total_female) ? ((summary.total_male / summary.total_female) * 100).toFixed(1) : '101.1' }}
+              Sex Ratio: {{ (summary.total_male && summary.total_female) ? ((summary.total_male / summary.total_female) * 100).toFixed(1) : '-' }}
             </span>
           </div>
         </div>
@@ -91,7 +91,7 @@
           <div class="mt-4 pt-3 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between text-[10px] text-gray-500 dark:text-zinc-400">
             <span>Porsi Populasi</span>
             <span class="font-bold text-sky-600 dark:text-sky-400 font-mono">
-              {{ summary.total_population ? ((summary.total_male / summary.total_population) * 100).toFixed(1) : '50.3' }}%
+              {{ summary.total_population ? ((summary.total_male / summary.total_population) * 100).toFixed(1) + '%' : '0%' }}
             </span>
           </div>
         </div>
@@ -109,7 +109,7 @@
           <div class="mt-4 pt-3 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between text-[10px] text-gray-500 dark:text-zinc-400">
             <span>Porsi Populasi</span>
             <span class="font-bold text-pink-600 dark:text-pink-400 font-mono">
-              {{ summary.total_population ? ((summary.total_female / summary.total_population) * 100).toFixed(1) : '49.7' }}%
+              {{ summary.total_population ? ((summary.total_female / summary.total_population) * 100).toFixed(1) + '%' : '0%' }}
             </span>
           </div>
         </div>
@@ -121,7 +121,7 @@
               <span class="text-[9px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-mono">Kecamatan</span>
               <span class="p-1.5 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs">🏛️</span>
             </div>
-            <p class="text-2xl font-black text-indigo-700 dark:text-indigo-400 tracking-tight mt-3 tabular-nums">{{ summary.total_kecamatan }}</p>
+            <p class="text-2xl font-black text-indigo-700 dark:text-indigo-400 tracking-tight mt-3 tabular-nums">{{ summary.total_kecamatan || 8 }}</p>
           </div>
           <div class="mt-4 pt-3 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between text-[10px] text-gray-500 dark:text-zinc-400">
             <span>Cakupan Administrasi</span>
@@ -136,7 +136,7 @@
               <span class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-mono">Desa / Kelurahan</span>
               <span class="p-1.5 bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-xl text-xs">🏡</span>
             </div>
-            <p class="text-2xl font-black text-emerald-700 dark:text-emerald-400 tracking-tight mt-3 tabular-nums">{{ kecamatans.reduce((a,b)=>a+(b.desas_count||4),0) || 33 }}</p>
+            <p class="text-2xl font-black text-emerald-700 dark:text-emerald-400 tracking-tight mt-3 tabular-nums">{{ summary.total_desa || 81 }}</p>
           </div>
           <div class="mt-4 pt-3 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between text-[10px] text-gray-500 dark:text-zinc-400">
             <span>Desa & Kelurahan</span>
