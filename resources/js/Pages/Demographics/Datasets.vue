@@ -444,10 +444,13 @@
                 </label>
                 <span class="text-[10px] text-sky-600 dark:text-sky-400">Salin kolom Kategori & Jumlah dari Excel, lalu tempel di bawah.</span>
               </div>
+              <div v-if="importFeedback" class="p-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 rounded-xl text-xs font-bold flex items-center gap-2">
+                <span>{{ importFeedback }}</span>
+              </div>
               <textarea 
                 v-model="pasteRawInput"
                 rows="8"
-                placeholder="Contoh salinan dari Excel:&#10;Islam	270100&#10;Kristen	318&#10;Katolik	156&#10;Hindu	92"
+                :placeholder="getSmartPastePlaceholder()"
                 class="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-sky-200 dark:border-sky-700 rounded-xl text-xs font-mono focus:ring-2 focus:ring-sky-500 focus:outline-none"
               ></textarea>
               <div class="flex justify-between items-center">
@@ -793,6 +796,15 @@ const loadMasterTemplate = () => {
 };
 
 // ── MODE 2: SMART PASTE FROM EXCEL ──────────────────────────────────────────
+const generateSmartTitle = () => {
+  if (modal.editing) return;
+  const label = props.typeLabels[form.type] || 'Dataset';
+  const region = getRegionLabel();
+  form.title = `${label} ${region} ${form.year} Sem ${form.semester}`;
+};
+
+const importFeedback = ref('');
+
 const importPastedData = () => {
   if (!pasteRawInput.value.trim()) return;
   const lines = pasteRawInput.value.trim().split(/\r?\n/);
@@ -800,7 +812,6 @@ const importPastedData = () => {
 
   for (const line of lines) {
     if (!line.trim()) continue;
-    // split by Tab (\t), CSV (,), or multi-spaces
     let parts = line.split('\t');
     if (parts.length < 2) parts = line.split(',');
     if (parts.length < 2) parts = line.split(/\s{2,}/);
@@ -820,8 +831,17 @@ const importPastedData = () => {
     gridRows.value = rows;
     pasteRawInput.value = '';
     editorMode.value = 'spreadsheet';
+    importFeedback.value = `✓ Berhasil mengimpor ${rows.length} baris dari Excel ke Spreadsheet Editor!`;
+    setTimeout(() => { importFeedback.value = ''; }, 4000);
     saveGridHistory();
   }
+};
+
+const getSmartPastePlaceholder = () => {
+  if (form.type === 'population') {
+    return 'Salin 3 kolom dari Excel (Rentang Usia, Laki-Laki, Perempuan):\n0-4\t8120\t7890\n5-9\t8450\t8210\n10-14\t8230\t8050\n15-19\t7890\t7640';
+  }
+  return 'Salin 2 kolom dari Excel (Kategori, Jumlah):\nIslam\t270100\nKristen\t318\nKatolik\t156\nHindu\t92';
 };
 
 // ── MODE 3: UPLOAD EXCEL FILE (.XLSX / .CSV) ────────────────────────────────
@@ -947,6 +967,7 @@ const onTypeChoiceChange = () => {
   } else {
     form.type = selectedTypeChoice.value;
   }
+  generateSmartTitle();
   loadMasterTemplate();
 };
 
