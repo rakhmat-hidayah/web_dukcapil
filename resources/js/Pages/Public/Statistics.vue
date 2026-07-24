@@ -304,7 +304,7 @@
             </div>
             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-800 text-[10px]">
               <p class="font-bold text-blue-600 dark:text-blue-400">
-                ⚡ {{ charts.productive_age?.percentage !== undefined ? charts.productive_age.percentage + '% Bonus Demografi' : 'Data produktif belum ada' }}
+                ⚡ {{ charts.productive_age?.percentage !== undefined ? charts.productive_age.percentage + '% Bonus Demografi' : (summary.total_population && charts.productive_age?.total ? ((charts.productive_age.total / summary.total_population) * 100).toFixed(1) + '% Bonus Demografi' : 'Data produktif belum ada') }}
               </p>
             </div>
           </div>
@@ -322,7 +322,7 @@
             </div>
             <div class="mt-3 pt-3 border-t border-gray-100 dark:border-zinc-800 text-[10px]">
               <p class="font-bold text-amber-600 dark:text-amber-400">
-                👴 {{ charts.lansia?.percentage !== undefined ? charts.lansia.percentage + '% Dari Total Penduduk' : 'Data lansia belum ada' }}
+                👴 {{ charts.lansia?.percentage !== undefined ? charts.lansia.percentage + '% Dari Total Penduduk' : (summary.total_population && charts.lansia?.total ? ((charts.lansia.total / summary.total_population) * 100).toFixed(1) + '% Dari Total Penduduk' : 'Data lansia belum ada') }}
               </p>
             </div>
           </div>
