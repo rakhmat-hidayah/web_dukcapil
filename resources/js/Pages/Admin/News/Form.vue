@@ -52,7 +52,12 @@
 
             <!-- Visual Tiptap Rich Editor -->
             <div class="space-y-2">
-              <label class="block text-xs font-semibold text-gray-500">Isi Berita Lengkap *</label>
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-semibold text-gray-500">Isi Berita Lengkap *</label>
+                <span class="text-[10px] text-primary-600 dark:text-primary-400 font-semibold flex items-center gap-1 bg-primary-50 dark:bg-primary-950/50 px-2.5 py-1 rounded-lg border border-primary-200 dark:border-primary-900/40">
+                  📁 Foto disisipkan otomatis tersimpan di Media Manager ➔ Folder "Berita"
+                </span>
+              </div>
               <RichEditor v-model="form.content" placeholder="Tuliskan isi berita, laporan kegiatan, atau pengumuman publik di sini..." min-height="380px" />
             </div>
           </div>

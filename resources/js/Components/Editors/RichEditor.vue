@@ -93,11 +93,22 @@
       </button>
 
       <!-- Media Group -->
-      <button type="button" @click="promptImageUrl" class="toolbar-btn text-purple-600" title="Sisipkan Gambar">
+      <input type="file" ref="fileInput" @change="handleFileUpload" class="hidden" accept="image/*" />
+      
+      <button type="button" @click="$refs.fileInput.click()" :disabled="isUploading" class="toolbar-btn text-emerald-600 flex items-center gap-1" title="Unggah Gambar (Otomatis Tersimpan di Folder Berita)">
+        <Upload class="w-3.5 h-3.5" :class="{ 'animate-spin': isUploading }" />
+        <span class="text-[10px] font-bold hidden sm:inline">Unggah Foto</span>
+      </button>
+      <button type="button" @click="promptImageUrl" class="toolbar-btn text-purple-600" title="Sisipkan Gambar via URL">
         <ImageIcon class="w-3.5 h-3.5" />
       </button>
-      <button type="button" @click="promptYoutubeUrl" class="toolbar-btn text-red-600" title="Sisipkan Video YouTube">
+      <button type="button" @click="promptYoutubeUrl" class="toolbar-btn text-red-600 flex items-center gap-1" title="Sisipkan Video YouTube">
         <Video class="w-3.5 h-3.5" />
+        <span class="text-[10px] font-bold hidden sm:inline">YouTube</span>
+      </button>
+      <button type="button" @click="promptGoogleDriveUrl" class="toolbar-btn text-blue-600 flex items-center gap-1" title="Sisipkan Video Google Drive">
+        <CloudVideo class="w-3.5 h-3.5" />
+        <span class="text-[10px] font-bold hidden sm:inline">GDrive Video</span>
       </button>
       <button type="button" @click="promptLink" :class="{ 'is-active': editor?.isActive('link') }" class="toolbar-btn text-cyan-600" title="Tautan Link">
         <LinkIcon class="w-3.5 h-3.5" />
@@ -182,10 +193,11 @@ import { CharacterCount } from '@tiptap/extension-character-count';
 import { Highlight } from '@tiptap/extension-highlight';
 import { TextAlign } from '@tiptap/extension-text-align';
 
+import axios from 'axios';
 import { 
   Undo, Redo, Bold, Italic, Underline as UnderlineIcon, Strikethrough, Highlighter,
   AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Quote, Info, AlertTriangle, CheckCircle2,
-  Table as TableIcon, Image as ImageIcon, Video, Link as LinkIcon, Code, Maximize2, Minimize2, Sparkles
+  Table as TableIcon, Image as ImageIcon, Video, Video as CloudVideo, Upload, Link as LinkIcon, Code, Maximize2, Minimize2, Sparkles
 } from '@lucide/vue';
 
 const props = defineProps({
@@ -199,6 +211,52 @@ const emit = defineEmits(['update:modelValue']);
 
 const showHtmlView = ref(false);
 const isFullscreen = ref(false);
+const fileInput = ref(null);
+const isUploading = ref(false);
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  isUploading.value = true;
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const response = await axios.post('/admin/news/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    if (response.data?.url) {
+      editor.value.chain().focus().setImage({ src: response.data.url }).run();
+    }
+  } catch (error) {
+    alert('Gagal mengunggah foto: ' + (error.response?.data?.message || error.message));
+  } finally {
+    isUploading.value = false;
+    if (fileInput.value) fileInput.value.value = '';
+  }
+};
+
+const promptGoogleDriveUrl = () => {
+  const url = window.prompt('Masukkan URL Video Google Drive (contoh: https://drive.google.com/file/d/XYZ/view):');
+  if (url) {
+    let embedUrl = url;
+    const match = url.match(/\/file\/d\/([^\/]+)/);
+    if (match && match[1]) {
+      embedUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+    }
+    const html = `<div class="relative pb-[56.25%] h-0 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 my-4 shadow-sm"><iframe src="${embedUrl}" class="absolute top-0 left-0 w-full h-full" frameborder="0" allowfullscreen></iframe></div>`;
+    editor.value.chain().focus().insertContent(html).run();
+  }
+};
+
+const promptYoutubeUrl = () => {
+  const url = window.prompt('Masukkan URL Video YouTube (contoh: https://www.youtube.com/watch?v=...):');
+  if (url) {
+    editor.value.chain().focus().setYoutubeVideo({ src: url }).run();
+  }
+};
 
 const editor = useEditor({
   content: props.modelValue,
@@ -269,12 +327,6 @@ const promptImageUrl = () => {
   }
 };
 
-const promptYoutubeUrl = () => {
-  const url = window.prompt('Masukkan URL Video YouTube (contoh: https://www.youtube.com/watch?v=...):');
-  if (url) {
-    editor.value.chain().focus().setYoutubeVideo({ src: url }).run();
-  }
-};
 
 const promptLink = () => {
   const previousUrl = editor.value.getAttributes('link').href;

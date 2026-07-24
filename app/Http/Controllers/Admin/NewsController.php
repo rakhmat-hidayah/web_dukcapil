@@ -80,10 +80,16 @@ class NewsController extends Controller
 
         // Handle thumbnail upload
         if ($request->hasFile('thumbnail')) {
-            $img = Image::decode($request->file('thumbnail'))->scale(width: 1200);
-            $path = 'news/' . date('Y/m') . '/' . Str::uuid() . '.webp';
-            Storage::disk('public')->put($path, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
-            $data['thumbnail'] = $path;
+            $beritaFolder = \App\Models\FileFolder::firstOrCreate(
+                ['name' => 'Berita'],
+                ['parent_id' => null, 'created_by' => auth()->id()]
+            );
+            $fileEntry = \App\Services\FileManagerService::uploadFile(
+                $request->file('thumbnail'),
+                $beritaFolder->id,
+                auth()->id()
+            );
+            $data['thumbnail'] = $fileEntry->path;
         }
 
         $news = News::create($data);
@@ -141,10 +147,16 @@ class NewsController extends Controller
             if ($news->thumbnail) {
                 Storage::disk('public')->delete($news->thumbnail);
             }
-            $img = Image::decode($request->file('thumbnail'))->scale(width: 1200);
-            $path = 'news/' . date('Y/m') . '/' . Str::uuid() . '.webp';
-            Storage::disk('public')->put($path, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
-            $data['thumbnail'] = $path;
+            $beritaFolder = \App\Models\FileFolder::firstOrCreate(
+                ['name' => 'Berita'],
+                ['parent_id' => null, 'created_by' => auth()->id()]
+            );
+            $fileEntry = \App\Services\FileManagerService::uploadFile(
+                $request->file('thumbnail'),
+                $beritaFolder->id,
+                auth()->id()
+            );
+            $data['thumbnail'] = $fileEntry->path;
         }
 
         $news->update($data);
@@ -214,13 +226,22 @@ class NewsController extends Controller
             'image' => 'required|image|max:10240',
         ]);
 
-        $img = Image::decode($request->file('image'))->scaleDown(width: 1200);
-        $path = 'news/inline/' . date('Y/m') . '/' . Str::uuid() . '.webp';
-        Storage::disk('public')->put($path, (string) $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
+        // Auto create/find 'Berita' folder in Media File Manager
+        $beritaFolder = \App\Models\FileFolder::firstOrCreate(
+            ['name' => 'Berita'],
+            ['parent_id' => null, 'created_by' => auth()->id()]
+        );
+
+        $fileEntry = \App\Services\FileManagerService::uploadFile(
+            $request->file('image'),
+            $beritaFolder->id,
+            auth()->id()
+        );
 
         return response()->json([
-            'url' => Storage::url($path),
+            'url' => Storage::url($fileEntry->path),
+            'file_id' => $fileEntry->id,
+            'name' => $fileEntry->name,
         ]);
     }
 }
-
