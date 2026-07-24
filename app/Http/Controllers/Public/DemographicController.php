@@ -103,7 +103,7 @@ class DemographicController extends Controller
                         $youngTotal += $tot;
                     } elseif (in_array($cat, ['15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59'])) {
                         $prodTotal += $tot;
-                    } elseif (in_array($cat, ['60-64', '65+'])) {
+                    } elseif (in_array($cat, ['60-64', '65-69', '70-74', '75+', '65+', '60+'])) {
                         $lansiaTotal += $tot;
                     }
                 }
