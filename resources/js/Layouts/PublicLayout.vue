@@ -1,22 +1,24 @@
 <template>
-  <div :class="{ 'dark': isDark }" class="min-h-screen flex flex-col bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 transition-colors duration-200 overflow-x-hidden">
+  <div :class="{ 'dark': isDark }" class="min-h-screen flex flex-col bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 transition-colors duration-200">
     
-    <!-- Top info bar -->
-    <div class="bg-primary-900 text-white text-[10px] py-2 px-6 flex justify-between items-center font-medium">
-      <div class="flex items-center gap-4">
-        <span>📍 Dompu, Nusa Tenggara Barat</span>
-        <span class="hidden sm:inline">✉️ {{ websiteSettings.office_email || 'dukcapil@dompukab.go.id' }}</span>
-        <a v-if="websiteSettings.social_instagram" :href="websiteSettings.social_instagram" target="_blank" rel="noopener noreferrer" class="hidden md:inline hover:text-amber-300 transition font-bold">📸 Instagram</a>
-        <a v-if="websiteSettings.social_facebook" :href="websiteSettings.social_facebook" target="_blank" rel="noopener noreferrer" class="hidden md:inline hover:text-amber-300 transition font-bold">🌐 Facebook</a>
+    <!-- Sticky Navigation Wrapper (Top Bar + Header Menu) -->
+    <div class="sticky top-0 z-50 shadow-md shadow-gray-200/40 dark:shadow-none">
+      <!-- Top info bar -->
+      <div class="bg-primary-900 text-white text-[10px] py-2 px-6 flex justify-between items-center font-medium">
+        <div class="flex items-center gap-4">
+          <span>📍 Dompu, Nusa Tenggara Barat</span>
+          <span class="hidden sm:inline">✉️ {{ websiteSettings.office_email || 'dukcapil@dompukab.go.id' }}</span>
+          <a v-if="websiteSettings.social_instagram" :href="websiteSettings.social_instagram" target="_blank" rel="noopener noreferrer" class="hidden md:inline hover:text-amber-300 transition font-bold">📸 Instagram</a>
+          <a v-if="websiteSettings.social_facebook" :href="websiteSettings.social_facebook" target="_blank" rel="noopener noreferrer" class="hidden md:inline hover:text-amber-300 transition font-bold">🌐 Facebook</a>
+        </div>
+        <div class="flex items-center gap-4">
+          <a href="/api/docs" target="_blank" class="hover:underline text-amber-400 font-bold">API INTEGRATION (OpenAPI)</a>
+          <a href="/admin/login" class="hover:underline">Operator Portal</a>
+        </div>
       </div>
-      <div class="flex items-center gap-4">
-        <a href="/api/docs" target="_blank" class="hover:underline text-amber-400 font-bold">API INTEGRATION (OpenAPI)</a>
-        <a href="/admin/login" class="hover:underline">Operator Portal</a>
-      </div>
-    </div>
 
-    <!-- Header Navigation -->
-    <header class="sticky top-0 bg-white/98 dark:bg-zinc-900/98 backdrop-blur border-b border-gray-100 dark:border-zinc-800/80 z-40 transition-colors">
+      <!-- Header Navigation -->
+      <header class="bg-white/98 dark:bg-zinc-900/98 backdrop-blur border-b border-gray-100 dark:border-zinc-800/80 transition-colors">
       <div class="max-w-7xl mx-auto px-3 xl:px-8 py-2.5 flex items-center justify-between gap-2 xl:gap-4">
         <!-- Logo Brand (Dual Logo: Logo Daerah Dompu & Logo Disdukcapil) -->
         <Link href="/" class="flex items-center gap-2 select-none group shrink-0">
@@ -367,6 +369,7 @@
         </template>
       </div>
     </header>
+    </div>
 
     <!-- Main Content Area -->
     <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
