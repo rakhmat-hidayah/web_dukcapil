@@ -209,7 +209,7 @@
           <div class="flex items-center gap-1 bg-gray-100 dark:bg-zinc-800 p-1 rounded-xl">
             <button 
               type="button" 
-              @click="editorMode = 'visual'"
+              @click="setEditorMode('visual')"
               class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition"
               :class="editorMode === 'visual' ? 'bg-white dark:bg-zinc-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-gray-400 hover:text-gray-600'"
             >
@@ -217,13 +217,18 @@
             </button>
             <button 
               type="button" 
-              @click="editorMode = 'json'"
+              @click="setEditorMode('json')"
               class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition"
               :class="editorMode === 'json' ? 'bg-white dark:bg-zinc-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-gray-400 hover:text-gray-600'"
             >
               💻 Mode JSON Manual
             </button>
           </div>
+        </div>
+
+        <div v-if="jsonError" class="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-xl text-xs font-semibold text-red-600 dark:text-red-300 flex items-center justify-between">
+          <span>⚠️ {{ jsonError }}</span>
+          <button type="button" @click="jsonError = ''" class="text-red-400 hover:text-red-600 font-bold ml-2">✕</button>
         </div>
 
         <form @submit.prevent="submitDataset" class="space-y-4" enctype="multipart/form-data">
@@ -445,6 +450,26 @@ const onRegionLevelChange = () => {
 const modal        = reactive({ open: false, editing: null });
 const submitting   = ref(false);
 const editorMode   = ref('visual'); // 'visual' | 'json'
+const jsonError    = ref('');
+
+const setEditorMode = (mode) => {
+  jsonError.value = '';
+  if (mode === 'json') {
+    if (editorMode.value === 'visual') {
+      syncVisualToJson();
+    }
+  } else if (mode === 'visual') {
+    if (editorMode.value === 'json' && form.data_json) {
+      try {
+        const parsed = JSON.parse(form.data_json);
+        parseJsonToVisual(parsed, form.type);
+      } catch (e) {
+        jsonError.value = 'Sintaks JSON tidak valid, tidak dapat di-parse ke form visual.';
+      }
+    }
+  }
+  editorMode.value = mode;
+};
 
 const form = reactive({
   title: '', year: new Date().getFullYear(), semester: 1, type: 'religion',
@@ -478,6 +503,7 @@ const onCustomTypeInput = () => {
 };
 
 const openModal = (ds) => {
+  jsonError.value = '';
   modal.editing = ds;
   if (ds) {
     if (props.typeLabels[ds.type]) {
@@ -703,22 +729,65 @@ const onFileChange = (e) => {
 };
 
 const submitDataset = () => {
-  syncVisualToJson();
+  jsonError.value = '';
+
+  if (editorMode.value === 'visual') {
+    syncVisualToJson();
+  } else if (form.data_json && form.data_json.trim() !== '') {
+    try {
+      JSON.parse(form.data_json);
+    } catch (e) {
+      jsonError.value = 'Sintaks JSON tidak valid! Mohon periksa kembali kurung buka/tutup atau tanda koma.';
+      return;
+    }
+  }
+
   submitting.value = true;
-  const payload = new FormData();
-  Object.entries(form).forEach(([k, v]) => { if (v !== null && v !== undefined) payload.append(k, v); });
-  if (selectedFile) payload.append('file', selectedFile);
 
   if (modal.editing) {
     router.put(route('admin.demographics.datasets.update', modal.editing.id), {
-      title: form.title, year: form.year, type: form.type,
-      region_level: form.region_level, region_code: form.region_code,
-      status: form.status, notes: form.notes, data_json: form.data_json,
-    }, { onFinish: () => { submitting.value = false; modal.open = false; } });
+      title: form.title,
+      year: Number(form.year),
+      semester: Number(form.semester),
+      type: form.type,
+      region_level: form.region_level,
+      region_code: form.region_code,
+      status: form.status,
+      notes: form.notes,
+      data_json: form.data_json,
+    }, {
+      onSuccess: () => {
+        submitting.value = false;
+        modal.open = false;
+      },
+      onError: (errs) => {
+        submitting.value = false;
+        jsonError.value = Object.values(errs).join(', ');
+      },
+      onFinish: () => {
+        submitting.value = false;
+      }
+    });
   } else {
+    const payload = new FormData();
+    Object.entries(form).forEach(([k, v]) => {
+      if (v !== null && v !== undefined) payload.append(k, v);
+    });
+    if (selectedFile) payload.append('file', selectedFile);
+
     router.post(route('admin.demographics.datasets.store'), payload, {
       forceFormData: true,
-      onFinish: () => { submitting.value = false; modal.open = false; },
+      onSuccess: () => {
+        submitting.value = false;
+        modal.open = false;
+      },
+      onError: (errs) => {
+        submitting.value = false;
+        jsonError.value = Object.values(errs).join(', ');
+      },
+      onFinish: () => {
+        submitting.value = false;
+      }
     });
   }
 };

@@ -207,6 +207,7 @@ class DemographicController extends Controller
     }
 
     public function storeDataset(Request $request): RedirectResponse
+    public function storeDataset(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'region_level' => 'required|in:regency,district,village',
@@ -217,14 +218,19 @@ class DemographicController extends Controller
             'type'         => 'required|string|max:100',
             'status'       => 'required|in:draft,published',
             'notes'        => 'nullable|string',
-            'data_json'    => 'nullable|string',
+            'data_json'    => 'nullable',
             'file'         => 'nullable|file|mimes:pdf,xlsx,xls|max:20480',
         ]);
 
+        $rawJson = $request->input('data_json');
         $dataJson = null;
-        if (!empty($data['data_json'])) {
-            $decoded  = json_decode($data['data_json'], true);
-            $dataJson = json_last_error() === JSON_ERROR_NONE ? $decoded : null;
+        if (!empty($rawJson)) {
+            if (is_array($rawJson)) {
+                $dataJson = $rawJson;
+            } elseif (is_string($rawJson)) {
+                $decoded  = json_decode($rawJson, true);
+                $dataJson = json_last_error() === JSON_ERROR_NONE ? $decoded : null;
+            }
         }
 
         $filePath = null;
@@ -276,13 +282,20 @@ class DemographicController extends Controller
             'type'         => 'required|string|max:100',
             'status'       => 'required|in:draft,published',
             'notes'        => 'nullable|string',
-            'data_json'    => 'nullable|string',
+            'data_json'    => 'nullable',
         ]);
 
+        $rawJson = $request->input('data_json');
         $dataJson = $dataset->data_json;
-        if (!empty($data['data_json'])) {
-            $decoded  = json_decode($data['data_json'], true);
-            $dataJson = json_last_error() === JSON_ERROR_NONE ? $decoded : $dataJson;
+        if (!empty($rawJson)) {
+            if (is_array($rawJson)) {
+                $dataJson = $rawJson;
+            } elseif (is_string($rawJson)) {
+                $decoded  = json_decode($rawJson, true);
+                $dataJson = json_last_error() === JSON_ERROR_NONE ? $decoded : $dataJson;
+            }
+        } elseif ($rawJson === '' || $rawJson === null) {
+            $dataJson = null;
         }
 
         // Resolve kecamatan_id for legacy FK
