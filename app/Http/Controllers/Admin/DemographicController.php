@@ -405,6 +405,52 @@ class DemographicController extends Controller
                 $totalMale       = isset($popChart['male'])   && is_array($popChart['male'])   ? array_sum($popChart['male'])   : 0;
                 $totalFemale     = isset($popChart['female']) && is_array($popChart['female']) ? array_sum($popChart['female']) : 0;
                 $totalPopulation = $popChart['total'] ?? ($totalMale + $totalFemale);
+
+                // Auto-derive lansia, productive_age, and dependency_ratio if not explicitly present
+                $cats   = $popChart['categories'] ?? [];
+                $males   = $popChart['male'] ?? [];
+                $females = $popChart['female'] ?? [];
+
+                $youngTotal  = 0;
+                $prodTotal   = 0;
+                $lansiaTotal = 0;
+
+                foreach ($cats as $idx => $cat) {
+                    $tot = ($males[$idx] ?? 0) + ($females[$idx] ?? 0);
+                    if (in_array($cat, ['0-4', '5-9', '10-14'])) {
+                        $youngTotal += $tot;
+                    } elseif (in_array($cat, ['15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59'])) {
+                        $prodTotal += $tot;
+                    } elseif (in_array($cat, ['60-64', '65+'])) {
+                        $lansiaTotal += $tot;
+                    }
+                }
+
+                $totPop = $youngTotal + $prodTotal + $lansiaTotal;
+
+                if (!isset($charts['productive_age']) && $prodTotal > 0) {
+                    $charts['productive_age'] = [
+                        'total'      => $prodTotal,
+                        'percentage' => $totPop > 0 ? round(($prodTotal / $totPop) * 100, 1) : 0,
+                    ];
+                }
+
+                if (!isset($charts['lansia']) && $lansiaTotal > 0) {
+                    $charts['lansia'] = [
+                        'total'      => $lansiaTotal,
+                        'percentage' => $totPop > 0 ? round(($lansiaTotal / $totPop) * 100, 1) : 0,
+                    ];
+                }
+
+                if (!isset($charts['dependency_ratio']) && $prodTotal > 0) {
+                    $nonProd = $youngTotal + $lansiaTotal;
+                    $ratio   = round(($nonProd / $prodTotal) * 100, 2);
+                    $charts['dependency_ratio'] = [
+                        'ratio'          => $ratio,
+                        'non_productive' => $nonProd,
+                        'productive'     => $prodTotal,
+                    ];
+                }
             }
 
             $householdsChart = $charts['households'] ?? null;
