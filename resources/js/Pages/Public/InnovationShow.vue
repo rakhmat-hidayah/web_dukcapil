@@ -42,7 +42,7 @@
 
             <!-- Main rich HTML text content explanation -->
             <div class="prose prose-xs dark:prose-invert max-w-none text-gray-700 dark:text-zinc-300 leading-relaxed space-y-4">
-              <h3 class="text-sm font-black text-gray-900 dark:text-zinc-50 tracking-tight">ℹ️ Mengenal Program Inovasi:</h3>
+              <h3 class="text-sm font-black text-gray-900 dark:text-zinc-50 tracking-tight">Mengenal Program Inovasi: {{ innovation.title }}</h3>
               <div v-html="innovation.content" class="innovation-detail-content"></div>
             </div>
           </div>

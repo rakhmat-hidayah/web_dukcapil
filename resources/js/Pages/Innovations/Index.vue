@@ -78,26 +78,58 @@
         </h3>
 
         <form @submit.prevent="submitForm" class="space-y-4">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="col-span-2">
-              <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Nama Inovasi *</label>
-              <input v-model="form.title" required type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
+          <!-- Nama Inovasi -->
+          <div>
+            <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Nama Inovasi *</label>
+            <input v-model="form.title" required type="text" placeholder="Contoh: Inovasi 'Lacak Mantan'" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
+          </div>
+
+          <!-- Icon Emoji Field with Categorized Preset Palette -->
+          <div class="p-3 bg-gray-50/70 dark:bg-zinc-800/50 rounded-2xl border border-gray-100 dark:border-zinc-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400">Icon (Emoji Inovasi)</label>
+              <span class="text-[9px] text-gray-400">Tekan <kbd class="px-1 py-0.5 bg-gray-200 dark:bg-zinc-700 rounded text-[9px] font-mono text-gray-700 dark:text-zinc-300">Win + .</kbd> untuk koleksi Windows</span>
             </div>
 
-            <div>
-              <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Icon (Emoji)</label>
-              <input v-model="form.icon" type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
-            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex flex-col items-center shrink-0">
+                <input v-model="form.icon" type="text" class="w-14 h-14 bg-white dark:bg-zinc-900 border-2 border-primary-500/40 rounded-2xl text-2xl font-bold text-center focus:ring-2 focus:ring-primary-500 focus:outline-none shadow-sm" />
+                <span class="text-[9px] text-gray-400 font-bold mt-1">Terpilih</span>
+              </div>
 
+              <!-- Categorized Emojis Palette -->
+              <div class="flex-1 space-y-2 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
+                <div v-for="cat in emojiCollection" :key="cat.name" class="space-y-1">
+                  <span class="text-[9px] font-extrabold uppercase tracking-wider text-gray-400 block">{{ cat.name }}</span>
+                  <div class="flex items-center gap-1 flex-wrap">
+                    <button 
+                      v-for="e in cat.emojis" 
+                      :key="e"
+                      type="button"
+                      @click="form.icon = e"
+                      class="w-7 h-7 flex items-center justify-center text-sm rounded-lg bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-700/80 hover:bg-primary-50 dark:hover:bg-primary-950/40 hover:border-primary-400 hover:scale-110 active:scale-95 transition"
+                      :class="{ 'border-primary-500 bg-primary-50 dark:bg-primary-950/60 ring-2 ring-primary-500/20': form.icon === e }"
+                      :title="`Pilih ${e}`"
+                    >
+                      {{ e }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sort Order & YouTube URL -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Urutan Sortir</label>
               <input v-model="form.sort_order" type="number" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
             </div>
-          </div>
 
-          <div>
-            <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">YouTube Video URL (Opsional)</label>
-            <input v-model="form.youtube_url" type="url" placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
+            <div class="sm:col-span-2">
+              <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">YouTube Video URL (Opsional)</label>
+              <input v-model="form.youtube_url" type="url" placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
+            </div>
           </div>
 
           <div>
@@ -136,6 +168,13 @@ import { Plus, SquarePen, Trash2 } from '@lucide/vue';
 const props = defineProps({
   innovations: Array,
 });
+
+const emojiCollection = [
+  { name: 'Kependudukan & Pelayanan', emojis: ['🚐', '🆔', '📜', '📑', '📄', '🏢', '🏥', '🏫', '🤝', '📋', '💳', '🚨'] },
+  { name: 'Pernikahan & Keluarga', emojis: ['💍', '💒', '❤️', '👶', '👨‍👩‍👧‍👦', '👩‍❤️‍👨', '💌', '💐', '🏡'] },
+  { name: 'Digital & Teknologi', emojis: ['💻', '🚀', '📱', '🌐', '⚡', '🤖', '📡', '💡', '🔍', '🔔', '🔒'] },
+  { name: 'Inovasi & Prestasi', emojis: ['✨', '🎯', '🌟', '🏆', '👑', '💎', '🎨', '🎁', '📌', '🎉', '🔥'] },
+];
 
 const modal = reactive({
   open: false,
