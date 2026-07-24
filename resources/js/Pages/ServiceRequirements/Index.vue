@@ -108,17 +108,10 @@
             <input v-model="form.description" type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
           </div>
 
-          <!-- HTML Requirements details editor -->
+          <!-- Visual Rich Requirements Details Editor -->
           <div>
-            <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Syarat & Ketentuan (Format HTML) *</label>
-            <textarea 
-              v-model="form.requirements" 
-              required
-              rows="8" 
-              placeholder="<ul>&#10;  <li>Fotokopi Kartu Keluarga</li>&#10;  <li>Fotokopi KTP</li>&#10;</ul>"
-              class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-mono focus:ring-2 focus:ring-primary-500 focus:outline-none"
-            ></textarea>
-            <p class="text-[8px] text-gray-400 mt-1">Gunakan tag &lt;ul&gt; dan &lt;li&gt; untuk membuat daftar peluru persyaratan.</p>
+            <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Syarat & Ketentuan Layanan *</label>
+            <RichEditor v-model="form.requirements" placeholder="Tuliskan rincian persyaratan, berkas yang dibawa, dan ketentuan layanan..." />
           </div>
 
           <div class="flex items-center gap-3">
@@ -140,6 +133,7 @@
 import { reactive } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import RichEditor from '@/Components/Editors/RichEditor.vue';
 import { Plus, SquarePen, Trash2 } from '@lucide/vue';
 
 const props = defineProps({

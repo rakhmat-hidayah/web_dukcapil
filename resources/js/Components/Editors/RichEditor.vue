@@ -166,20 +166,21 @@
 
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from 'vue';
-import { useEditor, EditorContent, BubbleMenu } from '@tiptap/vue-3';
+import { useEditor, EditorContent } from '@tiptap/vue-3';
+import { BubbleMenu } from '@tiptap/extension-bubble-menu';
 import StarterKit from '@tiptap/starter-kit';
-import UnderlineExtension from '@tiptap/extension-underline';
-import LinkExtension from '@tiptap/extension-link';
-import ImageExtension from '@tiptap/extension-image';
-import YoutubeExtension from '@tiptap/extension-youtube';
-import TableExtension from '@tiptap/extension-table';
-import TableRowExtension from '@tiptap/extension-table-row';
-import TableCellExtension from '@tiptap/extension-table-cell';
-import TableHeaderExtension from '@tiptap/extension-table-header';
-import PlaceholderExtension from '@tiptap/extension-placeholder';
-import CharacterCountExtension from '@tiptap/extension-character-count';
-import HighlightExtension from '@tiptap/extension-highlight';
-import TextAlignExtension from '@tiptap/extension-text-align';
+import { Underline } from '@tiptap/extension-underline';
+import { Link } from '@tiptap/extension-link';
+import { Image } from '@tiptap/extension-image';
+import { Youtube } from '@tiptap/extension-youtube';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { Placeholder } from '@tiptap/extension-placeholder';
+import { CharacterCount } from '@tiptap/extension-character-count';
+import { Highlight } from '@tiptap/extension-highlight';
+import { TextAlign } from '@tiptap/extension-text-align';
 
 import { 
   Undo, Redo, Bold, Italic, Underline as UnderlineIcon, Strikethrough, Highlighter,
@@ -203,18 +204,18 @@ const editor = useEditor({
   content: props.modelValue,
   extensions: [
     StarterKit,
-    UnderlineExtension,
-    LinkExtension.configure({ openOnClick: false, HTMLAttributes: { class: 'text-primary-600 dark:text-primary-400 font-bold underline' } }),
-    ImageExtension.configure({ inline: true, allowBase64: true }),
-    YoutubeExtension.configure({ width: 640, height: 360 }),
-    TableExtension.configure({ resizable: true }),
-    TableRowExtension,
-    TableCellExtension,
-    TableHeaderExtension,
-    PlaceholderExtension.configure({ placeholder: props.placeholder }),
-    CharacterCountExtension,
-    HighlightExtension,
-    TextAlignExtension.configure({ types: ['heading', 'paragraph'] }),
+    Underline,
+    Link.configure({ openOnClick: false, HTMLAttributes: { class: 'text-primary-600 dark:text-primary-400 font-bold underline' } }),
+    Image.configure({ inline: true, allowBase64: true }),
+    Youtube.configure({ width: 640, height: 360 }),
+    Table.configure({ resizable: true }),
+    TableRow,
+    TableCell,
+    TableHeader,
+    Placeholder.configure({ placeholder: props.placeholder }),
+    CharacterCount,
+    Highlight,
+    TextAlign.configure({ types: ['heading', 'paragraph'] }),
   ],
   onUpdate: () => {
     emit('update:modelValue', editor.value.getHTML());
