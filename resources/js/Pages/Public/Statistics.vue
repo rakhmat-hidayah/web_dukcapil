@@ -11,31 +11,31 @@
         </p>
       </div>
 
-      <!-- Year, Semester & Region filter bar -->
-      <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-5 shadow-sm flex flex-wrap gap-4 items-center">
-        <div class="flex items-center gap-3 flex-1 flex-wrap">
-          <div>
+      <!-- Dynamic Filter Bar (Controlled via CMS Settings) -->
+      <div v-if="showYearFilter || showSemesterFilter || showRegionFilter" class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-5 shadow-sm flex flex-wrap gap-4 items-center justify-between">
+        <div class="flex items-center gap-3 flex-wrap">
+          <div v-if="showYearFilter">
             <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Tahun Data</label>
             <select v-model="selectedYear" @change="applyFilters" class="px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-semibold focus:outline-none">
               <option v-for="yr in availableYears" :key="yr" :value="yr">{{ yr }}</option>
             </select>
           </div>
-          <div>
+          <div v-if="showSemesterFilter">
             <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Semester</label>
             <select v-model="selectedSem" @change="applyFilters" class="px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-semibold focus:outline-none">
               <option v-for="s in availableSemesters" :key="s" :value="s">Semester {{ s }} ({{ s == 1 ? 's.d. Juni' : 's.d. Desember' }})</option>
             </select>
           </div>
-          <!-- Region Level -->
-          <div>
+          <!-- Level Wilayah (CMS Controlled) -->
+          <div v-if="showRegionFilter">
             <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Level Wilayah</label>
             <select v-model="selectedLevel" @change="onLevelChange" class="px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-semibold focus:outline-none">
               <option value="regency">Kabupaten Dompu</option>
               <option value="district">Kecamatan</option>
             </select>
           </div>
-          <!-- Region Code (district) -->
-          <div v-if="selectedLevel === 'district'">
+          <!-- Kecamatan selector -->
+          <div v-if="showRegionFilter && selectedLevel === 'district'">
             <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Kecamatan</label>
             <select v-model="selectedCode" @change="applyFilters" class="px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-semibold focus:outline-none">
               <option v-for="kec in kecamatans" :key="kec.code" :value="kec.code">{{ kec.name }}</option>
@@ -43,7 +43,7 @@
           </div>
         </div>
         <div class="text-[9px] font-bold text-gray-400 uppercase tracking-wider font-mono">
-          Data Tahun {{ selectedYear }} — Sem {{ selectedSem }}<span v-if="selectedLevel === 'district'"> — {{ kecamatans.find(k => k.code === selectedCode)?.name ?? selectedCode }}</span>
+          Data Tahun {{ selectedYear }} — Sem {{ selectedSem }} <span v-if="showRegionFilter && selectedLevel === 'district'">— {{ kecamatans?.find(k => k.code === selectedCode)?.name }}</span><span v-else>— Kabupaten Dompu</span>
         </div>
       </div>
 
@@ -459,7 +459,7 @@
 
 <script setup>
 import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import * as echarts from 'echarts';
 
@@ -482,10 +482,15 @@ const props = defineProps({
   regencyCode:          String,
 });
 
+const page = usePage();
+const showRegionFilter   = computed(() => page.props.website_settings?.demographics_show_region_filter === '1');
+const showYearFilter     = computed(() => page.props.website_settings?.demographics_show_year_filter !== '0');
+const showSemesterFilter = computed(() => page.props.website_settings?.demographics_show_semester_filter !== '0');
+
 const selectedYear  = ref(props.selectedYear ?? (props.availableYears?.[0] || new Date().getFullYear()));
 const selectedSem   = ref(props.selectedSemester ?? 1);
 const selectedLevel = ref(props.selectedRegionLevel ?? 'regency');
-const selectedCode  = ref(props.selectedRegionCode  ?? props.regencyCode);
+const selectedCode  = ref(props.selectedRegionCode  ?? (props.regencyCode || '5205'));
 
 watch(() => props.selectedYear, (val) => { if (val) selectedYear.value = val; });
 watch(() => props.selectedSemester, (val) => { if (val) selectedSem.value = val; });
@@ -502,9 +507,9 @@ watch(() => props.dataAvailable, (isAvailable) => {
 
 const onLevelChange = () => {
   if (selectedLevel.value === 'regency') {
-    selectedCode.value = props.regencyCode;
+    selectedCode.value = props.regencyCode || '5205';
   } else {
-    selectedCode.value = props.kecamatans?.[0]?.code ?? '';
+    selectedCode.value = props.kecamatans?.[0]?.code ?? '520501';
   }
   applyFilters();
 };
@@ -513,9 +518,9 @@ const applyFilters = () => {
   router.get(route('public.statistics'), {
     year:         selectedYear.value,
     semester:     selectedSem.value,
-    region_level: selectedLevel.value,
-    region_code:  selectedCode.value,
-  }, { preserveState: true });
+    region_level: showRegionFilter.value ? selectedLevel.value : 'regency',
+    region_code:  showRegionFilter.value ? selectedCode.value : (props.regencyCode || '5205'),
+  }, { preserveState: false });
 };
 
 const sortedHeatmapData = computed(() => {

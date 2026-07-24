@@ -220,6 +220,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/demographics/datasets', [\App\Http\Controllers\Admin\DemographicController::class, 'storeDataset'])->name('demographics.datasets.store');
         Route::put('/demographics/datasets/{dataset}', [\App\Http\Controllers\Admin\DemographicController::class, 'updateDataset'])->name('demographics.datasets.update');
         Route::delete('/demographics/datasets/{dataset}', [\App\Http\Controllers\Admin\DemographicController::class, 'destroyDataset'])->name('demographics.datasets.destroy');
+        Route::post('/demographics/filter-settings', [\App\Http\Controllers\Admin\DemographicController::class, 'updateFilterSettings'])->name('demographics.filter-settings.update');
         Route::get('/demographics/dashboard', [\App\Http\Controllers\Admin\DemographicController::class, 'dashboard'])->name('demographics.dashboard');
 
         // Complaint System

@@ -9,9 +9,14 @@
           <h1 class="text-xl font-black text-gray-900 dark:text-zinc-50 tracking-tight">Dataset Statistik Kependudukan</h1>
           <p class="text-xs text-gray-400 mt-0.5">Kelola dataset kependudukan dengan Smart Dataset Editor & AI OCR Tabular Recognition Engine.</p>
         </div>
-        <button @click="openModal(null)" class="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white text-xs font-black rounded-xl transition flex items-center gap-1.5 shadow-md shadow-primary-500/20">
-          <Plus class="w-3.5 h-3.5" /> Upload Dataset Baru
-        </button>
+        <div class="flex items-center gap-2">
+          <button @click="showFilterModal = true" class="px-3.5 py-2 bg-slate-800 dark:bg-zinc-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 border border-slate-700/50 shadow-sm">
+            ⚙️ Pengaturan Filter Front-End
+          </button>
+          <button @click="openModal(null)" class="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white text-xs font-black rounded-xl transition flex items-center gap-1.5 shadow-md shadow-primary-500/20">
+            <Plus class="w-3.5 h-3.5" /> Upload Dataset Baru
+          </button>
+        </div>
       </div>
 
       <!-- Flash -->
@@ -621,12 +626,71 @@
 
       </div>
     </div>
+
+    <!-- Modal Pengaturan Filter Front-End (CMS Controlled) -->
+    <div v-if="showFilterModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-5">
+        <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
+          <div>
+            <h3 class="text-base font-black text-gray-900 dark:text-zinc-50 tracking-tight">⚙️ Pengaturan Filter Front-End</h3>
+            <p class="text-[11px] text-gray-400">Kendalikan komponen filter statistik yang tampil pada halaman publik.</p>
+          </div>
+          <button @click="showFilterModal = false" class="text-gray-400 hover:text-gray-600 text-lg font-bold">✕</button>
+        </div>
+
+        <form @submit.prevent="saveFilterSettings" class="space-y-4">
+          <!-- Toggle Filter Level Wilayah -->
+          <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-zinc-800/60 rounded-2xl border border-gray-100 dark:border-zinc-700/50">
+            <div>
+              <p class="text-xs font-bold text-gray-800 dark:text-zinc-200">Tampilkan Filter Level Wilayah</p>
+              <p class="text-[10px] text-gray-400">Aktifkan opsi pemilihan Kabupaten / Kecamatan pada publik</p>
+            </div>
+            <input type="checkbox" v-model="filterForm.demographics_show_region_filter" class="w-5 h-5 rounded text-primary-600 focus:ring-primary-500 cursor-pointer" />
+          </div>
+
+          <!-- Level Default -->
+          <div v-if="filterForm.demographics_show_region_filter" class="p-3 bg-gray-50 dark:bg-zinc-800/60 rounded-2xl border border-gray-100 dark:border-zinc-700/50 space-y-1">
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Level Wilayah Default</label>
+            <select v-model="filterForm.demographics_default_level" class="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-bold focus:outline-none">
+              <option value="regency">Kabupaten Dompu (Agregat)</option>
+              <option value="district">Kecamatan</option>
+            </select>
+          </div>
+
+          <!-- Toggle Filter Tahun Data -->
+          <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-zinc-800/60 rounded-2xl border border-gray-100 dark:border-zinc-700/50">
+            <div>
+              <p class="text-xs font-bold text-gray-800 dark:text-zinc-200">Tampilkan Filter Tahun Data</p>
+              <p class="text-[10px] text-gray-400">Memungkinkan pengunjung memilih tahun data statistik</p>
+            </div>
+            <input type="checkbox" v-model="filterForm.demographics_show_year_filter" class="w-5 h-5 rounded text-primary-600 focus:ring-primary-500 cursor-pointer" />
+          </div>
+
+          <!-- Toggle Filter Semester -->
+          <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-zinc-800/60 rounded-2xl border border-gray-100 dark:border-zinc-700/50">
+            <div>
+              <p class="text-xs font-bold text-gray-800 dark:text-zinc-200">Tampilkan Filter Semester</p>
+              <p class="text-[10px] text-gray-400">Memungkinkan pengunjung memilih Semester 1 / Semester 2</p>
+            </div>
+            <input type="checkbox" v-model="filterForm.demographics_show_semester_filter" class="w-5 h-5 rounded text-primary-600 focus:ring-primary-500 cursor-pointer" />
+          </div>
+
+          <!-- Actions -->
+          <div class="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-zinc-800">
+            <button type="button" @click="showFilterModal = false" class="px-4 py-2 text-xs font-bold border border-gray-200 dark:border-zinc-700 rounded-xl hover:bg-gray-50 transition">Batal</button>
+            <button type="button" @click="saveFilterSettings" :disabled="filterForm.processing" class="px-5 py-2 bg-primary-600 hover:bg-primary-500 text-white text-xs font-black rounded-xl transition shadow-lg shadow-primary-500/20 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer">
+              {{ filterForm.processing ? 'Menyimpan...' : 'Simpan Pengaturan CMS' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </AdminLayout>
 </template>
 
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Plus, SquarePen, Trash2 } from '@lucide/vue';
 import * as XLSX from 'xlsx';
@@ -642,7 +706,31 @@ const props = defineProps({
   availableYears: Array,
   availableSemesters: Array,
   filters: Object,
+  filterSettings: Object,
 });
+
+// CMS Filter Modal State
+const showFilterModal = ref(false);
+const filterForm = useForm({
+  demographics_show_region_filter: props.filterSettings?.demographics_show_region_filter ?? false,
+  demographics_show_district_filter: props.filterSettings?.demographics_show_district_filter ?? false,
+  demographics_show_year_filter: props.filterSettings?.demographics_show_year_filter ?? true,
+  demographics_show_semester_filter: props.filterSettings?.demographics_show_semester_filter ?? true,
+  demographics_default_level: props.filterSettings?.demographics_default_level ?? 'regency',
+});
+
+const saveFilterSettings = () => {
+  const targetUrl = '/admin/demographics/filter-settings';
+  filterForm.post(targetUrl, {
+    preserveScroll: true,
+    onSuccess: () => {
+      showFilterModal.value = false;
+    },
+    onError: (err) => {
+      console.error('Error updating filter settings:', err);
+    },
+  });
+};
 
 // Filter state
 const filterRegionLevel = ref(props.filters?.region_level ?? '');
@@ -838,6 +926,35 @@ const loadMasterTemplate = () => {
       { label: '55-59', male: 3540, female: 3410 },
       { label: '60-64', male: 2870, female: 2750 },
       { label: '65+', male: 4080, female: 4320 },
+    ];
+  } else if (type === 'wajib_ktp') {
+    gridRows.value = [
+      { label: 'Jumlah Wajib KTP', value: 200291 },
+      { label: 'Sudah Perekaman KTP-el', value: 198522 },
+      { label: 'Belum Perekaman KTP-el', value: 1769 },
+    ];
+  } else if (type === 'akta_lahir') {
+    gridRows.value = [
+      { label: 'Total Target Anak (0-17 Tahun)', value: 176197 },
+      { label: 'Memiliki Akta Lahir', value: 88553 },
+      { label: 'Belum Memiliki Akta Lahir', value: 87644 },
+    ];
+  } else if (type === 'kia') {
+    gridRows.value = [
+      { label: 'Total Target Anak (0-17 Tahun)', value: 85600 },
+      { label: 'Memiliki Kartu Identitas Anak (KIA)', value: 64200 },
+      { label: 'Belum Memiliki KIA', value: 21400 },
+    ];
+  } else if (type === 'ikd') {
+    gridRows.value = [
+      { label: 'Total Wajib IKD (17+ Tahun)', value: 185000 },
+      { label: 'Memiliki Identitas Kependudukan Digital (IKD)', value: 18500 },
+      { label: 'Belum Memiliki IKD', value: 166500 },
+    ];
+  } else if (type === 'households') {
+    gridRows.value = [
+      { label: 'Kepala Keluarga Laki-Laki', value: 62450 },
+      { label: 'Kepala Keluarga Perempuan', value: 12350 },
     ];
   } else {
     gridRows.value = [
@@ -1236,6 +1353,22 @@ const parseJsonToGrid = (jsonObj, type) => {
   saveGridHistory();
 };
 
+const parseVal = (v) => {
+  if (v === null || v === undefined || v === '') return 0;
+  if (typeof v === 'number') {
+    if (v > 0 && v < 1000 && !Number.isInteger(v)) {
+      const s = String(v);
+      const p = s.split('.');
+      if (p[1] && p[1].length === 3) {
+        return Number(p[0] + p[1]);
+      }
+    }
+    return Math.round(v);
+  }
+  const str = String(v).trim().replace(/[.,]/g, '');
+  return Number(str) || 0;
+};
+
 const compileGridToJson = () => {
   const type = form.type;
   let result = {};
@@ -1243,11 +1376,11 @@ const compileGridToJson = () => {
   if (type === 'education' || type === 'blood_type') {
     result = {
       categories: gridRows.value.map(r => r.label || ''),
-      values: gridRows.value.map(r => Number(r.value || 0))
+      values: gridRows.value.map(r => parseVal(r.value))
     };
   } else if (type === 'population') {
-    const maleArr = gridRows.value.map(r => Number(r.male || 0));
-    const femaleArr = gridRows.value.map(r => Number(r.female || 0));
+    const maleArr = gridRows.value.map(r => parseVal(r.male));
+    const femaleArr = gridRows.value.map(r => parseVal(r.female));
     const totalPop = maleArr.reduce((a, b) => a + b, 0) + femaleArr.reduce((a, b) => a + b, 0);
 
     result = {
@@ -1257,22 +1390,83 @@ const compileGridToJson = () => {
       total: totalPop,
     };
   } else {
-    const items = gridRows.value.map(r => ({ name: r.label || '', value: Number(r.value || 0) }));
+    const items = gridRows.value.map(r => ({ name: r.label || '', value: parseVal(r.value) }));
     result = { items };
 
     if (type === 'akta_lahir' || type === 'kia' || type === 'ikd') {
-      const owned = items[0] ? items[0].value : 0;
-      const unowned = items[1] ? items[1].value : 0;
-      const target = owned + unowned;
+      let owned = 0;
+      let target = 0;
+
+      const targetItem = items.find(i => {
+        const l = i.name.toLowerCase();
+        return l.includes('target') || l.includes('total') || l.includes('jumlah') || l.includes('wajib');
+      });
+      const ownedItem = items.find(i => {
+        const l = i.name.toLowerCase();
+        return (l.includes('memiliki') || l.includes('sudah') || l.includes('punya')) && !l.includes('belum');
+      });
+      const unownedItem = items.find(i => {
+        const l = i.name.toLowerCase();
+        return l.includes('belum');
+      });
+
+      if (targetItem && ownedItem) {
+        target = targetItem.value;
+        owned = ownedItem.value;
+      } else if (ownedItem && unownedItem) {
+        owned = ownedItem.value;
+        target = ownedItem.value + unownedItem.value;
+      } else if (items.length >= 3) {
+        target = items[0].value;
+        owned = items[1].value;
+      } else {
+        owned = items[0] ? items[0].value : 0;
+        const unowned = items[1] ? items[1].value : 0;
+        target = owned + unowned;
+      }
+
       const percentage = target > 0 ? Number(((owned / target) * 100).toFixed(1)) : 0;
 
       result.owned = owned;
       result.target = target;
       result.percentage = percentage;
     } else if (type === 'wajib_ktp') {
-      const recorded = items[0] ? items[0].value : 0;
-      const unrecorded = items[1] ? items[1].value : 0;
-      const total = recorded + unrecorded;
+      let recorded = 0;
+      let total = 0;
+
+      const totalItem = items.find(i => {
+        const l = i.name.toLowerCase();
+        return l.includes('wajib') || l.includes('total') || l.includes('jumlah');
+      });
+      const recordedItem = items.find(i => {
+        const l = i.name.toLowerCase();
+        return (l.includes('sudah') || l.includes('terekam') || l.includes('rekam')) && !l.includes('belum');
+      });
+      const unrecordedItem = items.find(i => {
+        const l = i.name.toLowerCase();
+        return l.includes('belum');
+      });
+
+      if (totalItem && recordedItem) {
+        total = totalItem.value;
+        recorded = recordedItem.value;
+      } else if (recordedItem && unrecordedItem) {
+        recorded = recordedItem.value;
+        total = recordedItem.value + unrecordedItem.value;
+      } else if (items.length >= 3) {
+        total = items[0].value;
+        recorded = items[1].value;
+      } else {
+        if (items[0] && items[0].name.toLowerCase().includes('wajib')) {
+          total = items[0].value;
+          recorded = items[1] ? items[1].value : 0;
+        } else {
+          recorded = items[0] ? items[0].value : 0;
+          const unrecorded = items[1] ? items[1].value : 0;
+          total = recorded + unrecorded;
+        }
+      }
+
       const recorded_percentage = total > 0 ? Number(((recorded / total) * 100).toFixed(1)) : 0;
 
       result.recorded = recorded;

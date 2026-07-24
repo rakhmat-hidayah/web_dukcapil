@@ -58,18 +58,39 @@ class HomeController extends Controller
             ->limit(4)
             ->get(['id', 'title', 'file_type', 'file_size']);
 
-        // 6. Aggregate demographic highlights dynamically from latest published dataset
-        $latestDataset = \App\Models\DemographicDataset::published()->where('type', 'population')->orderByDesc('year')->orderByDesc('semester')->first();
-        $latestYear = $latestDataset ? $latestDataset->year : 2026;
+        // 6. Aggregate demographic highlights dynamically from latest published regency dataset
+        $latestDataset = \App\Models\DemographicDataset::published()
+            ->where('region_level', 'regency')
+            ->where('type', 'population')
+            ->orderByDesc('year')
+            ->orderByDesc('semester')
+            ->first();
+
+        $latestYear     = $latestDataset ? $latestDataset->year : 2026;
         $latestSemester = $latestDataset ? $latestDataset->semester : 1;
-        $periodLabel = "Semester {$latestSemester} (s.d. " . ($latestSemester == 1 ? 'Juni' : 'Desember') . " {$latestYear})";
+        $periodLabel    = "Semester {$latestSemester} (s.d. " . ($latestSemester == 1 ? 'Juni' : 'Desember') . " {$latestYear})";
+
+        $householdsDataset = \App\Models\DemographicDataset::published()
+            ->where('region_level', 'regency')
+            ->where('type', 'households')
+            ->where('year', $latestYear)
+            ->where('semester', $latestSemester)
+            ->first();
 
         if ($latestDataset && $latestDataset->data_json && is_array($latestDataset->data_json)) {
             $popData     = $latestDataset->data_json;
-            $totalMale   = isset($popData['male']) && is_array($popData['male']) ? array_sum($popData['male']) : 136108;
-            $totalFemale = isset($popData['female']) && is_array($popData['female']) ? array_sum($popData['female']) : 134658;
+            $totalMale   = isset($popData['male']) && is_array($popData['male']) ? array_sum($popData['male']) : 143240;
+            $totalFemale = isset($popData['female']) && is_array($popData['female']) ? array_sum($popData['female']) : 142788;
             $totalPop    = $popData['total'] ?? ($totalMale + $totalFemale);
-            $totalHouseholds = (int) round($totalPop / 3.646);
+
+            $hhData = $householdsDataset ? $householdsDataset->data_json : null;
+            if ($hhData && isset($hhData['total'])) {
+                $totalHouseholds = $hhData['total'];
+            } elseif ($hhData && isset($hhData['items']) && is_array($hhData['items'])) {
+                $totalHouseholds = array_sum(array_column($hhData['items'], 'value'));
+            } else {
+                $totalHouseholds = (int) round($totalPop / 3.646);
+            }
 
             $demographicSummary = [
                 'total_population' => $totalPop,
@@ -80,10 +101,10 @@ class HomeController extends Controller
             ];
         } else {
             $kecamatans = \App\Models\Kecamatan::all();
-            $totalPop   = $kecamatans->sum('population_total') ?: 270766;
-            $totalMale  = $kecamatans->sum('male_count') ?: 136108;
-            $totalFemale = $kecamatans->sum('female_count') ?: 134658;
-            $totalHouseholds = (int) round($totalPop / 3.646);
+            $totalPop   = $kecamatans->sum('population_total') ?: 286028;
+            $totalMale  = $kecamatans->sum('male_count') ?: 143240;
+            $totalFemale = $kecamatans->sum('female_count') ?: 142788;
+            $totalHouseholds = 74800;
 
             $demographicSummary = [
                 'total_population' => $totalPop,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DemographicDataset;
 use App\Models\Desa;
 use App\Models\Kecamatan;
+use App\Models\WebsiteSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -203,7 +204,36 @@ class DemographicController extends Controller
             'availableYears'     => $availableYears,
             'availableSemesters' => $availableSemesters,
             'filters'            => $request->only(['region_level', 'region_code', 'year', 'semester', 'type']),
+            'filterSettings'     => [
+                'demographics_show_region_filter'   => WebsiteSetting::where('key', 'demographics_show_region_filter')->value('value') === '1',
+                'demographics_show_district_filter' => WebsiteSetting::where('key', 'demographics_show_district_filter')->value('value') === '1',
+                'demographics_show_year_filter'     => WebsiteSetting::where('key', 'demographics_show_year_filter')->value('value') !== '0',
+                'demographics_show_semester_filter' => WebsiteSetting::where('key', 'demographics_show_semester_filter')->value('value') !== '0',
+                'demographics_default_level'        => WebsiteSetting::where('key', 'demographics_default_level')->value('value') ?: 'regency',
+            ],
         ]);
+    }
+
+    public function updateFilterSettings(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'demographics_show_region_filter'   => 'required|boolean',
+            'demographics_show_district_filter' => 'nullable|boolean',
+            'demographics_show_year_filter'     => 'required|boolean',
+            'demographics_show_semester_filter' => 'required|boolean',
+            'demographics_default_level'        => 'required|in:regency,district,village',
+        ]);
+
+        foreach ($data as $key => $value) {
+            WebsiteSetting::updateOrCreate(
+                ['key' => $key],
+                ['value' => is_bool($value) ? ($value ? '1' : '0') : (string)$value, 'group' => 'demographics']
+            );
+        }
+
+        WebsiteSetting::clearCache();
+
+        return back()->with('success', 'Pengaturan filter statistik publik berhasil diperbarui dari CMS!');
     }
 
     public function storeDataset(Request $request): RedirectResponse
@@ -411,22 +441,29 @@ class DemographicController extends Controller
                 $males   = $popChart['male'] ?? [];
                 $females = $popChart['female'] ?? [];
 
-                $youngTotal  = 0;
-                $prodTotal   = 0;
-                $lansiaTotal = 0;
+                $youngTotal    = 0; // 0-14 Thn (Belum Produktif)
+                $prodTotal     = 0; // 15-64 Thn (Usia Produktif)
+                $seniorTotal   = 0; // 65+ Thn (Tidak Produktif / Senja)
+                $lansia60Total = 0; // 60+ Thn (UU Lansia)
 
                 foreach ($cats as $idx => $cat) {
                     $tot = ($males[$idx] ?? 0) + ($females[$idx] ?? 0);
                     if (in_array($cat, ['0-4', '5-9', '10-14'])) {
                         $youngTotal += $tot;
-                    } elseif (in_array($cat, ['15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59'])) {
+                    } elseif (in_array($cat, ['15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64'])) {
                         $prodTotal += $tot;
-                    } elseif (in_array($cat, ['60-64', '65-69', '70-74', '75+', '65+', '60+'])) {
-                        $lansiaTotal += $tot;
+                        if ($cat === '60-64') {
+                            $lansia60Total += $tot;
+                        }
+                    } elseif (in_array($cat, ['65-69', '70-74', '75+', '65+'])) {
+                        $seniorTotal += $tot;
+                        $lansia60Total += $tot;
+                    } elseif ($cat === '60-64' || $cat === '60+') {
+                        $lansia60Total += $tot;
                     }
                 }
 
-                $totPop = $youngTotal + $prodTotal + $lansiaTotal;
+                $totPop = $youngTotal + $prodTotal + $seniorTotal;
 
                 if (!isset($charts['productive_age']) && $prodTotal > 0) {
                     $charts['productive_age'] = [
@@ -435,15 +472,15 @@ class DemographicController extends Controller
                     ];
                 }
 
-                if (!isset($charts['lansia']) && $lansiaTotal > 0) {
+                if (!isset($charts['lansia']) && $lansia60Total > 0) {
                     $charts['lansia'] = [
-                        'total'      => $lansiaTotal,
-                        'percentage' => $totPop > 0 ? round(($lansiaTotal / $totPop) * 100, 1) : 0,
+                        'total'      => $lansia60Total,
+                        'percentage' => $totPop > 0 ? round(($lansia60Total / $totPop) * 100, 1) : 0,
                     ];
                 }
 
                 if (!isset($charts['dependency_ratio']) && $prodTotal > 0) {
-                    $nonProd = $youngTotal + $lansiaTotal;
+                    $nonProd = $youngTotal + $seniorTotal;
                     $ratio   = round(($nonProd / $prodTotal) * 100, 2);
                     $charts['dependency_ratio'] = [
                         'ratio'          => $ratio,

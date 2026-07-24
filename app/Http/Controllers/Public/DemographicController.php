@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DemographicDataset;
 use App\Models\Desa;
 use App\Models\Kecamatan;
+use App\Models\WebsiteSetting;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
@@ -25,9 +26,18 @@ class DemographicController extends Controller
         $desas = Desa::orderBy('name')
             ->get(['id', 'kecamatan_id', 'name', 'code']);
 
-        // ── Region filter ─────────────────────────────────────────────────
-        $regionLevel = $request->input('region_level', 'regency');
-        $regionCode  = $request->input('region_code', DemographicDataset::REGENCY_CODE);
+        // ── CMS Filter Controls & Settings ────────────────────────────────
+        $showRegionFilter   = WebsiteSetting::where('key', 'demographics_show_region_filter')->value('value') === '1';
+        $showDistrictFilter = WebsiteSetting::where('key', 'demographics_show_district_filter')->value('value') === '1';
+        $defaultLevel       = WebsiteSetting::where('key', 'demographics_default_level')->value('value') ?: 'regency';
+
+        if ($showRegionFilter) {
+            $regionLevel = $request->input('region_level', $defaultLevel);
+            $regionCode  = $request->input('region_code', $regionLevel === 'regency' ? DemographicDataset::REGENCY_CODE : ($kecamatans->first()->code ?? '520501'));
+        } else {
+            $regionLevel = 'regency';
+            $regionCode  = DemographicDataset::REGENCY_CODE;
+        }
 
         // ── Period filter — based on real data available for this region ──
         $availableYears = DemographicDataset::published()
@@ -68,6 +78,21 @@ class DemographicController extends Controller
             ->forPeriod($selectedYear, $selectedSemester)
             ->get();
 
+        // Fallback: If specific district/village lacks certain dataset types, fill from Regency aggregate
+        if ($regionLevel !== 'regency') {
+            $regencyDatasets = DemographicDataset::published()
+                ->forRegion('regency', DemographicDataset::REGENCY_CODE)
+                ->forPeriod($selectedYear, $selectedSemester)
+                ->get();
+            
+            $existingTypes = $rawDatasets->pluck('type')->toArray();
+            foreach ($regencyDatasets as $rDs) {
+                if (!in_array($rDs->type, $existingTypes)) {
+                    $rawDatasets->push($rDs);
+                }
+            }
+        }
+
         $dataAvailable = $rawDatasets->isNotEmpty();
 
         $charts = [];
@@ -93,22 +118,29 @@ class DemographicController extends Controller
                 $males   = $popChart['male'] ?? [];
                 $females = $popChart['female'] ?? [];
 
-                $youngTotal  = 0;
-                $prodTotal   = 0;
-                $lansiaTotal = 0;
+                $youngTotal    = 0; // 0-14 Thn (Belum Produktif)
+                $prodTotal     = 0; // 15-64 Thn (Usia Produktif)
+                $seniorTotal   = 0; // 65+ Thn (Tidak Produktif / Senja)
+                $lansia60Total = 0; // 60+ Thn (UU Lansia)
 
                 foreach ($cats as $idx => $cat) {
                     $tot = ($males[$idx] ?? 0) + ($females[$idx] ?? 0);
                     if (in_array($cat, ['0-4', '5-9', '10-14'])) {
                         $youngTotal += $tot;
-                    } elseif (in_array($cat, ['15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59'])) {
+                    } elseif (in_array($cat, ['15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64'])) {
                         $prodTotal += $tot;
-                    } elseif (in_array($cat, ['60-64', '65-69', '70-74', '75+', '65+', '60+'])) {
-                        $lansiaTotal += $tot;
+                        if ($cat === '60-64') {
+                            $lansia60Total += $tot;
+                        }
+                    } elseif (in_array($cat, ['65-69', '70-74', '75+', '65+'])) {
+                        $seniorTotal += $tot;
+                        $lansia60Total += $tot;
+                    } elseif ($cat === '60-64' || $cat === '60+') {
+                        $lansia60Total += $tot;
                     }
                 }
 
-                $totPop = $youngTotal + $prodTotal + $lansiaTotal;
+                $totPop = $youngTotal + $prodTotal + $seniorTotal;
 
                 if (!isset($charts['productive_age']) && $prodTotal > 0) {
                     $charts['productive_age'] = [
@@ -117,15 +149,15 @@ class DemographicController extends Controller
                     ];
                 }
 
-                if (!isset($charts['lansia']) && $lansiaTotal > 0) {
+                if (!isset($charts['lansia']) && $lansia60Total > 0) {
                     $charts['lansia'] = [
-                        'total'      => $lansiaTotal,
-                        'percentage' => $totPop > 0 ? round(($lansiaTotal / $totPop) * 100, 1) : 0,
+                        'total'      => $lansia60Total,
+                        'percentage' => $totPop > 0 ? round(($lansia60Total / $totPop) * 100, 1) : 0,
                     ];
                 }
 
                 if (!isset($charts['dependency_ratio']) && $prodTotal > 0) {
-                    $nonProd = $youngTotal + $lansiaTotal;
+                    $nonProd = $youngTotal + $seniorTotal;
                     $ratio   = round(($nonProd / $prodTotal) * 100, 2);
                     $charts['dependency_ratio'] = [
                         'ratio'          => $ratio,

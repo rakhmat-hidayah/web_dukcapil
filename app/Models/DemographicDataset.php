@@ -65,11 +65,8 @@ class DemographicDataset extends Model
         'akta_lahir'       => 'Cakupan Akta Lahir (0-17 Thn)',
         'kia'              => 'Cakupan Kartu Identitas Anak (KIA)',
         'ikd'              => 'Cakupan Identitas Kependudukan Digital (IKD)',
-        'lansia'           => 'Jumlah Lansia (60+ Thn)',
-        'productive_age'   => 'Jumlah Penduduk Produktif (15-59 Thn)',
         'households'       => 'Jumlah Kepala Keluarga (KK)',
         'wajib_ktp'        => 'Jumlah Wajib KTP & Perekaman',
-        'dependency_ratio' => 'Rasio Ketergantungan (Dependency Ratio)',
     ];
 
     // ── Scopes ───────────────────────────────────────────────────────────
