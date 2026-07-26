@@ -101,20 +101,56 @@
                 ></textarea>
               </div>
 
-              <!-- File Input -->
+              <!-- File Input Dropzone -->
               <div>
-                <label class="block text-xs font-semibold text-gray-500 mb-1">Pilih File (Foto / Video)</label>
-                <input 
-                  type="file" 
-                  ref="fileInput" 
-                  @change="handleFileUpload" 
-                  required
-                  :accept="album.type === 'photo' ? 'image/*' : 'video/*'"
-                  class="w-full text-xs"
-                />
-                <p class="text-[9px] text-gray-400 mt-1">
-                  {{ album.type === 'photo' ? 'Format: JPG, PNG, WebP (Max 5MB)' : 'Format: MP4, MOV (Max 50MB)' }}
-                </p>
+                <label class="block text-xs font-semibold text-gray-500 mb-1.5">Berkas Media (Foto / Video)</label>
+                <div 
+                  @click="$refs.fileInput.click()"
+                  class="border-2 border-dashed border-gray-200 dark:border-zinc-700 hover:border-primary-500 dark:hover:border-primary-400 rounded-2xl p-4 text-center cursor-pointer bg-gray-50/60 dark:bg-zinc-800/40 hover:bg-primary-50/30 dark:hover:bg-primary-950/20 transition group relative"
+                >
+                  <input 
+                    type="file" 
+                    ref="fileInput" 
+                    @change="handleFileUpload" 
+                    required
+                    :accept="album.type === 'photo' ? 'image/*' : 'video/*'"
+                    class="hidden"
+                  />
+                  
+                  <!-- Selected file preview -->
+                  <div v-if="form.file" class="flex items-center justify-between gap-3 text-left">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 flex items-center justify-center shrink-0">
+                        <UploadCloud class="w-5 h-5" />
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-xs font-bold text-gray-800 dark:text-zinc-100 truncate">{{ form.file.name }}</p>
+                        <p class="text-[10px] text-gray-400 font-mono">{{ formatBytes(form.file.size) }}</p>
+                      </div>
+                    </div>
+                    <button 
+                      type="button" 
+                      @click.stop="removeSelectedFile" 
+                      class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition shrink-0"
+                      title="Ganti berkas"
+                    >
+                      <X class="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <!-- Default upload state -->
+                  <div v-else class="py-3 flex flex-col items-center justify-center">
+                    <div class="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-zinc-800 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:bg-primary-100 dark:group-hover:bg-primary-950/50 flex items-center justify-center mb-2 transition">
+                      <UploadCloud class="w-5 h-5" />
+                    </div>
+                    <p class="text-xs font-bold text-gray-700 dark:text-zinc-300">
+                      <span class="text-primary-600 dark:text-primary-400 hover:underline">Klik untuk mengunggah {{ album.type === 'photo' ? 'Foto' : 'Video' }}</span> atau tarik file ke sini
+                    </p>
+                    <p class="text-[10px] text-gray-400 mt-1">
+                      {{ album.type === 'photo' ? 'Format: JPG, PNG, WebP (Max 5MB)' : 'Format: MP4, MOV (Max 50MB)' }}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <!-- Footer Buttons -->
@@ -146,7 +182,7 @@
 import { ref } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Plus, Trash2, Video } from '@lucide/vue';
+import { Plus, Trash2, Video, UploadCloud, X } from '@lucide/vue';
 
 const props = defineProps({
   album: Object,
@@ -161,13 +197,31 @@ const form = useForm({
   file: null,
 });
 
+const formatBytes = (bytes) => {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
 const openUploadModal = () => {
   form.reset();
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
   uploadModalOpen.value = true;
 };
 
 const handleFileUpload = (e) => {
   form.file = e.target.files[0];
+};
+
+const removeSelectedFile = () => {
+  form.file = null;
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
 };
 
 const submit = () => {
