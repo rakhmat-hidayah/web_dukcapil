@@ -66,11 +66,23 @@ class BannerController extends Controller
         $data = $request->except(['image', 'image_mobile']);
 
         if ($request->hasFile('image')) {
-            Storage::disk('public')->delete($banner->image);
+            if ($banner->image) {
+                Storage::disk('public')->delete($banner->image);
+            }
             $img = Image::decode($request->file('image'))->scale(width: 1920);
             $path = 'banners/' . Str::uuid() . '.webp';
             Storage::disk('public')->put($path, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
             $data['image'] = $path;
+        }
+
+        if ($request->hasFile('image_mobile')) {
+            if ($banner->image_mobile) {
+                Storage::disk('public')->delete($banner->image_mobile);
+            }
+            $mobileImg = Image::decode($request->file('image_mobile'))->scale(width: 768);
+            $mobilePath = 'banners/mobile-' . Str::uuid() . '.webp';
+            Storage::disk('public')->put($mobilePath, $mobileImg->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
+            $data['image_mobile'] = $mobilePath;
         }
 
         $banner->update($data);
@@ -90,7 +102,10 @@ class BannerController extends Controller
 
     public function destroy(Banner $banner): RedirectResponse
     {
-        Storage::disk('public')->delete([$banner->image, $banner->image_mobile]);
+        $filesToDelete = array_filter([$banner->image, $banner->image_mobile]);
+        if (!empty($filesToDelete)) {
+            Storage::disk('public')->delete($filesToDelete);
+        }
         $banner->delete();
         return redirect()->back()->with('success', 'Banner berhasil dihapus.');
     }

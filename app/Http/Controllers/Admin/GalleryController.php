@@ -63,7 +63,10 @@ class GalleryController extends Controller
     {
         // Delete all items
         foreach ($galleryAlbum->items as $item) {
-            Storage::disk('public')->delete([$item->file_path, $item->thumbnail]);
+            $filesToDelete = array_filter([$item->file_path, $item->thumbnail]);
+            if (!empty($filesToDelete)) {
+                Storage::disk('public')->delete($filesToDelete);
+            }
         }
         $galleryAlbum->delete();
         return redirect()->back()->with('success', 'Album berhasil dihapus.');
@@ -123,7 +126,10 @@ class GalleryController extends Controller
 
     public function destroyItem(GalleryItem $galleryItem): RedirectResponse
     {
-        Storage::disk('public')->delete([$galleryItem->file_path, $galleryItem->thumbnail]);
+        $filesToDelete = array_filter([$galleryItem->file_path, $galleryItem->thumbnail]);
+        if (!empty($filesToDelete)) {
+            Storage::disk('public')->delete($filesToDelete);
+        }
         $galleryItem->delete();
         return redirect()->back()->with('success', 'Media berhasil dihapus.');
     }
