@@ -51,7 +51,43 @@
 
         <div>
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Foto Resmi Pejabat</label>
-          <input type="file" @change="e => form.photo = e.target.files[0]" accept="image/*" class="text-xs text-slate-500" />
+          <div 
+            @click="$refs.photoInput.click()"
+            class="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 rounded-2xl p-4 text-center cursor-pointer bg-slate-50/60 dark:bg-slate-900/40 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition group relative overflow-hidden"
+          >
+            <input 
+              type="file" 
+              ref="photoInput" 
+              @change="handlePhotoUpload" 
+              accept="image/*" 
+              class="hidden" 
+            />
+
+            <!-- Preview Image -->
+            <div v-if="photoPreview || (isEdit && official?.photo_url)" class="relative h-44 w-36 mx-auto rounded-xl overflow-hidden bg-slate-900 border border-slate-700/60 shadow-md group/img">
+              <img 
+                :src="photoPreview || official?.photo_url" 
+                class="w-full h-full object-cover group-hover/img:scale-105 transition duration-300" 
+              />
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center p-2 text-center">
+                <span class="px-2.5 py-1 bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-slate-100 text-[10px] font-bold rounded-lg shadow-md flex items-center gap-1">
+                  <UploadCloud class="w-3.5 h-3.5 text-blue-500" />
+                  Ganti Foto
+                </span>
+              </div>
+            </div>
+
+            <!-- Default Upload State -->
+            <div v-else class="py-4 flex flex-col items-center justify-center">
+              <div class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-950/50 flex items-center justify-center mb-2 transition">
+                <UploadCloud class="w-5 h-5" />
+              </div>
+              <p class="text-xs font-bold text-slate-700 dark:text-slate-300">
+                <span class="text-blue-600 dark:text-blue-400 hover:underline">Klik untuk mengunggah foto pejabat</span> atau tarik file ke sini
+              </p>
+              <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG, WEBP (Max 5MB)</p>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -74,15 +110,18 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import { UploadCloud } from '@lucide/vue'
 
 const props = defineProps({
   official: Object,
 })
 
 const isEdit = computed(() => !!props.official)
+const photoInput = ref(null)
+const photoPreview = ref(null)
 
 const form = useForm({
   name: props.official?.name || '',
@@ -98,6 +137,14 @@ const form = useForm({
   status: props.official?.status || 'active',
   photo: null,
 })
+
+const handlePhotoUpload = (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    form.photo = file
+    photoPreview.value = URL.createObjectURL(file)
+  }
+}
 
 const submit = () => {
   if (isEdit.value) {

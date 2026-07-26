@@ -111,10 +111,43 @@
 
           <!-- Attachment -->
           <div>
-            <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Lampiran Dokumen Pendukung (opsional)</label>
-            <input type="file" @change="onFile" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-              class="w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary-50 file:text-primary-600 hover:file:bg-primary-100 transition" />
-            <p class="text-[9px] text-gray-400 mt-1">Format: PDF, JPG, PNG, DOC. Maks. 5MB.</p>
+            <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Lampiran Dokumen Pendukung (Opsional)</label>
+            <div 
+              @click="$refs.attachmentInput.click()"
+              class="border-2 border-dashed border-gray-200 dark:border-zinc-700 hover:border-primary-500 rounded-2xl p-4 text-center cursor-pointer bg-gray-50/60 dark:bg-zinc-800/40 hover:bg-primary-50/30 transition group relative"
+            >
+              <input 
+                type="file" 
+                ref="attachmentInput" 
+                @change="onFile" 
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                class="hidden" 
+              />
+              
+              <!-- Selected File Preview -->
+              <div v-if="form.attachment" class="flex items-center justify-between gap-2 text-left">
+                <div class="flex items-center gap-2 min-w-0">
+                  <UploadCloud class="w-4 h-4 text-primary-600 shrink-0" />
+                  <span class="text-xs font-bold text-gray-800 dark:text-zinc-100 truncate">{{ form.attachment.name }}</span>
+                </div>
+                <button 
+                  type="button" 
+                  @click.stop="form.attachment = null; if ($refs.attachmentInput) $refs.attachmentInput.value = '';" 
+                  class="p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition shrink-0"
+                >
+                  <X class="w-4 h-4" />
+                </button>
+              </div>
+
+              <!-- Default Prompt -->
+              <div v-else class="py-2 flex flex-col items-center justify-center">
+                <UploadCloud class="w-5 h-5 text-gray-400 group-hover:text-primary-600 mb-1 transition" />
+                <p class="text-xs font-bold text-gray-700 dark:text-zinc-300">
+                  <span class="text-primary-600 hover:underline">Klik untuk mengunggah dokumen pendukung</span> atau tarik berkas ke sini
+                </p>
+                <p class="text-[9px] text-gray-400 mt-0.5">Format: PDF, JPG, PNG, DOC (Maksimal 5MB)</p>
+              </div>
+            </div>
           </div>
 
           <!-- Math CAPTCHA -->
@@ -158,6 +191,9 @@
 import { ref, reactive, computed } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import { UploadCloud, X } from '@lucide/vue';
+
+const attachmentInput = ref(null);
 
 const props = defineProps({ 
   categories: Array,

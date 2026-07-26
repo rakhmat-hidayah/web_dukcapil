@@ -486,12 +486,24 @@
                   Sistem akan membaca Kolom A sebagai Label dan Kolom B sebagai Jumlah secara otomatis tanpa proses mapping.
                 </p>
               </div>
-              <input 
-                type="file" 
-                accept=".xlsx, .xls, .csv" 
-                @change="handleExcelFileUpload" 
-                class="text-xs file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 transition cursor-pointer"
-              />
+              <div class="flex flex-col items-center gap-2">
+                <input 
+                  type="file" 
+                  ref="excelInput"
+                  accept=".xlsx, .xls, .csv" 
+                  @change="handleExcelFileUpload" 
+                  class="hidden"
+                />
+                <button
+                  type="button"
+                  @click="$refs.excelInput.click()"
+                  class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-500/20 transition flex items-center gap-2"
+                >
+                  <span class="text-base">📁</span>
+                  Pilih File Excel / CSV
+                </button>
+                <p class="text-[10px] text-gray-400">Format: .xlsx, .xls, .csv (Maks. 10MB)</p>
+              </div>
             </div>
           </div>
 

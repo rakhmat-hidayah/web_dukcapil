@@ -66,7 +66,32 @@
 
               <div class="field">
                 <label>Lampirkan File Balasan (PDF/Word)</label>
-                <input type="file" @change="handleFileUpload" accept=".pdf,.doc,.docx" />
+                <div
+                  @click="$refs.responseFileInput.click()"
+                  class="border-2 border-dashed border-gray-200 hover:border-blue-400 rounded-xl p-3 text-center cursor-pointer bg-gray-50/60 hover:bg-blue-50/30 transition group"
+                >
+                  <input
+                    type="file"
+                    ref="responseFileInput"
+                    @change="handleFileUpload"
+                    accept=".pdf,.doc,.docx"
+                    class="hidden"
+                  />
+                  <div v-if="form.response_file" class="flex items-center justify-between gap-2 text-left">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <UploadCloud class="w-4 h-4 text-blue-600 shrink-0" />
+                      <span class="text-xs font-bold text-gray-800 truncate">{{ form.response_file.name }}</span>
+                    </div>
+                    <span class="text-[10px] text-gray-400 font-mono shrink-0">{{ formatBytes(form.response_file.size) }}</span>
+                  </div>
+                  <div v-else class="py-1 flex flex-col items-center justify-center">
+                    <UploadCloud class="w-5 h-5 text-gray-400 group-hover:text-blue-600 mb-1 transition" />
+                    <span class="text-xs font-bold text-gray-600">
+                      <span class="text-blue-600 hover:underline">Klik untuk melampirkan dokumen balasan</span>
+                    </span>
+                    <span class="text-[10px] text-gray-400 mt-0.5">Format: PDF, Word (Max 20MB)</span>
+                  </div>
+                </div>
               </div>
 
               <button type="submit" class="submit-btn" :disabled="form.processing">
@@ -81,9 +106,20 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
-import { ArrowLeft, User, FileText, Send, CheckCircle } from '@lucide/vue'
+import { ArrowLeft, User, FileText, Send, CheckCircle, UploadCloud } from '@lucide/vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+
+const responseFileInput = ref(null)
+
+function formatBytes(bytes) {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
 
 const props = defineProps({
   ppidRequest: Object,

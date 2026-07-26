@@ -154,11 +154,22 @@
               <div>
                 <label class="block text-xs font-semibold text-gray-500 mb-1.5">Logo Website (Mode Terang)</label>
                 <div class="flex items-center gap-4">
-                  <div class="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-zinc-700 overflow-hidden">
-                    <img v-if="form.settings.site_logo" :src="form.settings.site_logo" class="object-contain max-w-full max-h-full" />
+                  <div class="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-zinc-700 overflow-hidden shrink-0 shadow-xs">
+                    <img v-if="logoLightPreview || form.settings.site_logo" :src="logoLightPreview || form.settings.site_logo" class="object-contain max-w-full max-h-full p-1" />
                     <span v-else class="text-[9px] text-gray-400">Belum ada</span>
                   </div>
-                  <input type="file" @input="form.site_logo = $event.target.files[0]" class="text-xs" accept="image/*" />
+                  <div>
+                    <input type="file" ref="logoLightInput" @change="e => handleImageUpload(e, 'site_logo', 'logoLightPreview')" class="hidden" accept="image/*" />
+                    <button 
+                      type="button" 
+                      @click="$refs.logoLightInput.click()" 
+                      class="px-3.5 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 text-xs font-bold rounded-xl border border-gray-200 dark:border-zinc-700 transition flex items-center gap-2"
+                    >
+                      <UploadCloud class="w-4 h-4 text-primary-500" />
+                      Pilih Berkas Logo
+                    </button>
+                    <p class="text-[9px] text-gray-400 mt-1">Format: PNG, SVG, WEBP (Latar Transparan)</p>
+                  </div>
                 </div>
               </div>
 
@@ -166,11 +177,22 @@
               <div>
                 <label class="block text-xs font-semibold text-gray-500 mb-1.5">Logo Website (Mode Gelap)</label>
                 <div class="flex items-center gap-4">
-                  <div class="w-16 h-16 bg-zinc-950 rounded-2xl flex items-center justify-center border border-zinc-800 overflow-hidden">
-                    <img v-if="form.settings.site_logo_dark" :src="form.settings.site_logo_dark" class="object-contain max-w-full max-h-full" />
+                  <div class="w-16 h-16 bg-zinc-950 rounded-2xl flex items-center justify-center border border-zinc-800 overflow-hidden shrink-0 shadow-xs">
+                    <img v-if="logoDarkPreview || form.settings.site_logo_dark" :src="logoDarkPreview || form.settings.site_logo_dark" class="object-contain max-w-full max-h-full p-1" />
                     <span v-else class="text-[9px] text-gray-400">Belum ada</span>
                   </div>
-                  <input type="file" @input="form.site_logo_dark = $event.target.files[0]" class="text-xs" accept="image/*" />
+                  <div>
+                    <input type="file" ref="logoDarkInput" @change="e => handleImageUpload(e, 'site_logo_dark', 'logoDarkPreview')" class="hidden" accept="image/*" />
+                    <button 
+                      type="button" 
+                      @click="$refs.logoDarkInput.click()" 
+                      class="px-3.5 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 text-xs font-bold rounded-xl border border-gray-200 dark:border-zinc-700 transition flex items-center gap-2"
+                    >
+                      <UploadCloud class="w-4 h-4 text-primary-500" />
+                      Pilih Berkas Logo
+                    </button>
+                    <p class="text-[9px] text-gray-400 mt-1">Format: PNG, SVG, WEBP (Latar Transparan)</p>
+                  </div>
                 </div>
               </div>
 
@@ -178,11 +200,22 @@
               <div>
                 <label class="block text-xs font-semibold text-gray-500 mb-1.5">Favicon (.ico, .png)</label>
                 <div class="flex items-center gap-4">
-                  <div class="w-12 h-12 bg-gray-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center border border-gray-200 dark:border-zinc-700 overflow-hidden">
-                    <img v-if="form.settings.site_favicon" :src="form.settings.site_favicon" class="object-contain max-w-full max-h-full" />
+                  <div class="w-12 h-12 bg-gray-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center border border-gray-200 dark:border-zinc-700 overflow-hidden shrink-0 shadow-xs">
+                    <img v-if="faviconPreview || form.settings.site_favicon" :src="faviconPreview || form.settings.site_favicon" class="object-contain max-w-full max-h-full p-1" />
                     <span v-else class="text-[9px] text-gray-400">Belum ada</span>
                   </div>
-                  <input type="file" @input="form.site_favicon = $event.target.files[0]" class="text-xs" accept="image/*" />
+                  <div>
+                    <input type="file" ref="faviconInput" @change="e => handleImageUpload(e, 'site_favicon', 'faviconPreview')" class="hidden" accept="image/*" />
+                    <button 
+                      type="button" 
+                      @click="$refs.faviconInput.click()" 
+                      class="px-3.5 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 text-xs font-bold rounded-xl border border-gray-200 dark:border-zinc-700 transition flex items-center gap-2"
+                    >
+                      <UploadCloud class="w-4 h-4 text-primary-500" />
+                      Pilih Favicon
+                    </button>
+                    <p class="text-[9px] text-gray-400 mt-1">Ukuran rekomendasi: 32×32 atau 64×64 pixel</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -246,10 +279,25 @@
 import { ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { UploadCloud } from '@lucide/vue';
 
 const props = defineProps({
   settings: Array,
 });
+
+const logoLightPreview = ref(null);
+const logoDarkPreview = ref(null);
+const faviconPreview = ref(null);
+
+const handleImageUpload = (event, formKey, previewRef) => {
+  const file = event.target.files[0];
+  if (file) {
+    form[formKey] = file;
+    if (previewRef === 'logoLightPreview') logoLightPreview.value = URL.createObjectURL(file);
+    if (previewRef === 'logoDarkPreview') logoDarkPreview.value = URL.createObjectURL(file);
+    if (previewRef === 'faviconPreview') faviconPreview.value = URL.createObjectURL(file);
+  }
+};
 
 const tabs = [
   { id: 'colors', label: 'Skema Warna' },

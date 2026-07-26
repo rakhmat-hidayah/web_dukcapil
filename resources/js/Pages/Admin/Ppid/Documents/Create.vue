@@ -38,7 +38,32 @@
         <div class="form-grid-2">
           <div class="field">
             <label>Unggah File Dokumen (PDF, Word, Excel)</label>
-            <input type="file" @change="handleFileUpload" accept=".pdf,.doc,.docx,.xls,.xlsx" />
+            <div 
+              @click="$refs.fileInput.click()"
+              class="border-2 border-dashed border-gray-200 dark:border-zinc-700 hover:border-primary-500 rounded-xl p-3 text-center cursor-pointer bg-gray-50/60 dark:bg-zinc-800/40 hover:bg-primary-50/30 transition group relative"
+            >
+              <input 
+                type="file" 
+                ref="fileInput" 
+                @change="handleFileUpload" 
+                accept=".pdf,.doc,.docx,.xls,.xlsx" 
+                class="hidden" 
+              />
+              <div v-if="form.file" class="flex items-center justify-between gap-2 text-left">
+                <div class="flex items-center gap-2 min-w-0">
+                  <UploadCloud class="w-4 h-4 text-primary-600 shrink-0" />
+                  <span class="text-xs font-bold text-gray-800 dark:text-zinc-100 truncate">{{ form.file.name }}</span>
+                </div>
+                <span class="text-[10px] text-gray-400 font-mono shrink-0">{{ formatBytes(form.file.size) }}</span>
+              </div>
+              <div v-else class="py-1 flex flex-col items-center justify-center">
+                <UploadCloud class="w-5 h-5 text-gray-400 group-hover:text-primary-600 mb-1 transition" />
+                <span class="text-xs font-bold text-gray-700 dark:text-zinc-300">
+                  <span class="text-primary-600 hover:underline">Klik untuk memilih dokumen</span> atau tarik berkas ke sini
+                </span>
+                <span class="text-[10px] text-gray-400 mt-0.5">Format: PDF, Word, Excel (Max 50MB)</span>
+              </div>
+            </div>
             <span v-if="form.errors.file" class="error">{{ form.errors.file }}</span>
           </div>
 
@@ -79,11 +104,14 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
-import { ArrowLeft, Save } from '@lucide/vue'
+import { ArrowLeft, Save, UploadCloud } from '@lucide/vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 defineProps({ categoryLabels: Object })
+
+const fileInput = ref(null)
 
 const form = useForm({
   category: 'informasi_publik',
@@ -96,6 +124,14 @@ const form = useForm({
   sort_order: 0,
   is_published: true,
 })
+
+function formatBytes(bytes) {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
 
 function handleFileUpload(e) {
   form.file = e.target.files[0]
