@@ -34,7 +34,7 @@ use OpenApi\Generator;
 class DocController extends Controller
 {
     /**
-     * Render the Swagger UI page.
+     * Render the Swagger UI page with custom brand theme.
      */
     public function docs(): HttpResponse
     {
@@ -46,7 +46,7 @@ class DocController extends Controller
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dukcapil Dompu — REST API Dokumentasi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.11.0/swagger-ui.css">
     <style>
         :root {
@@ -61,18 +61,12 @@ class DocController extends Controller
             --border:    #e2e8f0;
             --text:      #0f172a;
             --muted:     #64748b;
-            --get:       #059669;
-            --get-bg:    #ecfdf5;
-            --post:      #7c3aed;
-            --post-bg:   #f5f3ff;
-            --del:       #dc2626;
-            --del-bg:    #fef2f2;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: var(--surface);
             color: var(--text);
             min-height: 100vh;
@@ -84,7 +78,7 @@ class DocController extends Controller
             top: 0;
             z-index: 1000;
             background: linear-gradient(135deg, var(--brand-900) 0%, var(--brand-700) 60%, var(--brand-500) 100%);
-            box-shadow: 0 4px 24px rgba(3,92,163,0.35);
+            box-shadow: 0 4px 20px rgba(3,92,163,0.3);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -123,7 +117,7 @@ class DocController extends Controller
             display: block;
             font-size: 10px;
             font-weight: 500;
-            color: rgba(255,255,255,0.65);
+            color: rgba(255,255,255,0.7);
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
@@ -207,6 +201,7 @@ class DocController extends Controller
             color: var(--brand-700);
             font-weight: 500;
             max-width: 700px;
+            line-height: 1.5;
         }
 
         .api-info-stats {
@@ -240,45 +235,49 @@ class DocController extends Controller
             background: #93c5fd;
         }
 
-        /* ─── MAIN CONTENT ─── */
+        /* ─── MAIN CONTENT CONTAINER ─── */
         .api-content {
-            max-width: 1100px;
+            max-width: 1140px;
             margin: 0 auto;
             padding: 24px 24px 60px;
         }
 
-        /* ─── SWAGGER-UI OVERRIDES ─── */
+        /* ─── SWAGGER-UI CLEAN CUSTOM STYLING ─── */
         .swagger-ui .topbar { display: none !important; }
 
         .swagger-ui {
-            font-family: 'Inter', sans-serif !important;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+            color: var(--text) !important;
         }
 
-        /* Info block */
         .swagger-ui .info {
-            display: none !important; /* replaced by our banner */
+            margin: 10px 0 20px 0 !important;
         }
 
-        /* Scheme container (server select) */
+        .swagger-ui .info .title {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 800 !important;
+            color: var(--brand-900) !important;
+            font-size: 22px !important;
+        }
+
         .swagger-ui .scheme-container {
             background: var(--card) !important;
             border: 1px solid var(--border) !important;
-            border-radius: 14px !important;
+            border-radius: 12px !important;
             padding: 16px 20px !important;
-            margin-bottom: 20px !important;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.05) !important;
+            margin: 16px 0 24px !important;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
         }
 
-        /* Section headers (tag groups) */
         .swagger-ui .opblock-tag {
             font-family: 'Inter', sans-serif !important;
-            font-size: 14px !important;
+            font-size: 15px !important;
             font-weight: 700 !important;
             color: var(--brand-900) !important;
-            border: none !important;
             border-bottom: 2px solid var(--border) !important;
-            padding: 10px 0 10px 0 !important;
-            margin: 24px 0 8px !important;
+            padding: 12px 0 8px !important;
+            margin: 24px 0 12px !important;
         }
 
         .swagger-ui .opblock-tag small {
@@ -287,158 +286,67 @@ class DocController extends Controller
             color: var(--muted) !important;
         }
 
-        /* Operation blocks */
         .swagger-ui .opblock {
-            border-radius: 12px !important;
-            border: 1px solid var(--border) !important;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
-            margin-bottom: 8px !important;
-            overflow: hidden !important;
-            transition: box-shadow 0.2s !important;
+            border-radius: 10px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+            margin-bottom: 10px !important;
+            border-width: 1px !important;
+            transition: all 0.15s ease-in-out !important;
         }
+
         .swagger-ui .opblock:hover {
-            box-shadow: 0 4px 16px rgba(3,92,163,0.1) !important;
+            box-shadow: 0 4px 12px rgba(3,92,163,0.08) !important;
         }
 
-        /* GET */
-        .swagger-ui .opblock.opblock-get {
-            background: #f0fdf4 !important;
-            border-color: #86efac !important;
-        }
-        .swagger-ui .opblock.opblock-get .opblock-summary-method {
-            background: var(--get) !important;
-        }
-
-        /* POST */
-        .swagger-ui .opblock.opblock-post {
-            background: #faf5ff !important;
-            border-color: #c4b5fd !important;
-        }
-        .swagger-ui .opblock.opblock-post .opblock-summary-method {
-            background: var(--post) !important;
-        }
-
-        /* DELETE */
-        .swagger-ui .opblock.opblock-delete {
-            background: #fff1f2 !important;
-            border-color: #fca5a5 !important;
-        }
-        .swagger-ui .opblock.opblock-delete .opblock-summary-method {
-            background: var(--del) !important;
-        }
-
-        /* Method badge */
-        .swagger-ui .opblock-summary-method {
+        .swagger-ui .opblock .opblock-summary-method {
             font-family: 'JetBrains Mono', monospace !important;
-            font-size: 11px !important;
             font-weight: 700 !important;
             border-radius: 6px !important;
-            min-width: 60px !important;
-            letter-spacing: 0.5px !important;
+            text-shadow: none !important;
         }
 
-        /* Path */
-        .swagger-ui .opblock-summary-path {
+        .swagger-ui .opblock .opblock-summary-path {
             font-family: 'JetBrains Mono', monospace !important;
             font-size: 13px !important;
             font-weight: 600 !important;
-            color: var(--text) !important;
         }
 
-        /* Summary description */
-        .swagger-ui .opblock-summary-description {
-            font-family: 'Inter', sans-serif !important;
-            font-size: 12px !important;
-            color: var(--muted) !important;
-        }
-
-        /* Response codes */
-        .swagger-ui .response-col_status {
-            font-family: 'JetBrains Mono', monospace !important;
-            font-weight: 700 !important;
-        }
-
-        /* Authorize button */
         .swagger-ui .btn.authorize {
             background: var(--brand-700) !important;
             border-color: var(--brand-700) !important;
-            color: white !important;
+            color: #ffffff !important;
             border-radius: 8px !important;
             font-family: 'Inter', sans-serif !important;
-            font-weight: 700 !important;
-            font-size: 13px !important;
+            font-weight: 600 !important;
         }
-        .swagger-ui .btn.authorize:hover {
-            background: var(--brand-900) !important;
-        }
-        .swagger-ui .btn.authorize svg { fill: white !important; }
 
-        /* Execute button */
+        .swagger-ui .btn.authorize svg {
+            fill: #ffffff !important;
+        }
+
         .swagger-ui .btn.execute {
             background: var(--brand-500) !important;
             border-color: var(--brand-500) !important;
             border-radius: 8px !important;
             font-family: 'Inter', sans-serif !important;
-            font-weight: 700 !important;
+            font-weight: 600 !important;
         }
 
-        /* Models section */
+        .swagger-ui input[type=text],
+        .swagger-ui textarea,
+        .swagger-ui select {
+            border-radius: 6px !important;
+            border: 1px solid var(--border) !important;
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 12px !important;
+        }
+
         .swagger-ui section.models {
             border: 1px solid var(--border) !important;
-            border-radius: 14px !important;
-            overflow: hidden !important;
-        }
-        .swagger-ui section.models h4 {
-            font-family: 'Inter', sans-serif !important;
-            font-weight: 700 !important;
+            border-radius: 12px !important;
         }
 
-        /* Input fields */
-        .swagger-ui input[type=text], .swagger-ui textarea, .swagger-ui select {
-            border-radius: 8px !important;
-            border: 1px solid var(--border) !important;
-            font-family: 'JetBrains Mono', monospace !important;
-            font-size: 12px !important;
-        }
-
-        /* Curl/code blocks */
-        .swagger-ui .curl-command { border-radius: 8px !important; }
-        .swagger-ui .highlight-code { border-radius: 8px !important; }
-
-        /* Parameters table */
-        .swagger-ui table thead tr td, .swagger-ui table thead tr th {
-            font-family: 'Inter', sans-serif !important;
-            font-size: 12px !important;
-            font-weight: 700 !important;
-            color: var(--muted) !important;
-            border-color: var(--border) !important;
-        }
-
-        /* Server select */
-        .swagger-ui .servers-title {
-            font-family: 'Inter', sans-serif !important;
-            font-size: 12px !important;
-            font-weight: 700 !important;
-            color: var(--muted) !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-        }
-
-        .swagger-ui .servers select {
-            border-radius: 8px !important;
-            font-family: 'JetBrains Mono', monospace !important;
-            font-size: 12px !important;
-            border-color: var(--border) !important;
-            background: var(--surface) !important;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--brand-500); }
-
-        /* Footer */
+        /* ─── FOOTER ─── */
         .api-footer {
             background: var(--brand-900);
             color: rgba(255,255,255,0.5);
