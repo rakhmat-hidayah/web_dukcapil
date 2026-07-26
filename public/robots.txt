@@ -1,2 +1,8 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /storage/framework/
+Allow: /api/v1/
+
+Sitemap: http://dukcapil.dompukab.go.id.test/sitemap.xml
