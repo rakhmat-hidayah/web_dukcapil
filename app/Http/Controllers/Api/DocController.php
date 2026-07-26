@@ -4,9 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Response as HttpResponse;
-use OpenApi\Analysers\AttributeAnnotationFactory;
-use OpenApi\Analysers\DocBlockAnnotationFactory;
-use OpenApi\Analysers\ReflectionAnalyser;
 use OpenApi\Attributes as OA;
 use OpenApi\Generator;
 
@@ -130,21 +127,10 @@ HTML;
      */
     public function json(): HttpResponse
     {
-        // Use ReflectionAnalyser with BOTH Attribute AND DocBlock factories
-        // so existing @OA\ docblock annotations in V1 controllers are recognised
-        $analyser = new ReflectionAnalyser([
-            new AttributeAnnotationFactory(),
-            new DocBlockAnnotationFactory(),
-        ]);
-
-        $generator = (new Generator())
-            ->setAnalyser($analyser);
-
-        // scan Api AND V1 subdirectory; disable strict validation for partial coverage
-        $openapi = $generator->generate(
-            sources: [
-                app_path('Http/Controllers/Api'),
-            ],
+        // swagger-php v6 natively reads PHP 8 #[OA\*] Attributes
+        // All V1 controllers have been converted to Attributes format
+        $openapi = (new Generator())->generate(
+            sources: [app_path('Http/Controllers/Api')],
             validate: false
         );
 
