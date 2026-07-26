@@ -175,7 +175,7 @@
               <!-- Public Link -->
               <div>
                 <h4 class="text-[10px] font-bold text-gray-400 uppercase mb-1">Tautan Publik</h4>
-                <div class="flex gap-1">
+                <div class="flex gap-1.5 items-center">
                   <input 
                     type="text" 
                     readonly 
@@ -183,11 +183,17 @@
                     class="flex-1 px-2.5 py-1 bg-gray-50 dark:bg-zinc-800 text-[10px] font-mono border border-gray-100 dark:border-zinc-800 rounded-lg select-all focus:outline-none" 
                   />
                   <button 
+                    type="button"
                     @click="copyLink(selectedFile.url)" 
-                    class="px-2 py-1 bg-gray-50 hover:bg-gray-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-700 rounded-lg text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition"
-                    title="Salin Link"
+                    class="px-2.5 py-1 text-xs font-bold rounded-lg transition flex items-center gap-1 shrink-0 shadow-2xs"
+                    :class="copied 
+                      ? 'bg-emerald-600 text-white border border-emerald-500' 
+                      : 'bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-200'"
+                    :title="copied ? 'Tersalin!' : 'Salin Link'"
                   >
-                    <Copy class="w-3.5 h-3.5" />
+                    <Check v-if="copied" class="w-3.5 h-3.5" />
+                    <Copy v-else class="w-3.5 h-3.5" />
+                    <span class="text-[10px] font-semibold">{{ copied ? 'Tersalin!' : 'Salin' }}</span>
                   </button>
                 </div>
               </div>
@@ -300,7 +306,7 @@ import { Head, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { 
   Home, ChevronRight, Search, Plus, FolderPlus, Upload, 
-  Folder, FolderOpen, Trash2, X, Download, Copy, UploadCloud,
+  Folder, FolderOpen, Trash2, X, Download, Copy, Check, UploadCloud,
   FileText, FileArchive, FileImage, FileSpreadsheet, FileBox, FileVideo, File
 } from '@lucide/vue';
 
@@ -421,10 +427,52 @@ const uploadNewVersion = (event) => {
   });
 };
 
-// Copy URL link to clipboard
-const copyLink = (url) => {
-  navigator.clipboard.writeText(url);
-  alert('Tautan berkas berhasil disalin!');
+const copied = ref(false);
+
+// Copy URL link to clipboard with bulletproof fallback
+const copyLink = async (url) => {
+  if (!url) return;
+
+  const fullUrl = url.startsWith('http://') || url.startsWith('https://') 
+    ? url 
+    : window.location.origin + (url.startsWith('/') ? url : '/' + url);
+
+  let success = false;
+
+  if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(fullUrl);
+      success = true;
+    } catch (e) {
+      console.warn('Clipboard API failed, using fallback:', e);
+    }
+  }
+
+  if (!success) {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = fullUrl;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      textarea.style.top = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      success = document.execCommand('copy');
+      document.body.removeChild(textarea);
+    } catch (e) {
+      console.error('ExecCommand copy failed:', e);
+    }
+  }
+
+  if (success) {
+    copied.value = true;
+    setTimeout(() => {
+      copied.value = false;
+    }, 2500);
+  } else {
+    window.prompt('Salin tautan berkas secara manual:', fullUrl);
+  }
 };
 
 // Delete File

@@ -57,7 +57,7 @@ class FileEntry extends Model
             return $this->path;
         }
 
-        return '/storage/' . ltrim($this->path, '/');
+        return url('/storage/' . ltrim($this->path, '/'));
     }
 
     /**

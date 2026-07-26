@@ -60,8 +60,35 @@ const props = defineProps({
   subject: String,
 });
 
-const copyTicket = () => {
-  navigator.clipboard.writeText(props.ticket);
-  alert('Nomor tiket berhasil disalin ke clipboard!');
+const copyTicket = async () => {
+  if (!props.ticket) return;
+  let success = false;
+  if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(props.ticket);
+      success = true;
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+  if (!success) {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = props.ticket;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      success = document.execCommand('copy');
+      document.body.removeChild(textarea);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  if (success) {
+    alert('Nomor tiket berhasil disalin ke clipboard!');
+  } else {
+    window.prompt('Salin nomor tiket secara manual:', props.ticket);
+  }
 };
 </script>

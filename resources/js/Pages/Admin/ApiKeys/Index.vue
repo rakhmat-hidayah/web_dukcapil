@@ -272,9 +272,36 @@ const maskKey = (key) => {
   return key.substring(0, 8) + '••••••••••••••••••••••••••••' + key.substring(key.length - 4);
 };
 
-const copyKey = (key) => {
-  navigator.clipboard.writeText(key);
-  alert('API Key berhasil disalin ke clipboard!');
+const copyKey = async (key) => {
+  if (!key) return;
+  let success = false;
+  if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(key);
+      success = true;
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+  if (!success) {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = key;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      success = document.execCommand('copy');
+      document.body.removeChild(textarea);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  if (success) {
+    alert('API Key berhasil disalin ke clipboard!');
+  } else {
+    window.prompt('Salin API Key secara manual:', key);
+  }
 };
 
 // Actions
