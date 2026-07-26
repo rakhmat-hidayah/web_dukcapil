@@ -190,6 +190,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/gallery/item/{galleryItem}', [\App\Http\Controllers\Admin\GalleryController::class, 'destroyItem'])->name('gallery.item.destroy');
 
         // Downloads CMS
+        Route::post('/downloads/{download}', [\App\Http\Controllers\Admin\DownloadController::class, 'update']);
         Route::resource('/downloads', \App\Http\Controllers\Admin\DownloadController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::post('/downloads/categories', [\App\Http\Controllers\Admin\DownloadController::class, 'storeCategory'])->name('downloads.categories.store');
         Route::delete('/downloads/categories/{downloadCategory}', [\App\Http\Controllers\Admin\DownloadController::class, 'destroyCategory'])->name('downloads.categories.destroy');

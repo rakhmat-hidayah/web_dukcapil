@@ -270,16 +270,55 @@
 
               <!-- File Input -->
               <div>
-                <label class="block text-xs font-semibold text-gray-500 mb-1">Pilih File Berkas</label>
-                <input 
-                  type="file" 
-                  ref="fileInput" 
-                  @change="handleFileUpload" 
-                  :required="!isEditing"
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.zip"
-                  class="w-full text-xs"
-                />
-                <p class="text-[9px] text-gray-400 mt-1">Maksimal 50MB (Format: PDF, Word, Excel, ZIP)</p>
+                <label class="block text-xs font-semibold text-gray-500 mb-1.5">Berkas Dokumen Lampiran</label>
+                <div 
+                  @click="$refs.fileInput.click()"
+                  class="border-2 border-dashed border-gray-200 dark:border-zinc-700 hover:border-primary-500 dark:hover:border-primary-400 rounded-2xl p-4 text-center cursor-pointer bg-gray-50/60 dark:bg-zinc-800/40 hover:bg-primary-50/30 dark:hover:bg-primary-950/20 transition group relative"
+                >
+                  <input 
+                    type="file" 
+                    ref="fileInput" 
+                    @change="handleFileUpload" 
+                    :required="!isEditing"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.zip"
+                    class="hidden"
+                  />
+                  
+                  <!-- Selected file preview -->
+                  <div v-if="form.file" class="flex items-center justify-between gap-3 text-left">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 flex items-center justify-center shrink-0">
+                        <FileText class="w-5 h-5" />
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-xs font-bold text-gray-800 dark:text-zinc-100 truncate">{{ form.file.name }}</p>
+                        <p class="text-[10px] text-gray-400 font-mono">{{ formatBytes(form.file.size) }}</p>
+                      </div>
+                    </div>
+                    <button 
+                      type="button" 
+                      @click.stop="removeSelectedFile" 
+                      class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition shrink-0"
+                      title="Ganti berkas"
+                    >
+                      <X class="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <!-- Default upload prompt -->
+                  <div v-else class="py-2 flex flex-col items-center justify-center">
+                    <div class="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-zinc-800 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:bg-primary-100 dark:group-hover:bg-primary-950/50 flex items-center justify-center mb-2 transition">
+                      <UploadCloud class="w-5 h-5" />
+                    </div>
+                    <p class="text-xs font-bold text-gray-700 dark:text-zinc-300">
+                      <span class="text-primary-600 dark:text-primary-400 hover:underline">Klik untuk memilih file</span> atau tarik file ke sini
+                    </p>
+                    <p class="text-[10px] text-gray-400 mt-1">Maksimal 50MB (Format: PDF, Word, Excel, ZIP)</p>
+                    <p v-if="isEditing" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 px-2.5 py-1 rounded-lg">
+                      ✓ File saat ini sudah terpasang. Pilih file baru hanya jika ingin menggantinya.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <!-- Footer Buttons -->
@@ -366,7 +405,7 @@
 import { ref } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Plus, Search, Edit, Trash2, FileDown } from '@lucide/vue';
+import { Plus, Search, Edit, Trash2, FileDown, UploadCloud, FileText, X } from '@lucide/vue';
 
 const props = defineProps({
   downloads: Object,
@@ -410,6 +449,13 @@ const handleFileUpload = (e) => {
   form.file = e.target.files[0];
 };
 
+const removeSelectedFile = () => {
+  form.file = null;
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
+};
+
 const formatBytes = (bytes) => {
   if (bytes === 0) return '0 B';
   const k = 1024;
@@ -422,6 +468,9 @@ const openAddModal = () => {
   isEditing.value = false;
   editId.value = null;
   form.reset();
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
   modalOpen.value = true;
 };
 
@@ -435,22 +484,24 @@ const openEditModal = (doc) => {
   form.document_date = doc.document_date || '';
   form.status = doc.status;
   form.file = null;
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
   modalOpen.value = true;
 };
 
 const submit = () => {
   if (isEditing.value) {
-    form.post(route('admin.downloads.update', editId.value), {
-      forceFormData: true,
-      headers: {
-        _method: 'PUT'
-      },
+    form.transform((data) => ({
+      ...data,
+      _method: 'PUT',
+    })).post(route('admin.downloads.update', editId.value), {
       onSuccess: () => {
         modalOpen.value = false;
       }
     });
   } else {
-    form.post(route('admin.downloads.store'), {
+    form.transform((data) => data).post(route('admin.downloads.store'), {
       onSuccess: () => {
         modalOpen.value = false;
       }

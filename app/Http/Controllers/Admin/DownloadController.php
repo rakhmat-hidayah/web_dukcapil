@@ -84,7 +84,9 @@ class DownloadController extends Controller
         $data = $request->except('file');
 
         if ($request->hasFile('file')) {
-            Storage::disk('public')->delete($download->file_path);
+            if ($download->file_path) {
+                Storage::disk('public')->delete($download->file_path);
+            }
             $file = $request->file('file');
             $path = 'downloads/' . date('Y/m') . '/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
             Storage::disk('public')->putFileAs(dirname($path), $file, basename($path));
