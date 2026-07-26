@@ -8,20 +8,20 @@ use App\Models\Desa;
 use App\Models\Kecamatan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
-/**
- * @OA\Tag(name="Demographics", description="Demographic statistics & administrative hierarchy")
- */
+#[OA\Tag(name: 'Demographics', description: 'Statistik kependudukan dan hierarki wilayah administratif')]
 class DemographicController extends Controller
 {
-    /**
-     * @OA\Get(
-     *   path="/api/v1/demographics/summary",
-     *   summary="Get population summary KPIs",
-     *   tags={"Demographics"},
-     *   @OA\Response(response=200, description="Summary totals")
-     * )
-     */
+    #[OA\Get(
+        path: '/v1/demographics/summary',
+        summary: 'Ringkasan KPI data penduduk',
+        description: 'Mengambil total keseluruhan penduduk, pemilahan gender, jumlah kecamatan dan desa, serta sex ratio Kabupaten Dompu.',
+        tags: ['Demographics'],
+        responses: [
+            new OA\Response(response: 200, description: 'Data ringkasan populasi'),
+        ]
+    )]
     public function summary(): JsonResponse
     {
         $kecamatans      = Kecamatan::all();
@@ -31,25 +31,26 @@ class DemographicController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'total_population'  => $totalPopulation,
-                'total_male'        => $totalMale,
-                'total_female'      => $totalFemale,
-                'total_kecamatan'   => $kecamatans->count(),
-                'total_desa'        => Desa::count(),
-                'sex_ratio'         => $totalFemale > 0 ? round(($totalMale / $totalFemale) * 100, 2) : null,
+            'data'    => [
+                'total_population' => $totalPopulation,
+                'total_male'       => $totalMale,
+                'total_female'     => $totalFemale,
+                'total_kecamatan'  => $kecamatans->count(),
+                'total_desa'       => Desa::count(),
+                'sex_ratio'        => $totalFemale > 0 ? round(($totalMale / $totalFemale) * 100, 2) : null,
             ],
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *   path="/api/v1/demographics/kecamatans",
-     *   summary="List all kecamatan districts with population data",
-     *   tags={"Demographics"},
-     *   @OA\Response(response=200, description="Kecamatan list")
-     * )
-     */
+    #[OA\Get(
+        path: '/v1/demographics/kecamatans',
+        summary: 'Daftar kecamatan beserta data penduduk',
+        description: 'Mengambil semua kecamatan di Kabupaten Dompu lengkap dengan data jumlah penduduk, laki-laki, perempuan, dan jumlah desa.',
+        tags: ['Demographics'],
+        responses: [
+            new OA\Response(response: 200, description: 'Daftar kecamatan'),
+        ]
+    )]
     public function kecamatans(): JsonResponse
     {
         $data = Kecamatan::orderBy('sort_order')
@@ -71,16 +72,19 @@ class DemographicController extends Controller
         return response()->json(['success' => true, 'data' => $data]);
     }
 
-    /**
-     * @OA\Get(
-     *   path="/api/v1/demographics/datasets",
-     *   summary="List published demographic datasets",
-     *   tags={"Demographics"},
-     *   @OA\Parameter(name="year", in="query", required=false, @OA\Schema(type="integer")),
-     *   @OA\Parameter(name="type", in="query", required=false, @OA\Schema(type="string")),
-     *   @OA\Response(response=200, description="Datasets list")
-     * )
-     */
+    #[OA\Get(
+        path: '/v1/demographics/datasets',
+        summary: 'Daftar dataset demografis yang dipublikasikan',
+        description: 'Mengambil daftar dataset kependudukan yang tersedia, dapat difilter berdasarkan tahun dan tipe.',
+        tags: ['Demographics'],
+        parameters: [
+            new OA\Parameter(name: 'year', in: 'query', description: 'Filter tahun dataset', required: false, schema: new OA\Schema(type: 'integer', example: 2024)),
+            new OA\Parameter(name: 'type', in: 'query', description: 'Filter tipe dataset', required: false, schema: new OA\Schema(type: 'string')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Daftar dataset'),
+        ]
+    )]
     public function datasets(Request $request): JsonResponse
     {
         $query = DemographicDataset::published()->with('kecamatan:id,name');
@@ -106,20 +110,23 @@ class DemographicController extends Controller
         return response()->json(['success' => true, 'data' => $datasets]);
     }
 
-    /**
-     * @OA\Get(
-     *   path="/api/v1/demographics/chart/{type}",
-     *   summary="Get chart-ready JSON data for a given dataset type",
-     *   tags={"Demographics"},
-     *   @OA\Parameter(name="type", in="path", required=true, @OA\Schema(type="string")),
-     *   @OA\Parameter(name="year", in="query", required=false, @OA\Schema(type="integer")),
-     *   @OA\Response(response=200, description="Chart data")
-     * )
-     */
+    #[OA\Get(
+        path: '/v1/demographics/chart/{type}',
+        summary: 'Data chart JSON untuk tipe dataset tertentu',
+        description: 'Mengambil data siap-render untuk chart berdasarkan tipe dataset, opsional difilter berdasarkan tahun.',
+        tags: ['Demographics'],
+        parameters: [
+            new OA\Parameter(name: 'type', in: 'path', description: 'Tipe dataset (contoh: age_group, education, job)', required: true, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'year', in: 'query', description: 'Filter tahun (opsional, default: terbaru)', required: false, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Data chart berhasil diambil'),
+            new OA\Response(response: 404, description: 'Data tidak tersedia untuk tipe ini'),
+        ]
+    )]
     public function chartData(Request $request, string $type): JsonResponse
     {
-        $year = $request->integer('year', 0);
-
+        $year  = $request->integer('year', 0);
         $query = DemographicDataset::published()->where('type', $type);
 
         if ($year > 0) {

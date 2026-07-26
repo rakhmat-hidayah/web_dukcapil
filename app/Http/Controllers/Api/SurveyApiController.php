@@ -8,6 +8,7 @@ use App\Services\SurveyCalculationService;
 use App\Services\SurveyChartService;
 use App\Services\SurveyService;
 use Illuminate\Http\JsonResponse;
+use OpenApi\Attributes as OA;
 
 class SurveyApiController extends Controller
 {
@@ -28,6 +29,15 @@ class SurveyApiController extends Controller
     /**
      * Public API: Get Active Survey Metadata & Questions.
      */
+    #[OA\Get(
+        path: '/v1/survey/current',
+        summary: 'Survei IKM aktif saat ini',
+        description: 'Mengambil metadata survei Indeks Kepuasan Masyarakat (IKM) yang sedang aktif beserta daftar pertanyaannya.',
+        tags: ['Survey IKM'],
+        responses: [
+            new OA\Response(response: 200, description: 'Data survei aktif atau null jika tidak ada'),
+        ]
+    )]
     public function current(): JsonResponse
     {
         $activeSurvey = $this->surveyService->getActiveSurvey();
@@ -63,6 +73,15 @@ class SurveyApiController extends Controller
     /**
      * Public API: Get Current IKM Results & Quality Category.
      */
+    #[OA\Get(
+        path: '/v1/survey/results',
+        summary: 'Hasil IKM periode aktif',
+        description: 'Mengambil nilai IKM, kategori kualitas layanan, dan breakdown indeks per pertanyaan untuk periode survei aktif.',
+        tags: ['Survey IKM'],
+        responses: [
+            new OA\Response(response: 200, description: 'Hasil IKM periode aktif'),
+        ]
+    )]
     public function results(): JsonResponse
     {
         $activeSurvey = $this->surveyService->getActiveSurvey();
@@ -95,6 +114,15 @@ class SurveyApiController extends Controller
     /**
      * Public API: Get Historical IKM Archive.
      */
+    #[OA\Get(
+        path: '/v1/survey/archive',
+        summary: 'Arsip periode survei IKM historis',
+        description: 'Mengambil semua periode survei IKM yang telah selesai beserta nilai IKM historisnya.',
+        tags: ['Survey IKM'],
+        responses: [
+            new OA\Response(response: 200, description: 'Arsip data IKM historis'),
+        ]
+    )]
     public function archive(): JsonResponse
     {
         return response()->json([
@@ -106,6 +134,15 @@ class SurveyApiController extends Controller
     /**
      * Public API: Get Detailed Chart Statistics Datasets.
      */
+    #[OA\Get(
+        path: '/v1/survey/statistics',
+        summary: 'Dataset statistik chart survei IKM',
+        description: 'Mengambil dataset lengkap yang siap digunakan untuk merender chart statistik hasil survei IKM periode aktif.',
+        tags: ['Survey IKM'],
+        responses: [
+            new OA\Response(response: 200, description: 'Dataset chart statistik IKM'),
+        ]
+    )]
     public function statistics(): JsonResponse
     {
         $activeSurvey = $this->surveyService->getActiveSurvey();

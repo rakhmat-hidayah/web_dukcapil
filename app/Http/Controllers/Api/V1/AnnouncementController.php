@@ -6,22 +6,22 @@ use App\Http\Controllers\Api\BaseApiController;
 use App\Models\Announcement;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use OpenApi\Attributes as OA;
 
 class AnnouncementController extends BaseApiController
 {
-    /**
-     * @OA\Get(
-     *     path="/announcements",
-     *     summary="Daftar pengumuman aktif",
-     *     description="Mengambil daftar maklumat resmi, pengumuman darurat, popup, dan running text ticker yang masih aktif.",
-     *     tags={"Announcements"},
-     *     @OA\Parameter(name="type", in="query", description="Filter tipe (popup, ticker, feed)", required=false, @OA\Schema(type="string")),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Berhasil mengambil pengumuman"
-     *     )
-     * )
-     */
+    #[OA\Get(
+        path: '/v1/announcements',
+        summary: 'Daftar pengumuman aktif',
+        description: 'Mengambil daftar maklumat resmi, pengumuman darurat, popup, dan running text ticker yang masih aktif.',
+        tags: ['Announcements'],
+        parameters: [
+            new OA\Parameter(name: 'type', in: 'query', description: 'Filter tipe (popup, ticker, feed)', required: false, schema: new OA\Schema(type: 'string', enum: ['popup', 'ticker', 'feed'])),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Berhasil mengambil pengumuman'),
+        ]
+    )]
     public function index(Request $request): JsonResponse
     {
         $query = Announcement::where('status', 'published')
