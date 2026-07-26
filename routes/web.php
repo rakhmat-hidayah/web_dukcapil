@@ -79,6 +79,11 @@ Route::get('/captcha/image', [CaptchaController::class, 'image'])->name('captcha
 Route::get('/api/docs', [\App\Http\Controllers\Api\DocController::class, 'docs'])->name('api.docs');
 Route::get('/api/docs/json', [\App\Http\Controllers\Api\DocController::class, 'json'])->name('api.docs.json');
 
+// Fallback named route for standard Laravel login route() calls
+Route::get('/login', function () {
+    return redirect()->route('admin.login');
+})->name('login');
+
 // Admin Portal Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
