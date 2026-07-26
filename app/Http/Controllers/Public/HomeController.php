@@ -46,10 +46,16 @@ class HomeController extends Controller
             ->orderBy('is_pinned', 'desc')
             ->first();
 
-        // 4. Get 3 recent news articles
+        // 4. Get 6 recent news articles
         $recentNews = News::with('category')
             ->published()
-            ->limit(3)
+            ->limit(6)
+            ->get();
+
+        // 4b. Get active featured innovations
+        $innovations = \App\Models\Innovation::where('is_active', true)
+            ->orderBy('sort_order')
+            ->limit(4)
             ->get();
 
         // 5. Get top downloads count
@@ -142,6 +148,7 @@ class HomeController extends Controller
             'tickers' => $tickers,
             'popup' => $popup,
             'recentNews' => $recentNews,
+            'innovations' => $innovations,
             'downloadShortcuts' => $downloadShortcuts,
             'stats' => $demographicSummary,
             'ikmWidget' => $ikmWidget,

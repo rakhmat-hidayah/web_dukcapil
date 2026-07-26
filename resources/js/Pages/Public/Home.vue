@@ -286,57 +286,106 @@
 
       <!-- Main Home Layout Grids -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Recent News Feed (Col Span 2) -->
-        <div class="lg:col-span-2 space-y-6">
-          <div class="flex justify-between items-baseline">
-            <h3 class="text-lg font-black text-gray-900 dark:text-zinc-50 tracking-tight flex items-center gap-2">
-              📰 Berita Terkini
-            </h3>
-            <Link :href="route('public.news.index')" class="text-xs font-bold text-primary-600 hover:underline">
-              Lihat Semua →
-            </Link>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div v-if="recentNews.length === 0" class="col-span-3 text-center py-12 text-gray-400 text-xs">
-              Belum ada berita dipublikasikan.
+        <!-- Recent News & Innovations Feed (Col Span 2) -->
+        <div class="lg:col-span-2 space-y-8">
+          <!-- News Section -->
+          <div class="space-y-5">
+            <div class="flex justify-between items-baseline">
+              <h3 class="text-lg font-black text-gray-900 dark:text-zinc-50 tracking-tight flex items-center gap-2">
+                📰 Berita Terkini
+              </h3>
+              <Link :href="route('public.news.index')" class="text-xs font-bold text-primary-600 hover:underline">
+                Lihat Semua →
+              </Link>
             </div>
 
-            <Link 
-              v-for="item in recentNews" 
-              :key="item.id"
-              :href="route('public.news.show', item.slug)"
-              class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden flex flex-col group"
-            >
-              <div class="h-32 bg-gray-100 dark:bg-zinc-950 overflow-hidden flex items-center justify-center">
-                <img 
-                  :src="item.thumbnail ? `/storage/${item.thumbnail}` : 'https://images.unsplash.com/photo-1495020689067-958852a6565d?auto=format&fit=crop&w=400&q=80'" 
-                  class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                  alt="Thumbnail" 
-                />
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+              <div v-if="recentNews.length === 0" class="col-span-3 text-center py-12 text-gray-400 text-xs">
+                Belum ada berita dipublikasikan.
               </div>
-              <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
-                <div>
-                  <span 
-                    v-if="item.category" 
-                    class="text-[9px] font-bold font-mono uppercase tracking-wider border px-1.5 py-0.5 rounded"
-                    :style="{ 
-                      color: item.category.color, 
-                      backgroundColor: item.category.color + '15',
-                      borderColor: item.category.color + '30'
-                    }"
-                  >
-                    {{ item.category.name }}
-                  </span>
-                  <h4 class="font-bold text-gray-800 dark:text-zinc-100 text-xs mt-2 line-clamp-2 leading-snug group-hover:text-primary-600 transition">
-                    {{ item.title }}
-                  </h4>
+
+              <Link 
+                v-for="item in recentNews" 
+                :key="item.id"
+                :href="route('public.news.show', item.slug)"
+                class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden flex flex-col group hover:shadow-md hover:-translate-y-0.5 transition duration-200"
+              >
+                <div class="h-32 bg-gray-100 dark:bg-zinc-950 overflow-hidden flex items-center justify-center">
+                  <img 
+                    :src="item.thumbnail ? `/storage/${item.thumbnail}` : 'https://images.unsplash.com/photo-1495020689067-958852a6565d?auto=format&fit=crop&w=400&q=80'" 
+                    class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    alt="Thumbnail" 
+                  />
                 </div>
-                <p class="text-[9px] text-gray-400 font-semibold font-mono">
-                  {{ formatDate(item.published_at) }}
-                </p>
+                <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+                  <div>
+                    <span 
+                      v-if="item.category" 
+                      class="text-[9px] font-bold font-mono uppercase tracking-wider border px-1.5 py-0.5 rounded"
+                      :style="{ 
+                        color: item.category.color, 
+                        backgroundColor: item.category.color + '15',
+                        borderColor: item.category.color + '30'
+                      }"
+                    >
+                      {{ item.category.name }}
+                    </span>
+                    <h4 class="font-bold text-gray-800 dark:text-zinc-100 text-xs mt-2 line-clamp-2 leading-snug group-hover:text-primary-600 transition">
+                      {{ item.title }}
+                    </h4>
+                  </div>
+                  <p class="text-[9px] text-gray-400 font-semibold font-mono">
+                    {{ formatDate(item.published_at) }}
+                  </p>
+                </div>
+              </Link>
+            </div>
+          </div>
+
+          <!-- Featured Innovations Section -->
+          <div v-if="innovations && innovations.length > 0" class="space-y-4 pt-2">
+            <div class="flex justify-between items-baseline">
+              <h3 class="text-lg font-black text-gray-900 dark:text-zinc-50 tracking-tight flex items-center gap-2">
+                💡 Inovasi Pelayanan Unggulan
+              </h3>
+              <Link :href="route('public.innovations.index')" class="text-xs font-bold text-primary-600 hover:underline">
+                Lihat Semua Inovasi →
+              </Link>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div 
+                v-for="item in innovations" 
+                :key="item.id"
+                class="bg-gradient-to-br from-white to-slate-50/70 dark:from-zinc-900 dark:to-zinc-900/80 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between"
+              >
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-sm shadow-inner">
+                      ✨
+                    </span>
+                    <span class="text-[9px] font-bold font-mono text-gray-400 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
+                      Inovasi Dukcapil
+                    </span>
+                  </div>
+                  <h4 class="font-extrabold text-gray-900 dark:text-zinc-50 text-sm leading-snug">
+                    {{ item.name || item.title }}
+                  </h4>
+                  <p class="text-xs text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                    {{ item.description }}
+                  </p>
+                </div>
+                <div class="pt-3 mt-2 border-t border-gray-100 dark:border-zinc-800/60 flex justify-end">
+                  <Link 
+                    :href="route('public.innovations.show', item.slug || item.id)"
+                    class="text-[11px] font-extrabold text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
+                  >
+                    <span>Selengkapnya</span>
+                    <span>→</span>
+                  </Link>
+                </div>
               </div>
-            </Link>
+            </div>
           </div>
         </div>
 
@@ -433,6 +482,7 @@ const props = defineProps({
   tickers: Array,
   popup: Object,
   recentNews: Array,
+  innovations: Array,
   downloadShortcuts: Array,
   stats: Object,
   ikmWidget: Object,
