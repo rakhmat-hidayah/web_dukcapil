@@ -342,14 +342,23 @@
             </div>
           </div>
 
-          <!-- Featured Innovations Section -->
+          <!-- Featured Innovations Section (Upgraded Premium Cards) -->
           <div v-if="innovations && innovations.length > 0" class="space-y-4 pt-2">
-            <div class="flex justify-between items-baseline">
-              <h3 class="text-lg font-black text-gray-900 dark:text-zinc-50 tracking-tight flex items-center gap-2">
-                💡 Inovasi Pelayanan Unggulan
-              </h3>
-              <Link :href="route('public.innovations.index')" class="text-xs font-bold text-primary-600 hover:underline">
-                Lihat Semua Inovasi →
+            <div class="flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <span class="px-2.5 py-0.5 bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[9px] font-black uppercase rounded-md tracking-wider">
+                  Program Terobosan
+                </span>
+                <h3 class="text-xl font-black text-gray-900 dark:text-zinc-50 tracking-tight flex items-center gap-2 mt-1">
+                  💡 Inovasi Pelayanan Unggulan
+                </h3>
+              </div>
+              <Link 
+                :href="route('public.innovations.index')" 
+                class="px-3.5 py-1.5 bg-primary-50 dark:bg-primary-950/40 hover:bg-primary-100 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 border border-primary-200/60 dark:border-primary-800/50 rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-sm group"
+              >
+                <span>Lihat Semua Inovasi</span>
+                <span class="group-hover:translate-x-0.5 transition-transform">→</span>
               </Link>
             </div>
 
@@ -357,31 +366,71 @@
               <div 
                 v-for="item in innovations" 
                 :key="item.id"
-                class="bg-gradient-to-br from-white to-slate-50/70 dark:from-zinc-900 dark:to-zinc-900/80 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col justify-between"
+                class="group relative overflow-hidden bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800/80 rounded-3xl p-5 shadow-sm hover:shadow-xl hover:shadow-blue-900/10 dark:hover:shadow-black/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
               >
-                <div class="space-y-2">
+                <!-- Glowing Ambient Accent Background on Hover -->
+                <div 
+                  class="absolute -right-12 -top-12 w-36 h-36 rounded-full blur-2xl opacity-15 group-hover:opacity-30 transition duration-500 pointer-events-none"
+                  :style="{ backgroundColor: item.color || '#3b82f6' }"
+                ></div>
+
+                <!-- Top Accent Line -->
+                <div 
+                  class="absolute top-0 left-6 right-6 h-[3px] rounded-b-full opacity-60 group-hover:opacity-100 transition duration-300"
+                  :style="{ backgroundColor: item.color || '#3b82f6' }"
+                ></div>
+
+                <div class="relative z-10 space-y-3">
+                  <!-- Header: Icon & Category Tag -->
                   <div class="flex items-center justify-between">
-                    <span class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-sm shadow-inner">
-                      ✨
-                    </span>
-                    <span class="text-[9px] font-bold font-mono text-gray-400 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
+                    <div 
+                      class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shadow-md transition-transform duration-300 group-hover:scale-110"
+                      :style="{ 
+                        backgroundColor: (item.color || '#3b82f6') + '15',
+                        border: '1.5px solid ' + (item.color || '#3b82f6') + '30',
+                        boxShadow: '0 8px 18px -4px ' + (item.color || '#3b82f6') + '35'
+                      }"
+                    >
+                      {{ item.icon || '✨' }}
+                    </div>
+                    <span 
+                      class="text-[9px] font-extrabold uppercase font-mono tracking-wider px-2.5 py-1 rounded-full border shadow-2xs"
+                      :style="{ 
+                        color: item.color || '#3b82f6',
+                        backgroundColor: (item.color || '#3b82f6') + '10',
+                        borderColor: (item.color || '#3b82f6') + '25'
+                      }"
+                    >
                       Inovasi Dukcapil
                     </span>
                   </div>
-                  <h4 class="font-extrabold text-gray-900 dark:text-zinc-50 text-sm leading-snug">
-                    {{ item.name || item.title }}
-                  </h4>
-                  <p class="text-xs text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                    {{ item.description }}
-                  </p>
+
+                  <!-- Title & Description -->
+                  <div>
+                    <h4 class="font-black text-gray-900 dark:text-zinc-50 text-base leading-snug group-hover:text-primary-600 dark:group-hover:text-primary-400 transition">
+                      {{ item.title }}
+                    </h4>
+                    <p class="text-xs text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed mt-1.5 font-medium">
+                      {{ item.description }}
+                    </p>
+                  </div>
                 </div>
-                <div class="pt-3 mt-2 border-t border-gray-100 dark:border-zinc-800/60 flex justify-end">
+
+                <!-- Footer Action Button -->
+                <div class="relative z-10 pt-4 mt-3 border-t border-gray-100 dark:border-zinc-800/80 flex items-center justify-between">
+                  <span class="text-[10px] font-bold text-gray-400 dark:text-zinc-500">
+                    Layanan Publik
+                  </span>
                   <Link 
                     :href="route('public.innovations.show', item.slug || item.id)"
-                    class="text-[11px] font-extrabold text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
+                    class="px-3.5 py-1.5 rounded-xl text-xs font-black transition-all duration-200 flex items-center gap-1.5"
+                    :style="{ 
+                      color: item.color || '#3b82f6',
+                      backgroundColor: (item.color || '#3b82f6') + '10'
+                    }"
                   >
                     <span>Selengkapnya</span>
-                    <span>→</span>
+                    <span class="group-hover:translate-x-1 transition-transform">→</span>
                   </Link>
                 </div>
               </div>
