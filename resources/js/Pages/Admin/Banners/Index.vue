@@ -164,25 +164,49 @@
 
               <!-- File image selection & preview -->
               <div>
-                <label class="block text-xs font-semibold text-gray-500 mb-1">File Gambar (Rekomendasi 1920x800px)</label>
-                <div v-if="previewUrl || (isEditing && currentBannerImage && !modalImageError)" class="mb-2 h-32 rounded-2xl overflow-hidden bg-slate-900 border border-slate-700 relative flex items-center justify-center">
-                  <img 
-                    :src="previewUrl || `/storage/${currentBannerImage}`" 
-                    @error="modalImageError = true"
-                    class="w-full h-full object-cover" 
+                <label class="block text-xs font-semibold text-gray-500 mb-1.5">Berkas Gambar Banner (Rekomendasi 1920×800px)</label>
+                <div 
+                  @click="$refs.fileInput.click()"
+                  class="border-2 border-dashed border-gray-200 dark:border-zinc-700 hover:border-primary-500 dark:hover:border-primary-400 rounded-2xl p-3 text-center cursor-pointer bg-gray-50/60 dark:bg-zinc-800/40 hover:bg-primary-50/30 dark:hover:bg-primary-950/20 transition group relative overflow-hidden"
+                >
+                  <input 
+                    type="file" 
+                    ref="fileInput" 
+                    @change="handleFileUpload" 
+                    :required="!isEditing && !currentBannerImage"
+                    accept="image/*"
+                    class="hidden"
                   />
-                  <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-black/60 text-white text-[9px] font-bold rounded">
-                    {{ previewUrl ? 'Pratinjau Berkas Baru' : 'Gambar Saat Ini' }}
-                  </span>
+
+                  <!-- Image Preview (if existing or newly selected) -->
+                  <div v-if="previewUrl || (isEditing && currentBannerImage && !modalImageError)" class="relative h-36 w-full rounded-xl overflow-hidden bg-slate-900 border border-slate-700/60 shadow-inner group/img">
+                    <img 
+                      :src="previewUrl || `/storage/${currentBannerImage}`" 
+                      @error="modalImageError = true"
+                      class="w-full h-full object-cover group-hover/img:scale-105 transition duration-300" 
+                    />
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center gap-2">
+                      <span class="px-3 py-1.5 bg-white/90 dark:bg-zinc-900/90 text-gray-800 dark:text-zinc-100 text-xs font-bold rounded-lg shadow-md flex items-center gap-1.5">
+                        <UploadCloud class="w-4 h-4 text-primary-500" />
+                        Klik untuk Mengganti Gambar
+                      </span>
+                    </div>
+                    <span class="absolute bottom-2 left-2 px-2.5 py-0.5 bg-black/75 backdrop-blur-xs text-white text-[9px] font-bold rounded-md">
+                      {{ previewUrl ? '✓ Pratinjau Berkas Baru' : 'Gambar Saat Ini' }}
+                    </span>
+                  </div>
+
+                  <!-- Default Upload State -->
+                  <div v-else class="py-4 flex flex-col items-center justify-center">
+                    <div class="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-zinc-800 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:bg-primary-100 dark:group-hover:bg-primary-950/50 flex items-center justify-center mb-2 transition">
+                      <UploadCloud class="w-5 h-5" />
+                    </div>
+                    <p class="text-xs font-bold text-gray-700 dark:text-zinc-300">
+                      <span class="text-primary-600 dark:text-primary-400 hover:underline">Klik untuk mengunggah gambar</span> atau tarik file ke sini
+                    </p>
+                    <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG, WEBP (Max 10MB)</p>
+                  </div>
                 </div>
-                <input 
-                  type="file" 
-                  ref="fileInput" 
-                  @change="handleFileUpload" 
-                  :required="!isEditing && !currentBannerImage"
-                  accept="image/*"
-                  class="w-full text-xs"
-                />
               </div>
 
               <!-- Active Status checkbox -->
@@ -222,7 +246,7 @@
 import { ref } from 'vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Plus, Edit, Trash2, Image } from '@lucide/vue';
+import { Plus, Edit, Trash2, Image, UploadCloud } from '@lucide/vue';
 
 const props = defineProps({
   banners: Array,
