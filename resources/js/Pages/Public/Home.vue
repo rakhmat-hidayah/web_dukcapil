@@ -433,32 +433,69 @@
               </div>
             </div>
           </div>
-        </div>
-
         <!-- Quick Access Widgets: Downloads & Complaints (Col Span 1) -->
         <div class="space-y-8 text-left">
-          <!-- Download shortcuts -->
+          <!-- Download shortcuts widget (Paling Sering Diunduh) -->
           <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm space-y-4">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">Paling Sering Diunduh</h3>
+            <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20 shadow-xs">
+                  <Download class="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 class="text-xs font-black uppercase tracking-wider text-gray-800 dark:text-zinc-100">Paling Sering Diunduh</h3>
+                  <p class="text-[10px] text-gray-400 font-medium">Formulir &amp; Dokumen Resmi</p>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 bg-primary-50 text-primary-700 dark:bg-primary-950/50 dark:text-primary-300 text-[9px] font-extrabold rounded-md uppercase tracking-wider border border-primary-200/50">
+                Populer
+              </span>
+            </div>
             
-            <div class="divide-y divide-gray-50 dark:divide-zinc-800/60">
-              <div v-if="downloadShortcuts.length === 0" class="py-4 text-center text-gray-400 text-xs">
+            <div class="divide-y divide-gray-100 dark:divide-zinc-800/60">
+              <div v-if="downloadShortcuts.length === 0" class="py-6 text-center text-gray-400 text-xs">
                 Belum ada berkas unduhan terdaftar.
               </div>
               <a 
                 v-for="doc in downloadShortcuts" 
                 :key="doc.id"
-                :href="route('public.downloads.index')"
-                class="py-3 flex justify-between items-center hover:bg-gray-50/50 dark:hover:bg-zinc-800/20 px-2 rounded-xl transition"
+                :href="doc.file_path ? doc.file_path : route('public.downloads.index')"
+                target="_blank"
+                class="py-3 flex items-center justify-between group hover:bg-gray-50 dark:hover:bg-zinc-800/50 px-3.5 -mx-1 rounded-2xl transition duration-200 gap-3"
               >
-                <div class="min-w-0 pr-2">
-                  <h4 class="font-bold text-gray-800 dark:text-zinc-200 text-xs truncate leading-snug">{{ doc.title }}</h4>
-                  <span class="text-[9px] text-gray-400 uppercase font-bold font-mono">{{ doc.file_type }}</span>
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                  <div class="w-9 h-9 rounded-xl bg-primary-50 text-primary-600 dark:bg-primary-950/50 dark:text-primary-400 flex items-center justify-center shrink-0 border border-primary-100/60 dark:border-primary-900/30 group-hover:bg-primary-600 group-hover:text-white dark:group-hover:bg-primary-500 transition duration-200 shadow-xs">
+                    <FileText class="w-4.5 h-4.5" />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <h4 class="font-bold text-gray-800 dark:text-zinc-200 text-xs group-hover:text-primary-600 dark:group-hover:text-primary-400 transition leading-snug line-clamp-2">
+                      {{ doc.title }}
+                    </h4>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="px-1.5 py-0.2 bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 text-[9px] font-mono font-bold uppercase rounded border border-gray-200/60 dark:border-zinc-700/50">
+                        {{ doc.file_type || 'PDF' }}
+                      </span>
+                      <span v-if="doc.download_count" class="text-[10px] text-gray-400 font-medium">
+                        {{ formatNumber(doc.download_count) }}x diunduh
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <span class="w-7 h-7 rounded-lg bg-gray-50 dark:bg-zinc-800 flex items-center justify-center text-gray-500 shrink-0">
-                  ⬇️
-                </span>
+                <div class="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 dark:bg-zinc-800 dark:text-zinc-400 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white dark:group-hover:bg-primary-500 transition duration-200 shadow-xs shrink-0 border border-gray-200/60 dark:border-zinc-700/60">
+                  <Download class="w-4 h-4" />
+                </div>
               </a>
+            </div>
+
+            <!-- Footer Link Button -->
+            <div class="pt-2">
+              <Link 
+                :href="route('public.downloads.index')" 
+                class="w-full py-2.5 bg-gray-50 dark:bg-zinc-800/60 hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-xs font-bold rounded-2xl border border-gray-200/80 dark:border-zinc-700/60 flex items-center justify-center gap-2 transition group"
+              >
+                <span>Lihat Semua Berkas Unduhan</span>
+                <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </div>
           </div>
 
@@ -535,7 +572,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import InformasiLayananWidget from '@/Components/InformasiLayananWidget.vue';
-import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar } from '@lucide/vue';
+import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar, Download, FileText, ArrowRight } from '@lucide/vue';
 
 const props = defineProps({
   banners: Array,
