@@ -463,22 +463,32 @@
           </div>
 
           <!-- Public Complaint CTA -->
-          <div class="bg-gradient-to-br from-primary-600 to-indigo-700 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between h-48">
-            <div class="space-y-1">
-              <span class="px-2 py-0.5 bg-white/20 text-[9px] font-bold uppercase rounded-md tracking-wider w-fit">
+          <div class="bg-gradient-to-br from-primary-600 via-primary-700 to-indigo-800 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between space-y-4">
+            <div class="space-y-1.5">
+              <span class="px-2.5 py-0.5 bg-white/20 backdrop-blur-xs text-[9px] font-extrabold uppercase rounded-md tracking-wider w-fit inline-block">
                 Layanan Pengaduan
               </span>
-              <h3 class="text-sm font-extrabold tracking-tight mt-2">Aspirasi &amp; Pengaduan Rakyat (Lapor!)</h3>
-              <p class="text-[10px] text-white/80 leading-relaxed font-semibold">
+              <h3 class="text-sm font-black tracking-tight pt-1">Aspirasi &amp; Pengaduan Rakyat (Lapor!)</h3>
+              <p class="text-[10px] text-white/85 leading-relaxed font-medium">
                 Sampaikan keluhan pelayanan KTP, KK, Akta, atau pungutan liar secara online &amp; anonim.
               </p>
             </div>
-            <button 
-              class="w-full text-center py-2 bg-amber-500 hover:bg-amber-400 text-gray-900 text-xs font-black rounded-xl transition"
-              @click="goToComplaints"
-            >
-              Ajukan Pengaduan Sekarang →
-            </button>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              <Link 
+                :href="route('public.complaint.create')" 
+                class="w-full text-center py-2.5 bg-amber-500 hover:bg-amber-400 active:scale-95 text-gray-950 text-xs font-black rounded-xl transition shadow-xs flex items-center justify-center gap-1"
+              >
+                <span>Ajukan Pengaduan</span>
+                <span>→</span>
+              </Link>
+              <Link 
+                :href="route('public.complaint.track')" 
+                class="w-full text-center py-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white text-xs font-extrabold rounded-xl transition border border-white/25 backdrop-blur-xs flex items-center justify-center gap-1.5"
+              >
+                <span>🔍 Lacak Tiket</span>
+              </Link>
+            </div>
           </div>
 
           <!-- Indeks Kepuasan Masyarakat (IKM) Widget Card -->
