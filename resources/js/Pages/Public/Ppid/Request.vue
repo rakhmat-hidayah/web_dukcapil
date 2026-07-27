@@ -100,6 +100,16 @@
             </div>
 
             <form novalidate @submit.prevent="submit" class="p-6 sm:p-8 space-y-6">
+
+              <!-- Global Validation Error Banner -->
+              <div v-if="allErrors.length > 0" class="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs space-y-1.5 text-rose-700 dark:text-rose-300 shadow-sm">
+                <p class="font-black text-rose-800 dark:text-rose-200 flex items-center gap-1.5">
+                  <span>⚠️</span> Harap periksa kembali isian Anda:
+                </p>
+                <ul class="list-disc list-inside space-y-0.5 font-semibold text-[11px] pl-1">
+                  <li v-for="(err, idx) in allErrors" :key="idx">{{ err }}</li>
+                </ul>
+              </div>
               
               <!-- Section 1 -->
               <div>
@@ -112,30 +122,70 @@
                     <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 mb-1">
                       Nama Lengkap <span class="text-rose-500">*</span>
                     </label>
-                    <input v-model="form.requester_name" type="text" placeholder="Nama sesuai KTP" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" />
-                    <span class="text-[11px] text-rose-500 font-medium mt-1 block" v-if="form.errors.requester_name">{{ form.errors.requester_name }}</span>
+                    <input 
+                      v-model="form.requester_name" 
+                      type="text" 
+                      placeholder="Nama sesuai KTP" 
+                      class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" 
+                      :class="(clientErrors.requester_name || form.errors.requester_name) ? 'border-rose-400 bg-rose-50/20' : 'border-gray-200 dark:border-zinc-700'"
+                    />
+                    <span class="text-[11px] text-rose-500 font-medium mt-1 block" v-if="clientErrors.requester_name || form.errors.requester_name">
+                      ⚠️ {{ clientErrors.requester_name || form.errors.requester_name }}
+                    </span>
                   </div>
 
                   <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 mb-1">
                       NIK / Nomor Identitas (KTP)
                     </label>
-                    <input v-model="form.requester_id_number" type="text" placeholder="16 digit NIK" maxlength="16" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" />
+                    <input 
+                      v-model="form.requester_id_number" 
+                      type="text" 
+                      inputmode="numeric"
+                      placeholder="16 digit angka NIK" 
+                      maxlength="16" 
+                      @input="e => form.requester_id_number = e.target.value.replace(/\D/g, '')"
+                      class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border rounded-xl text-xs font-mono text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" 
+                      :class="(clientErrors.requester_id_number || form.errors.requester_id_number) ? 'border-rose-400 bg-rose-50/20' : 'border-gray-200 dark:border-zinc-700'"
+                    />
+                    <span class="text-[11px] text-rose-500 font-medium mt-1 block" v-if="clientErrors.requester_id_number || form.errors.requester_id_number">
+                      ⚠️ {{ clientErrors.requester_id_number || form.errors.requester_id_number }}
+                    </span>
                   </div>
 
                   <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 mb-1">
                       Alamat Email <span class="text-rose-500">*</span>
                     </label>
-                    <input v-model="form.requester_email" type="email" placeholder="nama@email.com" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" />
-                    <span class="text-[11px] text-rose-500 font-medium mt-1 block" v-if="form.errors.requester_email">{{ form.errors.requester_email }}</span>
+                    <input 
+                      v-model="form.requester_email" 
+                      type="email" 
+                      placeholder="nama@email.com" 
+                      class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" 
+                      :class="(clientErrors.requester_email || form.errors.requester_email) ? 'border-rose-400 bg-rose-50/20' : 'border-gray-200 dark:border-zinc-700'"
+                    />
+                    <span class="text-[11px] text-rose-500 font-medium mt-1 block" v-if="clientErrors.requester_email || form.errors.requester_email">
+                      ⚠️ {{ clientErrors.requester_email || form.errors.requester_email }}
+                    </span>
                   </div>
 
                   <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 mb-1">
                       Nomor Telepon / WhatsApp
                     </label>
-                    <input v-model="form.requester_phone" type="tel" placeholder="08xx-xxxx-xxxx" class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" />
+                    <input 
+                      v-model="form.requester_phone" 
+                      type="tel" 
+                      inputmode="numeric"
+                      placeholder="08xx-xxxx-xxxx" 
+                      maxlength="15"
+                      @input="e => form.requester_phone = e.target.value.replace(/\D/g, '')"
+                      class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border rounded-xl text-xs font-mono text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" 
+                      :class="(clientErrors.requester_phone || form.errors.requester_phone) ? 'border-rose-400 bg-rose-50/20' : 'border-gray-200 dark:border-zinc-700'"
+                    />
+                    <span class="text-[11px] text-rose-500 font-medium mt-1 block" v-if="clientErrors.requester_phone || form.errors.requester_phone">
+                      ⚠️ {{ clientErrors.requester_phone || form.errors.requester_phone }}
+                    </span>
                   </div>
                 </div>
 
@@ -156,16 +206,32 @@
                     <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 mb-1">
                       Tujuan Penggunaan Informasi <span class="text-rose-500">*</span>
                     </label>
-                    <input v-model="form.purpose" type="text" placeholder="Contoh: Penelitian Akademis, Referensi Kebijakan, dll." class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" />
-                    <span class="text-[11px] text-rose-500 font-medium mt-1 block" v-if="form.errors.purpose">{{ form.errors.purpose }}</span>
+                    <input 
+                      v-model="form.purpose" 
+                      type="text" 
+                      placeholder="Contoh: Penelitian Akademis, Referensi Kebijakan, dll." 
+                      class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" 
+                      :class="(clientErrors.purpose || form.errors.purpose) ? 'border-rose-400 bg-rose-50/20' : 'border-gray-200 dark:border-zinc-700'"
+                    />
+                    <span class="text-[11px] text-rose-500 font-medium mt-1 block" v-if="clientErrors.purpose || form.errors.purpose">
+                      ⚠️ {{ clientErrors.purpose || form.errors.purpose }}
+                    </span>
                   </div>
 
                   <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 mb-1">
                       Rincian Informasi Yang Dibutuhkan <span class="text-rose-500">*</span>
                     </label>
-                    <textarea v-model="form.information_requested" rows="4" placeholder="Jelaskan secara spesifik dokumen/data publik yang Anda butuhkan..." class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none"></textarea>
-                    <span class="text-[11px] text-rose-500 font-medium mt-1 block" v-if="form.errors.information_requested">{{ form.errors.information_requested }}</span>
+                    <textarea 
+                      v-model="form.information_requested" 
+                      rows="4" 
+                      placeholder="Jelaskan secara spesifik dokumen/data publik yang Anda butuhkan..." 
+                      class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none"
+                      :class="(clientErrors.information_requested || form.errors.information_requested) ? 'border-rose-400 bg-rose-50/20' : 'border-gray-200 dark:border-zinc-700'"
+                    ></textarea>
+                    <span class="text-[11px] text-rose-500 font-medium mt-1 block" v-if="clientErrors.information_requested || form.errors.information_requested">
+                      ⚠️ {{ clientErrors.information_requested || form.errors.information_requested }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -217,11 +283,14 @@
 </template>
 
 <script setup>
+import { ref, computed } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
 import { ChevronRight, Clock, AlertCircle, Send, Search, Loader2 } from '@lucide/vue'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
 
 defineProps({ pages: Array })
+
+const clientErrors = ref({})
 
 const form = useForm({
   requester_name: '',
@@ -235,7 +304,46 @@ const form = useForm({
   delivery_method: 'email',
 })
 
+const allErrors = computed(() => {
+  const cErrs = Object.values(clientErrors.value)
+  const sErrs = Object.values(form.errors)
+  return [...cErrs, ...sErrs]
+})
+
 function submit() {
+  clientErrors.value = {}
+  form.clearErrors()
+
+  if (!form.requester_name || form.requester_name.trim().length < 3) {
+    clientErrors.value.requester_name = 'Nama lengkap pemohon wajib diisi minimal 3 karakter.'
+  }
+
+  if (form.requester_id_number && !/^\d{16}$/.test(form.requester_id_number)) {
+    clientErrors.value.requester_id_number = 'NIK / Nomor Identitas KTP harus terdiri dari tepat 16 digit angka.'
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!form.requester_email || !emailRegex.test(form.requester_email.trim())) {
+    clientErrors.value.requester_email = 'Format alamat email tidak valid (contoh: nama@email.com).'
+  }
+
+  if (form.requester_phone && !/^\d{10,15}$/.test(form.requester_phone)) {
+    clientErrors.value.requester_phone = 'Nomor telepon/WhatsApp harus terdiri dari 10-15 digit angka.'
+  }
+
+  if (!form.purpose || !form.purpose.trim()) {
+    clientErrors.value.purpose = 'Tujuan penggunaan informasi wajib diisi.'
+  }
+
+  if (!form.information_requested || !form.information_requested.trim()) {
+    clientErrors.value.information_requested = 'Rincian informasi yang dibutuhkan wajib diisi.'
+  }
+
+  if (Object.keys(clientErrors.value).length > 0) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    return
+  }
+
   form.post(route('public.ppid.request.submit'))
 }
 </script>

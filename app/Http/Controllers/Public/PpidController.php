@@ -154,15 +154,26 @@ class PpidController extends Controller
     public function submitRequest(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'requester_name'       => 'required|string|max:255',
+            'requester_name'       => 'required|string|min:3|max:255',
             'requester_email'      => 'required|email|max:255',
-            'requester_phone'      => 'nullable|string|max:20',
+            'requester_phone'      => 'nullable|numeric|digits_between:10,15',
             'requester_address'    => 'nullable|string|max:500',
-            'requester_id_number'  => 'nullable|string|max:20',
+            'requester_id_number'  => 'nullable|numeric|digits:16',
             'purpose'              => 'required|string|max:500',
             'information_requested'=> 'required|string',
             'request_method'       => 'required|in:online,langsung,surat',
             'delivery_method'      => 'required|in:email,langsung,salinan',
+        ], [
+            'requester_name.required'       => 'Nama lengkap pemohon wajib diisi.',
+            'requester_name.min'            => 'Nama lengkap minimal 3 karakter.',
+            'requester_email.required'      => 'Alamat email wajib diisi.',
+            'requester_email.email'         => 'Format alamat email tidak valid (contoh: nama@email.com).',
+            'requester_phone.numeric'       => 'Nomor telepon/WhatsApp harus berupa angka saja.',
+            'requester_phone.digits_between'=> 'Nomor telepon/WhatsApp harus 10 hingga 15 digit angka.',
+            'requester_id_number.numeric'   => 'NIK/Nomor Identitas KTP harus berupa angka saja.',
+            'requester_id_number.digits'    => 'NIK/Nomor Identitas KTP harus tepat 16 digit angka.',
+            'purpose.required'              => 'Tujuan penggunaan informasi wajib diisi.',
+            'information_requested.required'=> 'Rincian informasi yang dibutuhkan wajib diisi.',
         ]);
 
         $ppid = PpidRequest::create($validated);
