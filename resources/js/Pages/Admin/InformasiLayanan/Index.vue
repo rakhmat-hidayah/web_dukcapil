@@ -1,5 +1,5 @@
 <template>
-  <Head title="Informasi Layanan & Mobil Keliling CMS - Admin Dukcapil" />
+  <Head title="Informasi Layanan & Pelayanan Mobile CMS - Admin Dukcapil" />
 
   <AdminLayout>
     <div class="space-y-6 max-w-5xl mx-auto pb-12 text-left">
@@ -7,10 +7,10 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 class="text-2xl font-black text-gray-900 dark:text-zinc-50 tracking-tight">
-            Pengaturan Informasi Layanan &amp; Mobil Keliling
+            Pengaturan Informasi Layanan &amp; Pelayanan Mobile
           </h1>
           <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-            Kelola jadwal Mobil Pelayanan Keliling, jenis dokumen yang dilayani, persyaratan berkas, serta kartu bantuan cepat.
+            Kelola jadwal Pelayanan Mobile, jenis dokumen yang dilayani, persyaratan berkas, serta kartu bantuan cepat.
           </p>
         </div>
 
@@ -313,10 +313,10 @@
               </div>
               <div>
                 <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50">
-                  Pilih Dokumen / Jenis Layanan yang Dilayani di Lokasi Mobil Keliling
+                  Pilih Dokumen / Jenis Layanan yang Dilayani di Lokasi Pelayanan Mobile
                 </h3>
                 <p class="text-xs text-gray-500 dark:text-zinc-400">
-                  Centang dokumen mana saja yang saat ini dilayani oleh tim mobil keliling pada jadwal lokasi tersebut.
+                  Centang dokumen mana saja yang saat ini dilayani oleh tim pelayanan mobile pada jadwal lokasi tersebut.
                 </p>
               </div>
             </div>
