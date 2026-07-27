@@ -127,34 +127,7 @@
           </div>
           <span class="text-xs font-bold group-hover:translate-x-0.5 transition-transform">→</span>
         </a>
-
-        <!-- Email Dukcapil -->
-        <a 
-          v-if="settings.quick_help_email"
-          :href="'mailto:' + settings.quick_help_email"
-          class="flex items-center justify-between p-2.5 rounded-xl bg-purple-50/60 dark:bg-purple-950/30 hover:bg-purple-100/80 dark:hover:bg-purple-900/40 border border-purple-100 dark:border-purple-900/40 text-purple-800 dark:text-purple-300 transition group"
-        >
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="w-7 h-7 rounded-lg bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
-              ✉️
-            </span>
-            <div class="min-w-0">
-              <p class="text-xs font-bold truncate">Email Dukcapil</p>
-              <p class="text-[10px] text-purple-600 dark:text-purple-400 truncate">{{ settings.quick_help_email }}</p>
-            </div>
-          </div>
-          <span class="text-xs font-bold group-hover:translate-x-0.5 transition-transform">→</span>
-        </a>
       </div>
-
-      <!-- Primary Action Button Section 2 -->
-      <a 
-        :href="settings.quick_help_primary_button_url || '/contact'" 
-        class="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-xs font-black rounded-xl shadow-md shadow-amber-500/20 active:scale-95 transition"
-      >
-        <span>{{ settings.quick_help_primary_button_text || 'Hubungi Kami' }}</span>
-        <span>→</span>
-      </a>
     </div>
   </div>
 </template>
