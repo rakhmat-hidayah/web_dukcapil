@@ -117,6 +117,8 @@ class PublicSurveyController extends Controller
         $request->validate([
             'survey_period_id' => 'required|exists:survey_periods,id',
             'respondent_name' => 'nullable|string|max:255',
+            'respondent_phone' => 'nullable|string|max:20',
+            'respondent_domicile' => 'nullable|string|max:100',
             'respondent_age' => 'nullable|string|max:50',
             'respondent_gender' => 'nullable|string|max:50',
             'respondent_education' => 'nullable|string|max:50',

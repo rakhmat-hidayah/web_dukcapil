@@ -38,6 +38,8 @@ class SurveyService
             $response = SurveyResponse::create([
                 'survey_period_id' => $period->id,
                 'respondent_name' => $data['respondent_name'] ?? 'Anonim',
+                'respondent_phone' => $data['respondent_phone'] ?? null,
+                'respondent_domicile' => $data['respondent_domicile'] ?? null,
                 'respondent_age' => $data['respondent_age'] ?? null,
                 'respondent_gender' => $data['respondent_gender'] ?? null,
                 'respondent_education' => $data['respondent_education'] ?? null,
