@@ -14,7 +14,7 @@ use Inertia\Response as InertiaResponse;
 class InformasiLayananController extends Controller
 {
     /**
-     * Display the Informasi Layanan (Mobil Pelayanan & Bantuan Cepat) configuration form.
+     * Display the Informasi Layanan (Pelayanan Mobile & Bantuan Cepat) configuration form.
      */
     public function index(): InertiaResponse
     {
@@ -27,6 +27,11 @@ class InformasiLayananController extends Controller
 
         // Default initial values for all sections
         $defaults = [
+            // Hero Banner Header (/layanan/mobil)
+            'mobile_service_hero_tag'           => 'Jemput Bola Adminduk',
+            'mobile_service_hero_title'         => 'Jadwal Pelayanan Mobile Keliling',
+            'mobile_service_hero_description'   => 'Layanan jemput bola penerbitan dokumen kependudukan langsung ke desa, kelurahan, dan sekolah di seluruh wilayah Kabupaten Dompu secara gratis dan cepat.',
+
             'mobile_service_is_active'          => '1',
             'mobile_service_kecamatan'          => 'Kecamatan Woja',
             'mobile_service_desa'               => 'Desa Monta Baru',
@@ -35,7 +40,7 @@ class InformasiLayananController extends Controller
             'mobile_service_status'             => 'hari_ini',
             'mobile_service_button_text'        => 'Lihat Jadwal Lengkap',
             'mobile_service_button_url'         => '/layanan/mobil',
-            'mobile_service_notes'              => 'Harap membawa berkas persyaratan fisik lengkap (ASLI & Fotokopi) untuk mempercepat proses penerbitan dokumen di lokasi mobil pelayanan keliling.',
+            'mobile_service_notes'              => 'Harap membawa berkas persyaratan fisik lengkap (ASLI & Fotokopi) untuk mempercepat proses penerbitan dokumen di lokasi pelayanan mobile keliling.',
             'mobile_service_selected_services'  => json_encode($allServices->pluck('id')->toArray()),
             
             // Persyaratan Umum Berkas (Multi-line text, 1 requirement per line)
@@ -43,7 +48,7 @@ class InformasiLayananController extends Controller
             
             // Card Permohonan Kunjungan (Kades/Sekolah)
             'mobile_service_request_badge'      => 'Khusus Kepala Desa / Sekolah',
-            'mobile_service_request_title'      => 'Ajukan Kunjungan Mobil Pelayanan',
+            'mobile_service_request_title'      => 'Ajukan Kunjungan Pelayanan Mobile',
             'mobile_service_request_description'=> 'Pemerintah Desa, Kelurahan, atau Kepala Sekolah di Kabupaten Dompu dapat mengajukan surat permohonan kunjungan tim jemput bola Dukcapil ke wilayah masing-masing.',
             'mobile_service_request_button_text'=> 'Hubungi Tim Jemput Bola via WA',
             'mobile_service_request_button_url' => 'https://wa.me/6282340001111',
@@ -73,7 +78,12 @@ class InformasiLayananController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            // Section 1: Mobil Pelayanan Utama
+            // Section 0: Hero Banner Header
+            'mobile_service_hero_tag'           => 'nullable|string|max:100',
+            'mobile_service_hero_title'         => 'nullable|string|max:255',
+            'mobile_service_hero_description'   => 'nullable|string|max:1000',
+
+            // Section 1: Pelayanan Mobile Utama
             'mobile_service_is_active'          => 'required|boolean',
             'mobile_service_kecamatan'          => 'nullable|string|max:255',
             'mobile_service_desa'               => 'nullable|string|max:255',
@@ -126,8 +136,8 @@ class InformasiLayananController extends Controller
 
         WebsiteSetting::clearCache();
 
-        ActivityLogger::log("Memperbarui konfigurasi Informasi Layanan & jenis dokumen Mobil Keliling", null, 'update_informasi_layanan');
+        ActivityLogger::log("Memperbarui konfigurasi Informasi Layanan & Halaman Pelayanan Mobile", null, 'update_informasi_layanan');
 
-        return redirect()->back()->with('success', 'Konfigurasi Informasi Layanan & Mobil Keliling berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Konfigurasi Informasi Layanan & Pelayanan Mobile berhasil diperbarui.');
     }
 }

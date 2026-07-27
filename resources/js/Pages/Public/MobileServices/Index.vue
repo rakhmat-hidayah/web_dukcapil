@@ -17,20 +17,20 @@
             <span>/</span>
             <Link href="/layanan" class="hover:underline">Layanan</Link>
             <span>/</span>
-            <span class="text-amber-400 font-bold">Mobil Pelayanan Keliling</span>
+            <span class="text-amber-400 font-bold">Pelayanan Mobile</span>
           </div>
 
           <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-black uppercase rounded-xl tracking-wider backdrop-blur-md">
             <span>🚐</span>
-            <span>Jemput Bola Adminduk</span>
+            <span>{{ scheduleSettings.mobile_service_hero_tag || 'Jemput Bola Adminduk' }}</span>
           </div>
 
           <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-            Jadwal Mobil Pelayanan Keliling
+            {{ scheduleSettings.mobile_service_hero_title || 'Jadwal Pelayanan Mobile Keliling' }}
           </h1>
 
           <p class="text-sm sm:text-base text-blue-100/90 leading-relaxed font-medium">
-            Layanan jemput bola penerbitan dokumen kependudukan langsung ke desa, kelurahan, dan sekolah di seluruh wilayah Kabupaten Dompu secara gratis dan cepat.
+            {{ scheduleSettings.mobile_service_hero_description || 'Layanan jemput bola penerbitan dokumen kependudukan langsung ke desa, kelurahan, dan sekolah di seluruh wilayah Kabupaten Dompu secara gratis dan cepat.' }}
           </p>
         </div>
       </div>
@@ -116,7 +116,7 @@
           <!-- Services Offered Card -->
           <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
             <h3 class="text-lg font-black text-gray-900 dark:text-zinc-50 tracking-tight flex items-center gap-2">
-              🛠️ Dokumen yang Dilayani di Mobil Keliling
+              🛠️ Dokumen yang Dilayani di Pelayanan Mobile
             </h3>
 
             <div v-if="services && services.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">

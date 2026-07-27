@@ -26,8 +26,65 @@
       </div>
 
       <form @submit.prevent="submit" class="space-y-8">
-        
-        <!-- SECTION 1: Mobil Pelayanan Utama & Jadwal -->
+        <!-- SECTION 0: Banner Header Halaman Publik (/layanan/mobil) -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-zinc-800">
+            <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-lg">
+              🎨
+            </div>
+            <div>
+              <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50">
+                Banner Header Halaman Publik Pelayanan Mobile
+              </h3>
+              <p class="text-xs text-gray-500 dark:text-zinc-400">
+                Kelola teks tag, judul utama, dan deskripsi pada banner biru atas halaman publik <code>/layanan/mobil</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Tag Badge -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Teks Tag Badge Header
+              </label>
+              <input 
+                type="text" 
+                v-model="form.mobile_service_hero_tag"
+                placeholder="Jemput Bola Adminduk"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <!-- Judul Utama -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Judul Utama Banner
+              </label>
+              <input 
+                type="text" 
+                v-model="form.mobile_service_hero_title"
+                placeholder="Jadwal Pelayanan Mobile Keliling"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <!-- Deskripsi Banner -->
+            <div class="space-y-1.5 md:col-span-2">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Deskripsi Singkat Banner
+              </label>
+              <textarea 
+                v-model="form.mobile_service_hero_description"
+                rows="2"
+                placeholder="Layanan jemput bola penerbitan dokumen kependudukan langsung ke desa..."
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 1: Pelayanan Mobile Utama & Jadwal -->
         <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
           <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-zinc-800">
             <div class="flex items-center gap-3">
@@ -36,7 +93,7 @@
               </div>
               <div>
                 <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50">
-                  Section 1: Mobil Pelayanan Keliling (Jadwal &amp; Status)
+                  Section 1: Pelayanan Mobile (Jadwal &amp; Status)
                 </h3>
                 <p class="text-xs text-gray-500 dark:text-zinc-400">
                   Tampilkan jadwal jemput bola pelayanan adminduk keliling di beranda &amp; halaman publik.
@@ -677,7 +734,12 @@ const deselectAllServices = () => {
 };
 
 const form = useForm({
-  // Section 1: Mobil Pelayanan Utama
+  // Section 0: Banner Header
+  mobile_service_hero_tag: props.settings.mobile_service_hero_tag || 'Jemput Bola Adminduk',
+  mobile_service_hero_title: props.settings.mobile_service_hero_title || 'Jadwal Pelayanan Mobile Keliling',
+  mobile_service_hero_description: props.settings.mobile_service_hero_description || 'Layanan jemput bola penerbitan dokumen kependudukan langsung ke desa, kelurahan, dan sekolah di seluruh wilayah Kabupaten Dompu secara gratis dan cepat.',
+
+  // Section 1: Pelayanan Mobile Utama
   mobile_service_is_active: props.settings.mobile_service_is_active === '1',
   mobile_service_kecamatan: props.settings.mobile_service_kecamatan || 'Kecamatan Woja',
   mobile_service_desa: props.settings.mobile_service_desa || 'Desa Monta Baru',
