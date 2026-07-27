@@ -521,40 +521,19 @@ function nextStep() {
   currentStep.value++
 }
 
-async function handleSubmit() {
+function handleSubmit() {
   if (isSubmitting.value) return
   isSubmitting.value = true
 
-  try {
-    const periodId = form.survey_period_id || (props.activeSurvey ? props.activeSurvey.id : null)
+  form.survey_period_id = form.survey_period_id || (props.activeSurvey ? props.activeSurvey.id : null)
 
-    const payload = {
-      survey_period_id: periodId,
-      respondent_name: form.respondent_name || 'Anonim',
-      respondent_phone: form.respondent_phone || '',
-      respondent_domicile: form.respondent_domicile || '',
-      respondent_age: form.respondent_age || '',
-      respondent_gender: form.respondent_gender || '',
-      respondent_education: form.respondent_education || '',
-      respondent_job: form.respondent_job || '',
-      service_accessed: form.service_accessed || '',
-      suggestion: form.suggestion || '',
-      answers: form.answers || {},
-    }
-
-    const res = await axios.post('/layanan/survei', payload, {
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-    
-    if (res.data && (res.data.success || res.status === 200)) {
+  form.post(route('public.survey.store'), {
+    preserveScroll: true,
+    onSuccess: () => {
       submittedName.value = form.respondent_name || 'Anonim'
       submittedService.value = form.service_accessed || 'Pelayanan Dukcapil'
       showWizard.value = false
       currentStep.value = 1
-      form.reset()
       localStorage.setItem(STORAGE_KEY, Date.now().toString())
       alreadySubmitted.value = true
       showSuccessModal.value = true
@@ -562,16 +541,15 @@ async function handleSubmit() {
         showToast.value = true
         setTimeout(() => { showToast.value = false }, 6000)
       }, 300)
-    } else {
-      alert('Respon dari server: ' + JSON.stringify(res.data))
+    },
+    onError: (errors) => {
+      console.error('Validation errors:', errors)
+      alert('Gagal mengirim survei. Silakan periksa kembali isian Anda.')
+    },
+    onFinish: () => {
+      isSubmitting.value = false
     }
-  } catch (err) {
-    console.error('Error submitting survey:', err)
-    const errorMsg = err.response?.data?.message || err.message || 'Gagal mengirim survei.'
-    alert('Gagal mengirim survei: ' + errorMsg)
-  } finally {
-    isSubmitting.value = false
-  }
+  })
 }
 </script>
 

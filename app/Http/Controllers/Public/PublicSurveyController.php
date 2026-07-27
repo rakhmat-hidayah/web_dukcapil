@@ -112,7 +112,7 @@ class PublicSurveyController extends Controller
     /**
      * Submit survey response from public.
      */
-    public function store(Request $request): mixed
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'survey_period_id' => 'required|exists:survey_periods,id',
@@ -128,17 +128,7 @@ class PublicSurveyController extends Controller
             'answers'          => 'nullable|array',
         ]);
 
-        $response = $this->surveyService->storeSubmission($request->all());
-
-        // Return JSON for AJAX/Inertia XHR requests
-        if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
-            return response()->json([
-                'success' => true,
-                'message' => 'Terima kasih! Penilaian survei Anda berhasil disimpan.',
-                'response_id' => $response->id,
-                'ikm_score' => $response->ikm_score,
-            ]);
-        }
+        $this->surveyService->storeSubmission($request->all());
 
         return redirect()->back()->with('success', 'Terima kasih! Partisipasi dan penilaian survei Anda berhasil disimpan.');
     }
