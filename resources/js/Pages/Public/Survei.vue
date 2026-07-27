@@ -19,14 +19,21 @@
             Laporan pengukuran secara berkala atas tingkat kepuasan masyarakat terhadap mutu dan kualitas pelayanan administrasi kependudukan di Kabupaten Dompu.
           </p>
           <div class="pt-2 flex items-center gap-4 flex-wrap">
-            <button
-              @click="startSurvey"
-              class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl transition shadow-lg shadow-amber-500/25 active:scale-95 flex items-center gap-2 cursor-pointer"
-            >
-              <span>Isi Survei Sekarang</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-            </button>
-            <a href="#hasil-ikm" class="px-5 py-3 bg-white/10 hover:bg-white/20 text-white text-xs font-extrabold rounded-xl transition border border-white/15">Lihat Statistik &amp; Grafik ↓</a>
+            <!-- Already submitted badge -->
+            <div v-if="alreadySubmitted" class="flex items-center gap-3 px-5 py-3 bg-emerald-500/20 border border-emerald-400/40 rounded-xl backdrop-blur-sm">
+              <svg class="w-5 h-5 text-emerald-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span class="text-sm font-bold text-emerald-200">Anda sudah mengisi survei ini. Terima kasih!</span>
+            </div>
+            <template v-else>
+              <button
+                @click="startSurvey"
+                class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl transition shadow-lg shadow-amber-500/25 active:scale-95 flex items-center gap-2 cursor-pointer"
+              >
+                <span>Isi Survei Sekarang</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </button>
+              <a href="#hasil-ikm" class="px-5 py-3 bg-white/10 hover:bg-white/20 text-white text-xs font-extrabold rounded-xl transition border border-white/15">Lihat Statistik &amp; Grafik ↓</a>
+            </template>
           </div>
         </div>
       </div>
@@ -410,12 +417,56 @@
       </div>
     </div>
 
+    <!-- ======================== -->
+    <!-- SUCCESS NOTIFICATION TOAST -->
+    <!-- ======================== -->
+    <transition name="toast">
+      <div v-if="showToast" class="fixed bottom-6 right-6 z-[100] flex items-start gap-3 bg-white dark:bg-zinc-900 border border-emerald-200 dark:border-emerald-800 rounded-2xl shadow-2xl shadow-emerald-100/50 p-4 max-w-sm w-full">
+        <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-extrabold text-emerald-700 dark:text-emerald-400">Survei Berhasil Terkirim! 🎉</p>
+          <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Terima kasih telah berpartisipasi dalam Survei Kepuasan Masyarakat (IKM) Disdukcapil Kabupaten Dompu.</p>
+        </div>
+        <button @click="showToast = false" class="text-gray-400 hover:text-gray-600 text-lg leading-none cursor-pointer shrink-0">×</button>
+      </div>
+    </transition>
+
+    <!-- ======================== -->
+    <!-- SUCCESS MODAL  -->
+    <!-- ======================== -->
+    <div v-if="showSuccessModal" class="fixed inset-0 z-[90] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-zinc-900 rounded-3xl max-w-md w-full shadow-2xl p-8 text-center space-y-5 border border-gray-100 dark:border-zinc-800">
+        <div class="flex justify-center">
+          <div class="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center">
+            <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-xl font-black text-gray-900 dark:text-zinc-50">Terima Kasih!</h3>
+          <p class="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-1">Survei IKM Berhasil Terkirim</p>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
+          Penilaian dan masukan Anda sangat berarti bagi peningkatan mutu pelayanan Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu.
+        </p>
+        <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-left space-y-1.5">
+          <p class="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Responden</p>
+          <p class="text-xs font-bold text-gray-800 dark:text-zinc-200">{{ submittedName }}</p>
+          <p class="text-xs text-gray-500">{{ submittedService }}</p>
+        </div>
+        <button @click="closeSuccessModal" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm rounded-xl shadow-lg shadow-blue-600/25 transition cursor-pointer">
+          Tutup &amp; Kembali ke Halaman
+        </button>
+      </div>
+    </div>
+
   </PublicLayout>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { Head, useForm, usePage } from '@inertiajs/vue3'
+import { ref, reactive, onMounted } from 'vue'
+import { Head, useForm } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
 
 const props = defineProps({
@@ -430,6 +481,17 @@ const page = usePage()
 
 const showWizard = ref(false)
 const currentStep = ref(1)
+const showToast = ref(false)
+const showSuccessModal = ref(false)
+const alreadySubmitted = ref(false)
+const submittedName = ref('')
+const submittedService = ref('')
+
+const STORAGE_KEY = `ikm_submitted_${props.activeSurvey?.id || 'survey'}`
+
+onMounted(() => {
+  alreadySubmitted.value = !!localStorage.getItem(STORAGE_KEY)
+})
 
 const steps = [
   { title: 'Data Responden', desc: 'Nama, Umur, Jenis Kelamin, Pekerjaan dan Pendidikan' },
@@ -470,6 +532,7 @@ const step1Errors = reactive({
 const step2Errors = reactive({})
 
 function startSurvey() {
+  if (alreadySubmitted.value) return
   currentStep.value = 1
   // Reset errors
   Object.keys(step1Errors).forEach(k => step1Errors[k] = false)
@@ -515,10 +578,45 @@ function nextStep() {
 function handleSubmit() {
   form.post(route('public.survey.store'), {
     onSuccess: () => {
+      // Capture name & service before reset
+      submittedName.value = form.respondent_name || 'Anonim'
+      submittedService.value = form.service_accessed || 'Pelayanan Dukcapil'
+      // Close wizard
       showWizard.value = false
       currentStep.value = 1
       form.reset()
+      // Mark as submitted in localStorage to prevent double input
+      localStorage.setItem(STORAGE_KEY, Date.now().toString())
+      alreadySubmitted.value = true
+      // Show success modal
+      showSuccessModal.value = true
+      // Show toast after modal is closed
+      setTimeout(() => {
+        showToast.value = true
+        setTimeout(() => { showToast.value = false }, 6000)
+      }, 100)
     }
   })
 }
+
+function closeSuccessModal() {
+  showSuccessModal.value = false
+}
 </script>
+
+<style scoped>
+.toast-enter-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.toast-leave-active {
+  transition: all 0.3s ease-in;
+}
+.toast-enter-from {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+}
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+</style>
