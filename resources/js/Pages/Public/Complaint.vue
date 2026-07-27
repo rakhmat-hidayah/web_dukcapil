@@ -128,18 +128,32 @@
               />
               
               <!-- Selected File Preview -->
-              <div v-if="form.attachment" class="flex items-center justify-between gap-2 text-left">
-                <div class="flex items-center gap-2 min-w-0">
-                  <UploadCloud class="w-4 h-4 text-primary-600 shrink-0" />
-                  <span class="text-xs font-bold text-gray-800 dark:text-zinc-100 truncate">{{ form.attachment.name }}</span>
+              <div v-if="fileDetails" class="space-y-3">
+                <!-- Image Thumbnail Preview if Image -->
+                <div v-if="imagePreviewUrl" class="relative group/img overflow-hidden rounded-xl border border-gray-200 dark:border-zinc-700 bg-black/5 dark:bg-black/40 flex items-center justify-center p-2 max-h-48">
+                  <img :src="imagePreviewUrl" alt="Preview Lampiran" class="max-h-40 rounded-lg object-contain shadow-sm" />
                 </div>
-                <button 
-                  type="button" 
-                  @click.stop="form.attachment = null; if ($refs.attachmentInput) $refs.attachmentInput.value = '';" 
-                  class="p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition shrink-0"
-                >
-                  <X class="w-4 h-4" />
-                </button>
+
+                <!-- File Info Badge & Remove Button -->
+                <div class="flex items-center justify-between gap-3 p-3 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-xs text-left">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-950/60 text-primary-600 flex items-center justify-center shrink-0 font-bold text-[10px] uppercase font-mono">
+                      {{ fileDetails.isImage ? 'IMG' : 'DOC' }}
+                    </div>
+                    <div class="min-w-0">
+                      <p class="text-xs font-extrabold text-gray-800 dark:text-zinc-100 truncate">{{ fileDetails.name }}</p>
+                      <p class="text-[10px] font-medium text-gray-400 font-mono">{{ fileDetails.size }}</p>
+                    </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    @click.stop="clearFile" 
+                    class="px-2.5 py-1 rounded-lg text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 transition shrink-0 flex items-center gap-1 cursor-pointer"
+                  >
+                    <X class="w-3.5 h-3.5" />
+                    Hapus
+                  </button>
+                </div>
               </div>
 
               <!-- Default Prompt -->
@@ -216,9 +230,11 @@ const form = reactive({
   captcha_answer:        '',
   captcha_hash:          '',
 });
-let selectedFile  = null;
-const submitting  = ref(false);
-const errors      = ref({});
+let selectedFile      = null;
+const imagePreviewUrl = ref(null);
+const fileDetails     = ref(null);
+const submitting      = ref(false);
+const errors          = ref({});
 
 const num1 = computed(() => props.captcha?.num1 || 5);
 const num2 = computed(() => props.captcha?.num2 || 3);
@@ -227,7 +243,40 @@ const refreshCaptcha = () => {
   router.reload({ only: ['captcha'] });
 };
 
-const onFile = (e) => { selectedFile = e.target.files[0] || null; };
+const onFile = (e) => { 
+  const file = e.target.files[0];
+  if (!file) {
+    clearFile();
+    return;
+  }
+
+  selectedFile = file;
+  fileDetails.value = {
+    name: file.name,
+    size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+    type: file.type,
+    isImage: file.type.startsWith('image/'),
+  };
+
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      imagePreviewUrl.value = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    imagePreviewUrl.value = null;
+  }
+};
+
+const clearFile = () => {
+  selectedFile = null;
+  imagePreviewUrl.value = null;
+  fileDetails.value = null;
+  if (attachmentInput.value) {
+    attachmentInput.value.value = '';
+  }
+};
 
 const submitForm = () => {
   errors.value = {};
