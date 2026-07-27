@@ -67,10 +67,8 @@ class AuthController extends Controller
 
         // 3. CAPTCHA Validation
         if (!CaptchaService::validateImage($request->captcha)) {
-            RateLimiter::hit($throttleKey, 300); // 5 min block
-            
             throw ValidationException::withMessages([
-                'captcha' => 'Kode CAPTCHA salah atau sudah kedaluwarsa.',
+                'captcha' => 'Kode CAPTCHA tidak cocok. Silakan coba lagi.',
             ]);
         }
 

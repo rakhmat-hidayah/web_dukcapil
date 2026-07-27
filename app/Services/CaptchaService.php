@@ -59,8 +59,8 @@ class CaptchaService
      */
     public static function generateImage(int $width = 180, int $height = 50): string
     {
-        // 1. Create a random clear code
-        $characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'; // exclude confusing chars like 1, 0, I, O
+        // 1. Create a random clear code from 100% unambiguous uppercase characters
+        $characters = '23456789ABCDEFHKMNPQRSTWXYZ';
         $code = '';
         for ($i = 0; $i < 5; $i++) {
             $code .= $characters[rand(0, strlen($characters) - 1)];
@@ -68,62 +68,60 @@ class CaptchaService
 
         Session::put('captcha_image_code', strtolower($code));
 
-        // 2. Generate GD image
-        $image = imagecreatetruecolor($width, $height);
+        // 2. Create 2x high-resolution canvas for ultra-sharp resampled rendering
+        $w2 = $width * 2;
+        $h2 = $height * 2;
+        $highRes = imagecreatetruecolor($w2, $h2);
         
-        // Setup crisp background (Pure White)
-        $bg = imagecolorallocate($image, 255, 255, 255);
-        imagefilledrectangle($image, 0, 0, $width, $height, $bg);
+        // Pure White background
+        $bg = imagecolorallocate($highRes, 255, 255, 255);
+        imagefilledrectangle($highRes, 0, 0, $w2, $h2, $bg);
 
-        // Add subtle light gray background grid lines for security without obscuring text
-        $gridColor = imagecolorallocate($image, 226, 232, 240); // slate-200
-        for ($x = 15; $x < $width; $x += 25) {
-            imageline($image, $x, 0, $x, $height, $gridColor);
+        // Subtle background grid
+        $gridColor = imagecolorallocate($highRes, 235, 240, 245);
+        for ($x = 30; $x < $w2; $x += 40) {
+            imageline($highRes, $x, 0, $x, $h2, $gridColor);
         }
-        for ($y = 12; $y < $height; $y += 15) {
-            imageline($image, 0, $y, $width, $y, $gridColor);
+        for ($y = 25; $y < $h2; $y += 30) {
+            imageline($highRes, 0, $y, $w2, $y, $gridColor);
         }
 
-        // Setup high-contrast bold text colors (Deep Slate, Dark Blue, Dark Emerald, Deep Indigo, Rose)
+        // Distinct, high-contrast dark text colors
         $textColors = [
-            imagecolorallocate($image, 15, 23, 42),    // slate-900
-            imagecolorallocate($image, 30, 58, 138),   // blue-900
-            imagecolorallocate($image, 6, 78, 59),     // emerald-900
-            imagecolorallocate($image, 49, 46, 129),   // indigo-900
-            imagecolorallocate($image, 136, 19, 55),   // rose-900
+            imagecolorallocate($highRes, 15, 23, 42),   // Dark Slate
+            imagecolorallocate($highRes, 30, 58, 138),  // Dark Blue
+            imagecolorallocate($highRes, 6, 78, 59),    // Dark Emerald
+            imagecolorallocate($highRes, 136, 19, 55),  // Dark Rose
+            imagecolorallocate($highRes, 67, 56, 202),  // Dark Indigo
         ];
 
-        // Draw characters with BOLD stroke overlay
-        $charWidth = ($width - 24) / 5;
+        // Draw characters clearly using GD font 5
+        $charWidth = ($w2 - 30) / 5;
         for ($i = 0; $i < strlen($code); $i++) {
             $char = $code[$i];
             $color = $textColors[$i % count($textColors)];
             
-            $font = 5; // Built-in largest font
-            $x = (int) (12 + ($i * $charWidth) + rand(-1, 1));
-            $y = (int) (16 + rand(-2, 2));
+            $x = (int) (20 + ($i * $charWidth));
+            $y = 32;
             
-            // Draw multi-pass bold offset to make characters extra thick & readable
-            imagechar($image, $font, $x, $y, $char, $color);
-            imagechar($image, $font, $x + 1, $y, $char, $color);
-            imagechar($image, $font, $x, $y + 1, $char, $color);
-            imagechar($image, $font, $x + 1, $y + 1, $char, $color);
+            imagechar($highRes, 5, $x, $y, $char, $color);
+            imagechar($highRes, 5, $x + 1, $y, $char, $color);
         }
 
-        // Add 1 light subtle wave line that doesn't block readability
-        $waveColor = imagecolorallocate($image, 203, 213, 225); // slate-300
-        imagesetthickness($image, 1);
-        imageline($image, 0, rand(10, 20), $width, rand(30, 40), $waveColor);
+        // 3. Resample down to 180x50 for crisp anti-aliased output
+        $finalImage = imagecreatetruecolor($width, $height);
+        imagecopyresampled($finalImage, $highRes, 0, 0, 0, 0, $width, $height, $w2, $h2);
+        imagedestroy($highRes);
 
-        // Outer border
-        $borderColor = imagecolorallocate($image, 203, 213, 225);
-        imagerectangle($image, 0, 0, $width - 1, $height - 1, $borderColor);
+        // Draw clean border
+        $borderColor = imagecolorallocate($finalImage, 203, 213, 225);
+        imagerectangle($finalImage, 0, 0, $width - 1, $height - 1, $borderColor);
 
-        // 3. Output as base64
+        // 4. Output as base64
         ob_start();
-        imagepng($image);
+        imagepng($finalImage);
         $imageData = ob_get_clean();
-        imagedestroy($image);
+        imagedestroy($finalImage);
 
         return 'data:image/png;base64,' . base64_encode($imageData);
     }
