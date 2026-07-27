@@ -12,10 +12,15 @@
       <div class="bg-zinc-900/90 backdrop-blur-2xl border border-zinc-800/90 rounded-3xl shadow-2xl shadow-black/80 overflow-hidden transition-all duration-300">
         <div class="p-8 sm:p-10">
           
-          <!-- Brand Logo Header -->
+          <!-- Brand Logo Header (Official Dual Logo: Pemkab Dompu & Disdukcapil) -->
           <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center p-3 bg-gradient-to-tr from-blue-600 via-primary-600 to-indigo-600 rounded-2xl shadow-xl shadow-blue-500/30 mb-4 group ring-4 ring-blue-500/20">
-              <img src="/img/logo-dukcapil.png" alt="Logo Dukcapil" class="h-10 w-auto object-contain brightness-200 drop-shadow" />
+            <div class="inline-flex items-center justify-center gap-3.5 px-6 py-3.5 bg-white rounded-2xl shadow-xl shadow-black/30 border border-zinc-200/60 mb-4 transition-transform hover:scale-[1.02]">
+              <!-- Logo 1: Logo Pemkab Dompu -->
+              <img src="/img/logo-dompu.png" alt="Logo Kabupaten Dompu" class="h-10 sm:h-11 w-auto object-contain drop-shadow-sm" />
+              <!-- Vertical Divider Line -->
+              <div class="h-8 w-px bg-zinc-300"></div>
+              <!-- Logo 2: Logo Disdukcapil Dompu -->
+              <img src="/img/logo-dukcapil.png" alt="Logo Disdukcapil Dompu" class="h-10 sm:h-11 w-auto object-contain drop-shadow-sm" />
             </div>
             <h2 class="text-2xl font-black tracking-tight text-white">Dukcapil Dompu</h2>
             <p class="text-xs font-medium text-zinc-400 mt-1">Sistem Informasi Kependudukan & Administrator Portal</p>
