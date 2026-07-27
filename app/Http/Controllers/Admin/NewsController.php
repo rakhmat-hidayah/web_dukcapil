@@ -13,14 +13,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
-use Intervention\Image\Laravel\Facades\Image;
 
 class NewsController extends Controller
 {
     public function index(Request $request): InertiaResponse
     {
         $query = News::with(['category', 'author'])
-            ->withTrashed()
             ->orderBy('created_at', 'desc');
 
         if ($request->filled('search')) {
@@ -170,7 +168,10 @@ class NewsController extends Controller
     public function destroy(News $news): RedirectResponse
     {
         $title = $news->title;
-        $news->delete();
+        if ($news->thumbnail) {
+            Storage::disk('public')->delete($news->thumbnail);
+        }
+        $news->forceDelete();
 
         ActivityLogger::log("Menghapus berita: {$title}", null, 'delete_news');
 
@@ -226,7 +227,6 @@ class NewsController extends Controller
             'image' => 'required|image|max:10240',
         ]);
 
-        // Auto create/find 'Berita' folder in Media File Manager
         $beritaFolder = \App\Models\FileFolder::firstOrCreate(
             ['name' => 'Berita'],
             ['parent_id' => null, 'created_by' => auth()->id()]
