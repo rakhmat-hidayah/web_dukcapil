@@ -30,12 +30,12 @@
       
       <!-- LEVEL 2 CONNECTOR LINES -->
       <!-- Left Dashed Horizontal Bar (starts at center 50% and stops exactly at 25% center of Jabatan Fungsional) -->
-      <div class="absolute top-0 left-[25%] right-1/2 h-0.5 border-t-2 border-dashed border-slate-400"></div>
+      <div class="absolute top-0 left-[25%] right-1/2 h-0.5 border-t-2 border-dashed border-slate-400 z-10"></div>
       <!-- Right Solid Horizontal Bar (starts at center 50% and stops exactly at 75% center of Sekretariat) -->
-      <div class="absolute top-0 left-1/2 right-[25%] h-0.5 bg-blue-400/80"></div>
+      <div class="absolute top-0 left-1/2 right-[25%] h-0.5 bg-blue-400/80 z-10"></div>
 
-      <!-- Central Vertical Trunk Continuation (dropping through Level 2 down to Level 4) -->
-      <div class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-blue-400/80 z-0"></div>
+      <!-- Central Vertical Trunk Continuation (STOPS EXACTLY at the 4-Bidang horizontal bar) -->
+      <div class="absolute top-0 h-[286px] left-1/2 -translate-x-1/2 w-0.5 bg-blue-400/80 z-0"></div>
 
       <!-- LEVEL 2 ROW (2 Columns: Left 50% & Right 50%) -->
       <div class="grid grid-cols-2 w-full z-10 pt-0">
@@ -158,9 +158,6 @@
 
       <!-- SPACER & CONNECTOR TO LEVEL 4 (4 BIDANG ROW) -->
       <div class="w-full relative flex flex-col items-center mt-10 z-10">
-        <!-- Central Trunk Hits 4-Bidang Horizontal Bar -->
-        <div class="w-0.5 h-6 bg-blue-400/80"></div>
-        
         <!-- Horizontal Bar connecting all 4 Bidangs (starts at 12.5% center of Bidang 1 and stops at 87.5% center of Bidang 4) -->
         <div class="w-full relative h-6">
           <div class="absolute top-0 left-[12.5%] right-[12.5%] h-0.5 bg-blue-400/80"></div>
