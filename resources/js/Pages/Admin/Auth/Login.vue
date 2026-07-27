@@ -182,7 +182,7 @@ const refreshCaptcha = async () => {
 };
 
 const submit = () => {
-  form.post(route('admin.login.store'), {
+  form.post('/admin/login', {
     onFinish: () => {
       form.password = '';
       form.captcha = '';
