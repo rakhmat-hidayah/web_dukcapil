@@ -486,10 +486,13 @@ function startSurvey() {
   if (alreadySubmitted.value) return
   currentStep.value = 1
   Object.keys(step1Errors).forEach(k => { step1Errors[k] = false })
-  if (props.activeSurvey && props.activeSurvey.questions) {
-    props.activeSurvey.questions.forEach(q => {
-      if (!form.answers[q.id]) form.answers[q.id] = 4
-    })
+  if (props.activeSurvey) {
+    form.survey_period_id = props.activeSurvey.id
+    if (props.activeSurvey.questions) {
+      props.activeSurvey.questions.forEach(q => {
+        if (!form.answers[q.id]) form.answers[q.id] = 4
+      })
+    }
   }
   showWizard.value = true
 }
@@ -525,7 +528,9 @@ function handleSubmit() {
   if (isSubmitting.value) return
   isSubmitting.value = true
 
-  form.survey_period_id = form.survey_period_id || (props.activeSurvey ? props.activeSurvey.id : null)
+  if (!form.survey_period_id && props.activeSurvey) {
+    form.survey_period_id = props.activeSurvey.id
+  }
 
   form.post(route('public.survey.store'), {
     preserveScroll: true,
@@ -544,7 +549,8 @@ function handleSubmit() {
     },
     onError: (errors) => {
       console.error('Validation errors:', errors)
-      alert('Gagal mengirim survei. Silakan periksa kembali isian Anda.')
+      const errList = Object.values(errors).flat().join('\n• ')
+      alert('Gagal mengirim survei:\n• ' + errList)
     },
     onFinish: () => {
       isSubmitting.value = false
