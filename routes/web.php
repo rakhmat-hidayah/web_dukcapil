@@ -40,6 +40,7 @@ Route::get('/layanan', [\App\Http\Controllers\Public\ServiceRequirementControlle
 Route::get('/layanan/survei', [\App\Http\Controllers\Public\PublicSurveyController::class, 'index'])->name('public.survey.index');
 Route::post('/layanan/survei', [\App\Http\Controllers\Public\PublicSurveyController::class, 'store'])->name('public.survey.store');
 Route::get('/layanan/mobile', [\App\Http\Controllers\Public\MobileServiceController::class, 'index'])->name('public.mobile-services.index');
+Route::redirect('/layanan/mobil', '/layanan/mobile');
 Route::get('/layanan/{slug}', [\App\Http\Controllers\Public\ServiceRequirementController::class, 'show'])->name('public.services.show');
 Route::get('/inovasi', [\App\Http\Controllers\Public\InnovationController::class, 'index'])->name('public.innovations.index');
 Route::get('/inovasi/{slug}', [\App\Http\Controllers\Public\InnovationController::class, 'show'])->name('public.innovations.show');
