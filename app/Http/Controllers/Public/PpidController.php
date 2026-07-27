@@ -223,4 +223,14 @@ class PpidController extends Controller
 
         abort(404, 'File tidak ditemukan.');
     }
+
+    /** Download PPID official response file attachment */
+    public function downloadResponse(PpidRequest $request)
+    {
+        if ($request->response_file && file_exists(storage_path('app/public/' . $request->response_file))) {
+            return response()->download(storage_path('app/public/' . $request->response_file));
+        }
+
+        abort(404, 'Berkas tanggapan tidak ditemukan.');
+    }
 }

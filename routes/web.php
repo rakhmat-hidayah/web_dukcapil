@@ -64,6 +64,7 @@ Route::get('/ppid/permohonan/sukses/{ticket}', [\App\Http\Controllers\Public\Ppi
 Route::get('/ppid/lacak', [\App\Http\Controllers\Public\PpidController::class, 'trackRequest'])->name('public.ppid.track');
 Route::get('/ppid/{slug}', [\App\Http\Controllers\Public\PpidController::class, 'page'])->name('public.ppid.page');
 Route::get('/ppid-dokumen/{document}/download', [\App\Http\Controllers\Public\PpidController::class, 'downloadDocument'])->name('public.ppid.document.download');
+Route::get('/ppid-response/{request}/download', [\App\Http\Controllers\Public\PpidController::class, 'downloadResponse'])->name('public.ppid.response.download');
 
 // Public Complaint System
 Route::get('/pengaduan', [\App\Http\Controllers\Public\ComplaintController::class, 'create'])->name('public.complaint.create');

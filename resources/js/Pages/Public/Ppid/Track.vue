@@ -116,37 +116,70 @@
           <p class="text-gray-700 dark:text-zinc-300 font-medium leading-relaxed">{{ ppidRequest.information_requested }}</p>
         </div>
 
-        <!-- Response Box -->
-        <div v-if="ppidRequest.response_notes" class="bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 rounded-2xl p-4 text-xs space-y-1 text-emerald-900 dark:text-emerald-200">
-          <div class="flex items-center gap-2 font-extrabold text-emerald-700 dark:text-emerald-300">
-            <MessageSquare :size="15" />
-            <span>Respons Resmi Dari Petugas PPID</span>
+        <!-- Response Box & File Attachment -->
+        <div v-if="ppidRequest.response_notes || ppidRequest.response_file" class="bg-gradient-to-br from-emerald-50 to-teal-50/60 dark:from-emerald-950/40 dark:to-teal-950/20 border border-emerald-200/60 dark:border-emerald-800/40 rounded-2xl p-5 text-xs space-y-3 text-emerald-950 dark:text-emerald-100 shadow-xs">
+          <div class="flex items-center justify-between gap-2 border-b border-emerald-200/40 dark:border-emerald-800/30 pb-2">
+            <div class="flex items-center gap-2 font-extrabold text-emerald-800 dark:text-emerald-200 text-xs">
+              <span>💬</span>
+              <span>Tanggapan Resmi PPID Disdukcapil</span>
+            </div>
+            <span v-if="ppidRequest.responded_at" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
+              {{ formatDate(ppidRequest.responded_at) }}
+            </span>
           </div>
-          <p class="font-medium leading-relaxed pt-1">{{ ppidRequest.response_notes }}</p>
-          <span v-if="ppidRequest.responded_at" class="text-[10px] opacity-75 block pt-2">
-            Waktu Tanggapan: {{ formatDate(ppidRequest.responded_at) }}
-          </span>
+
+          <p v-if="ppidRequest.response_notes" class="font-medium leading-relaxed text-gray-800 dark:text-zinc-200">
+            {{ ppidRequest.response_notes }}
+          </p>
+
+          <!-- Download Response Attachment if provided by Admin in CMS -->
+          <div v-if="ppidRequest.response_file" class="pt-2">
+            <a 
+              :href="route('public.ppid.response.download', ppidRequest.id)"
+              target="_blank"
+              class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
+            >
+              <span>📥 Unduh Berkas Lampiran Tanggapan</span>
+            </a>
+          </div>
         </div>
 
-        <!-- Progress Steps -->
-        <div class="pt-4 border-t border-gray-100 dark:border-zinc-800">
-          <div class="flex items-center justify-between text-center relative">
+        <!-- Ditolak Alert Banner if status is ditolak -->
+        <div v-if="ppidRequest.status === 'ditolak'" class="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs space-y-1 text-rose-800 dark:text-rose-200">
+          <p class="font-black text-rose-700 dark:text-rose-300 flex items-center gap-1.5">
+            <span>⛔</span> Status: Permohonan Tidak Diteruskan / Ditolak
+          </p>
+          <p class="text-[11px] text-rose-600 dark:text-rose-400 leading-relaxed">
+            Permohonan informasi Anda tidak dapat ditindaklanjuti. Harap baca catatan tanggapan resmi di atas untuk informasi lebih detail.
+          </p>
+        </div>
+
+        <!-- Progress Steps Timeline -->
+        <div class="pt-6 border-t border-gray-100 dark:border-zinc-800">
+          <div class="relative flex items-center justify-between text-center">
+            
+            <!-- Connecting Line Background -->
+            <div class="absolute top-4 left-6 right-6 h-0.5 bg-gray-200 dark:bg-zinc-800 -z-0"></div>
+            
             <div
               v-for="(step, i) in statusSteps"
               :key="step.key"
               class="flex flex-col items-center flex-1 z-10"
             >
               <div 
-                class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm"
-                :class="isStepDone(step.key) 
-                  ? 'bg-primary-600 text-white ring-4 ring-primary-100 dark:ring-primary-950' 
-                  : 'bg-gray-100 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500'"
+                class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm font-bold text-xs"
+                :class="{
+                  'bg-primary-600 text-white ring-4 ring-primary-100 dark:ring-primary-950': isStepDone(step.key),
+                  'bg-rose-600 text-white ring-4 ring-rose-100 dark:ring-rose-950': ppidRequest.status === 'ditolak' && step.key === 'diterima',
+                  'bg-gray-100 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500': !isStepDone(step.key) && ppidRequest.status !== 'ditolak'
+                }"
               >
-                <CheckCircle v-if="isStepDone(step.key)" :size="16" />
-                <div v-else class="w-2.5 h-2.5 rounded-full bg-current"></div>
+                <CheckCircle v-if="isStepDone(step.key)" :size="18" />
+                <span v-else-if="ppidRequest.status === 'ditolak' && step.key === 'diterima'">✕</span>
+                <span v-else>{{ i + 1 }}</span>
               </div>
               <span 
-                class="text-[11px] font-extrabold mt-2"
+                class="text-[11px] font-extrabold mt-2.5"
                 :class="isStepDone(step.key) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-zinc-500'"
               >
                 {{ step.label }}
@@ -182,8 +215,12 @@ const statusSteps = [
 
 function isStepDone(key) {
   if (!props.ppidRequest) return false
-  const order = ['diterima', 'diproses', 'selesai', 'ditolak']
-  return order.indexOf(props.ppidRequest.status) >= order.indexOf(key)
+  if (props.ppidRequest.status === 'ditolak') return false
+  const order = ['diterima', 'diproses', 'selesai']
+  const currentIdx = order.indexOf(props.ppidRequest.status)
+  const targetIdx = order.indexOf(key)
+  if (currentIdx === -1 || targetIdx === -1) return false
+  return targetIdx <= currentIdx
 }
 
 function doSearch() {
@@ -194,6 +231,6 @@ function doSearch() {
 
 function formatDate(dt) {
   if (!dt) return '-'
-  return new Date(dt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+  return new Date(dt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 </script>

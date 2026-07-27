@@ -22,6 +22,11 @@ class PpidRequest extends Model
         'responded_at' => 'datetime',
     ];
 
+    protected $appends = [
+        'status_label',
+        'status_color',
+    ];
+
     public static array $statusLabels = [
         'diterima'  => 'Diterima',
         'diproses'  => 'Diproses',
