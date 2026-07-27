@@ -34,6 +34,12 @@ class HomeController extends Controller
                   ->orWhere('expires_at', '>', now());
             })
             ->pluck('content')
+            ->map(function ($item) {
+                $text = strip_tags(html_entity_decode($item, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                return trim(preg_replace('/\s+/', ' ', $text));
+            })
+            ->filter()
+            ->values()
             ->toArray();
 
         // 3. Get active popup warning alert

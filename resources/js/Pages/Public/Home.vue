@@ -13,7 +13,7 @@
           Pengumuman
         </span>
         <marquee class="flex-1 select-none" scrollamount="4">
-          <span v-for="(t, idx) in tickers" :key="idx" class="mr-12">{{ t }}</span>
+          <span v-for="(t, idx) in tickers" :key="idx" class="mr-12">{{ stripHtml(t) }}</span>
         </marquee>
       </div>
 
@@ -567,6 +567,11 @@ const sanaiConfig = computed(() => {
 const currentSlide = ref(0);
 const popupOpen = ref(true);
 let slideInterval = null;
+
+const stripHtml = (html) => {
+  if (!html) return '';
+  return html.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim();
+};
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
