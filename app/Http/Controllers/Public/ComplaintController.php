@@ -49,13 +49,17 @@ class ComplaintController extends Controller
             'submitter_phone'       => 'nullable|string|max:20',
             'submitter_email'       => 'nullable|email|max:150',
             'is_anonymous'          => 'nullable|boolean',
-            'complaint_category_id' => 'nullable|exists:complaint_categories,id',
+            'complaint_category_id' => 'required|exists:complaint_categories,id',
             'subject'               => 'required|string|max:255',
             'message'               => 'required|string|min:20|max:5000',
             'attachment'            => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
             'captcha_answer'        => 'required|integer',
             'captcha_hash'          => 'required|string',
+        ], [
+            'complaint_category_id.required' => 'Silakan pilih salah satu Kategori Pengaduan terlebih dahulu.',
+            'complaint_category_id.exists'   => 'Kategori pengaduan tidak valid.',
         ]);
+
 
         // Verify math CAPTCHA — hash is sha256(answer + APP_KEY salt)
         $expectedHash = hash('sha256', $data['captcha_answer'] . config('app.key'));

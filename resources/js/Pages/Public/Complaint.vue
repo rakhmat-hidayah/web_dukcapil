@@ -13,19 +13,33 @@
       </div>
 
       <!-- Category grid -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" v-if="categories.length">
-        <div
-          v-for="cat in categories" :key="cat.id"
-          @click="form.complaint_category_id = cat.id"
-          class="p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col gap-2"
-          :class="form.complaint_category_id === cat.id
-            ? 'border-primary-500 bg-primary-50 dark:bg-primary-950/30'
-            : 'border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300'"
-        >
-          <span class="text-2xl">{{ cat.icon }}</span>
-          <p class="text-xs font-extrabold text-gray-800 dark:text-zinc-100 leading-snug">{{ cat.name }}</p>
-          <p class="text-[9px] text-gray-400 leading-relaxed line-clamp-2">{{ cat.description }}</p>
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-700 dark:text-zinc-300">
+            Pilih Kategori Pengaduan <span class="text-red-500">*</span>
+          </label>
+          <span v-if="!form.complaint_category_id" class="text-[10px] text-amber-600 font-bold">Wajib Dipilih</span>
         </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" v-if="categories.length">
+          <div
+            v-for="cat in categories" :key="cat.id"
+            @click="form.complaint_category_id = cat.id; if(errors.complaint_category_id) delete errors.complaint_category_id"
+            class="p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col gap-2 relative"
+            :class="form.complaint_category_id === cat.id
+              ? 'border-primary-500 bg-primary-50 dark:bg-primary-950/30 ring-2 ring-primary-500/20'
+              : (errors.complaint_category_id ? 'border-red-300 bg-red-50/20' : 'border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300')"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">{{ cat.icon }}</span>
+              <span v-if="form.complaint_category_id === cat.id" class="text-xs font-black text-primary-600 bg-primary-100 dark:bg-primary-900/60 px-2 py-0.5 rounded-full">✓ Terpilih</span>
+            </div>
+            <p class="text-xs font-extrabold text-gray-800 dark:text-zinc-100 leading-snug">{{ cat.name }}</p>
+            <p class="text-[9px] text-gray-400 leading-relaxed line-clamp-2">{{ cat.description }}</p>
+          </div>
+        </div>
+        <p v-if="errors.complaint_category_id" class="text-xs text-red-500 font-bold mt-1.5 flex items-center gap-1">
+          ⚠️ {{ errors.complaint_category_id }}
+        </p>
       </div>
 
       <!-- Main form card -->
@@ -291,7 +305,15 @@ const clearFile = () => {
 
 const submitForm = () => {
   errors.value = {};
+
+  if (!form.complaint_category_id) {
+    errors.value.complaint_category_id = 'Silakan pilih salah satu Kategori Pengaduan terlebih dahulu.';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
   submitting.value = true;
+
 
   const data = new FormData();
   Object.entries(form).forEach(([k, v]) => {
