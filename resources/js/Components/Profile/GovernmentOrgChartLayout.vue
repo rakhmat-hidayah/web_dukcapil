@@ -8,7 +8,7 @@
         :style="getCardStyle(kadisNode)"
         class="w-72 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden group cursor-pointer active:scale-95 relative"
       >
-        <div class="px-3 py-2 text-center bg-black/25 backdrop-blur-md border-b border-white/15 flex items-center justify-center gap-1.5">
+        <div class="px-3 py-2 text-center bg-black/25 backdrop-blur-md border-b border-white/15 rounded-t-[14px] flex items-center justify-center gap-1.5">
           <span class="text-xs">👑</span>
           <h3 class="font-black text-xs uppercase tracking-wider text-white drop-shadow">{{ kadisNode?.node_title || 'KEPALA DINAS' }}</h3>
         </div>
@@ -59,7 +59,7 @@
               :style="getCardStyle(fungsionalKadisNode)"
               class="w-64 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
             >
-              <div class="px-3 py-1.5 text-center bg-black/25 backdrop-blur-md flex items-center justify-center gap-1">
+              <div class="px-3 py-1.5 text-center bg-black/25 backdrop-blur-md rounded-t-[14px] flex items-center justify-center gap-1">
                 <span class="text-[10px]">📊</span>
                 <h3 class="font-black text-[11px] uppercase tracking-wider text-white drop-shadow">{{ fungsionalKadisNode?.node_title || 'JABATAN FUNGSIONAL' }}</h3>
               </div>
@@ -82,7 +82,7 @@
               :style="getCardStyle(sekretarisNode)"
               class="w-72 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
             >
-              <div class="px-3 py-1.5 text-center bg-black/25 backdrop-blur-md flex items-center justify-center gap-1">
+              <div class="px-3 py-1.5 text-center bg-black/25 backdrop-blur-md rounded-t-[14px] flex items-center justify-center gap-1">
                 <span class="text-[10px]">⭐</span>
                 <h3 class="font-black text-xs uppercase tracking-wider text-white drop-shadow">{{ sekretarisNode?.node_title || 'SEKRETARIAT' }}</h3>
               </div>
@@ -122,7 +122,7 @@
                     :style="getCardStyle(subNode2)"
                     class="w-full rounded-xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
                   >
-                    <div class="px-1.5 py-1 text-center bg-black/20 backdrop-blur-md min-h-[32px] flex items-center justify-center">
+                    <div class="px-1.5 py-1 text-center bg-black/20 backdrop-blur-md rounded-t-[10px] min-h-[32px] flex items-center justify-center">
                       <h4 class="font-bold text-[10px] uppercase text-white leading-tight drop-shadow">{{ subNode2?.node_title || 'SUB BAGIAN KEUANGAN' }}</h4>
                     </div>
                     <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md m-1 p-2 rounded-lg flex items-center gap-1.5 border border-white/40 dark:border-slate-800 min-h-[52px]">
@@ -148,7 +148,7 @@
                     :style="getCardStyle(subNode3)"
                     class="w-full rounded-xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
                   >
-                    <div class="px-1.5 py-1 text-center bg-black/20 backdrop-blur-md min-h-[32px] flex items-center justify-center">
+                    <div class="px-1.5 py-1 text-center bg-black/20 backdrop-blur-md rounded-t-[10px] min-h-[32px] flex items-center justify-center">
                       <h4 class="font-bold text-[10px] uppercase text-white leading-tight drop-shadow">{{ subNode3?.node_title || 'SUB BAGIAN UMUM & KEPEG.' }}</h4>
                     </div>
                     <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md m-1 p-2 rounded-lg flex items-center gap-1.5 border border-white/40 dark:border-slate-800 min-h-[52px]">
@@ -174,7 +174,7 @@
                     :style="getCardStyle(subNode1)"
                     class="w-full rounded-xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
                   >
-                    <div class="px-1.5 py-1 text-center bg-black/20 backdrop-blur-md min-h-[32px] flex items-center justify-center">
+                    <div class="px-1.5 py-1 text-center bg-black/20 backdrop-blur-md rounded-t-[10px] min-h-[32px] flex items-center justify-center">
                       <h4 class="font-bold text-[10px] uppercase text-white leading-tight drop-shadow">{{ subNode1?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
                     </div>
                     <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md m-1 p-1.5 rounded-lg border border-white/40 dark:border-slate-800 min-h-[52px] flex items-center">
@@ -219,7 +219,7 @@
               :style="getCardStyle(bidang1Node)"
               class="w-full rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
             >
-              <div class="px-2 py-2 text-center bg-black/25 backdrop-blur-md min-h-[44px] flex items-center justify-center gap-1">
+              <div class="px-2 py-2 text-center bg-black/25 backdrop-blur-md rounded-t-[14px] min-h-[44px] flex items-center justify-center gap-1">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight drop-shadow">
                   {{ bidang1Node?.node_title || 'BIDANG PELAYANAN PENDAFTARAN PENDUDUK' }}
                 </h3>
@@ -245,7 +245,7 @@
               :style="getCardStyle(subBidang1Node)"
               class="w-full rounded-xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
             >
-              <div class="px-2 py-1 text-center bg-black/20 backdrop-blur-md min-h-[32px] flex items-center justify-center">
+              <div class="px-2 py-1 text-center bg-black/20 backdrop-blur-md rounded-t-[10px] min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight drop-shadow">{{ subBidang1Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md m-1 p-1.5 rounded-lg border border-white/40 dark:border-slate-800 min-h-[52px] flex items-center">
@@ -265,7 +265,7 @@
               :style="getCardStyle(bidang2Node)"
               class="w-full rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
             >
-              <div class="px-2 py-2 text-center bg-black/25 backdrop-blur-md min-h-[44px] flex items-center justify-center gap-1">
+              <div class="px-2 py-2 text-center bg-black/25 backdrop-blur-md rounded-t-[14px] min-h-[44px] flex items-center justify-center gap-1">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight drop-shadow">
                   {{ bidang2Node?.node_title || 'BIDANG PELAYANAN PENCATATAN SIPIL' }}
                 </h3>
@@ -290,7 +290,7 @@
               :style="getCardStyle(subBidang2Node)"
               class="w-full rounded-xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
             >
-              <div class="px-2 py-1 text-center bg-black/20 backdrop-blur-md min-h-[32px] flex items-center justify-center">
+              <div class="px-2 py-1 text-center bg-black/20 backdrop-blur-md rounded-t-[10px] min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight drop-shadow">{{ subBidang2Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md m-1 p-1.5 rounded-lg border border-white/40 dark:border-slate-800 min-h-[52px] flex items-center">
@@ -310,7 +310,7 @@
               :style="getCardStyle(bidang3Node)"
               class="w-full rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
             >
-              <div class="px-2 py-2 text-center bg-black/25 backdrop-blur-md min-h-[44px] flex items-center justify-center gap-1">
+              <div class="px-2 py-2 text-center bg-black/25 backdrop-blur-md rounded-t-[14px] min-h-[44px] flex items-center justify-center gap-1">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight drop-shadow">
                   {{ bidang3Node?.node_title || 'BIDANG PENGELOLAAN INFORMASI ADM. KEPENDUDUKAN' }}
                 </h3>
@@ -335,7 +335,7 @@
               :style="getCardStyle(subBidang3Node)"
               class="w-full rounded-xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
             >
-              <div class="px-2 py-1 text-center bg-black/20 backdrop-blur-md min-h-[32px] flex items-center justify-center">
+              <div class="px-2 py-1 text-center bg-black/20 backdrop-blur-md rounded-t-[10px] min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight drop-shadow">{{ subBidang3Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md m-1 p-1.5 rounded-lg border border-white/40 dark:border-slate-800 min-h-[52px] flex items-center">
@@ -355,7 +355,7 @@
               :style="getCardStyle(bidang4Node)"
               class="w-full rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
             >
-              <div class="px-2 py-2 text-center bg-black/25 backdrop-blur-md min-h-[44px] flex items-center justify-center gap-1">
+              <div class="px-2 py-2 text-center bg-black/25 backdrop-blur-md rounded-t-[14px] min-h-[44px] flex items-center justify-center gap-1">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight drop-shadow">
                   {{ bidang4Node?.node_title || 'BIDANG PEMANFAATAN DATA DAN INOVASI PELAYANAN' }}
                 </h3>
@@ -380,7 +380,7 @@
               :style="getCardStyle(subBidang4Node)"
               class="w-full rounded-xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] overflow-hidden cursor-pointer active:scale-95"
             >
-              <div class="px-2 py-1 text-center bg-black/20 backdrop-blur-md min-h-[32px] flex items-center justify-center">
+              <div class="px-2 py-1 text-center bg-black/20 backdrop-blur-md rounded-t-[10px] min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight drop-shadow">{{ subBidang4Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md m-1 p-1.5 rounded-lg border border-white/40 dark:border-slate-800 min-h-[52px] flex items-center">
