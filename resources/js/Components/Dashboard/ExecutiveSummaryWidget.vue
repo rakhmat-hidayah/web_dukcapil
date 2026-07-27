@@ -77,17 +77,18 @@ const collapsed = ref(false);
 
 const generateSparklinePoints = (values) => {
   if (!values || values.length === 0) return '0,15 60,15';
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
+
+  const max = Math.max(...values, 1);
   const width = 60;
-  const height = 24;
+  const height = 20;
   const step = width / (values.length - 1);
 
   return values.map((val, idx) => {
     const x = idx * step;
-    const y = height - ((val - min) / range) * height + 3;
-    return `${x},${y}`;
+    // Proportional zero-baseline scale so small relative variations render as smooth gentle curves
+    const ratio = Math.min(Math.max(val / (max * 1.25), 0.15), 0.95);
+    const y = height - ratio * height + 5;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(' ');
 };
 </script>
