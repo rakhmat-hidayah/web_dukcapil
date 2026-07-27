@@ -24,8 +24,8 @@
             <option v-for="(label, key) in statusLabels" :key="key" :value="key">{{ label }}</option>
           </select>
           <button 
-            @click="submitStatusChange"
-            class="px-4 py-1.5 bg-gray-900 dark:bg-zinc-700 hover:bg-gray-800 text-white text-xs font-black rounded-xl transition"
+            @click="openStatusModal"
+            class="px-4 py-1.5 bg-gray-900 dark:bg-zinc-700 hover:bg-gray-800 text-white text-xs font-black rounded-xl transition cursor-pointer"
           >
             Update Status
           </button>
@@ -208,12 +208,52 @@
         </div>
 
       </div>
+
+      <!-- STATUS UPDATE MODAL (Custom Vue Modal) -->
+      <div v-if="showStatusModal" class="fixed inset-0 z-[90] bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-zinc-900 rounded-3xl max-w-md w-full shadow-2xl p-6 space-y-4 border border-gray-100 dark:border-zinc-800 text-left">
+          <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
+            <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">Update Status Pengaduan</h3>
+            <button @click="showStatusModal = false" class="text-gray-400 hover:text-gray-600 text-lg leading-none cursor-pointer">&times;</button>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Status Baru</label>
+              <div class="px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-gray-800 dark:text-zinc-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                <span>{{ statusLabels[statusForm.status] }}</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Catatan / Alasan Perubahan Status (Opsional)</label>
+              <textarea 
+                v-model="statusForm.note" 
+                rows="4" 
+                placeholder="Ketikkan catatan atau alasan perubahan status di sini..." 
+                class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none resize-none"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-zinc-800">
+            <button type="button" @click="showStatusModal = false" class="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 cursor-pointer">
+              Batal
+            </button>
+            <button type="button" @click="confirmStatusChange" class="px-5 py-2 bg-primary-600 hover:bg-primary-500 text-white font-extrabold text-xs rounded-xl shadow-md transition cursor-pointer">
+              Simpan Perubahan
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </AdminLayout>
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { ref, reactive } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
@@ -222,6 +262,8 @@ const props = defineProps({
   statusLabels: Object,
   statusColors: Object,
 });
+
+const showStatusModal = ref(false);
 
 const replyForm = reactive({
   message: '',
@@ -241,10 +283,15 @@ const submitReply = () => {
   });
 };
 
-const submitStatusChange = () => {
-  const note = prompt('Ketik alasan atau catatan perubahan status (opsional):') || '';
-  statusForm.note = note;
-  
+const openStatusModal = () => {
+  if (statusForm.status === props.complaint.status) {
+    statusForm.note = '';
+  }
+  showStatusModal.value = true;
+};
+
+const confirmStatusChange = () => {
+  showStatusModal.value = false;
   router.post(route('admin.complaints.status', props.complaint.id), statusForm);
 };
 
