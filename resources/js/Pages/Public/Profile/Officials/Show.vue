@@ -46,32 +46,6 @@
             <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-4">Tugas Pokok & Wewenang</h2>
             <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">{{ official.main_duties }}</p>
           </div>
-
-          <!-- Education Timeline -->
-          <div v-if="official.educations && official.educations.length > 0" class="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-slate-100 dark:border-slate-700">
-            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Riwayat Pendidikan</h2>
-            <div class="border-l-2 border-blue-500 ml-3 pl-6 space-y-6">
-              <div v-for="edu in official.educations" :key="edu.id">
-                <span class="text-xs font-bold text-blue-600 dark:text-blue-400">{{ edu.start_year }} - {{ edu.end_year }}</span>
-                <h3 class="font-bold text-slate-900 dark:text-white text-sm mt-0.5">{{ edu.degree }}</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400">{{ edu.institution }} {{ edu.major ? ' - ' + edu.major : '' }}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Achievements -->
-          <div v-if="official.achievements && official.achievements.length > 0" class="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-slate-100 dark:border-slate-700">
-            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Prestasi & Penghargaan</h2>
-            <div class="space-y-4">
-              <div v-for="ach in official.achievements" :key="ach.id" class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 flex items-start gap-4">
-                <div class="p-2.5 bg-amber-500 text-white rounded-xl font-bold text-xs shrink-0">{{ ach.year }}</div>
-                <div>
-                  <h3 class="font-bold text-slate-900 dark:text-white text-sm">{{ ach.title }}</h3>
-                  <p class="text-xs text-amber-700 dark:text-amber-300 mt-0.5">{{ ach.issuer }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- Sidebar Info -->
