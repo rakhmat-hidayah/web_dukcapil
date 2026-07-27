@@ -14,7 +14,7 @@
           
           <!-- Brand Logo Header (Official Dual Logo: Pemkab Dompu & Disdukcapil) -->
           <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center gap-3.5 px-6 py-3.5 bg-white rounded-2xl shadow-xl shadow-black/30 border border-zinc-200/60 mb-4 transition-transform hover:scale-[1.02]">
+            <div class="inline-flex items-center justify-center gap-3.5 px-6 py-3.5 bg-white rounded-2xl shadow-xl shadow-black/30 border border-zinc-200/60 mb-3 transition-transform hover:scale-[1.02]">
               <!-- Logo 1: Logo Pemkab Dompu -->
               <img src="/img/logo-dompu.png" alt="Logo Kabupaten Dompu" class="h-10 sm:h-11 w-auto object-contain drop-shadow-sm" />
               <!-- Vertical Divider Line -->
@@ -22,8 +22,7 @@
               <!-- Logo 2: Logo Disdukcapil Dompu -->
               <img src="/img/logo-dukcapil.png" alt="Logo Disdukcapil Dompu" class="h-10 sm:h-11 w-auto object-contain drop-shadow-sm" />
             </div>
-            <h2 class="text-2xl font-black tracking-tight text-white">Dukcapil Dompu</h2>
-            <p class="text-xs font-medium text-zinc-400 mt-1">Sistem Informasi Kependudukan & Administrator Portal</p>
+            <p class="text-xs font-semibold text-zinc-400">Sistem Informasi Kependudukan & Administrator Portal</p>
           </div>
 
           <!-- Login Form -->
@@ -145,7 +144,7 @@
       
       <!-- Footer Copyright -->
       <div class="text-center mt-6 text-xs font-semibold text-zinc-500 tracking-wide">
-        Dinas Kependudukan &amp; Pencatatan Sipil Kabupaten Dompu NTB © 2026
+        Dinas Kependudukan &amp; Pencatatan Sipil Kabupaten Dompu © 2026
       </div>
     </div>
   </div>
