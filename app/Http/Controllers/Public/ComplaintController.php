@@ -41,7 +41,7 @@ class ComplaintController extends Controller
     public function store(Request $request): RedirectResponse|InertiaResponse
     {
         $data = $request->validate([
-            'submitter_name'        => 'required|string|max:150',
+            'submitter_name'        => 'required_unless:is_anonymous,true,1|nullable|string|max:150',
             'submitter_phone'       => 'nullable|string|max:20',
             'submitter_email'       => 'nullable|email|max:150',
             'is_anonymous'          => 'boolean',
@@ -69,7 +69,7 @@ class ComplaintController extends Controller
         }
 
         $complaint = Complaint::create([
-            'submitter_name'        => $data['is_anonymous'] ? 'Anonim' : $data['submitter_name'],
+            'submitter_name'        => ($data['is_anonymous'] ?? false) ? 'Anonim' : ($data['submitter_name'] ?? 'Anonim'),
             'submitter_phone'       => $data['is_anonymous'] ? null : ($data['submitter_phone'] ?? null),
             'submitter_email'       => $data['is_anonymous'] ? null : ($data['submitter_email'] ?? null),
             'is_anonymous'          => $data['is_anonymous'] ?? false,
