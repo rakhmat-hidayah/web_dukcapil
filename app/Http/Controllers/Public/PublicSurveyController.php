@@ -119,7 +119,7 @@ class PublicSurveyController extends Controller
             'respondent_name'  => 'nullable|string|max:255',
             'respondent_phone' => 'nullable|string|max:20',
             'respondent_domicile' => 'nullable|string|max:100',
-            'respondent_age'   => 'nullable|string|max:50',
+            'respondent_age'   => 'nullable|max:50',
             'respondent_gender' => 'nullable|string|max:50',
             'respondent_education' => 'nullable|string|max:50',
             'respondent_job'   => 'nullable|string|max:100',

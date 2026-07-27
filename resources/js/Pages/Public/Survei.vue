@@ -531,6 +531,9 @@ function handleSubmit() {
   if (!form.survey_period_id && props.activeSurvey) {
     form.survey_period_id = props.activeSurvey.id
   }
+  if (form.respondent_age) {
+    form.respondent_age = String(form.respondent_age)
+  }
 
   form.post(route('public.survey.store'), {
     preserveScroll: true,
