@@ -6,7 +6,6 @@
       <!-- Page Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 shadow-xl border border-slate-100 dark:border-slate-700">
         <div>
-          <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-400 rounded-full text-xs font-bold uppercase tracking-wider mb-2 inline-block">Engine Visual Org Chart</span>
           <h1 class="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Struktur Organisasi Interaktif</h1>
           <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu</p>
         </div>
