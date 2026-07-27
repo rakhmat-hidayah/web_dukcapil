@@ -32,6 +32,16 @@
       <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-8 shadow-sm">
         <form @submit.prevent="submitForm" class="space-y-5" enctype="multipart/form-data">
 
+          <!-- Global Validation Error Banner -->
+          <div v-if="Object.keys(errors).length > 0" class="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs space-y-1.5 text-rose-700 dark:text-rose-300 shadow-sm">
+            <p class="font-black text-rose-800 dark:text-rose-200 flex items-center gap-1.5">
+              <span>⚠️</span> Harap periksa kembali isian Anda:
+            </p>
+            <ul class="list-disc list-inside space-y-0.5 font-semibold text-[11px] pl-1">
+              <li v-for="(err, key) in errors" :key="key">{{ Array.isArray(err) ? err.join(', ') : err }}</li>
+            </ul>
+          </div>
+
           <!-- Anonymous toggle -->
           <div class="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-2xl">
             <input id="is_anonymous" type="checkbox" v-model="form.is_anonymous"
@@ -162,9 +172,10 @@
                 <p class="text-xs font-bold text-gray-700 dark:text-zinc-300">
                   <span class="text-primary-600 hover:underline">Klik untuk mengunggah dokumen pendukung</span> atau tarik berkas ke sini
                 </p>
-                <p class="text-[9px] text-gray-400 mt-0.5">Format: PDF, JPG, PNG, DOC (Maksimal 5MB)</p>
+                <p class="text-[9px] text-gray-400 mt-0.5">Format: PDF, JPG, PNG, DOC (Maksimal 10MB)</p>
               </div>
             </div>
+            <p v-if="errors.attachment" class="text-xs text-red-500 font-bold mt-1.5 flex items-center gap-1">⚠️ {{ errors.attachment }}</p>
           </div>
 
           <!-- Math CAPTCHA -->

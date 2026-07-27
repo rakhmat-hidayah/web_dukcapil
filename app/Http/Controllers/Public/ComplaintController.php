@@ -48,7 +48,7 @@ class ComplaintController extends Controller
             'complaint_category_id' => 'nullable|exists:complaint_categories,id',
             'subject'               => 'required|string|max:255',
             'message'               => 'required|string|min:20|max:5000',
-            'attachment'            => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120',
+            'attachment'            => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
             'captcha_answer'        => 'required|integer',
             'captcha_hash'          => 'required|string',
         ]);
