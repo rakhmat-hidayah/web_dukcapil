@@ -18,7 +18,7 @@ class InformasiLayananController extends Controller
      */
     public function index(): InertiaResponse
     {
-        $settings = WebsiteSetting::where('group', 'informasi_layanan')->pluck('value', 'key')->toArray();
+        $settings = WebsiteSetting::whereIn('group', ['informasi_layanan', 'pimpinan', 'profil_instansi'])->pluck('value', 'key')->toArray();
 
         // Get all available active service requirements
         $allServices = ServiceRequirement::where('is_active', true)
@@ -59,9 +59,36 @@ class InformasiLayananController extends Controller
             'mobile_service_contact_button_text'=> 'Lihat Kontak Kantor',
             'mobile_service_contact_button_url' => '/contact',
             
-            // Bantuan Cepat Widget Beranda
+            // Widget Bantuan Cepat
             'quick_help_whatsapp'               => 'https://wa.me/6282340001111',
             'quick_help_google_maps_url'        => 'https://maps.google.com/?q=Dukcapil+Dompu',
+
+            // Sambutan Pimpinan / Foto Kepala Dinas
+            'leader_name'                       => 'Drs. Abd. Najib',
+            'leader_title'                      => 'Kepala Dinas Dukcapil Kabupaten Dompu',
+            'leader_speech_title'               => '"Pelayanan Kependudukan Yang Transparan & Membahagiakan Masyarakat"',
+            'leader_speech_content'             => "Assalamu’alaikum Warahmatullahi Wabarakatuh,\n\nSelamat datang di portal resmi Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu. Kehadiran portal ini merupakan bagian dari komitmen kami dalam mewujudkan keterbukaan informasi publik dan kemudahan akses layanan administrasi kependudukan bagi seluruh lapisan masyarakat.\n\nSeluruh jajaran Dinas Dukcapil Kabupaten Dompu siap melayani Anda dengan semangat integritas, profesionalisme, dan tanpa pungutan biaya apapun (Rp 0,-).",
+            'leader_photo'                      => '/images/kepala_dinas.jpg',
+
+            // Visi Misi Instansi
+            'profile_visi_title'                => 'Visi Instansi',
+            'profile_visi_text'                 => '"Terwujudnya Pelayanan Kependudukan dan Pencatatan Sipil yang Prima, Akurat, Terintegrasi, dan Membahagiakan Masyarakat di Kabupaten Dompu."',
+            'profile_misi_title'                => 'Misi Pelayanan',
+            'profile_misi_items'                => "Meningkatkan kualitas dan kecepatan pelayanan administrasi kependudukan dan pencatatan sipil.\nMewujudkan validitas dan akurasi database kependudukan Kabupaten Dompu yang terintegrasi SIAK Terpusat.\nMendorong pemanfaatan data kependudukan secara luas bagi perencanaan pembangunan daerah.",
+
+            // Tugas Pokok & Fungsi
+            'profile_duties_title'              => 'Tugas Pokok & Fungsi',
+            'profile_duties_item_1_title'       => 'Pendaftaran Penduduk',
+            'profile_duties_item_1_desc'        => 'Pelayanan penerbitan KTP-El, KK, KIA, dan surat keterangan pindah penduduk.',
+            'profile_duties_item_2_title'       => 'Pencatatan Sipil',
+            'profile_duties_item_2_desc'        => 'Penerbitan akta kelahiran, akta perkawinan, akta perceraian, dan akta kematian.',
+            'profile_duties_item_3_title'       => 'Pengelolaan PIAK & IKD',
+            'profile_duties_item_3_desc'        => 'Pengelolaan jaringan data SIAK Terpusat dan aktivasi Identitas Kependudukan Digital.',
+
+            // Maklumat Pelayanan Publik
+            'profile_maklumat_tag'              => 'Maklumat Pelayanan Publik',
+            'profile_maklumat_title'            => '"Dengan Ini, Kami Menyatakan Sanggup Menyenggarakan Pelayanan Sesuai Standar Pelayanan Yang Telah Ditetapkan"',
+            'profile_maklumat_subtitle'         => 'Apabila tidak memenuhi janji ini, kami siap menerima sanksi sesuai dengan peraturan perundang-undangan yang berlaku.',
         ];
 
         $mergedSettings = array_merge($defaults, $settings);
@@ -121,6 +148,26 @@ class InformasiLayananController extends Controller
             'leader_speech_title'               => 'nullable|string|max:255',
             'leader_speech_content'             => 'nullable|string|max:4000',
             'leader_photo'                      => 'nullable|string|max:500',
+
+            // Section 7: Visi Misi Instansi
+            'profile_visi_title'                => 'nullable|string|max:255',
+            'profile_visi_text'                 => 'nullable|string|max:2000',
+            'profile_misi_title'                => 'nullable|string|max:255',
+            'profile_misi_items'                => 'nullable|string|max:4000',
+
+            // Section 8: Tugas Pokok & Fungsi
+            'profile_duties_title'              => 'nullable|string|max:255',
+            'profile_duties_item_1_title'       => 'nullable|string|max:255',
+            'profile_duties_item_1_desc'        => 'nullable|string|max:1000',
+            'profile_duties_item_2_title'       => 'nullable|string|max:255',
+            'profile_duties_item_2_desc'        => 'nullable|string|max:1000',
+            'profile_duties_item_3_title'       => 'nullable|string|max:255',
+            'profile_duties_item_3_desc'        => 'nullable|string|max:1000',
+
+            // Section 9: Maklumat Pelayanan Publik
+            'profile_maklumat_tag'              => 'nullable|string|max:255',
+            'profile_maklumat_title'            => 'nullable|string|max:2000',
+            'profile_maklumat_subtitle'         => 'nullable|string|max:2000',
         ]);
 
         if ($request->hasFile('leader_photo_file')) {
@@ -137,7 +184,7 @@ class InformasiLayananController extends Controller
                 $val = (string) ($val ?? '');
             }
 
-            $group = str_starts_with($key, 'leader_') ? 'pimpinan' : 'informasi_layanan';
+            $group = str_starts_with($key, 'profile_') ? 'profil_instansi' : (str_starts_with($key, 'leader_') ? 'pimpinan' : 'informasi_layanan');
 
             WebsiteSetting::updateOrCreate(
                 ['key' => $key],
@@ -150,8 +197,8 @@ class InformasiLayananController extends Controller
 
         WebsiteSetting::clearCache();
 
-        ActivityLogger::log("Memperbarui konfigurasi Informasi Layanan & Sambutan Pimpinan", null, 'update_informasi_layanan');
+        ActivityLogger::log("Memperbarui konfigurasi Informasi Layanan & Profil Instansi", null, 'update_informasi_layanan');
 
-        return redirect()->back()->with('success', 'Konfigurasi Informasi Layanan & Sambutan Pimpinan berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Konfigurasi Informasi Layanan & Profil Instansi berhasil diperbarui.');
     }
 }

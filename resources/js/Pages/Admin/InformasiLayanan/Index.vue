@@ -709,6 +709,208 @@
           </div>
         </div>
 
+        <!-- SECTION 7: Visi & Misi Instansi -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-zinc-800">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-lg">
+                🎯
+              </div>
+              <div>
+                <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-100">
+                  Visi &amp; Misi Instansi
+                </h3>
+                <p class="text-xs text-gray-400 dark:text-zinc-500">
+                  Kelola judul visi, teks pernyataan visi, judul misi, serta poin-poin misi pelayanan instansi.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Visi -->
+            <div class="space-y-4 bg-gray-50/50 dark:bg-zinc-800/30 p-5 rounded-2xl border border-gray-100 dark:border-zinc-800">
+              <h4 class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Bagian Visi</h4>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">Judul Visi</label>
+                <input 
+                  type="text" 
+                  v-model="form.profile_visi_title"
+                  placeholder="Visi Instansi"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+              </div>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">Teks Pernyataan Visi</label>
+                <textarea 
+                  v-model="form.profile_visi_text"
+                  rows="4"
+                  placeholder='"Terwujudnya Pelayanan Kependudukan..."'
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed"
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- Misi -->
+            <div class="space-y-4 bg-gray-50/50 dark:bg-zinc-800/30 p-5 rounded-2xl border border-gray-100 dark:border-zinc-800">
+              <h4 class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Bagian Misi</h4>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">Judul Misi</label>
+                <input 
+                  type="text" 
+                  v-model="form.profile_misi_title"
+                  placeholder="Misi Pelayanan"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+              </div>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">Poin-poin Misi (1 Misi per Baris / Enter)</label>
+                <textarea 
+                  v-model="form.profile_misi_items"
+                  rows="4"
+                  placeholder="Tuliskan tiap poin misi pada baris baru..."
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 8: Tugas Pokok & Fungsi -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-zinc-800">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-lg">
+                📌
+              </div>
+              <div>
+                <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-100">
+                  Tugas Pokok &amp; Fungsi
+                </h3>
+                <p class="text-xs text-gray-400 dark:text-zinc-500">
+                  Kelola judul seksi dan 3 bidang tugas pokok utama instansi.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">Judul Seksi Utama</label>
+              <input 
+                type="text" 
+                v-model="form.profile_duties_title"
+                placeholder="Tugas Pokok & Fungsi"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              <!-- Tugas 01 -->
+              <div class="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 space-y-3">
+                <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Bidang 01</span>
+                <input 
+                  type="text" 
+                  v-model="form.profile_duties_item_1_title"
+                  placeholder="Pendaftaran Penduduk"
+                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+                <textarea 
+                  v-model="form.profile_duties_item_1_desc"
+                  rows="3"
+                  placeholder="Deskripsi tugas bidang 01..."
+                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed"
+                ></textarea>
+              </div>
+
+              <!-- Tugas 02 -->
+              <div class="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 space-y-3">
+                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Bidang 02</span>
+                <input 
+                  type="text" 
+                  v-model="form.profile_duties_item_2_title"
+                  placeholder="Pencatatan Sipil"
+                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+                <textarea 
+                  v-model="form.profile_duties_item_2_desc"
+                  rows="3"
+                  placeholder="Deskripsi tugas bidang 02..."
+                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed"
+                ></textarea>
+              </div>
+
+              <!-- Tugas 03 -->
+              <div class="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 space-y-3">
+                <span class="text-xs font-bold text-purple-600 dark:text-purple-400">Bidang 03</span>
+                <input 
+                  type="text" 
+                  v-model="form.profile_duties_item_3_title"
+                  placeholder="Pengelolaan PIAK & IKD"
+                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+                <textarea 
+                  v-model="form.profile_duties_item_3_desc"
+                  rows="3"
+                  placeholder="Deskripsi tugas bidang 03..."
+                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 9: Maklumat Pelayanan Publik -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-zinc-800">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
+                📜
+              </div>
+              <div>
+                <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-100">
+                  Maklumat Pelayanan Publik
+                </h3>
+                <p class="text-xs text-gray-400 dark:text-zinc-500">
+                  Kelola teks komitmen maklumat pelayanan publik dan sanksi aturan perundangan.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">Teks Badge Tag</label>
+              <input 
+                type="text" 
+                v-model="form.profile_maklumat_tag"
+                placeholder="Maklumat Pelayanan Publik"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">Pernyataan Maklumat Utama</label>
+              <textarea 
+                v-model="form.profile_maklumat_title"
+                rows="3"
+                placeholder='"Dengan Ini, Kami Menyatakan Sanggup Menyenggarakan Pelayanan..."'
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed font-bold"
+              ></textarea>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">Teks Keterangan Sanksi &amp; Konsekuensi</label>
+              <input 
+                type="text" 
+                v-model="form.profile_maklumat_subtitle"
+                placeholder="Apabila tidak memenuhi janji ini, kami siap menerima sanksi..."
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+          </div>
+        </div>
+
         <!-- Form Submit Bar -->
         <div class="flex items-center justify-end gap-3 pt-4">
           <button 
@@ -901,6 +1103,26 @@ const form = useForm({
   leader_speech_content: props.settings.leader_speech_content || "Assalamu’alaikum Warahmatullahi Wabarakatuh,\n\nSelamat datang di portal resmi Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu. Kehadiran portal ini merupakan bagian dari komitmen kami dalam mewujudkan keterbukaan informasi publik dan kemudahan akses layanan administrasi kependudukan bagi seluruh lapisan masyarakat.\n\nSeluruh jajaran Dinas Dukcapil Kabupaten Dompu siap melayani Anda dengan semangat integritas, profesionalisme, dan tanpa pungutan biaya apapun (Rp 0,-).",
   leader_photo: props.settings.leader_photo || '/images/kepala_dinas.jpg',
   leader_photo_file: null,
+
+  // Section 7: Visi Misi Instansi
+  profile_visi_title: props.settings.profile_visi_title || 'Visi Instansi',
+  profile_visi_text: props.settings.profile_visi_text || '"Terwujudnya Pelayanan Kependudukan dan Pencatatan Sipil yang Prima, Akurat, Terintegrasi, dan Membahagiakan Masyarakat di Kabupaten Dompu."',
+  profile_misi_title: props.settings.profile_misi_title || 'Misi Pelayanan',
+  profile_misi_items: props.settings.profile_misi_items || "Meningkatkan kualitas dan kecepatan pelayanan administrasi kependudukan dan pencatatan sipil.\nMewujudkan validitas dan akurasi database kependudukan Kabupaten Dompu yang terintegrasi SIAK Terpusat.\nMendorong pemanfaatan data kependudukan secara luas bagi perencanaan pembangunan daerah.",
+
+  // Section 8: Tugas Pokok & Fungsi
+  profile_duties_title: props.settings.profile_duties_title || 'Tugas Pokok & Fungsi',
+  profile_duties_item_1_title: props.settings.profile_duties_item_1_title || 'Pendaftaran Penduduk',
+  profile_duties_item_1_desc: props.settings.profile_duties_item_1_desc || 'Pelayanan penerbitan KTP-El, KK, KIA, dan surat keterangan pindah penduduk.',
+  profile_duties_item_2_title: props.settings.profile_duties_item_2_title || 'Pencatatan Sipil',
+  profile_duties_item_2_desc: props.settings.profile_duties_item_2_desc || 'Penerbitan akta kelahiran, akta perkawinan, akta perceraian, dan akta kematian.',
+  profile_duties_item_3_title: props.settings.profile_duties_item_3_title || 'Pengelolaan PIAK & IKD',
+  profile_duties_item_3_desc: props.settings.profile_duties_item_3_desc || 'Pengelolaan jaringan data SIAK Terpusat dan aktivasi Identitas Kependudukan Digital.',
+
+  // Section 9: Maklumat Pelayanan Publik
+  profile_maklumat_tag: props.settings.profile_maklumat_tag || 'Maklumat Pelayanan Publik',
+  profile_maklumat_title: props.settings.profile_maklumat_title || '"Dengan Ini, Kami Menyatakan Sanggup Menyenggarakan Pelayanan Sesuai Standar Pelayanan Yang Telah Ditetapkan"',
+  profile_maklumat_subtitle: props.settings.profile_maklumat_subtitle || 'Apabila tidak memenuhi janji ini, kami siap menerima sanksi sesuai dengan peraturan perundang-undangan yang berlaku.',
 });
 
 const submit = () => {
