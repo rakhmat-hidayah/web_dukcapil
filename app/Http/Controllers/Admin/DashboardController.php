@@ -134,7 +134,7 @@ class DashboardController extends Controller
 
         $innovationsCount = DB::table('innovations')->count();
         $complaintsCount = DB::table('complaints')->count();
-        $complaintsResolved = DB::table('complaints')->whereIn('status', ['diproses', 'selesai'])->count();
+        $complaintsResolved = DB::table('complaints')->whereIn('status', ['in_progress', 'resolved'])->count();
         $complaintRate = $complaintsCount > 0 ? round(($complaintsResolved / $complaintsCount) * 100) : 100;
 
         $avgIkm = DB::table('survey_responses')->avg('ikm_score');
@@ -182,8 +182,8 @@ class DashboardController extends Controller
                 'title' => "VISITOR BULAN INI",
                 'value' => number_format($visitorsThisMonth, 0, ',', '.'),
                 'unit' => 'hits',
-                'trend' => ($visitorsMonthTrend >= 0 ? '+' : '') . $visitorsMonthTrend . '%',
-                'is_positive' => $visitorsMonthTrend >= 0,
+                'trend' => 'Akumulasi 30 Hari',
+                'is_positive' => true,
                 'sparkline' => $sparklineVisitors,
                 'icon' => 'TrendingUp',
                 'color' => 'indigo',
@@ -193,7 +193,7 @@ class DashboardController extends Controller
                 'title' => 'BERITA & ARTIKEL',
                 'value' => number_format($newsPublishedCount, 0, ',', '.'),
                 'unit' => 'rilis',
-                'trend' => "+{$newsThisWeek} minggu ini",
+                'trend' => '100% Terpublikasi',
                 'is_positive' => true,
                 'sparkline' => $sparklineNews,
                 'icon' => 'Newspaper',
@@ -204,7 +204,7 @@ class DashboardController extends Controller
                 'title' => 'FILE DOWNLOADS',
                 'value' => number_format($downloadsCount, 0, ',', '.'),
                 'unit' => 'berkas',
-                'trend' => "22 Formulir",
+                'trend' => '22 Form & 17 Dokumen',
                 'is_positive' => true,
                 'sparkline' => $sparklineDownloads,
                 'icon' => 'Download',
@@ -215,7 +215,7 @@ class DashboardController extends Controller
                 'title' => 'FOTO & VIDEO GALERI',
                 'value' => number_format($galleryCount, 0, ',', '.'),
                 'unit' => 'item',
-                'trend' => "2 Album",
+                'trend' => '2 Album Kegiatan',
                 'is_positive' => true,
                 'sparkline' => $sparklineGallery,
                 'icon' => 'Image',
@@ -226,7 +226,7 @@ class DashboardController extends Controller
                 'title' => 'TANYA JAWAB (FAQ)',
                 'value' => number_format($faqCount, 0, ',', '.'),
                 'unit' => 'soal',
-                'trend' => '100% online',
+                'trend' => '100% Online',
                 'is_positive' => true,
                 'sparkline' => $sparklineFaqs,
                 'icon' => 'HelpCircle',
@@ -237,7 +237,7 @@ class DashboardController extends Controller
                 'title' => 'DOKUMEN PPID',
                 'value' => number_format($ppidDocsCount, 0, ',', '.'),
                 'unit' => 'dokumen',
-                'trend' => "+{$ppidDocsThisMonth} baru",
+                'trend' => 'DIP 2024 - 2026',
                 'is_positive' => true,
                 'sparkline' => $sparklinePpid,
                 'icon' => 'FileText',
@@ -248,7 +248,7 @@ class DashboardController extends Controller
                 'title' => 'INOVASI LAYANAN',
                 'value' => number_format($innovationsCount, 0, ',', '.'),
                 'unit' => 'program',
-                'trend' => 'Aktif 100%',
+                'trend' => '12 Inovasi Aktif',
                 'is_positive' => true,
                 'sparkline' => $sparklineInnovations,
                 'icon' => 'Zap',
@@ -259,7 +259,7 @@ class DashboardController extends Controller
                 'title' => 'ADUAN MASYARAKAT',
                 'value' => number_format($complaintsCount, 0, ',', '.'),
                 'unit' => 'tiket',
-                'trend' => "{$complaintRate}% terlayani",
+                'trend' => "{$complaintRate}% Terlayani",
                 'is_positive' => true,
                 'sparkline' => $sparklineComplaints,
                 'icon' => 'MessageSquareWarning',
@@ -270,7 +270,7 @@ class DashboardController extends Controller
                 'title' => 'SKOR IKM (KEPUASAN)',
                 'value' => $ikmScoreFormatted,
                 'unit' => 'A (Sangat Baik)',
-                'trend' => 'Mutu A',
+                'trend' => 'Mutu A (Sangat Baik)',
                 'is_positive' => true,
                 'sparkline' => $sparklineIkm,
                 'icon' => 'Award',
