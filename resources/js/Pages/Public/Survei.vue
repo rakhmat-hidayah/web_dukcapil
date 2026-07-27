@@ -1,7 +1,6 @@
 <template>
-  <Head title="Survei Kepuasan Masyarakat (IKM) — Disdukcapil Dompu" />
-
   <PublicLayout>
+    <Head title="Survei Kepuasan Masyarakat (IKM) — Disdukcapil Dompu" />
     <div class="space-y-10 text-left max-w-7xl mx-auto">
 
       <!-- HERO HEADER -->
