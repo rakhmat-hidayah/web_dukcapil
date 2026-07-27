@@ -47,6 +47,21 @@
               <option value="transferred">Transferred (Mutasi)</option>
             </select>
           </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Nomor Telepon / Kontak</label>
+            <input v-model="form.phone" type="text" placeholder="(0373) 21124 / 08123456789" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Alamat Email Resmi Pejabat</label>
+            <input v-model="form.email" type="email" placeholder="kadis@dukcapil.dompukab.go.id" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Alamat Kantor</label>
+            <input v-model="form.office_address" type="text" placeholder="Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
         </div>
 
         <div>
