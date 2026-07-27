@@ -129,13 +129,24 @@
                 <label class="block text-xs font-semibold text-gray-500 mb-1">
                   Kata Sandi <span v-if="editingUser" class="text-[10px] text-gray-400 font-normal">(Kosongkan jika tidak diubah)</span>
                 </label>
-                <input 
-                  type="password" 
-                  v-model="form.password" 
-                  :required="!editingUser"
-                  placeholder="Min. 8 karakter"
-                  class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
+                <div class="relative">
+                  <input 
+                    :type="showPassword ? 'text' : 'password'" 
+                    v-model="form.password" 
+                    :required="!editingUser"
+                    placeholder="Min. 8 karakter"
+                    class="w-full pl-3.5 pr-10 py-2.5 bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                  <button 
+                    type="button" 
+                    @click="showPassword = !showPassword"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 transition focus:outline-none p-1"
+                    title="Tampilkan / Sembunyikan Kata Sandi"
+                  >
+                    <Eye v-if="!showPassword" class="w-4 h-4" />
+                    <EyeOff v-else class="w-4 h-4" />
+                  </button>
+                </div>
                 <span v-if="form.errors.password" class="text-[10px] text-red-500 mt-0.5 block">{{ form.errors.password }}</span>
               </div>
 
@@ -228,7 +239,7 @@
 import { ref } from 'vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Plus, Pencil, Trash2 } from '@lucide/vue';
+import { Plus, Pencil, Trash2, Eye, EyeOff } from '@lucide/vue';
 
 const props = defineProps({
   users: Array,
@@ -239,6 +250,7 @@ const modalOpen = ref(false);
 const editingUser = ref(null);
 const deleteModalOpen = ref(false);
 const userToDelete = ref(null);
+const showPassword = ref(false);
 
 const form = useForm({
   name: '',
@@ -286,6 +298,7 @@ const openCreateModal = () => {
   form.reset();
   form.role = 'Content Editor';
   form.clearErrors();
+  showPassword.value = false;
   modalOpen.value = true;
 };
 
@@ -296,6 +309,7 @@ const openEditModal = (user) => {
   form.password = '';
   form.role = user.role || 'Content Editor';
   form.clearErrors();
+  showPassword.value = false;
   modalOpen.value = true;
 };
 

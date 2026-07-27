@@ -69,12 +69,21 @@
                   </svg>
                 </span>
                 <input 
-                  type="password" 
+                  :type="showPassword ? 'text' : 'password'" 
                   v-model="form.password" 
                   required
                   placeholder="••••••••"
-                  class="w-full pl-11 pr-4 py-3 bg-zinc-950/90 border border-zinc-700/80 rounded-2xl text-white placeholder-zinc-500 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-inner"
+                  class="w-full pl-11 pr-11 py-3 bg-zinc-950/90 border border-zinc-700/80 rounded-2xl text-white placeholder-zinc-500 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-inner"
                 />
+                <button 
+                  type="button" 
+                  @click="showPassword = !showPassword"
+                  class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-400 hover:text-white transition focus:outline-none"
+                  title="Tampilkan / Sembunyikan Kata Sandi"
+                >
+                  <Eye v-if="!showPassword" class="w-5 h-5" />
+                  <EyeOff v-else class="w-5 h-5" />
+                </button>
               </div>
               <span v-if="form.errors.password" class="text-xs font-semibold text-rose-400 mt-1.5 block">
                 {{ form.errors.password }}
@@ -154,12 +163,14 @@
 import { ref } from 'vue';
 import { useForm, Head } from '@inertiajs/vue3';
 import axios from 'axios';
+import { Eye, EyeOff } from '@lucide/vue';
 
 const props = defineProps({
   captchaImage: String,
 });
 
 const currentCaptcha = ref(props.captchaImage);
+const showPassword = ref(false);
 
 const form = useForm({
   email: '',

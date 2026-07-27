@@ -433,9 +433,11 @@
               </div>
             </div>
           </div>
+        </div>
+
         <!-- Quick Access Widgets: Downloads & Complaints (Col Span 1) -->
         <div class="space-y-8 text-left">
-          <!-- Download shortcuts widget (Paling Sering Diunduh) -->
+          <!-- Download shortcuts -->
           <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm space-y-4">
             <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
               <div class="flex items-center gap-2.5">
