@@ -212,6 +212,31 @@
           />
         </div>
       </div>
+
+      <!-- Custom Vue Modal Confirm Delete News -->
+      <transition name="fade">
+        <div v-if="deletingNews" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="deletingNews = null">
+          <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl w-full max-w-sm shadow-2xl p-6 text-left relative space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                <Trash2 class="w-5 h-5" />
+              </div>
+              <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">Hapus Artikel Berita</h3>
+            </div>
+            <p class="text-xs text-gray-600 dark:text-zinc-300 leading-relaxed">
+              Apakah Anda yakin ingin menghapus berita <strong>"{{ deletingNews.title }}"</strong>? Berita yang dihapus dapat dipulihkan kembali jika diperlukan.
+            </p>
+            <div class="flex justify-end gap-2 pt-2">
+              <button @click="deletingNews = null" class="px-4 py-2 border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 text-xs font-semibold rounded-xl hover:bg-gray-50 transition" :disabled="isDeleting">
+                Batal
+              </button>
+              <button @click="executeDeleteNews" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl active:scale-95 transition" :disabled="isDeleting">
+                {{ isDeleting ? 'Menghapus...' : 'Ya, Hapus Berita' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
   </AdminLayout>
 </template>
@@ -232,6 +257,9 @@ const search = ref(props.filters.search || '');
 const category = ref(props.filters.category || '');
 const status = ref(props.filters.status || '');
 
+const deletingNews = ref(null);
+const isDeleting = ref(false);
+
 const applyFilters = () => {
   router.get(route('admin.news.index'), {
     search: search.value,
@@ -243,9 +271,24 @@ const applyFilters = () => {
 };
 
 const deleteNews = (item) => {
-  if (confirm(`Apakah Anda yakin ingin menghapus berita "${item.title}"?`)) {
-    router.delete(route('admin.news.destroy', item.id));
-  }
+  deletingNews.value = item;
+};
+
+const executeDeleteNews = () => {
+  if (!deletingNews.value) return;
+  isDeleting.value = true;
+  router.delete(route('admin.news.destroy', deletingNews.value.id), {
+    onSuccess: () => {
+      deletingNews.value = null;
+      isDeleting.value = false;
+    },
+    onError: () => {
+      isDeleting.value = false;
+    },
+    onFinish: () => {
+      isDeleting.value = false;
+    }
+  });
 };
 
 const formatDate = (dateStr) => {

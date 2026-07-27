@@ -168,6 +168,30 @@
           </div>
         </div>
       </transition>
+      <!-- Custom Vue Modal Confirm Delete Category -->
+      <transition name="fade">
+        <div v-if="deletingCat" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="deletingCat = null">
+          <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl w-full max-w-sm shadow-2xl p-6 text-left relative space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                <Trash2 class="w-5 h-5" />
+              </div>
+              <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">Hapus Kategori Berita</h3>
+            </div>
+            <p class="text-xs text-gray-600 dark:text-zinc-300 leading-relaxed">
+              Apakah Anda yakin ingin menghapus kategori <strong>"{{ deletingCat.name }}"</strong>?
+            </p>
+            <div class="flex justify-end gap-2 pt-2">
+              <button @click="deletingCat = null" class="px-4 py-2 border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 text-xs font-semibold rounded-xl hover:bg-gray-50 transition">
+                Batal
+              </button>
+              <button @click="executeDeleteCat" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl active:scale-95 transition">
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
   </AdminLayout>
 </template>
@@ -176,7 +200,7 @@
 import { ref } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Plus, Edit, Trash2 } from '@lucide/vue';
+import { Plus, Edit, Trash2, ArrowLeft } from '@lucide/vue';
 
 const props = defineProps({
   categories: Array,
@@ -185,6 +209,7 @@ const props = defineProps({
 const modalOpen = ref(false);
 const isEditing = ref(false);
 const editId = ref(null);
+const deletingCat = ref(null);
 
 const form = useForm({
   name: '',
@@ -202,7 +227,7 @@ const openEditModal = (cat) => {
   isEditing.value = true;
   editId.value = cat.id;
   form.name = cat.name;
-  form.color = cat.color;
+  form.color = cat.color || '#3b82f6';
   modalOpen.value = true;
 };
 
@@ -223,8 +248,15 @@ const submit = () => {
 };
 
 const deleteCategory = (cat) => {
-  if (confirm(`Apakah Anda yakin ingin menghapus kategori "${cat.name}"?`)) {
-    router.delete(route('admin.news.categories.destroy', cat.id));
-  }
+  deletingCat.value = cat;
+};
+
+const executeDeleteCat = () => {
+  if (!deletingCat.value) return;
+  router.delete(route('admin.news.categories.destroy', deletingCat.value.id), {
+    onSuccess: () => {
+      deletingCat.value = null;
+    }
+  });
 };
 </script>
