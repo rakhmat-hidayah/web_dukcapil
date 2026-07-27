@@ -99,7 +99,7 @@
               <span>Isi Formulir Permohonan Informasi</span>
             </div>
 
-            <form @submit.prevent="submit" class="p-6 sm:p-8 space-y-6">
+            <form novalidate @submit.prevent="submit" class="p-6 sm:p-8 space-y-6">
               
               <!-- Section 1 -->
               <div>

@@ -13,23 +13,25 @@
 
       <!-- Form card -->
       <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-8 shadow-sm">
-        <form @submit.prevent="submitTrack" class="space-y-4">
+        <form novalidate @submit.prevent="submitTrack" class="space-y-4">
           <div>
             <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Nomor Tiket Pengaduan *</label>
             <input 
               v-model="form.ticket_number" 
-              required 
               type="text" 
               placeholder="Contoh: DKP-2026-XXXXXX" 
-              class="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-bold uppercase placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
+              class="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border rounded-xl text-xs font-mono font-bold uppercase placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
+              :class="errors.ticket_number ? 'border-red-400 bg-red-50/20' : 'border-gray-200 dark:border-zinc-700'"
             />
-            <p v-if="errors.ticket_number" class="text-[9px] text-red-500 font-bold mt-1">{{ errors.ticket_number }}</p>
+            <p v-if="errors.ticket_number" class="text-xs text-red-500 font-bold mt-1.5 flex items-center gap-1">
+              ⚠️ {{ errors.ticket_number }}
+            </p>
           </div>
 
           <button 
             type="submit" 
             :disabled="submitting"
-            class="w-full py-3 bg-primary-600 hover:bg-primary-500 text-white text-xs font-black rounded-xl transition disabled:opacity-50"
+            class="w-full py-3 bg-primary-600 hover:bg-primary-500 text-white text-xs font-black rounded-xl transition disabled:opacity-50 cursor-pointer"
           >
             {{ submitting ? 'Mencari Tiket...' : '🔍 Lacak Status Tiket' }}
           </button>
@@ -53,6 +55,12 @@ const submitting = ref(false);
 
 const submitTrack = () => {
   errors.value = {};
+
+  if (!form.ticket_number || !form.ticket_number.trim()) {
+    errors.value.ticket_number = 'Nomor tiket pengaduan wajib diisi.';
+    return;
+  }
+
   submitting.value = true;
 
   router.post(route('public.complaint.track.search'), form, {

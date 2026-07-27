@@ -44,7 +44,7 @@
 
       <!-- Main form card -->
       <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-8 shadow-sm">
-        <form @submit.prevent="submitForm" class="space-y-5" enctype="multipart/form-data">
+        <form novalidate @submit.prevent="submitForm" class="space-y-5" enctype="multipart/form-data">
 
           <!-- Global Validation Error Banner -->
           <div v-if="Object.keys(errors).length > 0" class="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs space-y-1.5 text-rose-700 dark:text-rose-300 shadow-sm">
@@ -72,11 +72,11 @@
                 <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Nama Lengkap *</label>
                 <input 
                   v-model="form.submitter_name" 
-                  required 
                   type="text" 
                   :disabled="form.is_anonymous"
                   placeholder="Nama sesuai KTP"
-                  class="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" 
+                  class="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" 
+                  :class="errors.submitter_name ? 'border-red-400 bg-red-50/20' : 'border-gray-200 dark:border-zinc-700'"
                 />
                 <p v-if="errors.submitter_name" class="text-[9px] text-red-500 font-semibold mt-0.5">{{ errors.submitter_name }}</p>
               </div>
@@ -106,11 +106,11 @@
             <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Judul / Pokok Pengaduan *</label>
             <input 
               v-model="form.subject" 
-              required 
               type="text" 
               maxlength="255"
               placeholder="Tulis ringkasan masalah secara singkat dan jelas"
-              class="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" 
+              class="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" 
+              :class="errors.subject ? 'border-red-400 bg-red-50/20' : 'border-gray-200 dark:border-zinc-700'"
             />
             <p v-if="errors.subject" class="text-[9px] text-red-500 font-semibold mt-0.5">{{ errors.subject }}</p>
           </div>
@@ -120,14 +120,11 @@
             <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Uraian Pengaduan *</label>
             <textarea 
               v-model="form.message" 
-              required 
               rows="6" 
-              minlength="20" 
               maxlength="5000"
-              @invalid="e => e.target.setCustomValidity('Mohon isi uraian pengaduan minimal 20 karakter agar kronologi dapat dipahami.')"
-              @input="e => e.target.setCustomValidity('')"
               placeholder="Jelaskan kronologi, lokasi, dan fakta pendukung pengaduan Anda (minimal 20 karakter)..."
-              class="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none"
+              class="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none"
+              :class="errors.message ? 'border-red-400 bg-red-50/20' : 'border-gray-200 dark:border-zinc-700'"
             ></textarea>
             <div class="flex justify-between items-center mt-1">
               <p v-if="errors.message" class="text-[9px] text-red-500 font-semibold">{{ errors.message }}</p>
@@ -308,11 +305,27 @@ const submitForm = () => {
 
   if (!form.complaint_category_id) {
     errors.value.complaint_category_id = 'Silakan pilih salah satu Kategori Pengaduan terlebih dahulu.';
+  }
+  if (!form.is_anonymous && (!form.submitter_name || !form.submitter_name.trim())) {
+    errors.value.submitter_name = 'Nama lengkap wajib diisi (atau centang Kirim sebagai Anonim).';
+  }
+  if (!form.subject || !form.subject.trim()) {
+    errors.value.subject = 'Judul / pokok pengaduan wajib diisi.';
+  }
+  if (!form.message || form.message.trim().length < 20) {
+    errors.value.message = 'Uraian pengaduan wajib diisi minimal 20 karakter agar kronologi jelas.';
+  }
+  if (form.captcha_answer === '' || form.captcha_answer === null || form.captcha_answer === undefined) {
+    errors.value.captcha_answer = 'Jawaban verifikasi anti-robot wajib diisi.';
+  }
+
+  if (Object.keys(errors.value).length > 0) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
 
   submitting.value = true;
+
 
 
   const data = new FormData();

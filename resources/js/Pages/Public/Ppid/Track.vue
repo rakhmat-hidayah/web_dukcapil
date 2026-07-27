@@ -33,7 +33,7 @@
       
       <!-- Search Form Card -->
       <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
-        <form @submit.prevent="doSearch" class="flex flex-col sm:flex-row gap-3">
+        <form novalidate @submit.prevent="doSearch" class="flex flex-col sm:flex-row gap-3">
           <div class="flex-1 relative">
             <Search :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500" />
             <input

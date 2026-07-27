@@ -201,7 +201,7 @@
           </div>
 
           <!-- FORM -->
-          <form @submit.prevent="handleSubmit" class="p-6 space-y-5">
+          <form novalidate @submit.prevent="handleSubmit" class="p-6 space-y-5">
 
             <!-- STEP 1: DATA RESPONDEN -->
             <div v-if="currentStep === 1" class="space-y-4">
