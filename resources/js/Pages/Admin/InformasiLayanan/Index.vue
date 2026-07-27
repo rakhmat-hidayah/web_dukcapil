@@ -10,7 +10,7 @@
             Pengaturan Informasi Layanan &amp; Mobil Keliling
           </h1>
           <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-            Kelola jadwal Mobil Pelayanan Keliling, catatan, persyaratan berkas, serta kartu bantuan cepat.
+            Kelola jadwal Mobil Pelayanan Keliling, jenis dokumen yang dilayani, persyaratan berkas, serta kartu bantuan cepat.
           </p>
         </div>
 
@@ -244,6 +244,77 @@
 
           <div v-else class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-2xl text-xs text-amber-800 dark:text-amber-300">
             ℹ️ Seksi <strong>Mobil Pelayanan</strong> sedang disembunyikan dari widget beranda.
+          </div>
+        </div>
+
+        <!-- NEW SUBSECTION: Pilih Jenis Dokumen yang Dilayani di Mobil Keliling -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-zinc-800">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
+                🛠️
+              </div>
+              <div>
+                <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50">
+                  Pilih Dokumen / Jenis Layanan yang Dilayani di Lokasi Mobil Keliling
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-zinc-400">
+                  Centang dokumen mana saja yang saat ini dilayani oleh tim mobil keliling pada jadwal lokasi tersebut.
+                </p>
+              </div>
+            </div>
+
+            <!-- Quick Selection Buttons -->
+            <div class="flex items-center gap-2 shrink-0">
+              <button 
+                type="button" 
+                @click="selectAllServices"
+                class="px-3 py-1 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-bold rounded-xl hover:bg-indigo-100 transition"
+              >
+                Pilih Semua
+              </button>
+              <button 
+                type="button" 
+                @click="deselectAllServices"
+                class="px-3 py-1 bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 border border-gray-200 dark:border-zinc-700 text-xs font-bold rounded-xl hover:bg-gray-200 transition"
+              >
+                Hapus Semua
+              </button>
+            </div>
+          </div>
+
+          <!-- Service Checkbox Badge List -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div 
+              v-for="service in allServices" 
+              :key="service.id"
+              @click="toggleServiceSelection(service.id)"
+              class="p-3.5 rounded-2xl border transition-all cursor-pointer select-none flex items-start gap-3"
+              :class="form.mobile_service_selected_services.includes(service.id) 
+                ? 'bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800/80 text-indigo-950 dark:text-indigo-100 shadow-xs' 
+                : 'bg-gray-50/50 dark:bg-zinc-800/30 border-gray-200 dark:border-zinc-800/60 opacity-60 text-gray-600 dark:text-zinc-400 hover:opacity-100'"
+            >
+              <!-- Custom Checkbox Icon -->
+              <div 
+                class="w-5 h-5 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 border transition"
+                :class="form.mobile_service_selected_services.includes(service.id)
+                  ? 'bg-indigo-600 border-indigo-600 text-white'
+                  : 'border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-transparent'"
+              >
+                ✓
+              </div>
+
+              <!-- Service Info -->
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-base">{{ service.icon || '📄' }}</span>
+                  <span class="text-xs font-extrabold truncate">{{ service.title }}</span>
+                </div>
+                <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-1 line-clamp-1 leading-normal">
+                  {{ service.description }}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -493,18 +564,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Save } from '@lucide/vue';
 
 const props = defineProps({
   settings: Object,
+  allServices: Array,
 });
 
 const pickedDate = ref('');
 const timeStart = ref('08:00');
 const timeEnd = ref('14:00');
+
+// Initial Selected Service IDs parser
+const initialSelectedServices = computed(() => {
+  try {
+    const raw = props.settings?.mobile_service_selected_services;
+    if (!raw) return (props.allServices || []).map(s => s.id);
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed.map(Number) : (props.allServices || []).map(s => s.id);
+  } catch (e) {
+    return (props.allServices || []).map(s => s.id);
+  }
+});
 
 const formatIndonesianDate = (dateObj) => {
   const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -575,6 +659,23 @@ const setTimePreset = (startStr, endStr) => {
   form.mobile_service_time = `${s} - ${e} WITA`;
 };
 
+const toggleServiceSelection = (serviceId) => {
+  const index = form.mobile_service_selected_services.indexOf(serviceId);
+  if (index > -1) {
+    form.mobile_service_selected_services.splice(index, 1);
+  } else {
+    form.mobile_service_selected_services.push(serviceId);
+  }
+};
+
+const selectAllServices = () => {
+  form.mobile_service_selected_services = (props.allServices || []).map(s => s.id);
+};
+
+const deselectAllServices = () => {
+  form.mobile_service_selected_services = [];
+};
+
 const form = useForm({
   // Section 1: Mobil Pelayanan Utama
   mobile_service_is_active: props.settings.mobile_service_is_active === '1',
@@ -586,6 +687,7 @@ const form = useForm({
   mobile_service_button_text: props.settings.mobile_service_button_text || 'Lihat Jadwal Lengkap',
   mobile_service_button_url: props.settings.mobile_service_button_url || '/layanan/mobil',
   mobile_service_notes: props.settings.mobile_service_notes || '',
+  mobile_service_selected_services: initialSelectedServices.value,
 
   // Section 2: Persyaratan Umum Berkas
   mobile_service_requirements: props.settings.mobile_service_requirements || '',

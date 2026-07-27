@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\WebsiteSetting;
+use App\Models\ServiceRequirement;
 use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,11 @@ class InformasiLayananController extends Controller
     {
         $settings = WebsiteSetting::where('group', 'informasi_layanan')->pluck('value', 'key')->toArray();
 
+        // Get all available active service requirements
+        $allServices = ServiceRequirement::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'title', 'icon', 'color', 'description']);
+
         // Default initial values for all sections
         $defaults = [
             'mobile_service_is_active'          => '1',
@@ -30,6 +36,7 @@ class InformasiLayananController extends Controller
             'mobile_service_button_text'        => 'Lihat Jadwal Lengkap',
             'mobile_service_button_url'         => '/layanan/mobil',
             'mobile_service_notes'              => 'Harap membawa berkas persyaratan fisik lengkap (ASLI & Fotokopi) untuk mempercepat proses penerbitan dokumen di lokasi mobil pelayanan keliling.',
+            'mobile_service_selected_services'  => json_encode($allServices->pluck('id')->toArray()),
             
             // Persyaratan Umum Berkas (Multi-line text, 1 requirement per line)
             'mobile_service_requirements'       => "Fotokopi Kartu Keluarga (KK) terbaru.\nKTP-el lama atau Surat Keterangan Pengganti (jika ubah data/rusak).\nSurat Keterangan Kehilangan dari Kepolisian (jika KTP/KK hilang).\nBuku Nikah / Kutipan Akta Perkawinan (jika ubah status perkawinan).\nSurat Keterangan Lahir dari Bidan/Klinik/RS (untuk Akta Kelahiran).",
@@ -56,6 +63,7 @@ class InformasiLayananController extends Controller
 
         return Inertia::render('Admin/InformasiLayanan/Index', [
             'settings' => $mergedSettings,
+            'allServices' => $allServices,
         ]);
     }
 
@@ -75,6 +83,7 @@ class InformasiLayananController extends Controller
             'mobile_service_button_text'        => 'nullable|string|max:100',
             'mobile_service_button_url'         => 'nullable|string|max:500',
             'mobile_service_notes'              => 'nullable|string|max:1000',
+            'mobile_service_selected_services'  => 'nullable|array',
 
             // Section 2: Persyaratan Umum Berkas
             'mobile_service_requirements'       => 'nullable|string|max:2000',
@@ -98,10 +107,18 @@ class InformasiLayananController extends Controller
         ]);
 
         foreach ($data as $key => $val) {
+            if ($key === 'mobile_service_selected_services') {
+                $val = json_encode(array_map('intval', $val ?? []));
+            } elseif (is_bool($val)) {
+                $val = $val ? '1' : '0';
+            } else {
+                $val = (string) ($val ?? '');
+            }
+
             WebsiteSetting::updateOrCreate(
                 ['key' => $key],
                 [
-                    'value' => is_bool($val) ? ($val ? '1' : '0') : (string) ($val ?? ''),
+                    'value' => $val,
                     'group' => 'informasi_layanan',
                 ]
             );
@@ -109,8 +126,8 @@ class InformasiLayananController extends Controller
 
         WebsiteSetting::clearCache();
 
-        ActivityLogger::log("Memperbarui konfigurasi Informasi Layanan & Halaman Mobil Keliling", null, 'update_informasi_layanan');
+        ActivityLogger::log("Memperbarui konfigurasi Informasi Layanan & jenis dokumen Mobil Keliling", null, 'update_informasi_layanan');
 
-        return redirect()->back()->with('success', 'Konfigurasi Informasi Layanan & Halaman Mobil Keliling berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Konfigurasi Informasi Layanan & Mobil Keliling berhasil diperbarui.');
     }
 }

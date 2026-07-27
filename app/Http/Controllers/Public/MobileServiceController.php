@@ -16,7 +16,18 @@ class MobileServiceController extends Controller
     public function index(): InertiaResponse
     {
         $settings = WebsiteSetting::where('group', 'informasi_layanan')->pluck('value', 'key')->toArray();
-        $services = ServiceRequirement::where('is_active', true)->orderBy('sort_order')->get();
+        
+        $selectedIdsRaw = $settings['mobile_service_selected_services'] ?? null;
+        $selectedIds = json_decode($selectedIdsRaw, true);
+
+        $query = ServiceRequirement::where('is_active', true)->orderBy('sort_order');
+        
+        // If selected services are configured, only display those checked services
+        if (is_array($selectedIds) && count($selectedIds) > 0) {
+            $query->whereIn('id', $selectedIds);
+        }
+
+        $services = $query->get();
 
         return Inertia::render('Public/MobileServices/Index', [
             'scheduleSettings' => $settings,
