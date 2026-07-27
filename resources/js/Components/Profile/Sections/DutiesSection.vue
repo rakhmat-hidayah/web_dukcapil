@@ -3,16 +3,18 @@
     <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-12 shadow-xl border border-slate-100 dark:border-slate-700">
       <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-6">{{ sectionTitle }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div v-for="(item, idx) in dutyItems" :key="idx" class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col">
-          <div 
-            :class="[
-              'w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg mb-4 shrink-0',
-              idx === 0 ? 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400' : idx === 1 ? 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400'
-            ]"
-          >
-            0{{ idx + 1 }}
+        <div 
+          v-for="(item, idx) in dutyItems" 
+          :key="idx" 
+          :class="[
+            'p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-900/80 border flex flex-col transition-all duration-300 hover:shadow-lg',
+            idx === 0 ? 'border-blue-200 dark:border-blue-900/50' : idx === 1 ? 'border-emerald-200 dark:border-emerald-900/50' : 'border-purple-200 dark:border-purple-900/50'
+          ]"
+        >
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-lg">{{ idx === 0 ? '📌' : idx === 1 ? '⚡' : '🏢' }}</span>
+            <h3 class="font-extrabold text-slate-900 dark:text-white text-base leading-snug">{{ item.title }}</h3>
           </div>
-          <h3 class="font-bold text-slate-900 dark:text-white mb-3 text-base leading-snug">{{ item.title }}</h3>
           <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line flex-1">{{ item.desc }}</p>
         </div>
       </div>
@@ -55,17 +57,17 @@ const dutyItems = computed(() => {
   // Fallback defaults
   return [
     {
-      title: ws.value.profile_duties_item_1_title || 'Pendaftaran Penduduk',
-      desc: ws.value.profile_duties_item_1_desc || 'Pelayanan penerbitan KTP-El, KK, KIA, dan surat keterangan pindah penduduk.',
+      title: 'Tugas Pokok',
+      desc: "Dinas Kependudukan dan Pencatatan Sipil mempunyai tugas membantu Bupati melaksanakan urusan pemerintahan di bidang Administrasi Kependudukan dan Pencatatan Sipil, meliputi:\n1. Fasilitasi pelayanan administrasi kependudukan.\n2. Pengelolaan informasi administrasi kependudukan (PIAK).\n3. Pemanfaatan data dan inovasi pelayanan kependudukan."
     },
     {
-      title: ws.value.profile_duties_item_2_title || 'Pencatatan Sipil',
-      desc: ws.value.profile_duties_item_2_desc || 'Penerbitan akta kelahiran, akta perkawinan, akta perceraian, dan akta kematian.',
+      title: 'Fungsi',
+      desc: "Dalam menyelenggarakan tugas pokok, Dinas Kependudukan dan Pencatatan Sipil menyelenggarakan fungsi:\n1. Penyelenggaraan perumusan kebijakan teknis di bidang administrasi kependudukan dan pencatatan sipil.\n2. Penyelenggaraan pelayanan administrasi kependudukan dan pencatatan sipil.\n3. Penyelenggaraan evaluasi, pelaporan, dan pengendalian sistem informasi.\n4. Penyelenggaraan fungsi dinas lainnya sesuai tugas pokok dan fungsinya."
     },
     {
-      title: ws.value.profile_duties_item_3_title || 'Pengelolaan PIAK & IKD',
-      desc: ws.value.profile_duties_item_3_desc || 'Pengelolaan jaringan data SIAK Terpusat dan aktivasi Identitas Kependudukan Digital.',
-    },
+      title: 'Kewenangan Disdukcapil Kabupaten Dompu',
+      desc: "Pemerintah Kabupaten berkewajiban dan bertanggung jawab menyelenggarakan urusan Administrasi Kependudukan dengan kewenangan meliputi:\n1. Koordinasi penyelenggaraan Administrasi Kependudukan.\n2. Pemberian bimbingan, supervisi, dan konsultasi pelaksanaan Pendaftaran Penduduk dan Pencatatan Sipil.\n3. Pembinaan dan sosialisasi penyelenggaraan Administrasi Kependudukan.\n4. Penyajian Data Kependudukan berskala Kabupaten dari SIAK Terpusat.\n5. Koordinasi pengawasan atas penyelenggaraan Administrasi Kependudukan."
+    }
   ]
 })
 </script>
