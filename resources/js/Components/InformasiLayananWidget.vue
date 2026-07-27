@@ -129,12 +129,84 @@
         </a>
       </div>
     </div>
+
+    <!-- SECTION 3: Jam Operasional & Alamat Kantor (Office Hours & Address) -->
+    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20 shadow-xs">
+            <Clock class="w-4 h-4" />
+          </div>
+          <div>
+            <h3 class="text-xs font-black uppercase tracking-wider text-gray-800 dark:text-zinc-100">Jam Operasional</h3>
+            <p class="text-[10px] text-gray-400 font-medium">Jadwal Pelayanan Tatap Muka</p>
+          </div>
+        </div>
+        <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 text-[9px] font-black rounded uppercase tracking-wider border border-emerald-200/50">
+          Buka
+        </span>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="flex justify-between items-center py-1.5 border-b border-gray-50 dark:border-zinc-800/60">
+          <span class="text-gray-500 dark:text-zinc-400 font-semibold">Senin — Kamis</span>
+          <span class="font-bold font-mono text-gray-800 dark:text-zinc-200">08.00 - 15.30 WITA</span>
+        </div>
+        <div class="flex justify-between items-center py-1.5 border-b border-gray-50 dark:border-zinc-800/60">
+          <span class="text-gray-500 dark:text-zinc-400 font-semibold">Jumat</span>
+          <span class="font-bold font-mono text-gray-800 dark:text-zinc-200">08.00 - 11.30 WITA</span>
+        </div>
+        <div class="flex justify-between items-center py-1.5">
+          <span class="text-gray-400 font-medium">Sabtu — Minggu &amp; Libur</span>
+          <span class="font-bold text-rose-500 text-[11px]">Tutup (Online Active)</span>
+        </div>
+      </div>
+
+      <!-- Address Info -->
+      <div class="bg-gray-50 dark:bg-zinc-800/50 rounded-2xl p-3.5 border border-gray-100 dark:border-zinc-800 flex items-start gap-2.5 text-xs mt-3">
+        <MapPin class="w-4 h-4 text-primary-600 dark:text-primary-400 shrink-0 mt-0.5" />
+        <div class="min-w-0">
+          <p class="font-bold text-gray-800 dark:text-zinc-200 text-[11px]">Alamat Kantor Dinas:</p>
+          <p class="text-[10px] text-gray-500 dark:text-zinc-400 leading-relaxed mt-0.5">
+            Jl. Mahoni No. 02, Kel. Badawa, Kec. Dompu, Kab. Dompu, NTB 84211
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: SANAI Online Direct Banner -->
+    <div class="bg-gradient-to-br from-blue-950 via-indigo-950 to-slate-950 text-white rounded-3xl p-6 shadow-md border border-blue-900/50 relative overflow-hidden space-y-3.5">
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-0.5 bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[9px] font-black uppercase rounded-md tracking-wider">
+          Pelayanan Digital 24 Jam
+        </span>
+      </div>
+      <div>
+        <h4 class="text-sm font-black tracking-tight text-white flex items-center gap-1.5">
+          <span>🌐</span>
+          <span>Sistem Informasi SANAI Online</span>
+        </h4>
+        <p class="text-[10px] text-blue-200/90 leading-relaxed mt-1 font-medium">
+          Urus KTP-el, KK, Akta Kelahiran, dan Surat Pindah secara mandiri dari mana saja tanpa antre.
+        </p>
+      </div>
+      <a 
+        href="https://sanai-dukcapil.dompukab.go.id" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        class="w-full py-2.5 bg-primary-500 hover:bg-primary-400 text-white text-xs font-black rounded-xl text-center flex items-center justify-center gap-1.5 transition shadow-md shadow-primary-500/20 active:scale-95"
+      >
+        <span>Buka Portal SANAI Online</span>
+        <span>→</span>
+      </a>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import { Clock, MapPin } from '@lucide/vue';
 
 const page = usePage();
 
