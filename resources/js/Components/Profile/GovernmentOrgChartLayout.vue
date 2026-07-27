@@ -35,7 +35,7 @@
       <div class="absolute top-0 left-1/2 right-[25%] h-0.5 bg-blue-400/80 z-10"></div>
 
       <!-- Central Vertical Trunk Continuation (STOPS EXACTLY at the 4-Bidang horizontal bar) -->
-      <div class="absolute top-0 h-[286px] left-1/2 -translate-x-1/2 w-0.5 bg-blue-400/80 z-0"></div>
+      <div class="absolute top-0 h-[296px] left-1/2 -translate-x-1/2 w-0.5 bg-blue-400/80 z-0"></div>
 
       <!-- LEVEL 2 ROW (2 Columns: Left 50% & Right 50%) -->
       <div class="grid grid-cols-2 w-full z-10 pt-0">
@@ -109,11 +109,14 @@
                   <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
                     <h4 class="font-bold text-[10px] uppercase text-white leading-tight">SUB BAGIAN KEUANGAN</h4>
                   </div>
-                  <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg flex items-center gap-1.5 border border-slate-100 dark:border-slate-800">
-                    <div class="w-6 h-6 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center text-slate-400">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  <div class="bg-white dark:bg-slate-900 m-1 p-2 rounded-lg flex items-center gap-1.5 border border-slate-100 dark:border-slate-800 min-h-[52px]">
+                    <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center text-slate-400">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     </div>
-                    <span class="font-bold text-[9px] text-slate-800 dark:text-white truncate">Staf Keuangan</span>
+                    <div class="overflow-hidden">
+                      <span class="font-bold text-[9.5px] text-slate-800 dark:text-white block truncate">Staf Keuangan</span>
+                      <span class="text-[8.5px] text-slate-400 block truncate">Pengelola Keuangan</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -125,11 +128,14 @@
                   <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
                     <h4 class="font-bold text-[10px] uppercase text-white leading-tight">SUB BAGIAN UMUM & KEPEG.</h4>
                   </div>
-                  <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg flex items-center gap-1.5 border border-slate-100 dark:border-slate-800">
-                    <div class="w-6 h-6 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center text-slate-400">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  <div class="bg-white dark:bg-slate-900 m-1 p-2 rounded-lg flex items-center gap-1.5 border border-slate-100 dark:border-slate-800 min-h-[52px]">
+                    <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center text-slate-400">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     </div>
-                    <span class="font-bold text-[9px] text-slate-800 dark:text-white truncate">Staf Umum</span>
+                    <div class="overflow-hidden">
+                      <span class="font-bold text-[9.5px] text-slate-800 dark:text-white block truncate">Staf Umum</span>
+                      <span class="text-[8.5px] text-slate-400 block truncate">Umum & Kepegawaian</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -141,12 +147,16 @@
                   <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
                     <h4 class="font-bold text-[10px] uppercase text-white leading-tight">KELOMPOK JABATAN FUNGSIONAL</h4>
                   </div>
-                  <div class="bg-white dark:bg-slate-900 m-1 p-1 rounded-lg border border-slate-100 dark:border-slate-800">
-                    <div class="grid grid-cols-4 gap-1 py-0.5">
-                      <div class="h-4 rounded border border-amber-200 bg-amber-50"></div>
-                      <div class="h-4 rounded border border-amber-200 bg-amber-50"></div>
-                      <div class="h-4 rounded border border-amber-200 bg-amber-50"></div>
-                      <div class="h-4 rounded border border-amber-200 bg-amber-50"></div>
+                  <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
+                    <div class="grid grid-cols-4 gap-1 w-full py-0.5">
+                      <div class="h-4 rounded border border-amber-200 bg-amber-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                      <div class="h-4 rounded border border-amber-200 bg-amber-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                      <div class="h-4 rounded border border-amber-200 bg-amber-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                      <div class="h-4 rounded border border-amber-200 bg-amber-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                      <div class="h-4 rounded border border-amber-200 bg-amber-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                      <div class="h-4 rounded border border-amber-200 bg-amber-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                      <div class="h-4 rounded border border-amber-200 bg-amber-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                      <div class="h-4 rounded border border-amber-200 bg-amber-50 dark:bg-slate-800 dark:border-slate-700"></div>
                     </div>
                   </div>
                 </div>
@@ -196,15 +206,19 @@
               @click="selectNode(subBidang1Node)"
               class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
             >
-              <div class="px-2 py-1 text-center bg-teal-800/40">
+              <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight">KELOMPOK JABATAN FUNGSIONAL</h4>
               </div>
-              <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800">
-                <div class="grid grid-cols-4 gap-1 py-0.5">
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
+              <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
+                <div class="grid grid-cols-4 gap-1 w-full py-0.5">
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
                 </div>
               </div>
             </div>
@@ -240,15 +254,19 @@
               @click="selectNode(subBidang2Node)"
               class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
             >
-              <div class="px-2 py-1 text-center bg-teal-800/40">
+              <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight">KELOMPOK JABATAN FUNGSIONAL</h4>
               </div>
-              <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800">
-                <div class="grid grid-cols-4 gap-1 py-0.5">
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
+              <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
+                <div class="grid grid-cols-4 gap-1 w-full py-0.5">
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
                 </div>
               </div>
             </div>
@@ -284,15 +302,19 @@
               @click="selectNode(subBidang3Node)"
               class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
             >
-              <div class="px-2 py-1 text-center bg-teal-800/40">
+              <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight">KELOMPOK JABATAN FUNGSIONAL</h4>
               </div>
-              <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800">
-                <div class="grid grid-cols-4 gap-1 py-0.5">
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
+              <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
+                <div class="grid grid-cols-4 gap-1 w-full py-0.5">
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
                 </div>
               </div>
             </div>
@@ -328,15 +350,19 @@
               @click="selectNode(subBidang4Node)"
               class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
             >
-              <div class="px-2 py-1 text-center bg-teal-800/40">
+              <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight">KELOMPOK JABATAN FUNGSIONAL</h4>
               </div>
-              <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800">
-                <div class="grid grid-cols-4 gap-1 py-0.5">
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
-                  <div class="h-4 rounded border border-teal-200 bg-teal-50"></div>
+              <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
+                <div class="grid grid-cols-4 gap-1 w-full py-0.5">
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
+                  <div class="h-4 rounded border border-teal-200 bg-teal-50 dark:bg-slate-800 dark:border-slate-700"></div>
                 </div>
               </div>
             </div>
