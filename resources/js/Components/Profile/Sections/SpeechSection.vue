@@ -5,7 +5,12 @@
         <div class="md:col-span-4 text-center">
           <div class="relative inline-block">
             <div class="w-44 h-44 md:w-52 md:h-52 rounded-2xl overflow-hidden bg-gray-100 dark:bg-zinc-800 border-4 border-white dark:border-zinc-700 shadow-lg mx-auto flex items-center justify-center">
-              <svg class="w-24 h-24 text-gray-400 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+              <img 
+                :src="setting?.leader_photo ? (setting.leader_photo.startsWith('http') ? setting.leader_photo : `/storage/${setting.leader_photo}`) : '/images/kepala_dinas.jpg'" 
+                alt="Drs. Abd. Najib — Kepala Dinas Dukcapil Kabupaten Dompu"
+                class="w-full h-full object-cover object-top"
+                @error="$event.target.src = '/images/kepala_dinas.jpg'"
+              />
             </div>
           </div>
           <h3 class="text-lg font-extrabold text-gray-900 dark:text-zinc-50 mt-4">Drs. Abd. Najib</h3>
