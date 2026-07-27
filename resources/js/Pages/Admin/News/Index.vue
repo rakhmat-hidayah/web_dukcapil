@@ -38,9 +38,18 @@
               type="text" 
               v-model="search" 
               placeholder="Cari judul berita..." 
-              class="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none"
+              class="w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none"
               @keyup.enter="applyFilters"
             />
+            <button 
+              v-if="search" 
+              type="button"
+              @click="clearSearch"
+              class="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+              title="Bersihkan Pencarian"
+            >
+              <X class="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <!-- Category filter -->
@@ -66,12 +75,24 @@
           </select>
         </div>
 
-        <button 
-          @click="applyFilters"
-          class="px-4 py-2 bg-gray-900 dark:bg-zinc-800 hover:bg-gray-800 dark:hover:bg-zinc-700 text-white text-xs font-bold rounded-xl transition"
-        >
-          Cari
-        </button>
+        <div class="flex items-center gap-2">
+          <button 
+            v-if="search || category || status"
+            type="button"
+            @click="resetAllFilters"
+            class="px-3.5 py-2 border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 text-xs font-bold rounded-xl transition flex items-center gap-1.5"
+            title="Reset Seluruh Filter"
+          >
+            <RotateCcw class="w-3.5 h-3.5" />
+            Reset
+          </button>
+          <button 
+            @click="applyFilters"
+            class="px-4 py-2 bg-gray-900 dark:bg-zinc-800 hover:bg-gray-800 dark:hover:bg-zinc-700 text-white text-xs font-bold rounded-xl transition"
+          >
+            Cari
+          </button>
+        </div>
       </div>
 
       <!-- Articles Grid -->
@@ -245,7 +266,7 @@
 import { ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Plus, Search, Edit, Trash2 } from '@lucide/vue';
+import { Plus, Search, Edit, Trash2, X, RotateCcw } from '@lucide/vue';
 
 const props = defineProps({
   news: Object,
@@ -262,12 +283,24 @@ const isDeleting = ref(false);
 
 const applyFilters = () => {
   router.get(route('admin.news.index'), {
-    search: search.value,
-    category: category.value,
-    status: status.value,
+    search: search.value || undefined,
+    category: category.value || undefined,
+    status: status.value || undefined,
   }, {
     preserveState: true,
   });
+};
+
+const clearSearch = () => {
+  search.value = '';
+  applyFilters();
+};
+
+const resetAllFilters = () => {
+  search.value = '';
+  category.value = '';
+  status.value = '';
+  applyFilters();
 };
 
 const deleteNews = (item) => {
