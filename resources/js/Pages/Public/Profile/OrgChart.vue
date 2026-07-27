@@ -43,9 +43,7 @@
       <div id="printable-org-chart" class="bg-slate-950 rounded-3xl p-6 md:p-10 shadow-2xl border border-slate-800 overflow-x-auto relative min-h-[650px]">
         <div class="min-w-max mx-auto flex justify-center py-6">
           <div :style="{ transform: `scale(${zoomScale})`, transformOrigin: 'top center' }" class="transition-transform duration-200 ease-out flex flex-col items-center">
-            <div v-for="node in tree" :key="node.id" class="flex flex-col items-center">
-              <OrgNodeCard :node="node" :searchQuery="searchQuery" @select-node="openNodeDrawer" />
-            </div>
+            <GovernmentOrgChartLayout :tree="tree" :searchQuery="searchQuery" @select-node="openNodeDrawer" />
           </div>
         </div>
       </div>
@@ -97,7 +95,7 @@
 import { ref } from 'vue'
 import { Head } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
-import OrgNodeCard from '@/Components/Profile/OrgNodeCard.vue'
+import GovernmentOrgChartLayout from '@/Components/Profile/GovernmentOrgChartLayout.vue'
 
 defineProps({
   tree: Array,
