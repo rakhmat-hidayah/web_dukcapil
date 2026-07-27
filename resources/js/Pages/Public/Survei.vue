@@ -372,9 +372,9 @@
                 <button v-if="currentStep < 3" type="button" @click="nextStep" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs rounded-xl shadow-md transition cursor-pointer">
                   Selanjutnya &rarr;
                 </button>
-                <button v-else type="submit" :disabled="form.processing" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-md transition disabled:opacity-50 cursor-pointer flex items-center gap-2">
-                  <svg v-if="form.processing" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                  <span>{{ form.processing ? 'Menyimpan...' : 'Kirim Penilaian IKM ✓' }}</span>
+                <button v-else type="submit" :disabled="isSubmitting" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-md transition disabled:opacity-50 cursor-pointer flex items-center gap-2">
+                  <svg v-if="isSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                  <span>{{ isSubmitting ? 'Menyimpan...' : 'Kirim Penilaian IKM ✓' }}</span>
                 </button>
               </div>
             </div>
@@ -429,6 +429,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
+import axios from 'axios'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
 
 const props = defineProps({
@@ -446,6 +447,7 @@ const showSuccessModal = ref(false)
 const alreadySubmitted = ref(false)
 const submittedName = ref('')
 const submittedService = ref('')
+const isSubmitting = ref(false)
 
 const STORAGE_KEY = 'ikm_submitted_' + (props.activeSurvey ? props.activeSurvey.id : 'survey')
 
@@ -519,9 +521,28 @@ function nextStep() {
   currentStep.value++
 }
 
-function handleSubmit() {
-  form.post(route('public.survey.store'), {
-    onSuccess: () => {
+async function handleSubmit() {
+  if (isSubmitting.value) return
+  isSubmitting.value = true
+
+  try {
+    const payload = {
+      survey_period_id: form.survey_period_id,
+      respondent_name: form.respondent_name,
+      respondent_phone: form.respondent_phone,
+      respondent_domicile: form.respondent_domicile,
+      respondent_age: form.respondent_age,
+      respondent_gender: form.respondent_gender,
+      respondent_education: form.respondent_education,
+      respondent_job: form.respondent_job,
+      service_accessed: form.service_accessed,
+      suggestion: form.suggestion,
+      answers: form.answers,
+    }
+
+    const res = await axios.post(route('public.survey.store'), payload)
+    
+    if (res.data && res.data.success) {
       submittedName.value = form.respondent_name || 'Anonim'
       submittedService.value = form.service_accessed || 'Pelayanan Dukcapil'
       showWizard.value = false
@@ -535,7 +556,12 @@ function handleSubmit() {
         setTimeout(() => { showToast.value = false }, 6000)
       }, 300)
     }
-  })
+  } catch (err) {
+    console.error('Error submitting survey:', err)
+    alert('Gagal mengirim survei. Silakan periksa kembali isian Anda.')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 

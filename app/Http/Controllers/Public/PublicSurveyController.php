@@ -112,23 +112,33 @@ class PublicSurveyController extends Controller
     /**
      * Submit survey response from public.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): mixed
     {
         $request->validate([
             'survey_period_id' => 'required|exists:survey_periods,id',
-            'respondent_name' => 'nullable|string|max:255',
+            'respondent_name'  => 'nullable|string|max:255',
             'respondent_phone' => 'nullable|string|max:20',
             'respondent_domicile' => 'nullable|string|max:100',
-            'respondent_age' => 'nullable|string|max:50',
+            'respondent_age'   => 'nullable|string|max:50',
             'respondent_gender' => 'nullable|string|max:50',
             'respondent_education' => 'nullable|string|max:50',
-            'respondent_job' => 'nullable|string|max:100',
+            'respondent_job'   => 'nullable|string|max:100',
             'service_accessed' => 'nullable|string|max:255',
-            'suggestion' => 'nullable|string|max:1000',
-            'answers' => 'required|array',
+            'suggestion'       => 'nullable|string|max:1000',
+            'answers'          => 'nullable|array',
         ]);
 
-        $this->surveyService->storeSubmission($request->all());
+        $response = $this->surveyService->storeSubmission($request->all());
+
+        // Return JSON for AJAX/Inertia XHR requests
+        if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Terima kasih! Penilaian survei Anda berhasil disimpan.',
+                'response_id' => $response->id,
+                'ikm_score' => $response->ikm_score,
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Terima kasih! Partisipasi dan penilaian survei Anda berhasil disimpan.');
     }
