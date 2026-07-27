@@ -63,12 +63,7 @@ class InformasiLayananController extends Controller
 
             // Section 2: Bantuan Cepat
             'quick_help_whatsapp'            => 'nullable|string|max:255',
-            'quick_help_call_center'         => 'nullable|string|max:255',
-            'quick_help_tracking_url'        => 'nullable|string|max:500',
             'quick_help_google_maps_url'     => 'nullable|string|max:500',
-            'quick_help_email'               => 'nullable|string|max:255',
-            'quick_help_primary_button_text' => 'nullable|string|max:100',
-            'quick_help_primary_button_url'  => 'nullable|string|max:500',
         ]);
 
         foreach ($data as $key => $val) {

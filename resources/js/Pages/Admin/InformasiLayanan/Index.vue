@@ -227,45 +227,6 @@
                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
               />
             </div>
-
-            <!-- Email Dukcapil -->
-            <div class="space-y-1.5 md:col-span-2">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <span>✉️ Email Resmi Dukcapil</span>
-              </label>
-              <input 
-                type="email" 
-                v-model="form.quick_help_email"
-                placeholder="Contoh: dukcapilkabdompu@gmail.com"
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              />
-            </div>
-
-            <!-- Primary Button Text -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
-                Teks Tombol Utama Bantuan
-              </label>
-              <input 
-                type="text" 
-                v-model="form.quick_help_primary_button_text"
-                placeholder="Hubungi Kami"
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              />
-            </div>
-
-            <!-- Primary Button URL -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
-                URL Tombol Utama Bantuan
-              </label>
-              <input 
-                type="text" 
-                v-model="form.quick_help_primary_button_url"
-                placeholder="Contoh: /contact"
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              />
-            </div>
           </div>
         </div>
 
@@ -307,12 +268,7 @@ const form = useForm({
 
   // Section 2: Bantuan Cepat
   quick_help_whatsapp: props.settings.quick_help_whatsapp || 'https://wa.me/6282340001111',
-  quick_help_call_center: props.settings.quick_help_call_center || '(0373) 21123',
-  quick_help_tracking_url: props.settings.quick_help_tracking_url || '/layanan/tracking',
   quick_help_google_maps_url: props.settings.quick_help_google_maps_url || 'https://maps.google.com/?q=Dukcapil+Dompu',
-  quick_help_email: props.settings.quick_help_email || 'dukcapilkabdompu@gmail.com',
-  quick_help_primary_button_text: props.settings.quick_help_primary_button_text || 'Hubungi Kami',
-  quick_help_primary_button_url: props.settings.quick_help_primary_button_url || '/contact',
 });
 
 const submit = () => {
