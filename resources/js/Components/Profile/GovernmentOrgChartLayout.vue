@@ -7,7 +7,7 @@
         class="w-72 rounded-2xl shadow-2xl border-2 border-rose-500 bg-rose-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden group"
       >
         <div class="px-3 py-2 text-center bg-rose-700/60 border-b border-rose-500/50">
-          <h3 class="font-black text-xs uppercase tracking-wider text-white">KEPALA DINAS</h3>
+          <h3 class="font-black text-xs uppercase tracking-wider text-white">{{ kadisNode?.node_title || 'KEPALA DINAS' }}</h3>
         </div>
         <div class="bg-white dark:bg-slate-900 mx-1.5 my-1.5 p-2.5 rounded-xl flex items-center gap-3 border border-slate-100 dark:border-slate-800">
           <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 flex items-center justify-center">
@@ -29,9 +29,7 @@
     <div class="w-full relative flex flex-col items-center">
       
       <!-- LEVEL 2 CONNECTOR LINES -->
-      <!-- Left Dashed Horizontal Bar (starts at center 50% and stops exactly at 25% center of Jabatan Fungsional) -->
       <div class="absolute top-0 left-[25%] right-1/2 h-0.5 border-t-2 border-dashed border-slate-400 z-10"></div>
-      <!-- Right Solid Horizontal Bar (starts at center 50% and stops exactly at 75% center of Sekretariat) -->
       <div class="absolute top-0 left-1/2 right-[25%] h-0.5 bg-blue-400/80 z-10"></div>
 
       <!-- Central Vertical Trunk Continuation (STOPS EXACTLY at the 4-Bidang horizontal bar) -->
@@ -42,14 +40,13 @@
         
         <!-- LEFT COLUMN: JABATAN FUNGSIONAL -->
         <div class="flex flex-col items-center">
-          <!-- Vertical drop line down from 25% mark to center of Jabatan Fungsional -->
           <div class="w-0.5 h-6 border-l-2 border-dashed border-slate-400"></div>
           <div 
             @click="selectNode(fungsionalKadisNode)"
             class="w-64 rounded-2xl shadow-xl border-2 border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
           >
             <div class="px-3 py-1.5 text-center bg-amber-600/50">
-              <h3 class="font-black text-[11px] uppercase tracking-wider text-white">JABATAN FUNGSIONAL</h3>
+              <h3 class="font-black text-[11px] uppercase tracking-wider text-white">{{ fungsionalKadisNode?.node_title || 'JABATAN FUNGSIONAL' }}</h3>
             </div>
             <div class="bg-white dark:bg-slate-900 mx-1.5 my-1.5 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
               <div class="grid grid-cols-4 gap-1.5 py-1">
@@ -68,7 +65,6 @@
 
         <!-- RIGHT COLUMN: SEKRETARIAT + SUB BAGIAN ROW -->
         <div class="flex flex-col items-center px-4 relative">
-          <!-- Vertical drop line down from 75% mark to center of Sekretariat -->
           <div class="w-0.5 h-6 bg-blue-400/80"></div>
           
           <!-- Sekretariat Card -->
@@ -77,7 +73,7 @@
             class="w-72 rounded-2xl shadow-xl border-2 border-pink-400 bg-pink-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
           >
             <div class="px-3 py-1.5 text-center bg-pink-700/50">
-              <h3 class="font-black text-xs uppercase tracking-wider text-white">SEKRETARIAT</h3>
+              <h3 class="font-black text-xs uppercase tracking-wider text-white">{{ sekretarisNode?.node_title || 'SEKRETARIAT' }}</h3>
             </div>
             <div class="bg-white dark:bg-slate-900 mx-1.5 my-1.5 p-2.5 rounded-xl flex items-center gap-3 border border-slate-100 dark:border-slate-800">
               <div class="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 flex items-center justify-center">
@@ -91,12 +87,10 @@
             </div>
           </div>
 
-          <!-- Vertical Drop Line from Sekretariat down to Sub-Bagian Horizontal Bar -->
           <div class="w-0.5 h-6 bg-blue-400/80"></div>
 
           <!-- SUB BAGIAN ROW (3 Columns under Sekretariat) -->
           <div class="w-full relative flex flex-col items-center">
-            <!-- Sub-horizontal connector bar for 3 Sub-Bagian cards (starts at 16.67% center of Col 1 and stops at 83.33% center of Col 3) -->
             <div class="w-full relative h-4">
               <div class="absolute top-0 left-[16.67%] right-[16.67%] h-0.5 bg-blue-400/80"></div>
             </div>
@@ -107,15 +101,17 @@
                 <div class="w-0.5 h-4 bg-blue-400/80 -mt-4"></div>
                 <div @click="selectNode(subNode2)" class="w-full rounded-xl shadow-lg border border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden">
                   <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
-                    <h4 class="font-bold text-[10px] uppercase text-white leading-tight">SUB BAGIAN KEUANGAN</h4>
+                    <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subNode2?.node_title || 'SUB BAGIAN KEUANGAN' }}</h4>
                   </div>
                   <div class="bg-white dark:bg-slate-900 m-1 p-2 rounded-lg flex items-center gap-1.5 border border-slate-100 dark:border-slate-800 min-h-[52px]">
-                    <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center text-slate-400">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <div class="w-7 h-7 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center text-slate-400">
+                      <img v-if="subNode2?.official?.photo" :src="'/storage/' + subNode2.official.photo" :alt="subNode2.official.name" class="w-full h-full object-cover" />
+                      <svg v-else class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     </div>
                     <div class="overflow-hidden">
-                      <span class="font-bold text-[9.5px] text-slate-800 dark:text-white block truncate">Staf Keuangan</span>
-                      <span class="text-[8.5px] text-slate-400 block truncate">Pengelola Keuangan</span>
+                      <span class="font-bold text-[9.5px] text-slate-800 dark:text-white block truncate">{{ subNode2?.official?.name || 'Staf Keuangan' }}</span>
+                      <span v-if="subNode2?.official?.nip" class="text-[8.5px] text-slate-400 block truncate">NIP. {{ subNode2.official.nip }}</span>
+                      <span v-else class="text-[8.5px] text-slate-400 block truncate">Pengelola Keuangan</span>
                     </div>
                   </div>
                 </div>
@@ -126,15 +122,17 @@
                 <div class="w-0.5 h-4 bg-blue-400/80 -mt-4"></div>
                 <div @click="selectNode(subNode3)" class="w-full rounded-xl shadow-lg border border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden">
                   <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
-                    <h4 class="font-bold text-[10px] uppercase text-white leading-tight">SUB BAGIAN UMUM & KEPEG.</h4>
+                    <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subNode3?.node_title || 'SUB BAGIAN UMUM & KEPEG.' }}</h4>
                   </div>
                   <div class="bg-white dark:bg-slate-900 m-1 p-2 rounded-lg flex items-center gap-1.5 border border-slate-100 dark:border-slate-800 min-h-[52px]">
-                    <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center text-slate-400">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <div class="w-7 h-7 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center text-slate-400">
+                      <img v-if="subNode3?.official?.photo" :src="'/storage/' + subNode3.official.photo" :alt="subNode3.official.name" class="w-full h-full object-cover" />
+                      <svg v-else class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     </div>
                     <div class="overflow-hidden">
-                      <span class="font-bold text-[9.5px] text-slate-800 dark:text-white block truncate">Staf Umum</span>
-                      <span class="text-[8.5px] text-slate-400 block truncate">Umum & Kepegawaian</span>
+                      <span class="font-bold text-[9.5px] text-slate-800 dark:text-white block truncate">{{ subNode3?.official?.name || 'Indah Dewi Marini, S.E' }}</span>
+                      <span v-if="subNode3?.official?.nip" class="text-[8.5px] text-slate-400 block truncate">NIP. {{ subNode3.official.nip }}</span>
+                      <span v-else class="text-[8.5px] text-slate-400 block truncate">Umum & Kepegawaian</span>
                     </div>
                   </div>
                 </div>
@@ -145,7 +143,7 @@
                 <div class="w-0.5 h-4 bg-blue-400/80 -mt-4"></div>
                 <div @click="selectNode(subNode1)" class="w-full rounded-xl shadow-lg border border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden">
                   <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
-                    <h4 class="font-bold text-[10px] uppercase text-white leading-tight">KELOMPOK JABATAN FUNGSIONAL</h4>
+                    <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subNode1?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
                   </div>
                   <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
                     <div class="grid grid-cols-4 gap-1 w-full py-0.5">
@@ -168,7 +166,6 @@
 
       <!-- SPACER & CONNECTOR TO LEVEL 4 (4 BIDANG ROW) -->
       <div class="w-full relative flex flex-col items-center mt-10 z-10">
-        <!-- Horizontal Bar connecting all 4 Bidangs (starts at 12.5% center of Bidang 1 and stops at 87.5% center of Bidang 4) -->
         <div class="w-full relative h-6">
           <div class="absolute top-0 left-[12.5%] right-[12.5%] h-0.5 bg-blue-400/80"></div>
         </div>
@@ -184,7 +181,7 @@
             >
               <div class="px-2 py-2 text-center bg-teal-800/40 min-h-[44px] flex items-center justify-center">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight">
-                  BIDANG PELAYANAN PENDAFTARAN PENDUDUK
+                  {{ bidang1Node?.node_title || 'BIDANG PELAYANAN PENDAFTARAN PENDUDUK' }}
                 </h3>
               </div>
               <div class="bg-white dark:bg-slate-900 mx-1.5 mb-1.5 p-2 rounded-xl flex items-center gap-2 border border-slate-100 dark:border-slate-800">
@@ -207,7 +204,7 @@
               class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
             >
               <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
-                <h4 class="font-bold text-[10px] uppercase text-white leading-tight">KELOMPOK JABATAN FUNGSIONAL</h4>
+                <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subBidang1Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
                 <div class="grid grid-cols-4 gap-1 w-full py-0.5">
@@ -233,7 +230,7 @@
             >
               <div class="px-2 py-2 text-center bg-teal-800/40 min-h-[44px] flex items-center justify-center">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight">
-                  BIDANG PELAYANAN PENCATATAN SIPIL
+                  {{ bidang2Node?.node_title || 'BIDANG PELAYANAN PENCATATAN SIPIL' }}
                 </h3>
               </div>
               <div class="bg-white dark:bg-slate-900 mx-1.5 mb-1.5 p-2 rounded-xl flex items-center gap-2 border border-slate-100 dark:border-slate-800">
@@ -255,7 +252,7 @@
               class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
             >
               <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
-                <h4 class="font-bold text-[10px] uppercase text-white leading-tight">KELOMPOK JABATAN FUNGSIONAL</h4>
+                <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subBidang2Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
                 <div class="grid grid-cols-4 gap-1 w-full py-0.5">
@@ -281,7 +278,7 @@
             >
               <div class="px-2 py-2 text-center bg-teal-800/40 min-h-[44px] flex items-center justify-center">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight">
-                  BIDANG PENGELOLAAN INFORMASI ADM. KEPENDUDUKAN
+                  {{ bidang3Node?.node_title || 'BIDANG PENGELOLAAN INFORMASI ADM. KEPENDUDUKAN' }}
                 </h3>
               </div>
               <div class="bg-white dark:bg-slate-900 mx-1.5 mb-1.5 p-2 rounded-xl flex items-center gap-2 border border-slate-100 dark:border-slate-800">
@@ -303,7 +300,7 @@
               class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
             >
               <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
-                <h4 class="font-bold text-[10px] uppercase text-white leading-tight">KELOMPOK JABATAN FUNGSIONAL</h4>
+                <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subBidang3Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
                 <div class="grid grid-cols-4 gap-1 w-full py-0.5">
@@ -329,7 +326,7 @@
             >
               <div class="px-2 py-2 text-center bg-teal-800/40 min-h-[44px] flex items-center justify-center">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight">
-                  BIDANG PEMANFAATAN DATA DAN INOVASI PELAYANAN
+                  {{ bidang4Node?.node_title || 'BIDANG PEMANFAATAN DATA DAN INOVASI PELAYANAN' }}
                 </h3>
               </div>
               <div class="bg-white dark:bg-slate-900 mx-1.5 mb-1.5 p-2 rounded-xl flex items-center gap-2 border border-slate-100 dark:border-slate-800">
@@ -351,7 +348,7 @@
               class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
             >
               <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
-                <h4 class="font-bold text-[10px] uppercase text-white leading-tight">KELOMPOK JABATAN FUNGSIONAL</h4>
+                <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subBidang4Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
                 <div class="grid grid-cols-4 gap-1 w-full py-0.5">
@@ -391,17 +388,17 @@ const selectNode = (node) => {
 const kadisNode = computed(() => props.tree?.[0] || null)
 const kadisOfficial = computed(() => kadisNode.value?.official || null)
 
-const sekretarisNode = computed(() => kadisNode.value?.children?.find(c => c.node_title.includes('SEKRETARIS')) || null)
+const sekretarisNode = computed(() => kadisNode.value?.children?.find(c => c.node_title.toUpperCase().includes('SEKRETARIS')) || null)
 const sekretarisOfficial = computed(() => sekretarisNode.value?.official || null)
 
-const fungsionalKadisNode = computed(() => kadisNode.value?.children?.find(c => c.node_title.includes('FUNGSIONAL') && !c.node_title.includes('SEKRETARIS')) || null)
+const fungsionalKadisNode = computed(() => kadisNode.value?.children?.find(c => c.node_title.toUpperCase().includes('FUNGSIONAL') && !c.node_title.toUpperCase().includes('SEKRETARIS')) || null)
 
 const subNodes = computed(() => sekretarisNode.value?.children || [])
-const subNode1 = computed(() => subNodes.value[0] || { node_title: 'KELOMPOK JABATAN FUNGSIONAL' })
-const subNode2 = computed(() => subNodes.value[1] || { node_title: 'SUB BAGIAN KEUANGAN DAN ASET' })
-const subNode3 = computed(() => subNodes.value[2] || { node_title: 'SUB BAGIAN UMUM & KEPEGAWAIAN' })
+const subNode1 = computed(() => subNodes.value.find(c => c.node_title.toUpperCase().includes('FUNGSIONAL')) || { node_title: 'KELOMPOK JABATAN FUNGSIONAL' })
+const subNode2 = computed(() => subNodes.value.find(c => c.node_title.toUpperCase().includes('KEUANGAN')) || { node_title: 'SUB BAGIAN KEUANGAN DAN ASET' })
+const subNode3 = computed(() => subNodes.value.find(c => c.node_title.toUpperCase().includes('UMUM') || c.node_title.toUpperCase().includes('KEPEGAWAIAN')) || { node_title: 'SUB BAGIAN UMUM & KEPEGAWAIAN' })
 
-const bidangNodes = computed(() => kadisNode.value?.children?.filter(c => c.node_title.includes('BIDANG')) || [])
+const bidangNodes = computed(() => kadisNode.value?.children?.filter(c => c.node_title.toUpperCase().includes('BIDANG')) || [])
 const bidang1Node = computed(() => bidangNodes.value[0] || null)
 const bidang1Official = computed(() => bidang1Node.value?.official || null)
 const subBidang1Node = computed(() => bidang1Node.value?.children?.[0] || null)
