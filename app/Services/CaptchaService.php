@@ -57,7 +57,7 @@ class CaptchaService
      * Generate a new Image CAPTCHA as a base64 encoded string.
      * Returns the base64 image data and stores the answer in session.
      */
-    public static function generateImage(int $width = 180, int $height = 50): string
+    public static function generateImage(int $width = 200, int $height = 55): string
     {
         // 1. Create a random clear code from 100% unambiguous uppercase characters
         $characters = '23456789ABCDEFHKMNPQRSTWXYZ';
@@ -68,60 +68,68 @@ class CaptchaService
 
         Session::put('captcha_image_code', strtolower($code));
 
-        // 2. Create 2x high-resolution canvas for ultra-sharp resampled rendering
-        $w2 = $width * 2;
-        $h2 = $height * 2;
-        $highRes = imagecreatetruecolor($w2, $h2);
+        // 2. Create GD image
+        $image = imagecreatetruecolor($width, $height);
         
         // Pure White background
-        $bg = imagecolorallocate($highRes, 255, 255, 255);
-        imagefilledrectangle($highRes, 0, 0, $w2, $h2, $bg);
+        $bg = imagecolorallocate($image, 255, 255, 255);
+        imagefilledrectangle($image, 0, 0, $width, $height, $bg);
 
         // Subtle background grid
-        $gridColor = imagecolorallocate($highRes, 235, 240, 245);
-        for ($x = 30; $x < $w2; $x += 40) {
-            imageline($highRes, $x, 0, $x, $h2, $gridColor);
+        $gridColor = imagecolorallocate($image, 238, 242, 246);
+        for ($x = 25; $x < $width; $x += 30) {
+            imageline($image, $x, 0, $x, $height, $gridColor);
         }
-        for ($y = 25; $y < $h2; $y += 30) {
-            imageline($highRes, 0, $y, $w2, $y, $gridColor);
+        for ($y = 15; $y < $height; $y += 15) {
+            imageline($image, 0, $y, $width, $y, $gridColor);
         }
 
         // Distinct, high-contrast dark text colors
         $textColors = [
-            imagecolorallocate($highRes, 15, 23, 42),   // Dark Slate
-            imagecolorallocate($highRes, 30, 58, 138),  // Dark Blue
-            imagecolorallocate($highRes, 6, 78, 59),    // Dark Emerald
-            imagecolorallocate($highRes, 136, 19, 55),  // Dark Rose
-            imagecolorallocate($highRes, 67, 56, 202),  // Dark Indigo
+            imagecolorallocate($image, 15, 23, 42),    // Dark Slate
+            imagecolorallocate($image, 30, 58, 138),   // Dark Blue
+            imagecolorallocate($image, 6, 78, 59),     // Dark Emerald
+            imagecolorallocate($image, 136, 19, 55),   // Dark Rose
+            imagecolorallocate($image, 67, 56, 202),   // Dark Indigo
         ];
 
-        // Draw characters clearly using GD font 5
-        $charWidth = ($w2 - 30) / 5;
+        $fontPath = storage_path('app/fonts/arialbd.ttf');
+        $useTtf = function_exists('imagettftext') && file_exists($fontPath);
+
+        // Draw 5 LARGE, BOLD, CRYSTAL-CLEAR characters
+        $charWidth = ($width - 25) / 5;
         for ($i = 0; $i < strlen($code); $i++) {
             $char = $code[$i];
             $color = $textColors[$i % count($textColors)];
             
-            $x = (int) (20 + ($i * $charWidth));
-            $y = 32;
-            
-            imagechar($highRes, 5, $x, $y, $char, $color);
-            imagechar($highRes, 5, $x + 1, $y, $char, $color);
+            if ($useTtf) {
+                $fontSize = 22; // 22pt LARGE BOLD TTF FONT
+                $angle = rand(-5, 5);
+                $x = (int) (12 + ($i * $charWidth) + rand(-1, 1));
+                $y = (int) ($height - 15 + rand(-2, 2));
+                imagettftext($image, $fontSize, $angle, $x, $y, $color, $fontPath, $char);
+            } else {
+                // High-visibility fallback
+                $x = (int) (15 + ($i * $charWidth));
+                $y = 16;
+                imagechar($image, 5, $x, $y, $char, $color);
+                imagechar($image, 5, $x + 1, $y, $char, $color);
+            }
         }
 
-        // 3. Resample down to 180x50 for crisp anti-aliased output
-        $finalImage = imagecreatetruecolor($width, $height);
-        imagecopyresampled($finalImage, $highRes, 0, 0, 0, 0, $width, $height, $w2, $h2);
-        imagedestroy($highRes);
+        // Subtle background wave line
+        $waveColor = imagecolorallocate($image, 203, 213, 225);
+        imageline($image, 0, rand(10, 20), $width, rand(35, 45), $waveColor);
 
-        // Draw clean border
-        $borderColor = imagecolorallocate($finalImage, 203, 213, 225);
-        imagerectangle($finalImage, 0, 0, $width - 1, $height - 1, $borderColor);
+        // Outer border
+        $borderColor = imagecolorallocate($image, 203, 213, 225);
+        imagerectangle($image, 0, 0, $width - 1, $height - 1, $borderColor);
 
-        // 4. Output as base64
+        // 3. Output as base64
         ob_start();
-        imagepng($finalImage);
+        imagepng($image);
         $imageData = ob_get_clean();
-        imagedestroy($finalImage);
+        imagedestroy($image);
 
         return 'data:image/png;base64,' . base64_encode($imageData);
     }

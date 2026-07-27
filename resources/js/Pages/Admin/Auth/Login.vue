@@ -87,11 +87,11 @@
               <div class="grid grid-cols-2 gap-3 items-center">
                 <!-- Crisp High-Contrast White CAPTCHA Frame -->
                 <div class="relative bg-white border border-zinc-300 rounded-2xl p-1 flex items-center justify-between overflow-hidden shadow-inner group">
-                  <img :src="currentCaptcha" class="h-10 object-contain w-full rounded-xl bg-white select-none" alt="CAPTCHA Verification Code" />
+                  <img :src="currentCaptcha" class="h-12 w-full object-contain rounded-xl bg-white select-none" alt="CAPTCHA Verification Code" />
                   <button 
                     type="button"
                     @click="refreshCaptcha" 
-                    class="absolute right-1.5 top-1.5 p-1.5 bg-slate-900/90 hover:bg-slate-900 text-white rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95"
+                    class="absolute right-1.5 top-2 p-1.5 bg-slate-900/90 hover:bg-slate-900 text-white rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95"
                     title="Perbarui Kode CAPTCHA Baru"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
