@@ -1104,13 +1104,35 @@ const initialDutiesItems = computed(() => {
     const raw = props.settings?.profile_duties_items;
     if (!raw) {
       return [
-        { title: 'Pendaftaran Penduduk', desc: 'Pelayanan penerbitan KTP-El, KK, KIA, dan surat keterangan pindah penduduk.' },
-        { title: 'Pencatatan Sipil', desc: 'Penerbitan akta kelahiran, akta perkawinan, akta perceraian, dan akta kematian.' },
-        { title: 'Pengelolaan PIAK & IKD', desc: 'Pengelolaan jaringan data SIAK Terpusat dan aktivasi Identitas Kependudukan Digital.' },
+        {
+          title: 'Tugas Pokok :',
+          desc: "Dinas Kependudukan dan Pencatatan Sipil mempunyai tugas membantu Bupati melaksanakan urusan pemerintahan di bidang Administrasi Kependudukan dan Pencatatan Sipil, meliputi:\n1. Fasilitasi pelayanan administrasi kependudukan.\n2. Pengelolaan informasi administrasi kependudukan (PIAK).\n3. Pemanfaatan data dan inovasi pelayanan kependudukan."
+        },
+        {
+          title: 'Fungsi :',
+          desc: "Dalam menyelenggarakan tugas pokok, Dinas Kependudukan dan Pencatatan Sipil menyelenggarakan fungsi:\n1. Penyelenggaraan perumusan kebijakan teknis di bidang administrasi kependudukan dan pencatatan sipil.\n2. Penyelenggaraan pelayanan administrasi kependudukan dan pencatatan sipil.\n3. Penyelenggaraan evaluasi, pelaporan, dan pengendalian sistem informasi.\n4. Penyelenggaraan fungsi dinas lainnya sesuai tugas pokok dan fungsinya."
+        },
+        {
+          title: 'Kewenangan Disdukcapil Kabupaten Dompu',
+          desc: "Pemerintah Kabupaten berkewajiban dan bertanggung jawab menyelenggarakan urusan Administrasi Kependudukan dengan kewenangan meliputi:\n1. Koordinasi penyelenggaraan Administrasi Kependudukan.\n2. Pemberian bimbingan, supervisi, dan konsultasi pelaksanaan Pendaftaran Penduduk dan Pencatatan Sipil.\n3. Pembinaan dan sosialisasi penyelenggaraan Administrasi Kependudukan.\n4. Penyajian Data Kependudukan berskala Kabupaten dari SIAK Terpusat.\n5. Koordinasi pengawasan atas penyelenggaraan Administrasi Kependudukan."
+        }
       ];
     }
     const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    return Array.isArray(parsed) ? parsed : [];
+    return (Array.isArray(parsed) && parsed.length > 0) ? parsed : [
+      {
+        title: 'Tugas Pokok :',
+        desc: "Dinas Kependudukan dan Pencatatan Sipil mempunyai tugas membantu Bupati melaksanakan urusan pemerintahan di bidang Administrasi Kependudukan dan Pencatatan Sipil, meliputi:\n1. Fasilitasi pelayanan administrasi kependudukan.\n2. Pengelolaan informasi administrasi kependudukan (PIAK).\n3. Pemanfaatan data dan inovasi pelayanan kependudukan."
+      },
+      {
+        title: 'Fungsi :',
+        desc: "Dalam menyelenggarakan tugas pokok, Dinas Kependudukan dan Pencatatan Sipil menyelenggarakan fungsi:\n1. Penyelenggaraan perumusan kebijakan teknis di bidang administrasi kependudukan dan pencatatan sipil.\n2. Penyelenggaraan pelayanan administrasi kependudukan dan pencatatan sipil.\n3. Penyelenggaraan evaluasi, pelaporan, dan pengendalian sistem informasi.\n4. Penyelenggaraan fungsi dinas lainnya sesuai tugas pokok dan fungsinya."
+      },
+      {
+        title: 'Kewenangan Disdukcapil Kabupaten Dompu',
+        desc: "Pemerintah Kabupaten berkewajiban dan bertanggung jawab menyelenggarakan urusan Administrasi Kependudukan dengan kewenangan meliputi:\n1. Koordinasi penyelenggaraan Administrasi Kependudukan.\n2. Pemberian bimbingan, supervisi, dan konsultasi pelaksanaan Pendaftaran Penduduk dan Pencatatan Sipil.\n3. Pembinaan dan sosialisasi penyelenggaraan Administrasi Kependudukan.\n4. Penyajian Data Kependudukan berskala Kabupaten dari SIAK Terpusat.\n5. Koordinasi pengawasan atas penyelenggaraan Administrasi Kependudukan."
+      }
+    ];
   } catch (e) {
     return [];
   }
