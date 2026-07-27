@@ -146,9 +146,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         // -------------------------------------------------------------
-        // Content Editor & Super Administrator Routes
+        // Content & Media, Profile, Services, Demographics Route Group
         // -------------------------------------------------------------
-        Route::middleware('role:Super Administrator|Content Editor')->group(function () {
+        Route::middleware('role:Super Administrator|Website Administrator|Content Editor')->group(function () {
             // Enterprise Profile Module CMS
             Route::prefix('profile')->name('profile.')->group(function () {
                 Route::get('/dashboard', [\App\Http\Controllers\Admin\Profile\ProfileDashboardController::class, 'index'])->name('dashboard');
@@ -226,12 +226,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::resource('/service-requirements', \App\Http\Controllers\Admin\ServiceRequirementController::class)->except(['show']);
             Route::resource('/innovations', \App\Http\Controllers\Admin\InnovationController::class)->except(['show']);
+            Route::resource('/downloads', \App\Http\Controllers\Admin\DownloadController::class)->except(['show']);
         });
 
         // -------------------------------------------------------------
-        // Complaint Officer & Super Administrator Routes
+        // Complaint Officer, Website Administrator & Super Admin Routes
         // -------------------------------------------------------------
-        Route::middleware('role:Super Administrator|Complaint Officer')->group(function () {
+        Route::middleware('role:Super Administrator|Website Administrator|Complaint Officer')->group(function () {
             Route::get('/complaints', [\App\Http\Controllers\Admin\ComplaintController::class, 'index'])->name('complaints.index');
             Route::get('/complaints/categories', [\App\Http\Controllers\Admin\ComplaintController::class, 'categories'])->name('complaints.categories');
             Route::post('/complaints/categories', [\App\Http\Controllers\Admin\ComplaintController::class, 'storeCategory'])->name('complaints.categories.store');

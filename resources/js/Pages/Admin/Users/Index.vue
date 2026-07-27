@@ -251,6 +251,8 @@ const getRoleClass = (role) => {
   switch (role) {
     case 'Super Administrator':
       return 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-100 dark:border-red-900/30';
+    case 'Website Administrator':
+      return 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30';
     case 'Content Editor':
       return 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30';
     case 'Complaint Officer':
@@ -266,6 +268,8 @@ const getRoleDescription = (role) => {
   switch (role) {
     case 'Super Administrator':
       return 'Akses penuh tanpa batas ke seluruh modul CMS, Manajemen User, dan Pengaturan Sistem.';
+    case 'Website Administrator':
+      return 'Akses operasional penuh ke seluruh modul CMS (Konten, Layanan, Pengaduan, PPID, Demografi), kecuali Pengaturan Sistem & User.';
     case 'Content Editor':
       return 'Mengelola Berita, Artikel, Galeri Album, Pengumuman, Banner Slider, dan File Manager.';
     case 'Complaint Officer':

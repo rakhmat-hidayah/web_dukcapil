@@ -384,6 +384,7 @@ const menuGroups = [
 
 const userRoles = computed(() => page.props.auth?.roles || []);
 const isSuperAdmin = computed(() => userRoles.value.includes('Super Administrator'));
+const isWebsiteAdmin = computed(() => userRoles.value.includes('Website Administrator'));
 const isContentEditor = computed(() => userRoles.value.includes('Content Editor'));
 const isComplaintOfficer = computed(() => userRoles.value.includes('Complaint Officer'));
 const isPpidAdmin = computed(() => userRoles.value.includes('PPID Admin'));
@@ -391,6 +392,11 @@ const isPpidAdmin = computed(() => userRoles.value.includes('PPID Admin'));
 const filteredMenuGroups = computed(() => {
   if (isSuperAdmin.value) {
     return menuGroups;
+  }
+
+  // Website Administrator sees EVERYTHING except SYSTEM SETTINGS & SECURITY
+  if (isWebsiteAdmin.value) {
+    return menuGroups.filter(group => group.title !== 'SYSTEM SETTINGS & SECURITY');
   }
 
   return menuGroups.map(group => {
