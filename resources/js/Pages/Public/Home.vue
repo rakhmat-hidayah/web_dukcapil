@@ -83,9 +83,6 @@
 
           <!-- Text content overlay -->
           <div class="absolute inset-0 z-20 flex flex-col justify-center px-5 sm:px-12 md:px-16 max-w-2xl text-white space-y-2 sm:space-y-4">
-            <span class="px-2.5 py-0.5 bg-primary-600/90 border border-primary-400/40 text-[9px] font-bold uppercase rounded-md tracking-widest w-fit shadow-sm">
-              {{ banner.type }}
-            </span>
             <h2 class="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight line-clamp-2 sm:line-clamp-none drop-shadow-md">
               {{ banner.title }}
             </h2>
