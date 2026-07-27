@@ -78,9 +78,47 @@
             <span class="text-slate-400 font-medium">Unit Kerja / Bidang:</span>
             <p class="font-bold text-slate-900 dark:text-white mt-0.5">{{ selectedNode.official.department || '-' }}</p>
           </div>
-          <div v-if="selectedNode.official.main_duties" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900">
-            <span class="text-slate-400 font-medium">Tugas Pokok & Fungsi:</span>
-            <p class="text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">{{ selectedNode.official.main_duties }}</p>
+          <!-- Tugas Pokok & Fungsi (Formatted cleanly) -->
+          <div v-if="selectedNode.official.main_duties" class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 space-y-4">
+            <div class="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-800">
+              <span class="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              </span>
+              <h3 class="font-bold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Tugas Pokok & Fungsi</h3>
+            </div>
+
+            <!-- TUGAS UTAMA -->
+            <div v-if="parsedDuties.tugas" class="space-y-1">
+              <h4 class="font-bold text-xs text-blue-600 dark:text-blue-400">📌 Tugas Utama:</h4>
+              <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed pl-1">{{ parsedDuties.tugas }}</p>
+            </div>
+
+            <!-- FUNGSI LIST -->
+            <div v-if="parsedDuties.fungsi && parsedDuties.fungsi.length > 0" class="space-y-2 pt-1">
+              <h4 class="font-bold text-xs text-emerald-600 dark:text-emerald-400">⚡ Fungsi:</h4>
+              <ul class="space-y-1.5 pl-1">
+                <li v-for="(fItem, fIdx) in parsedDuties.fungsi" :key="fIdx" class="text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2 leading-relaxed">
+                  <span class="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] shrink-0 flex items-center justify-center mt-0.5">{{ fIdx + 1 }}</span>
+                  <span>{{ fItem }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- RINCIAN SUBBAGIAN / SUB BIDANG -->
+            <div v-if="parsedDuties.rincian && parsedDuties.rincian.length > 0" class="space-y-2 pt-1">
+              <h4 class="font-bold text-xs text-purple-600 dark:text-purple-400">🏢 {{ parsedDuties.rincianTitle || 'Rincian Unit Kerja:' }}</h4>
+              <ul class="space-y-2 pl-1">
+                <li v-for="(rItem, rIdx) in parsedDuties.rincian" :key="rIdx" class="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 leading-relaxed shadow-sm">
+                  <span class="font-bold text-blue-600 dark:text-blue-400 mr-1">{{ String.fromCharCode(97 + rIdx) }}).</span>
+                  <span>{{ rItem }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- FALLBACK IF UNPARSED -->
+            <div v-if="!parsedDuties.tugas && (!parsedDuties.fungsi || !parsedDuties.fungsi.length)" class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+              {{ selectedNode.official.main_duties }}
+            </div>
           </div>
           <a :href="'/profil/pejabat/' + (selectedNode.official.slug || selectedNode.official.id)" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-xs text-center block shadow-lg shadow-blue-600/30 transition">
             Lihat Profil Lengkap Pejabat &rarr;
@@ -112,6 +150,71 @@ const resetZoom = () => { zoomScale.value = 1 }
 const openNodeDrawer = (node) => {
   selectedNode.value = node
 }
+
+const parsedDuties = computed(() => {
+  const raw = selectedNode.value?.official?.main_duties || ''
+  if (!raw) return { tugas: '', fungsi: [], rincianTitle: '', rincian: [] }
+
+  let text = raw.trim()
+  let tugasText = ''
+  let fungsiList = []
+  let rincianTitle = ''
+  let rincianList = []
+
+  const fungsiMatchIndex = text.search(/Fungsi\s*[:\d]/i)
+  if (fungsiMatchIndex !== -1) {
+    tugasText = text.substring(0, fungsiMatchIndex).replace(/^Tugas\s*[:\s]*/i, '').trim()
+    text = text.substring(fungsiMatchIndex)
+  } else {
+    if (/^Tugas\s*[:\s]*/i.test(text)) {
+      tugasText = text.replace(/^Tugas\s*[:\s]*/i, '').trim()
+      text = ''
+    } else {
+      tugasText = text
+      text = ''
+    }
+  }
+
+  if (text) {
+    const rincianMatch = text.match(/(Sekretariat\s+Dinas\s+terdiri\s+atas:?|Subbagian\s+terdiri\s+atas:?|[A-Z][a-z\s]+terdiri\s+atas:?)/i)
+    let fungsiSection = text
+    let rincianSection = ''
+
+    if (rincianMatch) {
+      const idx = text.indexOf(rincianMatch[0])
+      fungsiSection = text.substring(0, idx)
+      rincianSection = text.substring(idx)
+      rincianTitle = rincianMatch[0].trim()
+      rincianSection = rincianSection.substring(rincianMatch[0].length).trim()
+    }
+
+    fungsiSection = fungsiSection.replace(/^Fungsi\s*[:\s]*/i, '').trim()
+    const numberedItems = fungsiSection.split(/(?=\b\d+[\.\)])/)
+    for (let item of numberedItems) {
+      const cleaned = item.replace(/^\d+[\.\)]\s*/, '').replace(/;$/, '').trim()
+      if (cleaned) {
+        fungsiList.push(cleaned)
+      }
+    }
+
+    if (rincianSection) {
+      const alphaItems = rincianSection.split(/(?=\b[a-z]\s*[\.\)])/i)
+      for (let item of alphaItems) {
+        const cleaned = item.replace(/^[a-z]\s*[\.\)]\s*/i, '').replace(/;$/, '').trim()
+        if (cleaned) {
+          rincianList.push(cleaned)
+        }
+      }
+    }
+  }
+
+  return {
+    tugas: tugasText,
+    fungsi: fungsiList,
+    rincianTitle: rincianTitle,
+    rincian: rincianList
+  }
+})
 
 const printChart = () => {
   window.print()
