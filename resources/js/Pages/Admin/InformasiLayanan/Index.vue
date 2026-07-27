@@ -316,7 +316,7 @@
                   Pilih Dokumen / Jenis Layanan yang Dilayani di Lokasi Pelayanan Mobile
                 </h3>
                 <p class="text-xs text-gray-500 dark:text-zinc-400">
-                  Centang dokumen mana saja yang saat ini dilayani oleh tim pelayanan mobile pada jadwal lokasi tersebut.
+                  Centang dokumen mana saja yang saat ini dilayani oleh Tim Pelayanan Mobile pada jadwal lokasi tersebut.
                 </p>
               </div>
             </div>
