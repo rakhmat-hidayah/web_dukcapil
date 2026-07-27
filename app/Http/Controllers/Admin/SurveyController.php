@@ -8,6 +8,7 @@ use App\Models\SurveyPeriod;
 use App\Models\SurveyQuestion;
 use App\Models\SurveyQuestionOption;
 use App\Models\SurveyRecommendation;
+use App\Models\SurveyResponse;
 use App\Services\ActivityLogger;
 use App\Services\SurveyArchiveService;
 use App\Services\SurveyCalculationService;
@@ -51,11 +52,34 @@ class SurveyController extends Controller
         $chartData = $activePeriodId ? $this->chartService->generateChartDatasets($activePeriodId) : null;
         $archives = $this->archiveService->getArchivedPeriods();
 
+        // Auto-recalculate stats for active period on load
+        if ($activePeriodId) {
+            $this->calcService->calculatePeriodStats($activePeriodId);
+            // Refresh activePeriod after recalc
+            $activePeriod = SurveyPeriod::with([
+                'questions.options',
+                'statistic',
+                'recommendations.followUpActions',
+                'followUpActions',
+                'publications'
+            ])->find($activePeriodId);
+        }
+
+        // Load respondents for active period
+        $respondents = $activePeriodId
+            ? SurveyResponse::where('survey_period_id', $activePeriodId)
+                ->orderBy('created_at', 'desc')
+                ->get(['id', 'respondent_name', 'respondent_phone', 'respondent_domicile',
+                    'respondent_age', 'respondent_gender', 'respondent_education',
+                    'respondent_job', 'service_accessed', 'ikm_score', 'suggestion', 'created_at'])
+            : collect();
+
         return Inertia::render('Admin/Surveys/Index', [
-            'periods' => $periods,
+            'periods'     => $periods,
             'activePeriod' => $activePeriod,
-            'chartData' => $chartData,
-            'archives' => $archives,
+            'chartData'   => $chartData,
+            'archives'    => $archives,
+            'respondents' => $respondents,
         ]);
     }
 

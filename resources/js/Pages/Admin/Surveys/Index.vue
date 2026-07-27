@@ -175,6 +175,106 @@
         </div>
       </div>
 
+      <!-- TAB: RESPONDENTS -->
+      <div v-if="activeTab === 'respondents'" class="space-y-4">
+        <!-- Summary Bar -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-sm space-y-1">
+            <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Total Responden</span>
+            <p class="text-2xl font-black text-primary-600 font-mono">{{ respondents ? respondents.length : 0 }}</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-sm space-y-1">
+            <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Nilai IKM</span>
+            <p class="text-2xl font-black text-amber-500 font-mono">{{ activePeriod?.statistic?.ikm_value || '—' }}</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-sm space-y-1">
+            <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Rata-Rata Skor</span>
+            <p class="text-2xl font-black text-blue-600 font-mono">
+              {{ respondents && respondents.length > 0 ? (respondents.reduce((a,b) => a + parseFloat(b.ikm_score||0), 0) / respondents.length).toFixed(1) : '—' }}
+            </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-sm space-y-1">
+            <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Mutu Pelayanan</span>
+            <p class="text-2xl font-black text-emerald-600 font-mono">{{ activePeriod?.statistic?.service_quality_category || '—' }}</p>
+          </div>
+        </div>
+
+        <!-- Respondents Table -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-100">Daftar Responden IKM</h3>
+              <p class="text-[11px] text-gray-400 mt-0.5">{{ activePeriod?.title || '—' }}</p>
+            </div>
+            <span class="px-3 py-1 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-lg">
+              {{ respondents ? respondents.length : 0 }} Responden
+            </span>
+          </div>
+
+          <div v-if="!respondents || respondents.length === 0" class="py-16 text-center">
+            <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+              <svg class="w-8 h-8 text-gray-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <p class="text-sm font-bold text-gray-400 dark:text-zinc-500">Belum ada responden yang mengisi survei</p>
+            <p class="text-xs text-gray-400 dark:text-zinc-600 mt-1">Data akan muncul setelah masyarakat mengisi form survei publik</p>
+          </div>
+
+          <div v-else class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-gray-100 dark:border-zinc-800 text-[10px] font-black uppercase text-gray-400 font-mono bg-gray-50/50 dark:bg-zinc-800/30">
+                  <th class="py-3 px-4">#</th>
+                  <th class="py-3 px-4">Nama</th>
+                  <th class="py-3 px-4">No. HP</th>
+                  <th class="py-3 px-4">Domisili</th>
+                  <th class="py-3 px-4">Umur/JK</th>
+                  <th class="py-3 px-4">Pendidikan</th>
+                  <th class="py-3 px-4">Pekerjaan</th>
+                  <th class="py-3 px-4">Layanan</th>
+                  <th class="py-3 px-4 text-center">Skor IKM</th>
+                  <th class="py-3 px-4">Saran</th>
+                  <th class="py-3 px-4">Tgl. Isi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50 dark:divide-zinc-800/80">
+                <tr v-for="(r, i) in respondents" :key="r.id" class="hover:bg-gray-50/60 dark:hover:bg-zinc-800/30 transition-colors">
+                  <td class="py-3 px-4 font-mono text-gray-400">{{ i + 1 }}</td>
+                  <td class="py-3 px-4 font-bold text-gray-900 dark:text-zinc-100">{{ r.respondent_name || 'Anonim' }}</td>
+                  <td class="py-3 px-4 font-mono text-blue-600 dark:text-blue-400">
+                    <span v-if="r.respondent_phone">+62{{ r.respondent_phone }}</span>
+                    <span v-else class="text-gray-300">—</span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-700 dark:text-zinc-300">{{ r.respondent_domicile || '—' }}</td>
+                  <td class="py-3 px-4 text-gray-600 dark:text-zinc-400">
+                    <span>{{ r.respondent_age ? r.respondent_age + ' thn' : '—' }}</span>
+                    <span v-if="r.respondent_gender" class="ml-1 text-[10px] px-1.5 py-0.5 rounded font-bold" :class="r.respondent_gender === 'Laki-laki' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600'">
+                      {{ r.respondent_gender === 'Laki-laki' ? 'L' : 'P' }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-600 dark:text-zinc-400">{{ r.respondent_education || '—' }}</td>
+                  <td class="py-3 px-4 text-gray-700 dark:text-zinc-300">{{ r.respondent_job || '—' }}</td>
+                  <td class="py-3 px-4">
+                    <span class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 rounded text-[10px] font-bold">{{ r.service_accessed || '—' }}</span>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <span class="px-2.5 py-1 rounded-lg font-black font-mono text-[11px]"
+                      :class="r.ikm_score >= 88.31 ? 'bg-emerald-50 text-emerald-700' : r.ikm_score >= 76.61 ? 'bg-blue-50 text-blue-700' : r.ikm_score >= 65 ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-700'">
+                      {{ parseFloat(r.ikm_score).toFixed(1) }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 max-w-[160px] truncate text-gray-500 dark:text-zinc-500 italic" :title="r.suggestion">
+                    {{ r.suggestion || '—' }}
+                  </td>
+                  <td class="py-3 px-4 font-mono text-gray-400 text-[10px] whitespace-nowrap">
+                    {{ new Date(r.created_at).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- TAB 4: RECOMMENDATIONS -->
       <div v-if="activeTab === 'recommendations'" class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl p-6 space-y-6">
         <div class="flex items-center justify-between">
@@ -444,6 +544,7 @@ const props = defineProps({
   activePeriod: Object,
   chartData: Object,
   archives: Array,
+  respondents: Array,
 })
 
 const activeTab = ref('dashboard')
@@ -452,6 +553,7 @@ const tabs = [
   { id: 'dashboard', label: 'Dashboard Overview' },
   { id: 'period', label: 'Periode Survei' },
   { id: 'questions', label: 'Form Pertanyaan' },
+  { id: 'respondents', label: '📋 Responden' },
   { id: 'recommendations', label: 'Rekomendasi' },
   { id: 'follow_up', label: 'Tindak Lanjut' },
 ]
