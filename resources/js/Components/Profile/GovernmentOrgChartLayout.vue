@@ -28,10 +28,6 @@
     <!-- MAIN TREE CANVAS WRAPPER (Exact 1200px width grid) -->
     <div class="w-full relative flex flex-col items-center">
       
-      <!-- LEVEL 2 CONNECTOR LINES -->
-      <div class="absolute top-0 left-[25%] right-1/2 h-0.5 border-t-2 border-dashed border-slate-400 z-10"></div>
-      <div class="absolute top-0 left-1/2 right-[25%] h-0.5 bg-blue-400/80 z-10"></div>
-
       <!-- Central Vertical Trunk Continuation (STOPS EXACTLY at the 4-Bidang horizontal bar) -->
       <div class="absolute top-0 h-[296px] left-1/2 -translate-x-1/2 w-0.5 bg-blue-400/80 z-0"></div>
 
@@ -39,8 +35,13 @@
       <div class="grid grid-cols-2 w-full z-10 pt-0">
         
         <!-- LEFT COLUMN: JABATAN FUNGSIONAL -->
-        <div class="flex flex-col items-center">
-          <div class="w-0.5 h-6 border-l-2 border-dashed border-slate-400"></div>
+        <div class="flex flex-col items-center relative">
+          <!-- Top Horizontal connector segment (from center 50% to right edge 100%) -->
+          <div class="w-full relative h-6 flex justify-center">
+            <div class="absolute top-0 left-1/2 right-0 h-0.5 border-t-2 border-dashed border-slate-400"></div>
+            <div class="w-0.5 h-6 border-l-2 border-dashed border-slate-400"></div>
+          </div>
+
           <div 
             @click="selectNode(fungsionalKadisNode)"
             class="w-64 rounded-2xl shadow-xl border-2 border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
@@ -65,7 +66,11 @@
 
         <!-- RIGHT COLUMN: SEKRETARIAT + SUB BAGIAN ROW -->
         <div class="flex flex-col items-center px-4 relative">
-          <div class="w-0.5 h-6 bg-blue-400/80"></div>
+          <!-- Top Horizontal connector segment (from left edge 0% to center 50%) -->
+          <div class="w-full relative h-6 flex justify-center">
+            <div class="absolute top-0 left-0 right-1/2 h-0.5 bg-blue-400/80"></div>
+            <div class="w-0.5 h-6 bg-blue-400/80"></div>
+          </div>
           
           <!-- Sekretariat Card -->
           <div 
@@ -90,15 +95,15 @@
           <div class="w-0.5 h-6 bg-blue-400/80"></div>
 
           <!-- SUB BAGIAN ROW (3 Columns under Sekretariat) -->
-          <div class="w-full relative flex flex-col items-center">
-            <div class="w-full relative h-4">
-              <div class="absolute top-0 left-[16.67%] right-[16.67%] h-0.5 bg-blue-400/80"></div>
-            </div>
-
+          <div class="w-full relative">
             <div class="grid grid-cols-3 gap-3 w-full">
               <!-- Sub Bagian 1: Sub Bagian Keuangan -->
-              <div class="flex flex-col items-center">
-                <div class="w-0.5 h-4 bg-blue-400/80 -mt-4"></div>
+              <div class="flex flex-col items-center relative">
+                <!-- Top horizontal connector from center (50%) to right edge (100%) -->
+                <div class="w-full relative h-4 flex justify-center">
+                  <div class="absolute top-0 left-1/2 right-0 h-0.5 bg-blue-400/80"></div>
+                  <div class="w-0.5 h-4 bg-blue-400/80"></div>
+                </div>
                 <div @click="selectNode(subNode2)" class="w-full rounded-xl shadow-lg border border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden">
                   <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
                     <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subNode2?.node_title || 'SUB BAGIAN KEUANGAN' }}</h4>
@@ -118,8 +123,12 @@
               </div>
 
               <!-- Sub Bagian 2: Sub Bagian Umum & Kepegawaian -->
-              <div class="flex flex-col items-center">
-                <div class="w-0.5 h-4 bg-blue-400/80 -mt-4"></div>
+              <div class="flex flex-col items-center relative">
+                <!-- Top horizontal connector full width (0% to 100%) -->
+                <div class="w-full relative h-4 flex justify-center">
+                  <div class="absolute top-0 left-0 right-0 h-0.5 bg-blue-400/80"></div>
+                  <div class="w-0.5 h-4 bg-blue-400/80"></div>
+                </div>
                 <div @click="selectNode(subNode3)" class="w-full rounded-xl shadow-lg border border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden">
                   <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
                     <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subNode3?.node_title || 'SUB BAGIAN UMUM & KEPEG.' }}</h4>
@@ -139,8 +148,12 @@
               </div>
 
               <!-- Sub Bagian 3: Kelompok Jabatan Fungsional -->
-              <div class="flex flex-col items-center">
-                <div class="w-0.5 h-4 bg-blue-400/80 -mt-4"></div>
+              <div class="flex flex-col items-center relative">
+                <!-- Top horizontal connector from left edge (0%) to center (50%) -->
+                <div class="w-full relative h-4 flex justify-center">
+                  <div class="absolute top-0 left-0 right-1/2 h-0.5 bg-blue-400/80"></div>
+                  <div class="w-0.5 h-4 bg-blue-400/80"></div>
+                </div>
                 <div @click="selectNode(subNode1)" class="w-full rounded-xl shadow-lg border border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden">
                   <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
                     <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subNode1?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
@@ -166,15 +179,14 @@
 
       <!-- SPACER & CONNECTOR TO LEVEL 4 (4 BIDANG ROW) -->
       <div class="w-full relative flex flex-col items-center mt-10 z-10">
-        <div class="w-full relative h-6">
-          <div class="absolute top-0 left-[12.5%] right-[12.5%] h-0.5 bg-blue-400/80"></div>
-        </div>
-
         <!-- 4 BIDANG GRID ROW -->
         <div class="grid grid-cols-4 gap-5 w-full px-2">
           <!-- BIDANG 1 -->
-          <div class="flex flex-col items-center">
-            <div class="w-0.5 h-6 bg-blue-400/80 -mt-6"></div>
+          <div class="flex flex-col items-center relative">
+            <div class="w-full relative h-6 flex justify-center">
+              <div class="absolute top-0 left-1/2 right-0 h-0.5 bg-blue-400/80"></div>
+              <div class="w-0.5 h-6 bg-blue-400/80"></div>
+            </div>
             <div 
               @click="selectNode(bidang1Node)"
               class="w-full rounded-2xl shadow-xl border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
@@ -222,8 +234,11 @@
           </div>
 
           <!-- BIDANG 2 -->
-          <div class="flex flex-col items-center">
-            <div class="w-0.5 h-6 bg-blue-400/80 -mt-6"></div>
+          <div class="flex flex-col items-center relative">
+            <div class="w-full relative h-6 flex justify-center">
+              <div class="absolute top-0 left-0 right-0 h-0.5 bg-blue-400/80"></div>
+              <div class="w-0.5 h-6 bg-blue-400/80"></div>
+            </div>
             <div 
               @click="selectNode(bidang2Node)"
               class="w-full rounded-2xl shadow-xl border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
@@ -270,8 +285,11 @@
           </div>
 
           <!-- BIDANG 3 -->
-          <div class="flex flex-col items-center">
-            <div class="w-0.5 h-6 bg-blue-400/80 -mt-6"></div>
+          <div class="flex flex-col items-center relative">
+            <div class="w-full relative h-6 flex justify-center">
+              <div class="absolute top-0 left-0 right-0 h-0.5 bg-blue-400/80"></div>
+              <div class="w-0.5 h-6 bg-blue-400/80"></div>
+            </div>
             <div 
               @click="selectNode(bidang3Node)"
               class="w-full rounded-2xl shadow-xl border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
@@ -318,8 +336,11 @@
           </div>
 
           <!-- BIDANG 4 -->
-          <div class="flex flex-col items-center">
-            <div class="w-0.5 h-6 bg-blue-400/80 -mt-6"></div>
+          <div class="flex flex-col items-center relative">
+            <div class="w-full relative h-6 flex justify-center">
+              <div class="absolute top-0 left-0 right-1/2 h-0.5 bg-blue-400/80"></div>
+              <div class="w-0.5 h-6 bg-blue-400/80"></div>
+            </div>
             <div 
               @click="selectNode(bidang4Node)"
               class="w-full rounded-2xl shadow-xl border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
