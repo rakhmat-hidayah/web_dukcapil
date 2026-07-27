@@ -40,8 +40,8 @@
       </div>
 
       <!-- Canvas Container -->
-      <div id="printable-org-chart" class="bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black rounded-3xl p-6 md:p-10 shadow-2xl border border-slate-800/80 overflow-x-auto relative min-h-[680px]">
-        <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b0f_1px,transparent_1px),linear-gradient(to_bottom,#1e293b0f_1px,transparent_1px)] bg-[size:2rem_2rem] pointer-events-none rounded-3xl"></div>
+      <div id="printable-org-chart" class="bg-slate-50/90 dark:bg-slate-950 rounded-3xl p-6 md:p-10 shadow-xl border border-slate-200 dark:border-slate-800 overflow-x-auto relative min-h-[680px]">
+        <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none rounded-3xl"></div>
         <div class="min-w-max mx-auto flex justify-center py-6 relative z-10">
           <div :style="{ transform: `scale(${zoomScale})`, transformOrigin: 'top center' }" class="transition-transform duration-300 ease-out flex flex-col items-center">
             <GovernmentOrgChartLayout :tree="tree" :searchQuery="searchQuery" @select-node="openNodeDrawer" />
