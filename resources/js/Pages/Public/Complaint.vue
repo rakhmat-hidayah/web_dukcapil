@@ -100,11 +100,14 @@
               rows="6" 
               minlength="20" 
               maxlength="5000"
-              placeholder="Jelaskan kronologi, lokasi, dan fakta pendukung pengaduan Anda..."
+              @invalid="e => e.target.setCustomValidity('Mohon isi uraian pengaduan minimal 20 karakter agar kronologi dapat dipahami.')"
+              @input="e => e.target.setCustomValidity('')"
+              placeholder="Jelaskan kronologi, lokasi, dan fakta pendukung pengaduan Anda (minimal 20 karakter)..."
               class="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none"
             ></textarea>
-            <div class="flex justify-between mt-1">
-              <p v-if="errors.message" class="text-[9px] text-red-500 font-semibold mt-0.5">{{ errors.message }}</p>
+            <div class="flex justify-between items-center mt-1">
+              <p v-if="errors.message" class="text-[9px] text-red-500 font-semibold">{{ errors.message }}</p>
+              <p v-else class="text-[9px] text-amber-600 dark:text-amber-400 font-medium">Minimal 20 karakter agar uraian jelas.</p>
               <p class="text-[9px] text-gray-400 ml-auto">{{ form.message.length }}/5000</p>
             </div>
           </div>
