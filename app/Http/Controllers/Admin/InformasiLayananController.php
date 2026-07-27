@@ -89,6 +89,11 @@ class InformasiLayananController extends Controller
             'profile_maklumat_tag'              => 'Maklumat Pelayanan Publik',
             'profile_maklumat_title'            => '"Dengan Ini, Kami Menyatakan Sanggup Menyenggarakan Pelayanan Sesuai Standar Pelayanan Yang Telah Ditetapkan"',
             'profile_maklumat_subtitle'         => 'Apabila tidak memenuhi janji ini, kami siap menerima sanksi sesuai dengan peraturan perundang-undangan yang berlaku.',
+
+            // Tentang Dinas
+            'profile_about_title'               => 'Tentang Dinas',
+            'profile_about_subtitle'            => 'Gambaran Umum & Peran Strategis Instansi',
+            'profile_about_content'             => "Dinas Kependudukan dan Pencatatan Sipil (Dukcapil) Kabupaten Dompu merupakan instansi pemerintah daerah yang bertugas menyelenggarakan urusan pemerintahan di bidang administrasi kependudukan dan pencatatan sipil di wilayah Kabupaten Dompu, Nusa Tenggara Barat.\n\nMelalui integrasi Sistem Informasi Administrasi Kependudukan (SIAK) Terpusat dan Identitas Kependudukan Digital (IKD), Dukcapil Kabupaten Dompu terus berinovasi untuk menghadirkan pelayanan publik yang melayani tanpa diskriminasi, cepat, akurat, dan Bebas Pungutan Liar (Rp 0,-).",
         ];
 
         $mergedSettings = array_merge($defaults, $settings);
@@ -168,6 +173,11 @@ class InformasiLayananController extends Controller
             'profile_maklumat_tag'              => 'nullable|string|max:255',
             'profile_maklumat_title'            => 'nullable|string|max:2000',
             'profile_maklumat_subtitle'         => 'nullable|string|max:2000',
+
+            // Section 10: Tentang Dinas
+            'profile_about_title'               => 'nullable|string|max:255',
+            'profile_about_subtitle'            => 'nullable|string|max:255',
+            'profile_about_content'             => 'nullable|string|max:4000',
         ]);
 
         if ($request->hasFile('leader_photo_file')) {

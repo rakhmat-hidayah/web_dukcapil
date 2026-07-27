@@ -911,6 +911,59 @@
           </div>
         </div>
 
+        <!-- SECTION 10: Tentang Dinas -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-zinc-800">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold text-lg">
+                ℹ️
+              </div>
+              <div>
+                <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-100">
+                  Tentang Dinas (Gambaran Umum)
+                </h3>
+                <p class="text-xs text-gray-400 dark:text-zinc-500">
+                  Kelola judul seksi, sub-judul, serta deskripsi gambaran umum dan peran strategis instansi.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">Judul Seksi</label>
+                <input 
+                  type="text" 
+                  v-model="form.profile_about_title"
+                  placeholder="Tentang Dinas"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">Sub-Judul Seksi</label>
+                <input 
+                  type="text" 
+                  v-model="form.profile_about_subtitle"
+                  placeholder="Gambaran Umum & Peran Strategis Instansi"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">Isi Teks Deskripsi (Pisahkan Paragraf dengan Enter)</label>
+              <textarea 
+                v-model="form.profile_about_content"
+                rows="5"
+                placeholder="Dinas Kependudukan dan Pencatatan Sipil..."
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
         <!-- Form Submit Bar -->
         <div class="flex items-center justify-end gap-3 pt-4">
           <button 
@@ -1123,6 +1176,11 @@ const form = useForm({
   profile_maklumat_tag: props.settings.profile_maklumat_tag || 'Maklumat Pelayanan Publik',
   profile_maklumat_title: props.settings.profile_maklumat_title || '"Dengan Ini, Kami Menyatakan Sanggup Menyenggarakan Pelayanan Sesuai Standar Pelayanan Yang Telah Ditetapkan"',
   profile_maklumat_subtitle: props.settings.profile_maklumat_subtitle || 'Apabila tidak memenuhi janji ini, kami siap menerima sanksi sesuai dengan peraturan perundang-undangan yang berlaku.',
+
+  // Section 10: Tentang Dinas
+  profile_about_title: props.settings.profile_about_title || 'Tentang Dinas',
+  profile_about_subtitle: props.settings.profile_about_subtitle || 'Gambaran Umum & Peran Strategis Instansi',
+  profile_about_content: props.settings.profile_about_content || "Dinas Kependudukan dan Pencatatan Sipil (Dukcapil) Kabupaten Dompu merupakan instansi pemerintah daerah yang bertugas menyelenggarakan urusan pemerintahan di bidang administrasi kependudukan dan pencatatan sipil di wilayah Kabupaten Dompu, Nusa Tenggara Barat.\n\nMelalui integrasi Sistem Informasi Administrasi Kependudukan (SIAK) Terpusat dan Identitas Kependudukan Digital (IKD), Dukcapil Kabupaten Dompu terus berinovasi untuk menghadirkan pelayanan publik yang melayani tanpa diskriminasi, cepat, akurat, dan Bebas Pungutan Liar (Rp 0,-).",
 });
 
 const submit = () => {

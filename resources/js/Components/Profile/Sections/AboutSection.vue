@@ -6,24 +6,53 @@
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
         <div>
-          <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">Tentang Dinas</h2>
-          <p class="text-xs text-gray-500 dark:text-zinc-400">Gambaran Umum & Peran Strategis Instansi</p>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">{{ aboutTitle }}</h2>
+          <p class="text-xs text-gray-500 dark:text-zinc-400">{{ aboutSubtitle }}</p>
         </div>
       </div>
-      <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-zinc-300 leading-relaxed text-xs md:text-sm space-y-4">
-        <p>
-          Dinas Kependudukan dan Pencatatan Sipil (Dukcapil) Kabupaten Dompu merupakan instansi pemerintah daerah yang bertugas menyelenggarakan urusan pemerintahan di bidang administrasi kependudukan dan pencatatan sipil di wilayah Kabupaten Dompu, Nusa Tenggara Barat.
-        </p>
-        <p>
-          Melalui integrasi Sistem Informasi Administrasi Kependudukan (SIAK) Terpusat dan Identitas Kependudukan Digital (IKD), Dukcapil Kabupaten Dompu terus berinovasi untuk menghadirkan pelayanan publik yang melayani tanpa diskriminasi, cepat, akurat, dan Bebas Pungutan Liar (Rp 0,-).
-        </p>
+      <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-zinc-300 leading-relaxed text-xs md:text-sm space-y-4 font-medium">
+        <template v-if="aboutParagraphs.length > 0">
+          <p v-for="(p, idx) in aboutParagraphs" :key="idx">{{ p }}</p>
+        </template>
+        <template v-else>
+          <p>
+            Dinas Kependudukan dan Pencatatan Sipil (Dukcapil) Kabupaten Dompu merupakan instansi pemerintah daerah yang bertugas menyelenggarakan urusan pemerintahan di bidang administrasi kependudukan dan pencatatan sipil di wilayah Kabupaten Dompu, Nusa Tenggara Barat.
+          </p>
+          <p>
+            Melalui integrasi Sistem Informasi Administrasi Kependudukan (SIAK) Terpusat dan Identitas Kependudukan Digital (IKD), Dukcapil Kabupaten Dompu terus berinovasi untuk menghadirkan pelayanan publik yang melayani tanpa diskriminasi, cepat, akurat, dan Bebas Pungutan Liar (Rp 0,-).
+          </p>
+        </template>
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import { usePage } from '@inertiajs/vue3'
+
+const page = usePage()
+
+const props = defineProps({
   setting: Object,
+})
+
+const ws = computed(() => page.props.website_settings || {})
+
+const aboutTitle = computed(() => {
+  return ws.value.profile_about_title || props.setting?.content_data?.about_title || 'Tentang Dinas'
+})
+
+const aboutSubtitle = computed(() => {
+  return ws.value.profile_about_subtitle || props.setting?.content_data?.about_subtitle || 'Gambaran Umum & Peran Strategis Instansi'
+})
+
+const aboutParagraphs = computed(() => {
+  const raw = ws.value.profile_about_content || props.setting?.content_data?.about_content
+  if (Array.isArray(raw)) return raw
+  if (typeof raw === 'string' && raw.trim()) {
+    return raw.split('\n').map(s => s.trim()).filter(Boolean)
+  }
+  return []
 })
 </script>
