@@ -4,9 +4,11 @@
     <div class="flex flex-col items-center relative z-30">
       <div 
         @click="selectNode(kadisNode)"
-        class="w-72 rounded-2xl shadow-2xl border-2 border-rose-500 bg-rose-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden group"
+        :class="getCardClass(kadisNode, 'border-2 border-rose-500 bg-rose-600 text-white')"
+        :style="getCardStyle(kadisNode)"
+        class="w-72 rounded-2xl shadow-2xl transition hover:scale-105 overflow-hidden group cursor-pointer"
       >
-        <div class="px-3 py-2 text-center bg-rose-700/60 border-b border-rose-500/50">
+        <div class="px-3 py-2 text-center bg-black/20 border-b border-white/10">
           <h3 class="font-black text-xs uppercase tracking-wider text-white">{{ kadisNode?.node_title || 'KEPALA DINAS' }}</h3>
         </div>
         <div class="bg-white dark:bg-slate-900 mx-1.5 my-1.5 p-2.5 rounded-xl flex items-center gap-3 border border-slate-100 dark:border-slate-800">
@@ -28,7 +30,7 @@
     <!-- MAIN TREE CANVAS WRAPPER (Exact 1200px width grid) -->
     <div class="w-full relative flex flex-col items-center">
       
-      <!-- LEVEL 2 SECTION (Container for Level 2 & central line connecting down to 4-Bidang bar) -->
+      <!-- LEVEL 2 SECTION -->
       <div class="w-full relative flex flex-col items-center">
         <!-- Central Trunk Line through Level 2 -->
         <div class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-blue-400/80 z-0"></div>
@@ -45,9 +47,11 @@
             <div class="w-0.5 h-6 border-l-2 border-dashed border-slate-400"></div>
             <div 
               @click="selectNode(fungsionalKadisNode)"
-              class="w-64 rounded-2xl shadow-xl border-2 border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
+              :class="getCardClass(fungsionalKadisNode, 'border-2 border-amber-400 bg-amber-500 text-white')"
+              :style="getCardStyle(fungsionalKadisNode)"
+              class="w-64 rounded-2xl shadow-xl transition hover:scale-105 overflow-hidden cursor-pointer"
             >
-              <div class="px-3 py-1.5 text-center bg-amber-600/50">
+              <div class="px-3 py-1.5 text-center bg-black/20">
                 <h3 class="font-black text-[11px] uppercase tracking-wider text-white">{{ fungsionalKadisNode?.node_title || 'JABATAN FUNGSIONAL' }}</h3>
               </div>
               <div class="bg-white dark:bg-slate-900 mx-1.5 my-1.5 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
@@ -72,9 +76,11 @@
             <!-- Sekretariat Card -->
             <div 
               @click="selectNode(sekretarisNode)"
-              class="w-72 rounded-2xl shadow-xl border-2 border-pink-400 bg-pink-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
+              :class="getCardClass(sekretarisNode, 'border-2 border-pink-400 bg-pink-600 text-white')"
+              :style="getCardStyle(sekretarisNode)"
+              class="w-72 rounded-2xl shadow-xl transition hover:scale-105 overflow-hidden cursor-pointer"
             >
-              <div class="px-3 py-1.5 text-center bg-pink-700/50">
+              <div class="px-3 py-1.5 text-center bg-black/20">
                 <h3 class="font-black text-xs uppercase tracking-wider text-white">{{ sekretarisNode?.node_title || 'SEKRETARIAT' }}</h3>
               </div>
               <div class="bg-white dark:bg-slate-900 mx-1.5 my-1.5 p-2.5 rounded-xl flex items-center gap-3 border border-slate-100 dark:border-slate-800">
@@ -101,8 +107,13 @@
                 <!-- Sub Bagian 1: Sub Bagian Keuangan -->
                 <div class="flex flex-col items-center">
                   <div class="w-0.5 h-4 bg-blue-400/80 -mt-4"></div>
-                  <div @click="selectNode(subNode2)" class="w-full rounded-xl shadow-lg border border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden">
-                    <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
+                  <div 
+                    @click="selectNode(subNode2)" 
+                    :class="getCardClass(subNode2, 'border border-amber-400 bg-amber-500 text-white')"
+                    :style="getCardStyle(subNode2)"
+                    class="w-full rounded-xl shadow-lg transition hover:scale-105 overflow-hidden cursor-pointer"
+                  >
+                    <div class="px-1.5 py-1 text-center bg-black/20 min-h-[32px] flex items-center justify-center">
                       <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subNode2?.node_title || 'SUB BAGIAN KEUANGAN' }}</h4>
                     </div>
                     <div class="bg-white dark:bg-slate-900 m-1 p-2 rounded-lg flex items-center gap-1.5 border border-slate-100 dark:border-slate-800 min-h-[52px]">
@@ -122,8 +133,13 @@
                 <!-- Sub Bagian 2: Sub Bagian Umum & Kepegawaian -->
                 <div class="flex flex-col items-center">
                   <div class="w-0.5 h-4 bg-blue-400/80 -mt-4"></div>
-                  <div @click="selectNode(subNode3)" class="w-full rounded-xl shadow-lg border border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden">
-                    <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
+                  <div 
+                    @click="selectNode(subNode3)" 
+                    :class="getCardClass(subNode3, 'border border-amber-400 bg-amber-500 text-white')"
+                    :style="getCardStyle(subNode3)"
+                    class="w-full rounded-xl shadow-lg transition hover:scale-105 overflow-hidden cursor-pointer"
+                  >
+                    <div class="px-1.5 py-1 text-center bg-black/20 min-h-[32px] flex items-center justify-center">
                       <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subNode3?.node_title || 'SUB BAGIAN UMUM & KEPEG.' }}</h4>
                     </div>
                     <div class="bg-white dark:bg-slate-900 m-1 p-2 rounded-lg flex items-center gap-1.5 border border-slate-100 dark:border-slate-800 min-h-[52px]">
@@ -143,8 +159,13 @@
                 <!-- Sub Bagian 3: Kelompok Jabatan Fungsional -->
                 <div class="flex flex-col items-center">
                   <div class="w-0.5 h-4 bg-blue-400/80 -mt-4"></div>
-                  <div @click="selectNode(subNode1)" class="w-full rounded-xl shadow-lg border border-amber-400 bg-amber-500 text-white cursor-pointer transition hover:scale-105 overflow-hidden">
-                    <div class="px-1.5 py-1 text-center bg-amber-600/50 min-h-[32px] flex items-center justify-center">
+                  <div 
+                    @click="selectNode(subNode1)" 
+                    :class="getCardClass(subNode1, 'border border-amber-400 bg-amber-500 text-white')"
+                    :style="getCardStyle(subNode1)"
+                    class="w-full rounded-xl shadow-lg transition hover:scale-105 overflow-hidden cursor-pointer"
+                  >
+                    <div class="px-1.5 py-1 text-center bg-black/20 min-h-[32px] flex items-center justify-center">
                       <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subNode1?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
                     </div>
                     <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
@@ -172,7 +193,7 @@
 
       <!-- LEVEL 4 SECTION (4 BIDANGS) -->
       <div class="w-full relative flex flex-col items-center z-10">
-        <!-- 4-Bidang Horizontal Bar (Line at top-0 touches the h-8 trunk line above it seamlessly!) -->
+        <!-- 4-Bidang Horizontal Bar -->
         <div class="w-full relative h-6">
           <div class="absolute top-0 left-[12.5%] right-[12.5%] h-0.5 bg-blue-400/80"></div>
         </div>
@@ -184,9 +205,11 @@
             <div class="w-0.5 h-6 bg-blue-400/80 -mt-6"></div>
             <div 
               @click="selectNode(bidang1Node)"
-              class="w-full rounded-2xl shadow-xl border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
+              :class="getCardClass(bidang1Node, 'border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white')"
+              :style="getCardStyle(bidang1Node)"
+              class="w-full rounded-2xl shadow-xl transition hover:scale-105 overflow-hidden cursor-pointer"
             >
-              <div class="px-2 py-2 text-center bg-teal-800/40 min-h-[44px] flex items-center justify-center">
+              <div class="px-2 py-2 text-center bg-black/20 min-h-[44px] flex items-center justify-center">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight">
                   {{ bidang1Node?.node_title || 'BIDANG PELAYANAN PENDAFTARAN PENDUDUK' }}
                 </h3>
@@ -208,9 +231,11 @@
 
             <div 
               @click="selectNode(subBidang1Node)"
-              class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
+              :class="getCardClass(subBidang1Node, 'border border-teal-400 bg-teal-600 text-white')"
+              :style="getCardStyle(subBidang1Node)"
+              class="w-full rounded-xl shadow-lg transition hover:scale-105 overflow-hidden cursor-pointer"
             >
-              <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
+              <div class="px-2 py-1 text-center bg-black/20 min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subBidang1Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
@@ -233,9 +258,11 @@
             <div class="w-0.5 h-6 bg-blue-400/80 -mt-6"></div>
             <div 
               @click="selectNode(bidang2Node)"
-              class="w-full rounded-2xl shadow-xl border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
+              :class="getCardClass(bidang2Node, 'border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white')"
+              :style="getCardStyle(bidang2Node)"
+              class="w-full rounded-2xl shadow-xl transition hover:scale-105 overflow-hidden cursor-pointer"
             >
-              <div class="px-2 py-2 text-center bg-teal-800/40 min-h-[44px] flex items-center justify-center">
+              <div class="px-2 py-2 text-center bg-black/20 min-h-[44px] flex items-center justify-center">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight">
                   {{ bidang2Node?.node_title || 'BIDANG PELAYANAN PENCATATAN SIPIL' }}
                 </h3>
@@ -256,9 +283,11 @@
 
             <div 
               @click="selectNode(subBidang2Node)"
-              class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
+              :class="getCardClass(subBidang2Node, 'border border-teal-400 bg-teal-600 text-white')"
+              :style="getCardStyle(subBidang2Node)"
+              class="w-full rounded-xl shadow-lg transition hover:scale-105 overflow-hidden cursor-pointer"
             >
-              <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
+              <div class="px-2 py-1 text-center bg-black/20 min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subBidang2Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
@@ -281,9 +310,11 @@
             <div class="w-0.5 h-6 bg-blue-400/80 -mt-6"></div>
             <div 
               @click="selectNode(bidang3Node)"
-              class="w-full rounded-2xl shadow-xl border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
+              :class="getCardClass(bidang3Node, 'border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white')"
+              :style="getCardStyle(bidang3Node)"
+              class="w-full rounded-2xl shadow-xl transition hover:scale-105 overflow-hidden cursor-pointer"
             >
-              <div class="px-2 py-2 text-center bg-teal-800/40 min-h-[44px] flex items-center justify-center">
+              <div class="px-2 py-2 text-center bg-black/20 min-h-[44px] flex items-center justify-center">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight">
                   {{ bidang3Node?.node_title || 'BIDANG PENGELOLAAN INFORMASI ADM. KEPENDUDUKAN' }}
                 </h3>
@@ -304,9 +335,11 @@
 
             <div 
               @click="selectNode(subBidang3Node)"
-              class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
+              :class="getCardClass(subBidang3Node, 'border border-teal-400 bg-teal-600 text-white')"
+              :style="getCardStyle(subBidang3Node)"
+              class="w-full rounded-xl shadow-lg transition hover:scale-105 overflow-hidden cursor-pointer"
             >
-              <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
+              <div class="px-2 py-1 text-center bg-black/20 min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subBidang3Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
@@ -329,9 +362,11 @@
             <div class="w-0.5 h-6 bg-blue-400/80 -mt-6"></div>
             <div 
               @click="selectNode(bidang4Node)"
-              class="w-full rounded-2xl shadow-xl border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
+              :class="getCardClass(bidang4Node, 'border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white')"
+              :style="getCardStyle(bidang4Node)"
+              class="w-full rounded-2xl shadow-xl transition hover:scale-105 overflow-hidden cursor-pointer"
             >
-              <div class="px-2 py-2 text-center bg-teal-800/40 min-h-[44px] flex items-center justify-center">
+              <div class="px-2 py-2 text-center bg-black/20 min-h-[44px] flex items-center justify-center">
                 <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-white leading-tight">
                   {{ bidang4Node?.node_title || 'BIDANG PEMANFAATAN DATA DAN INOVASI PELAYANAN' }}
                 </h3>
@@ -352,9 +387,11 @@
 
             <div 
               @click="selectNode(subBidang4Node)"
-              class="w-full rounded-xl shadow-lg border border-teal-400 bg-teal-600 text-white cursor-pointer transition hover:scale-105 overflow-hidden"
+              :class="getCardClass(subBidang4Node, 'border border-teal-400 bg-teal-600 text-white')"
+              :style="getCardStyle(subBidang4Node)"
+              class="w-full rounded-xl shadow-lg transition hover:scale-105 overflow-hidden cursor-pointer"
             >
-              <div class="px-2 py-1 text-center bg-teal-800/40 min-h-[32px] flex items-center justify-center">
+              <div class="px-2 py-1 text-center bg-black/20 min-h-[32px] flex items-center justify-center">
                 <h4 class="font-bold text-[10px] uppercase text-white leading-tight">{{ subBidang4Node?.node_title || 'KELOMPOK JABATAN FUNGSIONAL' }}</h4>
               </div>
               <div class="bg-white dark:bg-slate-900 m-1 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800 min-h-[52px] flex items-center">
@@ -389,6 +426,31 @@ const emit = defineEmits(['select-node'])
 
 const selectNode = (node) => {
   if (node) emit('select-node', node)
+}
+
+// Dynamic color resolution helper functions
+const getCardStyle = (node) => {
+  const color = node?.color_code?.trim()
+  if (!color) return {}
+  if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) {
+    return { backgroundColor: color, borderColor: color }
+  }
+  return {}
+}
+
+const getCardClass = (node, defaultClasses) => {
+  const color = node?.color_code?.trim()?.toLowerCase()
+  if (!color) return defaultClasses
+  if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) {
+    return 'border-2 text-white shadow-xl'
+  }
+  if (color === 'pink' || color === 'magenta') return 'border-2 border-pink-400 bg-pink-600 text-white'
+  if (color === 'red' || color === 'rose') return 'border-2 border-rose-500 bg-rose-600 text-white'
+  if (color === 'orange' || color === 'amber') return 'border-2 border-amber-400 bg-amber-500 text-white'
+  if (color === 'teal' || color === 'cyan') return 'border-2 border-teal-400 bg-gradient-to-r from-teal-600 to-cyan-700 text-white'
+  if (color === 'blue' || color === 'indigo' || color === '#1e00ff') return 'border-2 border-blue-500 bg-blue-600 text-white'
+  
+  return defaultClasses
 }
 
 // Find nodes from tree prop
