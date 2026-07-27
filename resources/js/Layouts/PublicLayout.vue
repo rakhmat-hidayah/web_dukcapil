@@ -96,7 +96,7 @@
               <div class="absolute left-0 top-full pt-1.5 hidden group-hover:block w-56 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-none py-2 overflow-hidden">
                   <Link href="/layanan" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Persyaratan Layanan</Link>
-                  <Link href="/layanan/mobil" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Mobil Pelayanan Keliling</Link>
+                  <Link href="/layanan/mobile" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Pelayanan Mobile</Link>
                   <Link href="/downloads" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Formulir Pendaftaran</Link>
                   <Link href="/layanan/survei" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Survei Kepuasan (IKM)</Link>
                   <Link href="/pengaduan" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Pengaduan Rakyat (Lapor)</Link>

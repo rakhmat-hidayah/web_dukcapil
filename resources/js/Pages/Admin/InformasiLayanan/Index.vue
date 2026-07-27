@@ -37,7 +37,7 @@
                 Banner Header Halaman Publik Pelayanan Mobile
               </h3>
               <p class="text-xs text-gray-500 dark:text-zinc-400">
-                Kelola teks tag, judul utama, dan deskripsi pada banner biru atas halaman publik <code>/layanan/mobil</code>.
+                Kelola teks tag, judul utama, dan deskripsi pada banner biru atas halaman publik <code>/layanan/mobile</code>.
               </p>
             </div>
           </div>
@@ -279,7 +279,7 @@
                 <input 
                   type="text" 
                   v-model="form.mobile_service_button_url"
-                  placeholder="Contoh: /layanan/mobil"
+                  placeholder="Contoh: /layanan/mobile"
                   class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
                 />
               </div>
@@ -386,7 +386,7 @@
                 Section 2: Persyaratan Umum Berkas
               </h3>
               <p class="text-xs text-gray-500 dark:text-zinc-400">
-                Daftar persyaratan berkas fisik yang tampil di kolom kanan halaman publik <code>/layanan/mobil</code> (Ketik 1 poin per baris).
+                Daftar persyaratan berkas fisik yang tampil di kolom kanan halaman publik <code>/layanan/mobile</code> (Ketik 1 poin per baris).
               </p>
             </div>
           </div>
@@ -747,7 +747,7 @@ const form = useForm({
   mobile_service_time: props.settings.mobile_service_time || '08.00 - 14.00 WITA',
   mobile_service_status: props.settings.mobile_service_status || 'hari_ini',
   mobile_service_button_text: props.settings.mobile_service_button_text || 'Lihat Jadwal Lengkap',
-  mobile_service_button_url: props.settings.mobile_service_button_url || '/layanan/mobil',
+  mobile_service_button_url: props.settings.mobile_service_button_url || '/layanan/mobile',
   mobile_service_notes: props.settings.mobile_service_notes || '',
   mobile_service_selected_services: initialSelectedServices.value,
 

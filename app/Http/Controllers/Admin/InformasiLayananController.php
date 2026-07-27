@@ -27,7 +27,7 @@ class InformasiLayananController extends Controller
 
         // Default initial values for all sections
         $defaults = [
-            // Hero Banner Header (/layanan/mobil)
+            // Hero Banner Header (/layanan/mobile)
             'mobile_service_hero_tag'           => 'Jemput Bola Adminduk',
             'mobile_service_hero_title'         => 'Jadwal Pelayanan Mobile Keliling',
             'mobile_service_hero_description'   => 'Layanan jemput bola penerbitan dokumen kependudukan langsung ke desa, kelurahan, dan sekolah di seluruh wilayah Kabupaten Dompu secara gratis dan cepat.',
@@ -39,7 +39,7 @@ class InformasiLayananController extends Controller
             'mobile_service_time'               => '08.00 - 14.00 WITA',
             'mobile_service_status'             => 'hari_ini',
             'mobile_service_button_text'        => 'Lihat Jadwal Lengkap',
-            'mobile_service_button_url'         => '/layanan/mobil',
+            'mobile_service_button_url'         => '/layanan/mobile',
             'mobile_service_notes'              => 'Harap membawa berkas persyaratan fisik lengkap (ASLI & Fotokopi) untuk mempercepat proses penerbitan dokumen di lokasi pelayanan mobile keliling.',
             'mobile_service_selected_services'  => json_encode($allServices->pluck('id')->toArray()),
             

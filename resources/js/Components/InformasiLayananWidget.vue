@@ -65,7 +65,7 @@
 
       <!-- Action Button Section 1 -->
       <a 
-        :href="settings.mobile_service_button_url || '/layanan/mobil'" 
+        :href="settings.mobile_service_button_url || '/layanan/mobile'" 
         class="w-full flex items-center justify-center gap-1.5 py-2.5 bg-blue-50 dark:bg-zinc-800 hover:bg-blue-100 dark:hover:bg-zinc-700 text-blue-700 dark:text-blue-300 text-xs font-extrabold rounded-xl transition border border-blue-200/80 dark:border-zinc-700"
       >
         <span>{{ settings.mobile_service_button_text || 'Lihat Jadwal Lengkap' }}</span>
@@ -148,7 +148,7 @@ const settings = computed(() => {
     mobile_service_time: ws.mobile_service_time || '',
     mobile_service_status: ws.mobile_service_status || 'hari_ini',
     mobile_service_button_text: ws.mobile_service_button_text || 'Lihat Jadwal Lengkap',
-    mobile_service_button_url: ws.mobile_service_button_url || '/layanan/mobil',
+    mobile_service_button_url: ws.mobile_service_button_url || '/layanan/mobile',
     quick_help_whatsapp: ws.quick_help_whatsapp || 'https://wa.me/6282340001111',
     quick_help_call_center: ws.quick_help_call_center || '(0373) 21123',
     quick_help_tracking_url: ws.quick_help_tracking_url || '/layanan/tracking',
