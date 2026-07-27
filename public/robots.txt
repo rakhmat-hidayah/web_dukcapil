@@ -3,6 +3,8 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 Disallow: /storage/framework/
+Disallow: /storage/logs/
+Disallow: /vendor/
 Allow: /api/v1/
 
-Sitemap: http://dukcapil.dompukab.go.id.test/sitemap.xml
+Sitemap: https://dukcapil.dompukab.go.id/sitemap.xml

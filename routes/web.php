@@ -19,8 +19,8 @@ Route::get('/profil/struktur-organisasi', [\App\Http\Controllers\Public\Organiza
 Route::get('/profil/pejabat', [\App\Http\Controllers\Public\OfficialDirectoryController::class, 'index'])->name('public.profile.officials.index');
 Route::get('/profil/pejabat/{identifier}', [\App\Http\Controllers\Public\OfficialDirectoryController::class, 'show'])->name('public.profile.officials.show');
 
-// Public Profile REST APIs
-Route::prefix('api/v1/profile')->group(function () {
+// Public Profile REST APIs (with throttle for rate-limiting consistency)
+Route::middleware(['throttle:60,1'])->prefix('api/v1/profile')->group(function () {
     Route::get('/sections', [\App\Http\Controllers\Api\ProfileApiController::class, 'sections']);
     Route::get('/tree', [\App\Http\Controllers\Api\ProfileApiController::class, 'tree']);
     Route::get('/officials', [\App\Http\Controllers\Api\ProfileApiController::class, 'officials']);
@@ -143,6 +143,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/external-services', [\App\Http\Controllers\Admin\ExternalServiceController::class, 'update'])->name('external-services.update');
             Route::get('/office-contact', [\App\Http\Controllers\Admin\OfficeContactController::class, 'index'])->name('office-contact.index');
             Route::post('/office-contact', [\App\Http\Controllers\Admin\OfficeContactController::class, 'update'])->name('office-contact.update');
+
+            // System Health Dashboard
+            Route::get('/system/health', [\App\Http\Controllers\Admin\SystemHealthController::class, 'index'])->name('system.health');
         });
 
         // -------------------------------------------------------------
@@ -265,10 +268,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // PPID Admin & Content Editor & Super Administrator Routes
         // -------------------------------------------------------------
+        // Note: Downloads resource is handled in the Content group above (role: Super Admin|Website Admin|Content Editor).
+        // PPID Admin additionally gets access to download category management only.
         Route::middleware('role:Super Administrator|PPID Admin|Content Editor')->group(function () {
-            // Downloads CMS
-            Route::post('/downloads/{download}', [\App\Http\Controllers\Admin\DownloadController::class, 'update']);
-            Route::resource('/downloads', \App\Http\Controllers\Admin\DownloadController::class)->only(['index', 'store', 'update', 'destroy']);
             Route::post('/downloads/categories', [\App\Http\Controllers\Admin\DownloadController::class, 'storeCategory'])->name('downloads.categories.store');
             Route::delete('/downloads/categories/{downloadCategory}', [\App\Http\Controllers\Admin\DownloadController::class, 'destroyCategory'])->name('downloads.categories.destroy');
         });

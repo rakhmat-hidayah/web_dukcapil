@@ -6,11 +6,83 @@
 
     @php
         $theme = \App\Models\ThemeSetting::getAllCached();
-        $siteTitle = $theme['site_title'] ?? 'Dukcapil Dompu';
-        $siteTagline = $theme['site_tagline'] ?? 'Pelayanan Cepat, Tepat, dan Gratis';
+        $siteTitle    = $theme['site_title'] ?? 'Dukcapil Dompu';
+        $siteTagline  = $theme['site_tagline'] ?? 'Pelayanan Cepat, Tepat, dan Gratis';
+        $siteDesc     = 'Website resmi Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu, Nusa Tenggara Barat. Layanan KTP-el, KK, Akta Kelahiran, dan administrasi kependudukan lainnya.';
+        $siteUrl      = rtrim(config('app.url'), '/');
+        $siteLogo     = $siteUrl . '/android-chrome-512x512.png';
+        $siteKeywords = 'Dukcapil Dompu, KTP-el, Kartu Keluarga, Akta Kelahiran, Administrasi Kependudukan, Disdukcapil Dompu, NTB, Pelayanan Publik';
     @endphp
 
     <title inertia>{{ $siteTitle }} - {{ $siteTagline }}</title>
+
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="{{ $siteTitle }} - {{ $siteTagline }}">
+    <meta name="description" content="{{ $siteDesc }}">
+    <meta name="keywords" content="{{ $siteKeywords }}">
+    <meta name="author" content="Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="{{ $theme['primary_600'] ?? '#0274cb' }}">
+    <link rel="canonical" href="{{ $siteUrl }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ $siteUrl }}">
+    <meta property="og:title" content="{{ $siteTitle }} - {{ $siteTagline }}">
+    <meta property="og:description" content="{{ $siteDesc }}">
+    <meta property="og:image" content="{{ $siteLogo }}">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:site_name" content="{{ $siteTitle }}">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ $siteUrl }}">
+    <meta name="twitter:title" content="{{ $siteTitle }} - {{ $siteTagline }}">
+    <meta name="twitter:description" content="{{ $siteDesc }}">
+    <meta name="twitter:image" content="{{ $siteLogo }}">
+
+    <!-- Schema.org GovernmentOffice Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "GovernmentOffice",
+        "name": "Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu",
+        "alternateName": "Dukcapil Dompu",
+        "url": "{{ $siteUrl }}",
+        "logo": "{{ $siteLogo }}",
+        "description": "{{ $siteDesc }}",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Jl. Mahoni No. 02, Kel. Badawa",
+            "addressLocality": "Dompu",
+            "addressRegion": "Nusa Tenggara Barat",
+            "postalCode": "84211",
+            "addressCountry": "ID"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "-8.5370",
+            "longitude": "118.4624"
+        },
+        "openingHoursSpecification": [
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday"],
+                "opens": "08:00",
+                "closes": "15:30"
+            },
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": "Friday",
+                "opens": "08:00",
+                "closes": "11:30"
+            }
+        ],
+        "sameAs": ["{{ $siteUrl }}"]
+    }
+    </script>
 
     <!-- Dynamic Theme Customizer Styling Injection Hook -->
     <style id="dynamic-theme-variables">
@@ -65,6 +137,9 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="shortcut icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/site.webmanifest">
 
     @routes
     @vite(['resources/js/app.js'])
