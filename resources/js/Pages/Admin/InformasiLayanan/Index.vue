@@ -1,263 +1,437 @@
 <template>
-  <Head title="CMS Informasi Layanan (Widget Sidebar)" />
+  <Head title="Informasi Layanan & Mobil Keliling CMS - Admin Dukcapil" />
 
   <AdminLayout>
-    <div class="space-y-8 text-left max-w-5xl mx-auto pb-12">
-      <!-- Header Banner -->
-      <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-blue-800/40">
-        <div class="space-y-2 max-w-2xl relative z-10">
-          <div class="flex items-center gap-2">
-            <span class="px-3 py-1 bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider rounded-lg shadow-sm">
-              Homepage Sidebar CMS
-            </span>
-            <span class="px-2.5 py-1 bg-white/10 text-white text-[10px] font-bold rounded-lg backdrop-blur-sm">
-              Widget Informasi &amp; Bantuan
-            </span>
-          </div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Pengaturan Informasi Layanan
+    <div class="space-y-6 max-w-5xl mx-auto pb-12 text-left">
+      <!-- Page Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-black text-gray-900 dark:text-zinc-50 tracking-tight">
+            Pengaturan Informasi Layanan &amp; Mobil Keliling
           </h1>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Kelola jadwal "Mobil Pelayanan" dan tautan aksi "Bantuan Cepat" yang ditampilkan pada widget sidebar halaman beranda publik.
+          <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
+            Kelola jadwal Mobil Pelayanan Keliling, catatan, persyaratan berkas, serta kartu bantuan cepat.
           </p>
         </div>
 
-        <div class="relative z-10 shrink-0 w-full md:w-auto">
-          <button 
-            @click="submit"
-            :disabled="form.processing"
-            class="w-full md:w-auto px-6 py-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-2xl shadow-lg shadow-amber-500/20 active:scale-95 transition flex items-center justify-center gap-2"
-          >
-            <Save class="w-4 h-4" />
-            <span>Simpan Perubahan</span>
-          </button>
-        </div>
+        <button 
+          type="button"
+          @click="submit"
+          :disabled="form.processing"
+          class="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold rounded-2xl shadow-lg shadow-primary-500/25 active:scale-95 transition flex items-center gap-2 self-start sm:self-auto"
+        >
+          <Save class="w-4 h-4" />
+          <span>Simpan Semua Pengaturan</span>
+        </button>
       </div>
 
       <form @submit.prevent="submit" class="space-y-8">
         
-        <!-- SECTION 1: Mobil Pelayanan -->
+        <!-- SECTION 1: Mobil Pelayanan Utama & Jadwal -->
         <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-          <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-zinc-800">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-zinc-800">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-lg">
                 🚐
               </div>
               <div>
                 <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50">
-                  Section 1: Mobil Pelayanan Keliling
+                  Section 1: Mobil Pelayanan Keliling (Jadwal &amp; Status)
                 </h3>
                 <p class="text-xs text-gray-500 dark:text-zinc-400">
-                  Tampilkan jadwal jemput bola pelayanan adminduk keliling.
+                  Tampilkan jadwal jemput bola pelayanan adminduk keliling di beranda &amp; halaman publik.
                 </p>
               </div>
             </div>
 
-            <!-- Enable/Disable Switch -->
+            <!-- Toggle Active Switch -->
             <label class="relative inline-flex items-center cursor-pointer select-none">
               <input 
                 type="checkbox" 
                 v-model="form.mobile_service_is_active" 
                 class="sr-only peer" 
               />
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-700 peer-checked:bg-emerald-500"></div>
-              <span class="ml-3 text-xs font-bold text-gray-700 dark:text-zinc-300">
-                {{ form.mobile_service_is_active ? 'Aktif (Ditampilkan)' : 'Sembunyikan' }}
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:after:border-zinc-600 peer-checked:bg-emerald-500"></div>
+              <span class="ml-2.5 text-xs font-bold text-gray-700 dark:text-zinc-300">
+                {{ form.mobile_service_is_active ? 'Aktif (Ditampilkan)' : 'Nonaktif (Disembunyikan)' }}
               </span>
             </label>
           </div>
 
-          <div v-if="form.mobile_service_is_active" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Kecamatan -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
-                Kecamatan Target <span class="text-red-500">*</span>
-              </label>
-              <input 
-                type="text" 
-                v-model="form.mobile_service_kecamatan"
-                placeholder="Contoh: Kecamatan Woja"
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              />
-              <p v-if="form.errors.mobile_service_kecamatan" class="text-[11px] text-red-500 font-semibold">
-                {{ form.errors.mobile_service_kecamatan }}
-              </p>
-            </div>
-
-            <!-- Desa (Optional) -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
-                Desa / Kelurahan (Opsional)
-              </label>
-              <input 
-                type="text" 
-                v-model="form.mobile_service_desa"
-                placeholder="Contoh: Desa Monta Baru"
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              />
-              <p v-if="form.errors.mobile_service_desa" class="text-[11px] text-red-500 font-semibold">
-                {{ form.errors.mobile_service_desa }}
-              </p>
-            </div>
-
-            <!-- Tanggal Pelayanan -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
+          <div v-if="form.mobile_service_is_active" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Kecamatan -->
+              <div class="space-y-1.5">
                 <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
-                  Tanggal Pelayanan
+                  Kecamatan Target <span class="text-red-500">*</span>
                 </label>
-                <div class="flex items-center gap-1">
-                  <button 
-                    type="button" 
-                    @click="setDateToday" 
-                    class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold rounded-lg hover:bg-emerald-100 transition"
-                  >
-                    📅 Hari Ini
-                  </button>
-                  <button 
-                    type="button" 
-                    @click="setDateTomorrow" 
-                    class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-[10px] font-bold rounded-lg hover:bg-blue-100 transition"
-                  >
-                    📅 Besok
-                  </button>
-                  <button 
-                    type="button" 
-                    @click="setDateUpcoming" 
-                    class="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] font-bold rounded-lg hover:bg-amber-100 transition"
-                  >
-                    📅 Lusa
-                  </button>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-2">
-                <!-- Native Date Picker for Easy Selection -->
-                <input 
-                  type="date" 
-                  v-model="pickedDate" 
-                  @change="onDatePick"
-                  class="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition shrink-0 cursor-pointer"
-                />
-                <!-- Formatted Text Field -->
                 <input 
                   type="text" 
-                  v-model="form.mobile_service_date"
-                  placeholder="Contoh: Senin, 28 Juli 2026"
-                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                  v-model="form.mobile_service_kecamatan"
+                  placeholder="Contoh: Kecamatan Woja"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
                 />
+                <p v-if="form.errors.mobile_service_kecamatan" class="text-[11px] text-red-500 font-semibold">
+                  {{ form.errors.mobile_service_kecamatan }}
+                </p>
               </div>
-              <p v-if="form.errors.mobile_service_date" class="text-[11px] text-red-500 font-semibold">
-                {{ form.errors.mobile_service_date }}
-              </p>
-            </div>
 
-            <!-- Jam Pelayanan -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
+              <!-- Desa -->
+              <div class="space-y-1.5">
                 <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
-                  Jam Pelayanan
+                  Desa / Kelurahan (Opsional)
                 </label>
-                <div class="flex items-center gap-1">
-                  <button 
-                    type="button" 
-                    @click="setTimePreset('08:00', '14:00')" 
-                    class="px-2 py-0.5 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-[10px] font-bold rounded-lg hover:bg-gray-200 transition"
-                  >
-                    ⏰ 08.00 - 14.00
-                  </button>
-                  <button 
-                    type="button" 
-                    @click="setTimePreset('08:00', '12:00')" 
-                    class="px-2 py-0.5 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-[10px] font-bold rounded-lg hover:bg-gray-200 transition"
-                  >
-                    ⏰ 08.00 - 12.00
-                  </button>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-2">
-                <!-- Start & End Time Pickers -->
-                <div class="flex items-center gap-1 shrink-0 bg-gray-50 dark:bg-zinc-800 p-1 rounded-xl border border-gray-200 dark:border-zinc-700">
-                  <input 
-                    type="time" 
-                    v-model="timeStart" 
-                    @change="updateTimeFromPickers"
-                    class="px-2 py-1.5 rounded-lg border-0 bg-transparent text-xs font-bold focus:ring-0 dark:text-zinc-100 cursor-pointer"
-                  />
-                  <span class="text-xs text-gray-400 font-bold">-</span>
-                  <input 
-                    type="time" 
-                    v-model="timeEnd" 
-                    @change="updateTimeFromPickers"
-                    class="px-2 py-1.5 rounded-lg border-0 bg-transparent text-xs font-bold focus:ring-0 dark:text-zinc-100 cursor-pointer"
-                  />
-                </div>
-                <!-- Formatted Text Field -->
                 <input 
                   type="text" 
-                  v-model="form.mobile_service_time"
-                  placeholder="Contoh: 08.00 - 14.00 WITA"
-                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                  v-model="form.mobile_service_desa"
+                  placeholder="Contoh: Desa Monta Baru"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
                 />
               </div>
-              <p v-if="form.errors.mobile_service_time" class="text-[11px] text-red-500 font-semibold">
-                {{ form.errors.mobile_service_time }}
-              </p>
+
+              <!-- Tanggal Pelayanan -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                    Tanggal Pelayanan
+                  </label>
+                  <div class="flex items-center gap-1">
+                    <button 
+                      type="button" 
+                      @click="setDateToday" 
+                      class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold rounded-lg hover:bg-emerald-100 transition"
+                    >
+                      📅 Hari Ini
+                    </button>
+                    <button 
+                      type="button" 
+                      @click="setDateTomorrow" 
+                      class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-[10px] font-bold rounded-lg hover:bg-blue-100 transition"
+                    >
+                      📅 Besok
+                    </button>
+                    <button 
+                      type="button" 
+                      @click="setDateUpcoming" 
+                      class="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] font-bold rounded-lg hover:bg-amber-100 transition"
+                    >
+                      📅 Lusa
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <input 
+                    type="date" 
+                    v-model="pickedDate" 
+                    @change="onDatePick"
+                    class="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition shrink-0 cursor-pointer"
+                  />
+                  <input 
+                    type="text" 
+                    v-model="form.mobile_service_date"
+                    placeholder="Contoh: Senin, 28 Juli 2026"
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                  />
+                </div>
+              </div>
+
+              <!-- Jam Pelayanan -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                    Jam Pelayanan
+                  </label>
+                  <div class="flex items-center gap-1">
+                    <button 
+                      type="button" 
+                      @click="setTimePreset('08:00', '14:00')" 
+                      class="px-2 py-0.5 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-[10px] font-bold rounded-lg hover:bg-gray-200 transition"
+                    >
+                      ⏰ 08.00 - 14.00
+                    </button>
+                    <button 
+                      type="button" 
+                      @click="setTimePreset('08:00', '12:00')" 
+                      class="px-2 py-0.5 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-[10px] font-bold rounded-lg hover:bg-gray-200 transition"
+                    >
+                      ⏰ 08.00 - 12.00
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-1 shrink-0 bg-gray-50 dark:bg-zinc-800 p-1 rounded-xl border border-gray-200 dark:border-zinc-700">
+                    <input 
+                      type="time" 
+                      v-model="timeStart" 
+                      @change="updateTimeFromPickers"
+                      class="px-2 py-1.5 rounded-lg border-0 bg-transparent text-xs font-bold focus:ring-0 dark:text-zinc-100 cursor-pointer"
+                    />
+                    <span class="text-xs text-gray-400 font-bold">-</span>
+                    <input 
+                      type="time" 
+                      v-model="timeEnd" 
+                      @change="updateTimeFromPickers"
+                      class="px-2 py-1.5 rounded-lg border-0 bg-transparent text-xs font-bold focus:ring-0 dark:text-zinc-100 cursor-pointer"
+                    />
+                  </div>
+                  <input 
+                    type="text" 
+                    v-model="form.mobile_service_time"
+                    placeholder="Contoh: 08.00 - 14.00 WITA"
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                  />
+                </div>
+              </div>
+
+              <!-- Status Badge Option -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                  Status Badge Pelayanan <span class="text-red-500">*</span>
+                </label>
+                <select 
+                  v-model="form.mobile_service_status"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                >
+                  <option value="hari_ini">🟢 Hari Ini (Hijau - Active Today)</option>
+                  <option value="besok">🔵 Besok (Biru - Tomorrow)</option>
+                  <option value="akan_datang">🟠 Akan Datang (Oranye - Upcoming)</option>
+                  <option value="selesai">⚪ Selesai (Abu-abu - Completed)</option>
+                </select>
+              </div>
+
+              <!-- Button Text -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                  Teks Tombol Widget Beranda
+                </label>
+                <input 
+                  type="text" 
+                  v-model="form.mobile_service_button_text"
+                  placeholder="Lihat Jadwal Lengkap"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+              </div>
+
+              <!-- Button URL -->
+              <div class="space-y-1.5 md:col-span-2">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                  Link URL Tombol Widget Beranda
+                </label>
+                <input 
+                  type="text" 
+                  v-model="form.mobile_service_button_url"
+                  placeholder="Contoh: /layanan/mobil"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+              </div>
             </div>
 
-            <!-- Status Badge Option -->
+            <!-- Catatan Pelayanan (Under Schedule Card) -->
             <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
-                Status Badge Pelayanan <span class="text-red-500">*</span>
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 flex items-center gap-1.5">
+                <span>💡 Teks Catatan Pelayanan (Kotak Biru di Halaman Publik)</span>
               </label>
-              <select 
-                v-model="form.mobile_service_status"
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              >
-                <option value="hari_ini">🟢 Hari Ini (Hijau - Active Today)</option>
-                <option value="besok">🔵 Besok (Biru - Tomorrow)</option>
-                <option value="akan_datang">🟠 Akan Datang (Oranye - Upcoming)</option>
-                <option value="selesai">⚪ Selesai (Abu-abu - Completed)</option>
-              </select>
-              <p v-if="form.errors.mobile_service_status" class="text-[11px] text-red-500 font-semibold">
-                {{ form.errors.mobile_service_status }}
-              </p>
-            </div>
-
-            <!-- Button Text -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
-                Teks Tombol Jadwal
-              </label>
-              <input 
-                type="text" 
-                v-model="form.mobile_service_button_text"
-                placeholder="Lihat Jadwal Lengkap"
+              <textarea 
+                v-model="form.mobile_service_notes"
+                rows="2"
+                placeholder="Harap membawa berkas persyaratan fisik lengkap (ASLI & Fotokopi)..."
                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              />
-            </div>
-
-            <!-- Button URL -->
-            <div class="space-y-1.5 md:col-span-2">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
-                Link URL Jadwal Lengkap
-              </label>
-              <input 
-                type="text" 
-                v-model="form.mobile_service_button_url"
-                placeholder="Contoh: /layanan/mobil atau https://..."
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              />
+              ></textarea>
             </div>
           </div>
 
           <div v-else class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-2xl text-xs text-amber-800 dark:text-amber-300">
-            ℹ️ Seksi <strong>Mobil Pelayanan</strong> sedang disembunyikan. Hanya seksi <strong>Bantuan Cepat</strong> yang akan muncul di widget sidebar beranda.
+            ℹ️ Seksi <strong>Mobil Pelayanan</strong> sedang disembunyikan dari widget beranda.
           </div>
         </div>
 
-        <!-- SECTION 2: Bantuan Cepat -->
+        <!-- SECTION 2: Persyaratan Umum Berkas -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-zinc-800">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
+              📋
+            </div>
+            <div>
+              <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50">
+                Section 2: Persyaratan Umum Berkas
+              </h3>
+              <p class="text-xs text-gray-500 dark:text-zinc-400">
+                Daftar persyaratan berkas fisik yang tampil di kolom kanan halaman publik <code>/layanan/mobil</code> (Ketik 1 poin per baris).
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+              Poin-Poin Persyaratan Berkas (Pisahkan dengan baris baru / Enter)
+            </label>
+            <textarea 
+              v-model="form.mobile_service_requirements"
+              rows="5"
+              placeholder="Fotokopi Kartu Keluarga (KK) terbaru.&#10;KTP-el lama atau Surat Keterangan...&#10;Surat Keterangan Kehilangan..."
+              class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-mono font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- SECTION 3: Card Ajukan Kunjungan Mobil (Khusus Kades / Sekolah) -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-zinc-800">
+            <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-lg">
+              🏫
+            </div>
+            <div>
+              <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50">
+                Section 3: Card Permohonan Kunjungan (Khusus Kades / Sekolah)
+              </h3>
+              <p class="text-xs text-gray-500 dark:text-zinc-400">
+                Kelola kartu permohonan kunjungan tim jemput bola bagi Kepala Desa / Sekolah.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Badge Teks -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Teks Badge
+              </label>
+              <input 
+                type="text" 
+                v-model="form.mobile_service_request_badge"
+                placeholder="Khusus Kepala Desa / Sekolah"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <!-- Judul Card -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Judul Card
+              </label>
+              <input 
+                type="text" 
+                v-model="form.mobile_service_request_title"
+                placeholder="Ajukan Kunjungan Mobil Pelayanan"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <!-- Deskripsi Card -->
+            <div class="space-y-1.5 md:col-span-2">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Deskripsi Singkat Card
+              </label>
+              <textarea 
+                v-model="form.mobile_service_request_description"
+                rows="2"
+                placeholder="Pemerintah Desa, Kelurahan, atau Kepala Sekolah di Kabupaten Dompu..."
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              ></textarea>
+            </div>
+
+            <!-- Teks Tombol WA -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Teks Tombol WhatsApp
+              </label>
+              <input 
+                type="text" 
+                v-model="form.mobile_service_request_button_text"
+                placeholder="Hubungi Tim Jemput Bola via WA"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <!-- Link URL Tombol WA -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Link WhatsApp / URL Permohonan
+              </label>
+              <input 
+                type="text" 
+                v-model="form.mobile_service_request_button_url"
+                placeholder="https://wa.me/6282340001111"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: Card Kontak Informasi Lebih Lanjut -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-zinc-800">
+            <div class="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg">
+              ℹ️
+            </div>
+            <div>
+              <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50">
+                Section 4: Card Kontak Informasi Lebih Lanjut
+              </h3>
+              <p class="text-xs text-gray-500 dark:text-zinc-400">
+                Kelola kartu info kontak tambahan di bagian bawah halaman publik.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Judul -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Judul Card Info
+              </label>
+              <input 
+                type="text" 
+                v-model="form.mobile_service_contact_title"
+                placeholder="Butuh Informasi Lebih Lanjut?"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <!-- Teks Tombol -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Teks Tombol Kontak
+              </label>
+              <input 
+                type="text" 
+                v-model="form.mobile_service_contact_button_text"
+                placeholder="Lihat Kontak Kantor"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <!-- Deskripsi -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Deskripsi Singkat
+              </label>
+              <input 
+                type="text" 
+                v-model="form.mobile_service_contact_description"
+                placeholder="Hubungi petugas layanan Dukcapil..."
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <!-- URL Tombol -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                Link URL Tombol Kontak
+              </label>
+              <input 
+                type="text" 
+                v-model="form.mobile_service_contact_button_url"
+                placeholder="/contact"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 5: Bantuan Cepat Widget Beranda -->
         <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
           <div class="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-zinc-800">
             <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-lg">
@@ -265,10 +439,10 @@
             </div>
             <div>
               <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50">
-                Section 2: Bantuan Cepat
+                Section 5: Widget Bantuan Cepat (Beranda Utama)
               </h3>
               <p class="text-xs text-gray-500 dark:text-zinc-400">
-                Kelola tautan kontak langsung (WhatsApp, Call Center, Tracking, Maps, Email).
+                Kelola tautan WhatsApp &amp; Google Maps yang tampil pada widget Bantuan Cepat di beranda.
               </p>
             </div>
           </div>
@@ -286,8 +460,6 @@
                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
               />
             </div>
-
-
 
             <!-- Google Maps URL -->
             <div class="space-y-1.5">
@@ -404,7 +576,7 @@ const setTimePreset = (startStr, endStr) => {
 };
 
 const form = useForm({
-  // Section 1: Mobil Pelayanan
+  // Section 1: Mobil Pelayanan Utama
   mobile_service_is_active: props.settings.mobile_service_is_active === '1',
   mobile_service_kecamatan: props.settings.mobile_service_kecamatan || 'Kecamatan Woja',
   mobile_service_desa: props.settings.mobile_service_desa || 'Desa Monta Baru',
@@ -413,8 +585,25 @@ const form = useForm({
   mobile_service_status: props.settings.mobile_service_status || 'hari_ini',
   mobile_service_button_text: props.settings.mobile_service_button_text || 'Lihat Jadwal Lengkap',
   mobile_service_button_url: props.settings.mobile_service_button_url || '/layanan/mobil',
+  mobile_service_notes: props.settings.mobile_service_notes || '',
 
-  // Section 2: Bantuan Cepat
+  // Section 2: Persyaratan Umum Berkas
+  mobile_service_requirements: props.settings.mobile_service_requirements || '',
+
+  // Section 3: Ajukan Kunjungan Mobil (Desa/Sekolah)
+  mobile_service_request_badge: props.settings.mobile_service_request_badge || 'Khusus Kepala Desa / Sekolah',
+  mobile_service_request_title: props.settings.mobile_service_request_title || 'Ajukan Kunjungan Mobil Pelayanan',
+  mobile_service_request_description: props.settings.mobile_service_request_description || 'Pemerintah Desa, Kelurahan, atau Kepala Sekolah di Kabupaten Dompu dapat mengajukan surat permohonan kunjungan tim jemput bola Dukcapil ke wilayah masing-masing.',
+  mobile_service_request_button_text: props.settings.mobile_service_request_button_text || 'Hubungi Tim Jemput Bola via WA',
+  mobile_service_request_button_url: props.settings.mobile_service_request_button_url || 'https://wa.me/6282340001111',
+
+  // Section 4: Informasi Kontak Lebih Lanjut
+  mobile_service_contact_title: props.settings.mobile_service_contact_title || 'Butuh Informasi Lebih Lanjut?',
+  mobile_service_contact_description: props.settings.mobile_service_contact_description || 'Hubungi petugas layanan Dukcapil Kabupaten Dompu melalui saluran kontak resmi.',
+  mobile_service_contact_button_text: props.settings.mobile_service_contact_button_text || 'Lihat Kontak Kantor',
+  mobile_service_contact_button_url: props.settings.mobile_service_contact_button_url || '/contact',
+
+  // Section 5: Widget Bantuan Cepat
   quick_help_whatsapp: props.settings.quick_help_whatsapp || 'https://wa.me/6282340001111',
   quick_help_google_maps_url: props.settings.quick_help_google_maps_url || 'https://maps.google.com/?q=Dukcapil+Dompu',
 });

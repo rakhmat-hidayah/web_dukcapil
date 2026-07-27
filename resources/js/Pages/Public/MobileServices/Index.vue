@@ -101,11 +101,14 @@
               </div>
             </div>
 
-            <!-- Notes -->
-            <div class="p-4 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-2xl flex items-start gap-3 text-xs text-blue-900 dark:text-blue-200 leading-relaxed font-medium">
+            <!-- Notes (Kotak Biru Catatan Pelayanan) -->
+            <div 
+              v-if="scheduleSettings.mobile_service_notes" 
+              class="p-4 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-2xl flex items-start gap-3 text-xs text-blue-900 dark:text-blue-200 leading-relaxed font-medium"
+            >
               <span class="text-base">💡</span>
               <p>
-                <strong>Catatan Pelayanan:</strong> Harap membawa berkas persyaratan fisik lengkap (ASLI & Fotokopi) untuk mempercepat proses penerbitan dokumen di lokasi mobil pelayanan keliling.
+                <strong>Catatan Pelayanan:</strong> {{ scheduleSettings.mobile_service_notes }}
               </p>
             </div>
           </div>
@@ -199,72 +202,62 @@
         <!-- Right Column: Requirements & Request Mobile Visit (Col Span 1) -->
         <div class="space-y-8">
           
-          <!-- Document Requirements Checklist -->
+          <!-- Document Requirements Checklist (Fully Dynamic from CMS) -->
           <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm space-y-4">
             <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight flex items-center gap-2">
               📋 Persyaratan Umum Berkas
             </h3>
 
             <ul class="space-y-2.5 text-xs text-gray-600 dark:text-zinc-300 font-medium">
-              <li class="flex items-start gap-2">
-                <span class="text-emerald-500 font-bold">✓</span>
-                <span>Fotokopi Kartu Keluarga (KK) terbaru.</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-emerald-500 font-bold">✓</span>
-                <span>KTP-el lama atau Surat Keterangan Pengganti (jika ubah data/rusak).</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-emerald-500 font-bold">✓</span>
-                <span>Surat Keterangan Kehilangan dari Kepolisian (jika KTP/KK hilang).</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-emerald-500 font-bold">✓</span>
-                <span>Buku Nikah / Kutipan Akta Perkawinan (jika ubah status perkawinan).</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-emerald-500 font-bold">✓</span>
-                <span>Surat Keterangan Lahir dari Bidan/Klinik/RS (untuk Akta Kelahiran).</span>
+              <li 
+                v-for="(req, index) in requirementsList" 
+                :key="index"
+                class="flex items-start gap-2"
+              >
+                <span class="text-emerald-500 font-bold shrink-0">✓</span>
+                <span>{{ req }}</span>
               </li>
             </ul>
           </div>
 
-          <!-- Request Visit for Village / School -->
+          <!-- Request Visit for Village / School (Fully Dynamic from CMS) -->
           <div class="bg-gradient-to-br from-amber-500 to-amber-400 text-slate-950 rounded-3xl p-6 shadow-xl space-y-4 relative overflow-hidden">
             <div class="space-y-1">
               <span class="px-2.5 py-0.5 bg-slate-950 text-amber-300 text-[9px] font-black uppercase rounded-md tracking-wider">
-                Khusus Kepala Desa / Sekolah
+                {{ scheduleSettings.mobile_service_request_badge || 'Khusus Kepala Desa / Sekolah' }}
               </span>
               <h3 class="text-base font-extrabold tracking-tight mt-2">
-                Ajukan Kunjungan Mobil Pelayanan
+                {{ scheduleSettings.mobile_service_request_title || 'Ajukan Kunjungan Mobil Pelayanan' }}
               </h3>
               <p class="text-xs text-slate-900/80 leading-relaxed font-semibold">
-                Pemerintah Desa, Kelurahan, atau Kepala Sekolah di Kabupaten Dompu dapat mengajukan surat permohonan kunjungan tim jemput bola Dukcapil ke wilayah masing-masing.
+                {{ scheduleSettings.mobile_service_request_description || 'Pemerintah Desa, Kelurahan, atau Kepala Sekolah di Kabupaten Dompu dapat mengajukan surat permohonan kunjungan tim jemput bola Dukcapil ke wilayah masing-masing.' }}
               </p>
             </div>
 
             <a 
-              :href="whatsappUrl"
+              :href="requestButtonUrl"
               target="_blank"
               rel="noopener noreferrer"
               class="w-full text-center py-3 bg-slate-950 hover:bg-slate-900 text-white text-xs font-black rounded-xl transition flex items-center justify-center gap-2 shadow-lg"
             >
-              <span>💬 Hubungi Tim Jemput Bola via WA</span>
+              <span>💬 {{ scheduleSettings.mobile_service_request_button_text || 'Hubungi Tim Jemput Bola via WA' }}</span>
               <span>→</span>
             </a>
           </div>
 
-          <!-- Contact Dukcapil Direct Link -->
+          <!-- Contact Dukcapil Direct Link (Fully Dynamic from CMS) -->
           <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm text-center space-y-3">
-            <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-50">Butuh Informasi Lebih Lanjut?</h4>
+            <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-50">
+              {{ scheduleSettings.mobile_service_contact_title || 'Butuh Informasi Lebih Lanjut?' }}
+            </h4>
             <p class="text-[11px] text-gray-500 dark:text-zinc-400 leading-relaxed">
-              Hubungi petugas layanan Dukcapil Kabupaten Dompu melalui saluran kontak resmi.
+              {{ scheduleSettings.mobile_service_contact_description || 'Hubungi petugas layanan Dukcapil Kabupaten Dompu melalui saluran kontak resmi.' }}
             </p>
             <Link 
-              href="/contact" 
+              :href="scheduleSettings.mobile_service_contact_button_url || '/contact'" 
               class="inline-block px-5 py-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-900 dark:text-zinc-100 text-xs font-extrabold rounded-xl transition border border-gray-200 dark:border-zinc-700"
             >
-              Lihat Kontak Kantor →
+              {{ scheduleSettings.mobile_service_contact_button_text || 'Lihat Kontak Kantor' }} →
             </Link>
           </div>
 
@@ -326,5 +319,27 @@ const whatsappUrl = computed(() => {
   if (wa.startsWith('http://') || wa.startsWith('https://')) return wa;
   const cleanNumber = wa.replace(/[^0-9]/g, '');
   return `https://wa.me/${cleanNumber}`;
+});
+
+const requestButtonUrl = computed(() => {
+  const url = props.scheduleSettings?.mobile_service_request_button_url;
+  if (!url) return whatsappUrl.value;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const cleanNumber = url.replace(/[^0-9]/g, '');
+  return `https://wa.me/${cleanNumber}`;
+});
+
+const requirementsList = computed(() => {
+  const reqs = props.scheduleSettings?.mobile_service_requirements;
+  if (!reqs) {
+    return [
+      'Fotokopi Kartu Keluarga (KK) terbaru.',
+      'KTP-el lama atau Surat Keterangan Pengganti (jika ubah data/rusak).',
+      'Surat Keterangan Kehilangan dari Kepolisian (jika KTP/KK hilang).',
+      'Buku Nikah / Kutipan Akta Perkawinan (jika ubah status perkawinan).',
+      'Surat Keterangan Lahir dari Bidan/Klinik/RS (untuk Akta Kelahiran).',
+    ];
+  }
+  return reqs.split('\n').map(item => item.trim()).filter(Boolean);
 });
 </script>

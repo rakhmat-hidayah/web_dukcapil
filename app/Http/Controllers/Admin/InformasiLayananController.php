@@ -19,23 +19,37 @@ class InformasiLayananController extends Controller
     {
         $settings = WebsiteSetting::where('group', 'informasi_layanan')->pluck('value', 'key')->toArray();
 
-        // Default initial values
+        // Default initial values for all sections
         $defaults = [
-            'mobile_service_is_active'         => '1',
-            'mobile_service_kecamatan'         => 'Kecamatan Woja',
-            'mobile_service_desa'              => 'Desa Monta Baru',
-            'mobile_service_date'              => 'Senin, 28 Juli 2026',
-            'mobile_service_time'              => '08.00 - 14.00 WITA',
-            'mobile_service_status'            => 'hari_ini',
-            'mobile_service_button_text'       => 'Lihat Jadwal Lengkap',
-            'mobile_service_button_url'        => '/layanan/mobil',
-            'quick_help_whatsapp'              => '6282340001111',
-            'quick_help_call_center'           => '(0373) 21123',
-            'quick_help_tracking_url'          => '/layanan/tracking',
-            'quick_help_google_maps_url'       => 'https://maps.google.com/?q=Dukcapil+Dompu',
-            'quick_help_email'                 => 'dukcapilkabdompu@gmail.com',
-            'quick_help_primary_button_text'   => 'Hubungi Kami',
-            'quick_help_primary_button_url'    => '/contact',
+            'mobile_service_is_active'          => '1',
+            'mobile_service_kecamatan'          => 'Kecamatan Woja',
+            'mobile_service_desa'               => 'Desa Monta Baru',
+            'mobile_service_date'               => 'Senin, 28 Juli 2026',
+            'mobile_service_time'               => '08.00 - 14.00 WITA',
+            'mobile_service_status'             => 'hari_ini',
+            'mobile_service_button_text'        => 'Lihat Jadwal Lengkap',
+            'mobile_service_button_url'         => '/layanan/mobil',
+            'mobile_service_notes'              => 'Harap membawa berkas persyaratan fisik lengkap (ASLI & Fotokopi) untuk mempercepat proses penerbitan dokumen di lokasi mobil pelayanan keliling.',
+            
+            // Persyaratan Umum Berkas (Multi-line text, 1 requirement per line)
+            'mobile_service_requirements'       => "Fotokopi Kartu Keluarga (KK) terbaru.\nKTP-el lama atau Surat Keterangan Pengganti (jika ubah data/rusak).\nSurat Keterangan Kehilangan dari Kepolisian (jika KTP/KK hilang).\nBuku Nikah / Kutipan Akta Perkawinan (jika ubah status perkawinan).\nSurat Keterangan Lahir dari Bidan/Klinik/RS (untuk Akta Kelahiran).",
+            
+            // Card Permohonan Kunjungan (Kades/Sekolah)
+            'mobile_service_request_badge'      => 'Khusus Kepala Desa / Sekolah',
+            'mobile_service_request_title'      => 'Ajukan Kunjungan Mobil Pelayanan',
+            'mobile_service_request_description'=> 'Pemerintah Desa, Kelurahan, atau Kepala Sekolah di Kabupaten Dompu dapat mengajukan surat permohonan kunjungan tim jemput bola Dukcapil ke wilayah masing-masing.',
+            'mobile_service_request_button_text'=> 'Hubungi Tim Jemput Bola via WA',
+            'mobile_service_request_button_url' => 'https://wa.me/6282340001111',
+            
+            // Card Informasi Kontak Lebih Lanjut
+            'mobile_service_contact_title'      => 'Butuh Informasi Lebih Lanjut?',
+            'mobile_service_contact_description'=> 'Hubungi petugas layanan Dukcapil Kabupaten Dompu melalui saluran kontak resmi.',
+            'mobile_service_contact_button_text'=> 'Lihat Kontak Kantor',
+            'mobile_service_contact_button_url' => '/contact',
+            
+            // Bantuan Cepat Widget Beranda
+            'quick_help_whatsapp'               => 'https://wa.me/6282340001111',
+            'quick_help_google_maps_url'        => 'https://maps.google.com/?q=Dukcapil+Dompu',
         ];
 
         $mergedSettings = array_merge($defaults, $settings);
@@ -51,19 +65,36 @@ class InformasiLayananController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            // Section 1: Mobil Pelayanan
-            'mobile_service_is_active'       => 'required|boolean',
-            'mobile_service_kecamatan'       => 'nullable|string|max:255',
-            'mobile_service_desa'            => 'nullable|string|max:255',
-            'mobile_service_date'            => 'nullable|string|max:255',
-            'mobile_service_time'            => 'nullable|string|max:255',
-            'mobile_service_status'          => 'required|string|in:hari_ini,besok,selesai,akan_datang',
-            'mobile_service_button_text'     => 'nullable|string|max:100',
-            'mobile_service_button_url'      => 'nullable|string|max:500',
+            // Section 1: Mobil Pelayanan Utama
+            'mobile_service_is_active'          => 'required|boolean',
+            'mobile_service_kecamatan'          => 'nullable|string|max:255',
+            'mobile_service_desa'               => 'nullable|string|max:255',
+            'mobile_service_date'               => 'nullable|string|max:255',
+            'mobile_service_time'               => 'nullable|string|max:255',
+            'mobile_service_status'             => 'required|string|in:hari_ini,besok,selesai,akan_datang',
+            'mobile_service_button_text'        => 'nullable|string|max:100',
+            'mobile_service_button_url'         => 'nullable|string|max:500',
+            'mobile_service_notes'              => 'nullable|string|max:1000',
 
-            // Section 2: Bantuan Cepat
-            'quick_help_whatsapp'            => 'nullable|string|max:255',
-            'quick_help_google_maps_url'     => 'nullable|string|max:500',
+            // Section 2: Persyaratan Umum Berkas
+            'mobile_service_requirements'       => 'nullable|string|max:2000',
+
+            // Section 3: Ajukan Kunjungan Mobil (Desa/Sekolah)
+            'mobile_service_request_badge'      => 'nullable|string|max:100',
+            'mobile_service_request_title'      => 'nullable|string|max:255',
+            'mobile_service_request_description'=> 'nullable|string|max:1000',
+            'mobile_service_request_button_text'=> 'nullable|string|max:100',
+            'mobile_service_request_button_url' => 'nullable|string|max:500',
+
+            // Section 4: Informasi Kontak Lebih Lanjut
+            'mobile_service_contact_title'      => 'nullable|string|max:255',
+            'mobile_service_contact_description'=> 'nullable|string|max:1000',
+            'mobile_service_contact_button_text'=> 'nullable|string|max:100',
+            'mobile_service_contact_button_url' => 'nullable|string|max:500',
+
+            // Section 5: Bantuan Cepat Widget
+            'quick_help_whatsapp'               => 'nullable|string|max:255',
+            'quick_help_google_maps_url'        => 'nullable|string|max:500',
         ]);
 
         foreach ($data as $key => $val) {
@@ -78,8 +109,8 @@ class InformasiLayananController extends Controller
 
         WebsiteSetting::clearCache();
 
-        ActivityLogger::log("Memperbarui konfigurasi Informasi Layanan (Mobil Pelayanan & Bantuan Cepat)", null, 'update_informasi_layanan');
+        ActivityLogger::log("Memperbarui konfigurasi Informasi Layanan & Halaman Mobil Keliling", null, 'update_informasi_layanan');
 
-        return redirect()->back()->with('success', 'Konfigurasi Informasi Layanan berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Konfigurasi Informasi Layanan & Halaman Mobil Keliling berhasil diperbarui.');
     }
 }
