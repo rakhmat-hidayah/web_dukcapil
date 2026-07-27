@@ -37,9 +37,9 @@
             <input 
               type="text" 
               v-model="search" 
+              @input="handleSearch"
               placeholder="Cari judul dokumen..." 
               class="w-full pl-9 pr-8 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none"
-              @keyup.enter="applyFilters"
             />
             <button 
               v-if="search" 
@@ -77,22 +77,15 @@
           </select>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div v-if="search || selectedCategory || status" class="flex items-center gap-2">
           <button 
-            v-if="search || selectedCategory || status"
             type="button"
             @click="resetAllFilters"
             class="px-3.5 py-2 border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 text-xs font-bold rounded-xl transition flex items-center gap-1.5"
             title="Reset Seluruh Filter"
           >
             <RotateCcw class="w-3.5 h-3.5" />
-            Reset
-          </button>
-          <button 
-            @click="applyFilters"
-            class="px-4 py-2 bg-gray-900 dark:bg-zinc-800 hover:bg-gray-800 dark:hover:bg-zinc-700 text-white text-xs font-bold rounded-xl transition"
-          >
-            Cari
+            Reset Filter
           </button>
         </div>
       </div>
@@ -499,6 +492,14 @@ const catForm = useForm({
   name: '',
   parent_id: null,
 });
+
+let searchTimeout = null;
+const handleSearch = () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    applyFilters();
+  }, 300);
+};
 
 const applyFilters = () => {
   router.get(route('admin.downloads.index'), {
