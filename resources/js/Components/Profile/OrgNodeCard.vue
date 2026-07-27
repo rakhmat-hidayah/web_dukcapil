@@ -19,22 +19,32 @@
           <svg v-else class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
         </div>
         <div class="overflow-hidden">
-          <h4 class="font-bold text-xs text-white truncate">{{ node.official ? node.official.name : node.node_title }}</h4>
-          <p class="text-[11px] text-white/90 font-semibold truncate mt-0.5">{{ node.node_title }}</p>
-          <p v-if="node.official && node.official.nip" class="text-[10px] text-white/70 truncate">NIP. {{ node.official.nip }}</p>
+          <h4 class="font-bold text-xs text-white leading-tight line-clamp-2">{{ node.official ? node.official.name : node.node_title }}</h4>
+          <p class="text-[11px] text-white/90 font-semibold leading-tight line-clamp-2 mt-0.5">{{ node.node_title }}</p>
+          <p v-if="node.official && node.official.nip" class="text-[10px] text-white/70 truncate mt-0.5">NIP. {{ node.official.nip }}</p>
         </div>
       </div>
     </div>
 
-    <!-- Connector Line Down -->
-    <div v-if="node.children && node.children.length > 0" class="w-0.5 h-8 bg-blue-500/60 my-0.5"></div>
+    <!-- Connector Line Down from Parent -->
+    <div v-if="node.children && node.children.length > 0" class="w-0.5 h-6 bg-blue-400/80"></div>
 
     <!-- Children Nodes Row -->
-    <div v-if="node.children && node.children.length > 0" class="flex items-start gap-5 relative pt-2">
-      <!-- Horizontal Connector Bar -->
-      <div v-if="node.children.length > 1" class="absolute top-0 left-12 right-12 h-0.5 bg-blue-500/60"></div>
-      <div v-for="child in node.children" :key="child.id" class="flex flex-col items-center">
-        <div class="w-0.5 h-4 bg-blue-500/60 mb-0.5"></div>
+    <div v-if="node.children && node.children.length > 0" class="flex items-start justify-center gap-6 relative">
+      <div 
+        v-for="(child, idx) in node.children" 
+        :key="child.id" 
+        class="relative flex flex-col items-center shrink-0"
+      >
+        <!-- Horizontal Bar Left Segment (for items after first child) -->
+        <div v-if="idx > 0" class="absolute top-0 left-0 w-1/2 h-0.5 bg-blue-400/80"></div>
+        <!-- Horizontal Bar Right Segment (for items before last child) -->
+        <div v-if="idx < node.children.length - 1" class="absolute top-0 right-0 w-1/2 h-0.5 bg-blue-400/80"></div>
+
+        <!-- Vertical Line down to child node -->
+        <div class="w-0.5 h-6 bg-blue-400/80 relative z-10"></div>
+
+        <!-- Child Node Recursion -->
         <OrgNodeCard :node="child" :searchQuery="searchQuery" @select-node="$emit('select-node', $event)" />
       </div>
     </div>
