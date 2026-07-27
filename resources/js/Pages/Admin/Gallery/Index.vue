@@ -113,10 +113,28 @@
                 <label class="block text-xs font-semibold text-gray-500 mb-1">Deskripsi Album</label>
                 <textarea 
                   v-model="form.description" 
-                  rows="3"
+                  rows="2"
                   placeholder="Keterangan isi dokumentasi kegiatan..."
                   class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none"
                 ></textarea>
+              </div>
+
+              <!-- Cover Image / Thumbnail Upload -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Foto Sampul / Thumbnail Album</label>
+                <div class="flex items-center gap-3">
+                  <div v-if="coverPreview || (isEditing && currentCoverUrl)" class="w-16 h-12 rounded-xl overflow-hidden bg-slate-900 border border-gray-200 dark:border-zinc-700 shrink-0">
+                    <img :src="coverPreview || currentCoverUrl" class="w-full h-full object-cover" />
+                  </div>
+                  <input 
+                    type="file" 
+                    ref="coverInput"
+                    @change="handleCoverChange" 
+                    accept="image/*"
+                    class="block w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 dark:file:bg-zinc-800 dark:file:text-zinc-300 transition cursor-pointer"
+                  />
+                </div>
+                <p class="text-[10px] text-gray-400 mt-1">Gunakan gambar resolusi lanskap (Maks 5MB). Opsional saat pertama kali buat.</p>
               </div>
 
               <!-- Type Selection (Only on create) -->
@@ -160,6 +178,31 @@
           </div>
         </div>
       </transition>
+
+      <!-- Custom Vue Modal Confirm Delete Album -->
+      <transition name="fade">
+        <div v-if="deletingAlbum" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="deletingAlbum = null">
+          <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl w-full max-w-sm shadow-2xl p-6 text-left relative space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                <Trash2 class="w-5 h-5" />
+              </div>
+              <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">Hapus Album Galeri</h3>
+            </div>
+            <p class="text-xs text-gray-600 dark:text-zinc-300 leading-relaxed">
+              Apakah Anda yakin ingin menghapus album <strong>"{{ deletingAlbum.title }}"</strong> beserta seluruh foto/video di dalamnya?
+            </p>
+            <div class="flex justify-end gap-2 pt-2">
+              <button @click="deletingAlbum = null" class="px-4 py-2 border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 text-xs font-semibold rounded-xl hover:bg-gray-50 transition" :disabled="isDeleting">
+                Batal
+              </button>
+              <button @click="executeDeleteAlbum" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl active:scale-95 transition" :disabled="isDeleting">
+                {{ isDeleting ? 'Menghapus...' : 'Ya, Hapus Album' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
   </AdminLayout>
 </template>
@@ -178,33 +221,58 @@ const imageErrors = ref({});
 const modalOpen = ref(false);
 const isEditing = ref(false);
 const editId = ref(null);
+const coverPreview = ref(null);
+const currentCoverUrl = ref(null);
+const coverInput = ref(null);
+
+const deletingAlbum = ref(null);
+const isDeleting = ref(false);
 
 const form = useForm({
   title: '',
   description: '',
   type: 'photo',
   is_published: true,
+  cover_image: null,
 });
+
+const handleCoverChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    form.cover_image = file;
+    coverPreview.value = URL.createObjectURL(file);
+  }
+};
 
 const openAddModal = () => {
   isEditing.value = false;
   editId.value = null;
+  coverPreview.value = null;
+  currentCoverUrl.value = null;
   form.reset();
+  if (coverInput.value) coverInput.value.value = '';
   modalOpen.value = true;
 };
 
 const openEditModal = (album) => {
   isEditing.value = true;
   editId.value = album.id;
+  coverPreview.value = null;
+  currentCoverUrl.value = album.cover_image ? `/storage/${album.cover_image}` : null;
   form.title = album.title;
-  form.description = album.description;
-  form.is_published = album.is_published;
+  form.description = album.description || '';
+  form.is_published = Boolean(album.is_published);
+  form.cover_image = null;
+  if (coverInput.value) coverInput.value.value = '';
   modalOpen.value = true;
 };
 
 const submit = () => {
   if (isEditing.value) {
-    form.put(route('admin.gallery.album.update', editId.value), {
+    form.transform((data) => ({
+      ...data,
+      _method: 'PUT',
+    })).post(route('admin.gallery.album.update', editId.value), {
       onSuccess: () => {
         modalOpen.value = false;
       }
@@ -219,8 +287,20 @@ const submit = () => {
 };
 
 const deleteAlbum = (album) => {
-  if (confirm(`Apakah Anda yakin ingin menghapus album "${album.title}" beserta seluruh media di dalamnya?`)) {
-    router.delete(route('admin.gallery.album.destroy', album.id));
-  }
+  deletingAlbum.value = album;
+};
+
+const executeDeleteAlbum = () => {
+  if (!deletingAlbum.value) return;
+  isDeleting.value = true;
+  router.delete(route('admin.gallery.album.destroy', deletingAlbum.value.id), {
+    onSuccess: () => {
+      deletingAlbum.value = null;
+      isDeleting.value = false;
+    },
+    onFinish: () => {
+      isDeleting.value = false;
+    }
+  });
 };
 </script>

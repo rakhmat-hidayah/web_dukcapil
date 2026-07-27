@@ -39,13 +39,23 @@ class GalleryController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'type' => 'required|in:photo,video',
+            'cover_image' => 'nullable|image|max:5120',
         ]);
+
+        $coverPath = null;
+        if ($request->hasFile('cover_image')) {
+            $file = $request->file('cover_image');
+            $img = Image::decode($file)->cover(600, 400);
+            $coverPath = 'gallery/covers/' . Str::uuid() . '.webp';
+            Storage::disk('public')->put($coverPath, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
+        }
 
         GalleryAlbum::create([
             'title' => $request->title,
             'slug' => Str::slug($request->title),
             'description' => $request->description,
             'type' => $request->type,
+            'cover_image' => $coverPath,
             'is_published' => $request->boolean('is_published', true),
         ]);
 
@@ -54,8 +64,26 @@ class GalleryController extends Controller
 
     public function updateAlbum(Request $request, GalleryAlbum $galleryAlbum): RedirectResponse
     {
-        $request->validate(['title' => 'required|string|max:255']);
-        $galleryAlbum->update($request->only(['title', 'description', 'is_published']));
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'cover_image' => 'nullable|image|max:5120',
+        ]);
+
+        $data = $request->only(['title', 'description']);
+        $data['is_published'] = $request->boolean('is_published');
+
+        if ($request->hasFile('cover_image')) {
+            if ($galleryAlbum->cover_image) {
+                Storage::disk('public')->delete($galleryAlbum->cover_image);
+            }
+            $file = $request->file('cover_image');
+            $img = Image::decode($file)->cover(600, 400);
+            $coverPath = 'gallery/covers/' . Str::uuid() . '.webp';
+            Storage::disk('public')->put($coverPath, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
+            $data['cover_image'] = $coverPath;
+        }
+
+        $galleryAlbum->update($data);
         return redirect()->back()->with('success', 'Album berhasil diperbarui.');
     }
 
