@@ -130,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Head } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
 import GovernmentOrgChartLayout from '@/Components/Profile/GovernmentOrgChartLayout.vue'
