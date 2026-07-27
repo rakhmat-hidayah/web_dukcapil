@@ -213,31 +213,7 @@
               />
             </div>
 
-            <!-- Call Center -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <span>📞 Call Center / Telepon Kantor</span>
-              </label>
-              <input 
-                type="text" 
-                v-model="form.quick_help_call_center"
-                placeholder="Contoh: (0373) 21123"
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              />
-            </div>
 
-            <!-- Tracking URL -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <span>🔍 URL Tracking Pengajuan</span>
-              </label>
-              <input 
-                type="text" 
-                v-model="form.quick_help_tracking_url"
-                placeholder="Contoh: /layanan/tracking"
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              />
-            </div>
 
             <!-- Google Maps URL -->
             <div class="space-y-1.5">

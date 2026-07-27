@@ -108,42 +108,6 @@
           <span class="text-xs font-bold group-hover:translate-x-0.5 transition-transform">→</span>
         </a>
 
-        <!-- Call Center -->
-        <a 
-          v-if="settings.quick_help_call_center"
-          :href="'tel:' + settings.quick_help_call_center"
-          class="flex items-center justify-between p-2.5 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 hover:bg-blue-100/80 dark:hover:bg-blue-900/40 border border-blue-100 dark:border-blue-900/40 text-blue-800 dark:text-blue-300 transition group"
-        >
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
-              📞
-            </span>
-            <div class="min-w-0">
-              <p class="text-xs font-bold truncate">Call Center</p>
-              <p class="text-[10px] text-blue-600 dark:text-blue-400 truncate">{{ settings.quick_help_call_center }}</p>
-            </div>
-          </div>
-          <span class="text-xs font-bold group-hover:translate-x-0.5 transition-transform">→</span>
-        </a>
-
-        <!-- Tracking Pengajuan -->
-        <a 
-          v-if="settings.quick_help_tracking_url"
-          :href="settings.quick_help_tracking_url"
-          class="flex items-center justify-between p-2.5 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/30 hover:bg-indigo-100/80 dark:hover:bg-indigo-900/40 border border-indigo-100 dark:border-indigo-900/40 text-indigo-800 dark:text-indigo-300 transition group"
-        >
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
-              🔍
-            </span>
-            <div class="min-w-0">
-              <p class="text-xs font-bold truncate">Tracking Pengajuan</p>
-              <p class="text-[10px] text-indigo-600 dark:text-indigo-400 truncate">Cek status berkas online</p>
-            </div>
-          </div>
-          <span class="text-xs font-bold group-hover:translate-x-0.5 transition-transform">→</span>
-        </a>
-
         <!-- Google Maps Kantor -->
         <a 
           v-if="settings.quick_help_google_maps_url"
