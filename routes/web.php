@@ -133,6 +133,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // File Manager CMS
         Route::get('/files', [\App\Http\Controllers\Admin\FileManagerController::class, 'index'])->name('files.index');
+        Route::get('/file-manager', function () { return redirect()->route('admin.files.index'); });
+        Route::get('/filemanager', function () { return redirect()->route('admin.files.index'); });
+        Route::get('/media', function () { return redirect()->route('admin.files.index'); });
         Route::post('/files/folder', [\App\Http\Controllers\Admin\FileManagerController::class, 'createFolder'])->name('files.folder.create');
         Route::post('/files/upload', [\App\Http\Controllers\Admin\FileManagerController::class, 'uploadFile'])->name('files.upload');
         Route::post('/files/{file}/version', [\App\Http\Controllers\Admin\FileManagerController::class, 'uploadVersion'])->name('files.version.upload');

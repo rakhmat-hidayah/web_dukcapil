@@ -297,6 +297,56 @@
         </div>
       </div>
     </transition>
+
+    <!-- Custom Vue Modal Confirm Delete File -->
+    <transition name="fade">
+      <div v-if="deletingFileItem" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="deletingFileItem = null">
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl w-full max-w-sm shadow-2xl p-6 text-left relative space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+              <Trash2 class="w-5 h-5" />
+            </div>
+            <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">Hapus Berkas</h3>
+          </div>
+          <p class="text-xs text-gray-600 dark:text-zinc-300 leading-relaxed">
+            Apakah Anda yakin ingin menghapus berkas <strong>"{{ deletingFileItem.name }}"</strong>?
+          </p>
+          <div class="flex justify-end gap-2 pt-2">
+            <button @click="deletingFileItem = null" class="px-4 py-2 border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 text-xs font-semibold rounded-xl hover:bg-gray-50 transition">
+              Batal
+            </button>
+            <button @click="executeDeleteFile" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl active:scale-95 transition">
+              Ya, Hapus
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Custom Vue Modal Confirm Delete Folder -->
+    <transition name="fade">
+      <div v-if="deletingFolderItem" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="deletingFolderItem = null">
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl w-full max-w-sm shadow-2xl p-6 text-left relative space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+              <Trash2 class="w-5 h-5" />
+            </div>
+            <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">Hapus Folder</h3>
+          </div>
+          <p class="text-xs text-gray-600 dark:text-zinc-300 leading-relaxed">
+            Apakah Anda yakin ingin menghapus folder <strong>"{{ deletingFolderItem.name }}"</strong> beserta seluruh isinya?
+          </p>
+          <div class="flex justify-end gap-2 pt-2">
+            <button @click="deletingFolderItem = null" class="px-4 py-2 border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 text-xs font-semibold rounded-xl hover:bg-gray-50 transition">
+              Batal
+            </button>
+            <button @click="executeDeleteFolder" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl active:scale-95 transition">
+              Ya, Hapus Folder
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </AdminLayout>
 </template>
 
@@ -321,6 +371,8 @@ const props = defineProps({
 const searchQuery = ref(props.filters.search || '');
 const selectedFile = ref(null);
 const folderModalOpen = ref(false);
+const deletingFileItem = ref(null);
+const deletingFolderItem = ref(null);
 
 const folderForm = useForm({
   name: '',
@@ -470,27 +522,36 @@ const copyLink = async (url) => {
     setTimeout(() => {
       copied.value = false;
     }, 2500);
-  } else {
-    window.prompt('Salin tautan berkas secara manual:', fullUrl);
   }
 };
 
 // Delete File
 const deleteFile = (file) => {
-  if (confirm(`Apakah Anda yakin ingin menghapus berkas "${file.name}"?`)) {
-    router.delete(route('admin.files.destroy', file.id), {
-      onSuccess: () => {
-        selectedFile.value = null;
-      }
-    });
-  }
+  deletingFileItem.value = file;
+};
+
+const executeDeleteFile = () => {
+  if (!deletingFileItem.value) return;
+  router.delete(route('admin.files.destroy', deletingFileItem.value.id), {
+    onSuccess: () => {
+      selectedFile.value = null;
+      deletingFileItem.value = null;
+    }
+  });
 };
 
 // Delete Folder
 const deleteFolder = (folder) => {
-  if (confirm(`Apakah Anda yakin ingin menghapus folder "${folder.name}" beserta seluruh isinya?`)) {
-    router.delete(route('admin.files.folder.destroy', folder.id));
-  }
+  deletingFolderItem.value = folder;
+};
+
+const executeDeleteFolder = () => {
+  if (!deletingFolderItem.value) return;
+  router.delete(route('admin.files.folder.destroy', deletingFolderItem.value.id), {
+    onSuccess: () => {
+      deletingFolderItem.value = null;
+    }
+  });
 };
 </script>
 
