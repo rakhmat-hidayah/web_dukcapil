@@ -394,9 +394,9 @@ const filteredMenuGroups = computed(() => {
     return menuGroups;
   }
 
-  // Website Administrator sees EVERYTHING except SYSTEM SETTINGS & SECURITY
+  // Website Administrator sees EVERYTHING except System Settings
   if (isWebsiteAdmin.value) {
-    return menuGroups.filter(group => group.title !== 'SYSTEM SETTINGS & SECURITY');
+    return menuGroups.filter(group => group.title !== 'System Settings');
   }
 
   return menuGroups.map(group => {
