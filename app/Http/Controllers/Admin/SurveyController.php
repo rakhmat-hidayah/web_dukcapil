@@ -39,7 +39,7 @@ class SurveyController extends Controller
      */
     public function index(Request $request): InertiaResponse
     {
-        $periods = SurveyPeriod::with('statistic')->orderBy('year', 'desc')->orderBy('semester', 'desc')->get();
+        $periods = SurveyPeriod::with(['statistic', 'questions'])->orderBy('year', 'desc')->orderBy('semester', 'desc')->get();
         $activePeriod = SurveyPeriod::with([
             'questions.options',
             'statistic',
@@ -285,6 +285,42 @@ class SurveyController extends Controller
         $followUpAction->delete();
 
         return redirect()->back()->with('success', 'Rencana tindak lanjut berhasil dihapus.');
+    }
+
+    /**
+     * Copy questions from another survey period.
+     */
+    public function copyQuestions(Request $request, SurveyPeriod $period): RedirectResponse
+    {
+        $data = $request->validate([
+            'source_period_id' => 'required|integer|exists:survey_periods,id|different:' . $period->id,
+            'overwrite'        => 'boolean',
+        ]);
+
+        $sourcePeriod = SurveyPeriod::with('questions')->findOrFail($data['source_period_id']);
+
+        if (empty($data['overwrite'])) {
+            // Overwrite: remove existing questions first
+            SurveyQuestion::where('survey_period_id', $period->id)->delete();
+        }
+
+        $copied = 0;
+        foreach ($sourcePeriod->questions as $q) {
+            SurveyQuestion::create([
+                'survey_period_id' => $period->id,
+                'question_text'    => $q->question_text,
+                'question_type'    => $q->question_type,
+                'service_category' => $q->service_category,
+                'sort_order'       => $q->sort_order,
+                'is_required'      => $q->is_required,
+                'is_enabled'       => $q->is_enabled,
+            ]);
+            $copied++;
+        }
+
+        ActivityLogger::log("Menyalin {$copied} pertanyaan dari periode \"{$sourcePeriod->title}\" ke \"{$period->title}\"", null, 'copy_survey_questions');
+
+        return redirect()->back()->with('success', "Berhasil menyalin {$copied} pertanyaan dari periode \"{$sourcePeriod->title}\".");
     }
 
     /**

@@ -150,26 +150,43 @@
 
       <!-- TAB 3: SURVEY QUESTIONS BUILDER -->
       <div v-if="activeTab === 'questions'" class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl p-6 space-y-6">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
           <h3 class="text-xs font-black uppercase tracking-wider text-gray-400">Pengaturan Pertanyaan Unsur PermenPANRB</h3>
-          <button @click="openQuestionModal()" class="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold rounded-xl shadow-sm cursor-pointer">
-            + Tambah Pertanyaan
-          </button>
+          <div class="flex items-center gap-2">
+            <!-- Copy from previous period -->
+            <button
+              v-if="otherPeriods.length > 0"
+              @click="showCopyModal = true"
+              class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl border border-indigo-200 transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              Salin dari Periode Lain
+            </button>
+            <button @click="openQuestionModal()" class="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold rounded-xl shadow-sm cursor-pointer">
+              + Tambah Pertanyaan
+            </button>
+          </div>
         </div>
 
-        <div class="space-y-3">
+        <!-- Empty state -->
+        <div v-if="!activePeriod?.questions || activePeriod.questions.length === 0" class="py-10 text-center border-2 border-dashed border-gray-200 dark:border-zinc-700 rounded-2xl">
+          <svg class="w-10 h-10 text-gray-300 dark:text-zinc-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          <p class="text-sm font-bold text-gray-400">Belum ada pertanyaan</p>
+          <p class="text-xs text-gray-400 mt-1">Tambah manual atau salin dari periode sebelumnya</p>
+        </div>
+
+        <div v-else class="space-y-3">
           <div v-for="(q, idx) in activePeriod?.questions" :key="q.id" class="p-4 bg-gray-50 dark:bg-zinc-800/80 rounded-xl border border-gray-100 dark:border-zinc-700 flex items-center justify-between gap-4">
-            <div class="space-y-1">
-              <span class="text-[10px] font-black uppercase text-primary-600 font-mono">Unsur {{ idx + 1 }} — {{ q.service_category }}</span>
-              <p class="text-xs font-bold text-gray-900 dark:text-zinc-100">{{ q.question_text }}</p>
+            <div class="flex items-start gap-3">
+              <span class="w-7 h-7 rounded-full bg-primary-100 dark:bg-primary-950/50 text-primary-600 dark:text-primary-400 text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5">{{ idx + 1 }}</span>
+              <div class="space-y-1">
+                <span class="text-[10px] font-black uppercase text-primary-600 font-mono">{{ q.service_category }}</span>
+                <p class="text-xs font-bold text-gray-900 dark:text-zinc-100">{{ q.question_text }}</p>
+              </div>
             </div>
-            <div class="flex items-center gap-2">
-              <button @click="openQuestionModal(q)" class="px-3 py-1 bg-amber-50 text-amber-700 hover:bg-amber-100 font-bold rounded-lg text-xs cursor-pointer">
-                Edit
-              </button>
-              <button @click="deleteQuestion(q)" class="px-3 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold rounded-lg text-xs cursor-pointer">
-                Hapus
-              </button>
+            <div class="flex items-center gap-2 shrink-0">
+              <button @click="openQuestionModal(q)" class="px-3 py-1 bg-amber-50 text-amber-700 hover:bg-amber-100 font-bold rounded-lg text-xs cursor-pointer">Edit</button>
+              <button @click="deleteQuestion(q)" class="px-3 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold rounded-lg text-xs cursor-pointer">Hapus</button>
             </div>
           </div>
         </div>
@@ -403,6 +420,69 @@
         </div>
       </div>
 
+      <!-- MODAL: SALIN PERTANYAAN -->
+      <div v-if="showCopyModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
+          <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
+            <div>
+              <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">Salin Pertanyaan dari Periode Lain</h3>
+              <p class="text-xs text-gray-400 mt-0.5">Pertanyaan akan disalin ke: <span class="font-bold text-primary-600">{{ activePeriod?.title }}</span></p>
+            </div>
+            <button @click="showCopyModal = false" class="text-gray-400 hover:text-gray-600 font-bold text-xl cursor-pointer">&times;</button>
+          </div>
+
+          <form @submit.prevent="submitCopyQuestions" class="space-y-4">
+            <!-- Source Period -->
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 mb-1">
+                Pilih Periode Sumber <span class="text-red-500">*</span>
+              </label>
+              <select
+                v-model="copyForm.source_period_id"
+                required
+                class="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">-- Pilih periode --</option>
+                <option v-for="p in otherPeriods" :key="p.id" :value="p.id">
+                  {{ p.title }} ({{ p.questions?.length || 0 }} pertanyaan)
+                </option>
+              </select>
+            </div>
+
+            <!-- Preview -->
+            <div v-if="copyForm.source_period_id" class="p-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-xl space-y-2">
+              <p class="text-[10px] font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-400">Preview Pertanyaan yang Akan Disalin</p>
+              <div v-for="(q, i) in selectedSourcePeriod?.questions" :key="q.id" class="flex items-start gap-2">
+                <span class="w-4 h-4 rounded-full bg-indigo-200 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-300 text-[9px] font-black flex items-center justify-center shrink-0 mt-0.5">{{ i+1 }}</span>
+                <p class="text-[11px] text-indigo-800 dark:text-indigo-300 leading-snug">{{ q.question_text }}</p>
+              </div>
+              <p v-if="!selectedSourcePeriod?.questions?.length" class="text-xs text-indigo-400">Periode ini tidak memiliki pertanyaan.</p>
+            </div>
+
+            <!-- Overwrite option -->
+            <div class="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 rounded-xl">
+              <input id="overwriteCheck" v-model="copyForm.keep_existing" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-indigo-600 cursor-pointer" />
+              <label for="overwriteCheck" class="text-xs font-bold text-amber-800 dark:text-amber-300 cursor-pointer">
+                Pertahankan pertanyaan yang sudah ada (tambah tanpa hapus)
+              </label>
+            </div>
+            <p class="text-[10px] text-gray-400 -mt-2">Jika tidak dicentang, pertanyaan lama akan <strong>dihapus</strong> dan diganti dengan yang baru.</p>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-zinc-800">
+              <button type="button" @click="showCopyModal = false" class="px-4 py-2 text-gray-500 font-bold text-xs cursor-pointer hover:text-gray-700">Batal</button>
+              <button
+                type="submit"
+                :disabled="!copyForm.source_period_id || copyForm.processing"
+                class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-sm transition disabled:opacity-50 cursor-pointer flex items-center gap-2"
+              >
+                <svg v-if="copyForm.processing" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                Salin Pertanyaan
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <!-- MODAL 2: PERTANYAAN MODAL -->
       <div v-if="showQuestionModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
@@ -534,7 +614,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { RefreshCw } from '@lucide/vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
@@ -569,6 +649,23 @@ const showRecommendationModal = ref(false)
 const editingRecommendation = ref(null)
 const showFollowUpModal = ref(false)
 const editingFollowUp = ref(null)
+
+// Copy Questions Modal
+const showCopyModal = ref(false)
+const copyForm = useForm({
+  source_period_id: '',
+  keep_existing: false,
+})
+
+// Computed: periods excluding the active period
+const otherPeriods = computed(() =>
+  (props.periods || []).filter(p => p.id !== props.activePeriod?.id)
+)
+
+// Computed: selected source period with its questions
+const selectedSourcePeriod = computed(() =>
+  otherPeriods.value.find(p => p.id == copyForm.source_period_id) || null
+)
 
 // Inertia Forms
 const periodForm = useForm({
@@ -742,6 +839,21 @@ function deleteFollowUp(action) {
   if (confirm('Hapus rencana tindak lanjut ini?')) {
     router.delete(route('admin.surveys.follow-up.destroy', action.id))
   }
+}
+
+function submitCopyQuestions() {
+  if (!props.activePeriod || !copyForm.source_period_id) return
+  copyForm
+    .transform(data => ({
+      source_period_id: data.source_period_id,
+      overwrite: !data.keep_existing,
+    }))
+    .post(route('admin.surveys.questions.copy', props.activePeriod.id), {
+      onSuccess: () => {
+        showCopyModal.value = false
+        copyForm.reset()
+      }
+    })
 }
 
 function recalculateStats() {

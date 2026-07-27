@@ -267,6 +267,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/follow-up/{followUpAction}', [\App\Http\Controllers\Admin\SurveyController::class, 'updateFollowUpAction'])->name('follow-up.update');
             Route::delete('/follow-up/{followUpAction}', [\App\Http\Controllers\Admin\SurveyController::class, 'destroyFollowUpAction'])->name('follow-up.destroy');
             Route::post('/periods/{period}/recalculate', [\App\Http\Controllers\Admin\SurveyController::class, 'recalculate'])->name('recalculate');
+            Route::post('/periods/{period}/copy-questions', [\App\Http\Controllers\Admin\SurveyController::class, 'copyQuestions'])->name('questions.copy');
         });
 
         // PPID Management
