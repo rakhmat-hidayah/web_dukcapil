@@ -43,6 +43,19 @@
             />
           </div>
 
+          <!-- Category filter -->
+          <select 
+            v-model="selectedCategory" 
+            class="px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none"
+            @change="applyFilters"
+          >
+            <option value="">Semua Kategori</option>
+            <template v-for="cat in categories" :key="cat.id">
+              <option :value="cat.id">{{ cat.name }}</option>
+              <option v-for="sub in cat.children" :key="sub.id" :value="sub.id">&nbsp;&nbsp;— {{ sub.name }}</option>
+            </template>
+          </select>
+
           <!-- Status filter -->
           <select 
             v-model="status" 
@@ -397,6 +410,32 @@
           </div>
         </div>
       </transition>
+
+      <!-- Custom Vue Modal Confirm Delete Document -->
+      <transition name="fade">
+        <div v-if="deletingDoc" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="deletingDoc = null">
+          <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl w-full max-w-sm shadow-2xl p-6 text-left relative space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                <Trash2 class="w-5 h-5" />
+              </div>
+              <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">Hapus Dokumen Unduhan</h3>
+            </div>
+            <p class="text-xs text-gray-600 dark:text-zinc-300 leading-relaxed">
+              Apakah Anda yakin ingin menghapus berkas <strong>"{{ deletingDoc.title }}"</strong>? Berkas fisik dan record database akan dihapus permanen.
+            </p>
+            <div class="flex justify-end gap-2 pt-2">
+              <button @click="deletingDoc = null" class="px-4 py-2 border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 text-xs font-semibold rounded-xl hover:bg-gray-50 transition" :disabled="isDeletingDoc">
+                Batal
+              </button>
+              <button @click="executeDeleteDoc" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl active:scale-95 transition" :disabled="isDeletingDoc">
+                {{ isDeletingDoc ? 'Menghapus...' : 'Ya, Hapus' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
     </div>
   </AdminLayout>
 </template>
@@ -414,12 +453,16 @@ const props = defineProps({
 });
 
 const search = ref(props.filters.search || '');
+const selectedCategory = ref(props.filters.category || '');
 const status = ref(props.filters.status || '');
 const modalOpen = ref(false);
 const categoryModalOpen = ref(false);
 const isEditing = ref(false);
 const editId = ref(null);
 const fileInput = ref(null);
+
+const deletingDoc = ref(null);
+const isDeletingDoc = ref(false);
 
 const form = useForm({
   title: '',
@@ -438,8 +481,9 @@ const catForm = useForm({
 
 const applyFilters = () => {
   router.get(route('admin.downloads.index'), {
-    search: search.value,
-    status: status.value,
+    search: search.value || undefined,
+    category: selectedCategory.value || undefined,
+    status: status.value || undefined,
   }, {
     preserveState: true,
   });
@@ -510,9 +554,21 @@ const submit = () => {
 };
 
 const deleteDoc = (doc) => {
-  if (confirm(`Apakah Anda yakin ingin menghapus berkas "${doc.title}"?`)) {
-    router.delete(route('admin.downloads.destroy', doc.id));
-  }
+  deletingDoc.value = doc;
+};
+
+const executeDeleteDoc = () => {
+  if (!deletingDoc.value) return;
+  isDeletingDoc.value = true;
+  router.delete(route('admin.downloads.destroy', deletingDoc.value.id), {
+    onSuccess: () => {
+      deletingDoc.value = null;
+      isDeletingDoc.value = false;
+    },
+    onFinish: () => {
+      isDeletingDoc.value = false;
+    }
+  });
 };
 
 const submitCategory = () => {
@@ -524,8 +580,6 @@ const submitCategory = () => {
 };
 
 const deleteCategory = (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus kategori unduhan ini?')) {
-    router.delete(route('admin.downloads.categories.destroy', id));
-  }
+  router.delete(route('admin.downloads.categories.destroy', id));
 };
 </script>
