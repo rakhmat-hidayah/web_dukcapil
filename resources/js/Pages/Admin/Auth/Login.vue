@@ -22,7 +22,7 @@
               <!-- Logo 2: Logo Disdukcapil Dompu -->
               <img src="/img/logo-dukcapil.png" alt="Logo Disdukcapil Dompu" class="h-10 sm:h-11 w-auto object-contain drop-shadow-sm" />
             </div>
-            <p class="text-xs font-semibold text-zinc-400">Sistem Informasi Kependudukan & Administrator Portal</p>
+            <p class="text-xs font-semibold text-zinc-400">Portal Admin Website Disdukcapil Kab. Dompu</p>
           </div>
 
           <!-- Login Form -->
