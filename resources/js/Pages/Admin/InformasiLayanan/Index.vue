@@ -785,13 +785,21 @@
               </div>
               <div>
                 <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-100">
-                  Tugas Pokok &amp; Fungsi
+                  Tugas Pokok &amp; Fungsi (Tupoksi)
                 </h3>
                 <p class="text-xs text-gray-400 dark:text-zinc-500">
-                  Kelola judul seksi dan 3 bidang tugas pokok utama instansi.
+                  Kelola judul seksi dan daftar bidang tugas pokok instansi. Tambah atau hapus bidang sesuai kebutuhan.
                 </p>
               </div>
             </div>
+
+            <button 
+              type="button" 
+              @click="addDutyItem"
+              class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1.5 shrink-0"
+            >
+              <span>+ Tambah Bidang Tugas</span>
+            </button>
           </div>
 
           <div class="space-y-4">
@@ -806,53 +814,31 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-              <!-- Tugas 01 -->
-              <div class="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 space-y-3">
-                <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Bidang 01</span>
+              <div 
+                v-for="(item, idx) in form.profile_duties_items" 
+                :key="idx" 
+                class="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 space-y-3 relative group"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Bidang {{ String(idx + 1).padStart(2, '0') }}</span>
+                  <button 
+                    type="button" 
+                    @click="removeDutyItem(idx)"
+                    class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline px-2 py-0.5 rounded bg-red-50 dark:bg-red-950/40 transition"
+                  >
+                    🗑 Hapus
+                  </button>
+                </div>
                 <input 
                   type="text" 
-                  v-model="form.profile_duties_item_1_title"
-                  placeholder="Pendaftaran Penduduk"
+                  v-model="item.title"
+                  placeholder="Nama Bidang Tugas..."
                   class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
                 />
                 <textarea 
-                  v-model="form.profile_duties_item_1_desc"
+                  v-model="item.desc"
                   rows="3"
-                  placeholder="Deskripsi tugas bidang 01..."
-                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed"
-                ></textarea>
-              </div>
-
-              <!-- Tugas 02 -->
-              <div class="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 space-y-3">
-                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Bidang 02</span>
-                <input 
-                  type="text" 
-                  v-model="form.profile_duties_item_2_title"
-                  placeholder="Pencatatan Sipil"
-                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-                />
-                <textarea 
-                  v-model="form.profile_duties_item_2_desc"
-                  rows="3"
-                  placeholder="Deskripsi tugas bidang 02..."
-                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed"
-                ></textarea>
-              </div>
-
-              <!-- Tugas 03 -->
-              <div class="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 space-y-3">
-                <span class="text-xs font-bold text-purple-600 dark:text-purple-400">Bidang 03</span>
-                <input 
-                  type="text" 
-                  v-model="form.profile_duties_item_3_title"
-                  placeholder="Pengelolaan PIAK & IKD"
-                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-                />
-                <textarea 
-                  v-model="form.profile_duties_item_3_desc"
-                  rows="3"
-                  placeholder="Deskripsi tugas bidang 03..."
+                  placeholder="Deskripsi rincian tugas..."
                   class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed"
                 ></textarea>
               </div>
@@ -1111,6 +1097,31 @@ const previewPhotoUrl = computed(() => {
   return `/storage/${photo}`;
 });
 
+const initialDutiesItems = computed(() => {
+  try {
+    const raw = props.settings?.profile_duties_items;
+    if (!raw) {
+      return [
+        { title: 'Pendaftaran Penduduk', desc: 'Pelayanan penerbitan KTP-El, KK, KIA, dan surat keterangan pindah penduduk.' },
+        { title: 'Pencatatan Sipil', desc: 'Penerbitan akta kelahiran, akta perkawinan, akta perceraian, dan akta kematian.' },
+        { title: 'Pengelolaan PIAK & IKD', desc: 'Pengelolaan jaringan data SIAK Terpusat dan aktivasi Identitas Kependudukan Digital.' },
+      ];
+    }
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+});
+
+const addDutyItem = () => {
+  form.profile_duties_items.push({ title: '', desc: '' });
+};
+
+const removeDutyItem = (index) => {
+  form.profile_duties_items.splice(index, 1);
+};
+
 const form = useForm({
   // Section 0: Banner Header
   mobile_service_hero_tag: props.settings.mobile_service_hero_tag || 'Jemput Bola Adminduk',
@@ -1165,12 +1176,7 @@ const form = useForm({
 
   // Section 8: Tugas Pokok & Fungsi
   profile_duties_title: props.settings.profile_duties_title || 'Tugas Pokok & Fungsi',
-  profile_duties_item_1_title: props.settings.profile_duties_item_1_title || 'Pendaftaran Penduduk',
-  profile_duties_item_1_desc: props.settings.profile_duties_item_1_desc || 'Pelayanan penerbitan KTP-El, KK, KIA, dan surat keterangan pindah penduduk.',
-  profile_duties_item_2_title: props.settings.profile_duties_item_2_title || 'Pencatatan Sipil',
-  profile_duties_item_2_desc: props.settings.profile_duties_item_2_desc || 'Penerbitan akta kelahiran, akta perkawinan, akta perceraian, dan akta kematian.',
-  profile_duties_item_3_title: props.settings.profile_duties_item_3_title || 'Pengelolaan PIAK & IKD',
-  profile_duties_item_3_desc: props.settings.profile_duties_item_3_desc || 'Pengelolaan jaringan data SIAK Terpusat dan aktivasi Identitas Kependudukan Digital.',
+  profile_duties_items: initialDutiesItems.value,
 
   // Section 9: Maklumat Pelayanan Publik
   profile_maklumat_tag: props.settings.profile_maklumat_tag || 'Maklumat Pelayanan Publik',

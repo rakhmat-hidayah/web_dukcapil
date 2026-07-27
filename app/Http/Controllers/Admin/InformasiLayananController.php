@@ -162,6 +162,7 @@ class InformasiLayananController extends Controller
 
             // Section 8: Tugas Pokok & Fungsi
             'profile_duties_title'              => 'nullable|string|max:255',
+            'profile_duties_items'              => 'nullable',
             'profile_duties_item_1_title'       => 'nullable|string|max:255',
             'profile_duties_item_1_desc'        => 'nullable|string|max:1000',
             'profile_duties_item_2_title'       => 'nullable|string|max:255',
@@ -188,6 +189,8 @@ class InformasiLayananController extends Controller
         foreach ($data as $key => $val) {
             if ($key === 'mobile_service_selected_services') {
                 $val = json_encode(array_map('intval', $val ?? []));
+            } elseif ($key === 'profile_duties_items') {
+                $val = is_array($val) ? json_encode($val) : (string) ($val ?? '[]');
             } elseif (is_bool($val)) {
                 $val = $val ? '1' : '0';
             } else {
