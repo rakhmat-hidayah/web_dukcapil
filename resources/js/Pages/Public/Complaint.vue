@@ -295,7 +295,11 @@ const submitForm = () => {
 
   const data = new FormData();
   Object.entries(form).forEach(([k, v]) => {
-    if (v !== null && v !== undefined) data.append(k, v);
+    if (k === 'is_anonymous') {
+      data.append(k, v ? '1' : '0');
+    } else if (v !== null && v !== undefined) {
+      data.append(k, v);
+    }
   });
   data.set('captcha_hash', props.captcha?.hash || '');
   if (selectedFile) data.append('attachment', selectedFile);

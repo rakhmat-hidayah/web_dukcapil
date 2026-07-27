@@ -40,11 +40,15 @@ class ComplaintController extends Controller
      */
     public function store(Request $request): RedirectResponse|InertiaResponse
     {
+        $request->merge([
+            'is_anonymous' => filter_var($request->is_anonymous, FILTER_VALIDATE_BOOLEAN),
+        ]);
+
         $data = $request->validate([
             'submitter_name'        => 'required_unless:is_anonymous,true,1|nullable|string|max:150',
             'submitter_phone'       => 'nullable|string|max:20',
             'submitter_email'       => 'nullable|email|max:150',
-            'is_anonymous'          => 'boolean',
+            'is_anonymous'          => 'nullable|boolean',
             'complaint_category_id' => 'nullable|exists:complaint_categories,id',
             'subject'               => 'required|string|max:255',
             'message'               => 'required|string|min:20|max:5000',
