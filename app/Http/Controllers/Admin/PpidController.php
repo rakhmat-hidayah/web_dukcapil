@@ -75,7 +75,7 @@ class PpidController extends Controller
     public function documentsStore(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'category'    => 'required|in:informasi_publik,prosedur,layanan_informasi',
+            'category'    => 'required|in:informasi_publik,prosedur,layanan_informasi,sk_ppid',
             'subcategory' => 'nullable|string|max:100',
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -114,7 +114,7 @@ class PpidController extends Controller
     public function documentsUpdate(Request $request, PpidDocument $document): RedirectResponse
     {
         $validated = $request->validate([
-            'category'    => 'required|in:informasi_publik,prosedur,layanan_informasi',
+            'category'    => 'required|in:informasi_publik,prosedur,layanan_informasi,sk_ppid',
             'subcategory' => 'nullable|string|max:100',
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',

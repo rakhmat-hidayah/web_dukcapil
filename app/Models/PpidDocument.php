@@ -26,6 +26,7 @@ class PpidDocument extends Model
         'informasi_publik'   => 'Informasi Publik',
         'prosedur'           => 'Prosedur',
         'layanan_informasi'  => 'Layanan Informasi',
+        'sk_ppid'            => 'SK PPID',
     ];
 
     public function scopePublished(Builder $query): Builder

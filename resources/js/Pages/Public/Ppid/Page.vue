@@ -149,6 +149,41 @@
             </div>
             
             <div class="prose dark:prose-invert max-w-none text-xs sm:text-sm text-gray-700 dark:text-zinc-300 leading-relaxed font-medium space-y-4" v-html="page.content"></div>
+
+            <!-- DYNAMIC SK PPID DOCUMENTS FROM CMS -->
+            <div v-if="documents && documents.length > 0" class="mt-8 pt-6 border-t border-gray-100 dark:border-zinc-800 space-y-4">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">📥</span>
+                <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50">Berkas Dokumen SK PPID (Dapat Diunduh)</h3>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div v-for="doc in documents" :key="doc.id" class="p-5 bg-white dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-700/60 rounded-2xl space-y-3 shadow-xs hover:border-blue-300 transition flex flex-col justify-between">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-300 flex items-center justify-center font-bold text-lg shrink-0">
+                      📄
+                    </div>
+                    <div class="space-y-1 min-w-0">
+                      <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-100 leading-snug truncate">{{ doc.title }}</h4>
+                      <p v-if="doc.description" class="text-[11px] text-gray-500 dark:text-zinc-400 line-clamp-2">{{ doc.description }}</p>
+                      <div class="flex items-center gap-2 pt-1 text-[10px] text-gray-400 font-mono">
+                        <span>Format {{ (doc.file_type || 'PDF').toUpperCase() }}</span>
+                        <span v-if="doc.file_size_formatted">• {{ doc.file_size_formatted }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <a 
+                    v-if="doc.file_path || doc.file_url"
+                    :href="route('public.ppid.document.download', doc.id)" 
+                    target="_blank"
+                    class="w-full py-2 bg-primary-600 hover:bg-primary-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                  >
+                    <span>Unduh Berkas SK</span>
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </main>
       </div>
@@ -164,5 +199,6 @@ import PublicLayout from '@/Layouts/PublicLayout.vue'
 defineProps({
   page: Object,
   pages: Array,
+  documents: Array,
 })
 </script>

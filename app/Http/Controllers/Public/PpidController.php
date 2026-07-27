@@ -26,8 +26,18 @@ class PpidController extends Controller
     {
         $page = PpidPage::published()->where('slug', $slug)->firstOrFail();
 
+        $documents = null;
+        if ($slug === 'sk-ppid') {
+            $documents = PpidDocument::published()
+                ->where('category', 'sk_ppid')
+                ->orderBy('sort_order')
+                ->orderByDesc('year')
+                ->get();
+        }
+
         return Inertia::render('Public/Ppid/Page', [
-            'page'  => $page,
+            'page'      => $page,
+            'documents' => $documents,
             ...$this->sharedData(),
         ]);
     }
