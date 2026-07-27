@@ -100,33 +100,107 @@
               </p>
             </div>
 
-            <!-- Tanggal -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
-                Tanggal Pelayanan
-              </label>
-              <input 
-                type="text" 
-                v-model="form.mobile_service_date"
-                placeholder="Contoh: Senin, 28 Juli 2026"
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              />
+            <!-- Tanggal Pelayanan -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                  Tanggal Pelayanan
+                </label>
+                <div class="flex items-center gap-1">
+                  <button 
+                    type="button" 
+                    @click="setDateToday" 
+                    class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold rounded-lg hover:bg-emerald-100 transition"
+                  >
+                    📅 Hari Ini
+                  </button>
+                  <button 
+                    type="button" 
+                    @click="setDateTomorrow" 
+                    class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-[10px] font-bold rounded-lg hover:bg-blue-100 transition"
+                  >
+                    📅 Besok
+                  </button>
+                  <button 
+                    type="button" 
+                    @click="setDateUpcoming" 
+                    class="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] font-bold rounded-lg hover:bg-amber-100 transition"
+                  >
+                    📅 Lusa
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <!-- Native Date Picker for Easy Selection -->
+                <input 
+                  type="date" 
+                  v-model="pickedDate" 
+                  @change="onDatePick"
+                  class="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition shrink-0 cursor-pointer"
+                />
+                <!-- Formatted Text Field -->
+                <input 
+                  type="text" 
+                  v-model="form.mobile_service_date"
+                  placeholder="Contoh: Senin, 28 Juli 2026"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+              </div>
               <p v-if="form.errors.mobile_service_date" class="text-[11px] text-red-500 font-semibold">
                 {{ form.errors.mobile_service_date }}
               </p>
             </div>
 
             <!-- Jam Pelayanan -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
-                Jam Pelayanan
-              </label>
-              <input 
-                type="text" 
-                v-model="form.mobile_service_time"
-                placeholder="Contoh: 08.00 - 14.00 WITA"
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
-              />
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                  Jam Pelayanan
+                </label>
+                <div class="flex items-center gap-1">
+                  <button 
+                    type="button" 
+                    @click="setTimePreset('08:00', '14:00')" 
+                    class="px-2 py-0.5 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-[10px] font-bold rounded-lg hover:bg-gray-200 transition"
+                  >
+                    ⏰ 08.00 - 14.00
+                  </button>
+                  <button 
+                    type="button" 
+                    @click="setTimePreset('08:00', '12:00')" 
+                    class="px-2 py-0.5 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-[10px] font-bold rounded-lg hover:bg-gray-200 transition"
+                  >
+                    ⏰ 08.00 - 12.00
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <!-- Start & End Time Pickers -->
+                <div class="flex items-center gap-1 shrink-0 bg-gray-50 dark:bg-zinc-800 p-1 rounded-xl border border-gray-200 dark:border-zinc-700">
+                  <input 
+                    type="time" 
+                    v-model="timeStart" 
+                    @change="updateTimeFromPickers"
+                    class="px-2 py-1.5 rounded-lg border-0 bg-transparent text-xs font-bold focus:ring-0 dark:text-zinc-100 cursor-pointer"
+                  />
+                  <span class="text-xs text-gray-400 font-bold">-</span>
+                  <input 
+                    type="time" 
+                    v-model="timeEnd" 
+                    @change="updateTimeFromPickers"
+                    class="px-2 py-1.5 rounded-lg border-0 bg-transparent text-xs font-bold focus:ring-0 dark:text-zinc-100 cursor-pointer"
+                  />
+                </div>
+                <!-- Formatted Text Field -->
+                <input 
+                  type="text" 
+                  v-model="form.mobile_service_time"
+                  placeholder="Contoh: 08.00 - 14.00 WITA"
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+              </div>
               <p v-if="form.errors.mobile_service_time" class="text-[11px] text-red-500 font-semibold">
                 {{ form.errors.mobile_service_time }}
               </p>
@@ -247,6 +321,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Save } from '@lucide/vue';
@@ -254,6 +329,79 @@ import { Save } from '@lucide/vue';
 const props = defineProps({
   settings: Object,
 });
+
+const pickedDate = ref('');
+const timeStart = ref('08:00');
+const timeEnd = ref('14:00');
+
+const formatIndonesianDate = (dateObj) => {
+  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  
+  const dayName = days[dateObj.getDay()];
+  const dayDate = dateObj.getDate();
+  const monthName = months[dateObj.getMonth()];
+  const year = dateObj.getFullYear();
+  
+  return `${dayName}, ${dayDate} ${monthName} ${year}`;
+};
+
+const onDatePick = () => {
+  if (!pickedDate.value) return;
+  const parts = pickedDate.value.split('-');
+  if (parts.length === 3) {
+    const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    form.mobile_service_date = formatIndonesianDate(d);
+  }
+};
+
+const updateTimeFromPickers = () => {
+  if (timeStart.value && timeEnd.value) {
+    const s = timeStart.value.replace(':', '.');
+    const e = timeEnd.value.replace(':', '.');
+    form.mobile_service_time = `${s} - ${e} WITA`;
+  }
+};
+
+const setDateToday = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  pickedDate.value = `${yyyy}-${mm}-${dd}`;
+  form.mobile_service_date = formatIndonesianDate(today);
+  form.mobile_service_status = 'hari_ini';
+};
+
+const setDateTomorrow = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const yyyy = tomorrow.getFullYear();
+  const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+  const dd = String(tomorrow.getDate()).padStart(2, '0');
+  pickedDate.value = `${yyyy}-${mm}-${dd}`;
+  form.mobile_service_date = formatIndonesianDate(tomorrow);
+  form.mobile_service_status = 'besok';
+};
+
+const setDateUpcoming = () => {
+  const upcoming = new Date();
+  upcoming.setDate(upcoming.getDate() + 2);
+  const yyyy = upcoming.getFullYear();
+  const mm = String(upcoming.getMonth() + 1).padStart(2, '0');
+  const dd = String(upcoming.getDate()).padStart(2, '0');
+  pickedDate.value = `${yyyy}-${mm}-${dd}`;
+  form.mobile_service_date = formatIndonesianDate(upcoming);
+  form.mobile_service_status = 'akan_datang';
+};
+
+const setTimePreset = (startStr, endStr) => {
+  timeStart.value = startStr;
+  timeEnd.value = endStr;
+  const s = startStr.replace(':', '.');
+  const e = endStr.replace(':', '.');
+  form.mobile_service_time = `${s} - ${e} WITA`;
+};
 
 const form = useForm({
   // Section 1: Mobil Pelayanan
