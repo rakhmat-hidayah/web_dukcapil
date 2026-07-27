@@ -68,7 +68,7 @@ class HomeController extends Controller
         $downloadShortcuts = Download::where('status', 'published')
             ->orderBy('download_count', 'desc')
             ->limit(4)
-            ->get(['id', 'title', 'file_type', 'file_size']);
+            ->get(['id', 'title', 'file_type', 'file_size', 'file_path', 'download_count']);
 
         // 6. Aggregate demographic highlights dynamically from latest published regency dataset
         $latestDataset = \App\Models\DemographicDataset::published()
