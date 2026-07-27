@@ -116,7 +116,31 @@
               🛠️ Dokumen yang Dilayani di Mobil Keliling
             </h3>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div v-if="services && services.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link 
+                v-for="service in services" 
+                :key="service.id"
+                :href="`/layanan/${service.slug}`"
+                class="p-4 rounded-2xl bg-gray-50/70 dark:bg-zinc-800/40 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-100 dark:border-zinc-800/60 flex items-start gap-3 transition group"
+              >
+                <div 
+                  class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base shrink-0 shadow-sm transition-transform group-hover:scale-110"
+                  :style="{ backgroundColor: service.color || '#2563eb', color: '#ffffff' }"
+                >
+                  {{ service.icon || '📜' }}
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-gray-900 dark:text-zinc-100 text-sm group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    {{ service.title }}
+                  </h4>
+                  <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1 leading-relaxed line-clamp-2">
+                    {{ service.description }}
+                  </p>
+                </div>
+              </Link>
+            </div>
+
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- KTP-el -->
               <div class="p-4 rounded-2xl bg-gray-50/70 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800/60 flex items-start gap-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">
@@ -165,19 +189,6 @@
                   <h4 class="font-extrabold text-gray-900 dark:text-zinc-100 text-sm">Akta Kelahiran &amp; Kematian</h4>
                   <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1 leading-relaxed">
                     Pencatatan sipil penerbitan kutipan akta kelahiran &amp; akta kematian warga.
-                  </p>
-                </div>
-              </div>
-
-              <!-- IKD -->
-              <div class="p-4 rounded-2xl bg-gray-50/70 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800/60 flex items-start gap-3 sm:col-span-2">
-                <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">
-                  📱
-                </div>
-                <div>
-                  <h4 class="font-extrabold text-gray-900 dark:text-zinc-100 text-sm">Aktivasi Identitas Kependudukan Digital (IKD)</h4>
-                  <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1 leading-relaxed">
-                    Pendampingan pemindaian QR Code dan registrasi aplikasi KTP Digital di smartphone warga.
                   </p>
                 </div>
               </div>
@@ -272,6 +283,7 @@ import PublicLayout from '@/Layouts/PublicLayout.vue';
 
 const props = defineProps({
   scheduleSettings: Object,
+  services: Array,
   innovations: Array,
 });
 
