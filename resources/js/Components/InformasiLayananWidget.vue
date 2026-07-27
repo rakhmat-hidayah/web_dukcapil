@@ -16,7 +16,7 @@
           </span>
           <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight flex items-center gap-1.5 mt-1">
             <span>🚐</span>
-            <span>Mobil Pelayanan</span>
+            <span>Pelayanan Mobile</span>
           </h3>
         </div>
 
