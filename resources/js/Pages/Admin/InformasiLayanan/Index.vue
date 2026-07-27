@@ -604,6 +604,111 @@
           </div>
         </div>
 
+        <!-- SECTION 6: Sambutan Pimpinan & Foto Kepala Dinas -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-zinc-800">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
+                👔
+              </div>
+              <div>
+                <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-100">
+                  Sambutan Pimpinan &amp; Foto Kepala Dinas
+                </h3>
+                <p class="text-xs text-gray-400 dark:text-zinc-500">
+                  Kelola foto pimpinan, nama, jabatan, serta isi teks sambutan yang muncul pada halaman profil instansi.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+            <!-- Left: Foto Pimpinan & Preview -->
+            <div class="md:col-span-4 space-y-4 text-center">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 text-left">
+                Foto Resmi Kepala Dinas
+              </label>
+              <div class="relative w-40 h-40 mx-auto rounded-2xl overflow-hidden bg-gray-100 dark:bg-zinc-800 border-4 border-white dark:border-zinc-700 shadow-md">
+                <img 
+                  :src="previewPhotoUrl" 
+                  alt="Foto Kepala Dinas" 
+                  class="w-full h-full object-cover object-top"
+                  @error="$event.target.src = '/images/kepala_dinas.jpg'"
+                />
+              </div>
+
+              <div class="space-y-1.5 text-left">
+                <label class="block text-[11px] font-semibold text-gray-500">
+                  Unggah Foto Baru (JPG/PNG/WEBP, Maks 5MB):
+                </label>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  @change="handlePhotoUpload"
+                  class="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-zinc-800 dark:file:text-zinc-300 transition"
+                />
+              </div>
+            </div>
+
+            <!-- Right: Text Inputs -->
+            <div class="md:col-span-8 space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Nama Kepala Dinas -->
+                <div class="space-y-1.5">
+                  <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                    Nama Lengkap &amp; Gelar Pimpinan
+                  </label>
+                  <input 
+                    type="text" 
+                    v-model="form.leader_name"
+                    placeholder="Drs. Abd. Najib"
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                  />
+                </div>
+
+                <!-- Jabatan Pimpinan -->
+                <div class="space-y-1.5">
+                  <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                    Jabatan Pimpinan
+                  </label>
+                  <input 
+                    type="text" 
+                    v-model="form.leader_title"
+                    placeholder="Kepala Dinas Dukcapil Kabupaten Dompu"
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                  />
+                </div>
+              </div>
+
+              <!-- Judul Kutipan Sambutan -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                  Judul Kutipan Sambutan Pimpinan
+                </label>
+                <input 
+                  type="text" 
+                  v-model="form.leader_speech_title"
+                  placeholder='"Pelayanan Kependudukan Yang Transparan & Membahagiakan Masyarakat"'
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+                />
+              </div>
+
+              <!-- Isi Paragraf Sambutan -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                  Isi Teks Sambutan (Pisahkan Paragraf dengan Enter)
+                </label>
+                <textarea 
+                  v-model="form.leader_speech_content"
+                  rows="5"
+                  placeholder="Tuliskan isi sambutan di sini..."
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition leading-relaxed"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Form Submit Bar -->
         <div class="flex items-center justify-end gap-3 pt-4">
           <button 
@@ -733,6 +838,24 @@ const deselectAllServices = () => {
   form.mobile_service_selected_services = [];
 };
 
+const photoPreview = ref(null);
+
+const handlePhotoUpload = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    form.leader_photo_file = file;
+    photoPreview.value = URL.createObjectURL(file);
+  }
+};
+
+const previewPhotoUrl = computed(() => {
+  if (photoPreview.value) return photoPreview.value;
+  const photo = form.leader_photo;
+  if (!photo) return '/images/kepala_dinas.jpg';
+  if (photo.startsWith('http://') || photo.startsWith('https://') || photo.startsWith('/images/')) return photo;
+  return `/storage/${photo}`;
+});
+
 const form = useForm({
   // Section 0: Banner Header
   mobile_service_hero_tag: props.settings.mobile_service_hero_tag || 'Jemput Bola Adminduk',
@@ -770,11 +893,20 @@ const form = useForm({
   // Section 5: Widget Bantuan Cepat
   quick_help_whatsapp: props.settings.quick_help_whatsapp || 'https://wa.me/6282340001111',
   quick_help_google_maps_url: props.settings.quick_help_google_maps_url || 'https://maps.google.com/?q=Dukcapil+Dompu',
+
+  // Section 6: Sambutan Pimpinan & Foto Kepala Dinas
+  leader_name: props.settings.leader_name || 'Drs. Abd. Najib',
+  leader_title: props.settings.leader_title || 'Kepala Dinas Dukcapil Kabupaten Dompu',
+  leader_speech_title: props.settings.leader_speech_title || '"Pelayanan Kependudukan Yang Transparan & Membahagiakan Masyarakat"',
+  leader_speech_content: props.settings.leader_speech_content || "Assalamu’alaikum Warahmatullahi Wabarakatuh,\n\nSelamat datang di portal resmi Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu. Kehadiran portal ini merupakan bagian dari komitmen kami dalam mewujudkan keterbukaan informasi publik dan kemudahan akses layanan administrasi kependudukan bagi seluruh lapisan masyarakat.\n\nSeluruh jajaran Dinas Dukcapil Kabupaten Dompu siap melayani Anda dengan semangat integritas, profesionalisme, dan tanpa pungutan biaya apapun (Rp 0,-).",
+  leader_photo: props.settings.leader_photo || '/images/kepala_dinas.jpg',
+  leader_photo_file: null,
 });
 
 const submit = () => {
   form.post(route('admin.informasi-layanan.update'), {
     preserveScroll: true,
+    forceFormData: true,
   });
 };
 </script>

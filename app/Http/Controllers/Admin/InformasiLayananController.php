@@ -114,7 +114,19 @@ class InformasiLayananController extends Controller
             // Section 5: Bantuan Cepat Widget
             'quick_help_whatsapp'               => 'nullable|string|max:255',
             'quick_help_google_maps_url'        => 'nullable|string|max:500',
+
+            // Section 6: Sambutan Pimpinan / Foto Kepala Dinas
+            'leader_name'                       => 'nullable|string|max:255',
+            'leader_title'                      => 'nullable|string|max:255',
+            'leader_speech_title'               => 'nullable|string|max:255',
+            'leader_speech_content'             => 'nullable|string|max:4000',
+            'leader_photo'                      => 'nullable|string|max:500',
         ]);
+
+        if ($request->hasFile('leader_photo_file')) {
+            $path = $request->file('leader_photo_file')->store('leader', 'public');
+            $data['leader_photo'] = $path;
+        }
 
         foreach ($data as $key => $val) {
             if ($key === 'mobile_service_selected_services') {
@@ -125,19 +137,21 @@ class InformasiLayananController extends Controller
                 $val = (string) ($val ?? '');
             }
 
+            $group = str_starts_with($key, 'leader_') ? 'pimpinan' : 'informasi_layanan';
+
             WebsiteSetting::updateOrCreate(
                 ['key' => $key],
                 [
                     'value' => $val,
-                    'group' => 'informasi_layanan',
+                    'group' => $group,
                 ]
             );
         }
 
         WebsiteSetting::clearCache();
 
-        ActivityLogger::log("Memperbarui konfigurasi Informasi Layanan & Halaman Pelayanan Mobile", null, 'update_informasi_layanan');
+        ActivityLogger::log("Memperbarui konfigurasi Informasi Layanan & Sambutan Pimpinan", null, 'update_informasi_layanan');
 
-        return redirect()->back()->with('success', 'Konfigurasi Informasi Layanan & Pelayanan Mobile berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Konfigurasi Informasi Layanan & Sambutan Pimpinan berhasil diperbarui.');
     }
 }
