@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Models\ApiKey;
 use App\Models\ApiSetting;
 
+use Illuminate\Support\Facades\Gate;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -24,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Super Administrator has implicit full permissions override
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('Super Administrator') ? true : null;
+        });
         // Define standard API Rate Limiter resolving limits dynamically
         RateLimiter::for('api', function (Request $request) {
             // 1. Resolve API Key if present

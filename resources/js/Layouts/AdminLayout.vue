@@ -34,7 +34,7 @@
 
       <!-- Navigation links -->
       <nav ref="sidebarNavRef" @scroll="handleSidebarScroll" class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin">
-        <div v-for="(group, gIdx) in menuGroups" :key="gIdx" class="space-y-1">
+        <div v-for="(group, gIdx) in filteredMenuGroups" :key="gIdx" class="space-y-1">
           <p v-if="sidebarOpen" class="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-zinc-500 mb-2">
             {{ group.title }}
           </p>
@@ -381,6 +381,38 @@ const menuGroups = [
     ]
   }
 ];
+
+const userRoles = computed(() => page.props.auth?.roles || []);
+const isSuperAdmin = computed(() => userRoles.value.includes('Super Administrator'));
+const isContentEditor = computed(() => userRoles.value.includes('Content Editor') || isSuperAdmin.value);
+const isComplaintOfficer = computed(() => userRoles.value.includes('Complaint Officer') || isSuperAdmin.value);
+const isPpidAdmin = computed(() => userRoles.value.includes('PPID Admin') || isSuperAdmin.value);
+
+const filteredMenuGroups = computed(() => {
+  return menuGroups.map(group => {
+    const items = group.items.filter(item => {
+      // System Settings & Security -> Super Admin Only
+      if (['admin.users.index', 'admin.theme.index', 'admin.api-keys.index', 'admin.api-dashboard.index', 'admin.api-settings.index', 'admin.audit-logs.index', 'admin.office-contact.index', 'admin.external-services.index'].includes(item.route)) {
+        return isSuperAdmin.value;
+      }
+      
+      // Complaints & Surveys -> Complaint Officer or Super Admin
+      if (['admin.complaints.index', 'admin.complaints.categories', 'admin.surveys.index'].includes(item.route)) {
+        return isComplaintOfficer.value;
+      }
+
+      // PPID -> PPID Admin or Super Admin
+      if (item.route && item.route.startsWith('admin.ppid.')) {
+        return isPpidAdmin.value;
+      }
+
+      // Content & Media / Profile / Services / Demographics -> Content Editor or Super Admin
+      return isContentEditor.value || isPpidAdmin.value || isComplaintOfficer.value;
+    });
+
+    return { ...group, items };
+  }).filter(group => group.items.length > 0);
+});
 
 const activePageName = computed(() => {
   const currentRouteName = route().current();
