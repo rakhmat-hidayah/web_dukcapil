@@ -68,4 +68,23 @@ class Official extends Model
     {
         return $this->hasMany(OrganizationNode::class, 'official_id');
     }
+
+    public function scopeOrderByHierarchy($query)
+    {
+        return $query->orderByRaw("
+            CASE 
+                WHEN position_title LIKE '%Kepala Dinas%' AND position_title NOT LIKE '%Bidang%' THEN 1
+                WHEN position_title LIKE '%Sekretaris%' THEN 2
+                WHEN position_title LIKE '%Pendaftaran Penduduk%' THEN 3
+                WHEN position_title LIKE '%Pencatatan Sipil%' THEN 4
+                WHEN position_title LIKE '%Pengelolaan Informasi%' OR position_title LIKE '%PIAK%' THEN 5
+                WHEN position_title LIKE '%Pemanfaatan Data%' THEN 6
+                WHEN position_title LIKE '%Keuangan%' THEN 7
+                WHEN position_title LIKE '%Umum%' OR position_title LIKE '%Kepegawaian%' THEN 8
+                WHEN position_title LIKE '%Kasubag%' OR position_title LIKE '%Subbag%' THEN 9
+                WHEN position_title LIKE '%Plt.%' OR position_title LIKE '%Kabid%' THEN 10
+                ELSE 20
+            END ASC
+        ")->orderBy('sort_order', 'asc')->orderBy('name', 'asc');
+    }
 }

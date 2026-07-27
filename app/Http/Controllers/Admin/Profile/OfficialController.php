@@ -25,7 +25,7 @@ class OfficialController extends Controller
             });
         }
 
-        $officials = $query->orderBy('sort_order')->paginate(10)->withQueryString();
+        $officials = $query->orderByHierarchy()->paginate(10)->withQueryString();
 
         return Inertia::render('Admin/Profile/Officials/Index', [
             'officials' => $officials,

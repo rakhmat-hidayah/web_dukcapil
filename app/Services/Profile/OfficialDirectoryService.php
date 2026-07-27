@@ -27,8 +27,7 @@ class OfficialDirectoryService
             $query->where('department', $filters['department']);
         }
 
-        return $query->orderBy('sort_order', 'asc')
-            ->orderBy('name', 'asc')
+        return $query->orderByHierarchy()
             ->paginate($perPage)
             ->withQueryString();
     }
