@@ -332,4 +332,25 @@ class SurveyController extends Controller
 
         return redirect()->back()->with('success', 'Kalkulasi Ulang Nilai IKM PermenPANRB Berhasil.');
     }
+
+    /**
+     * Delete a survey respondent entry and recalculate stats.
+     */
+    public function destroyResponse(SurveyResponse $response): RedirectResponse
+    {
+        $periodId = $response->survey_period_id;
+        $name = $response->respondent_name ?: 'Anonim';
+
+        // Delete associated answers and response
+        $response->answers()->delete();
+        $response->delete();
+
+        // Recalculate period statistics after deletion
+        $this->calcService->calculatePeriodStats($periodId);
+
+        ActivityLogger::log("Menghapus data responden \"{$name}\" pada survei", null, 'delete_survey_response');
+
+        return redirect()->back()->with('success', "Data responden \"{$name}\" berhasil dihapus.");
+    }
 }
+

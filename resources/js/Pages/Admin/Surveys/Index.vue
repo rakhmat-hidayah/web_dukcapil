@@ -251,6 +251,7 @@
                   <th class="py-3 px-4 text-center">Skor IKM</th>
                   <th class="py-3 px-4">Saran</th>
                   <th class="py-3 px-4">Tgl. Isi</th>
+                  <th class="py-3 px-4 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-50 dark:divide-zinc-800/80">
@@ -285,8 +286,15 @@
                   <td class="py-3 px-4 font-mono text-gray-400 text-[10px] whitespace-nowrap">
                     {{ new Date(r.created_at).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) }}
                   </td>
+                  <td class="py-3 px-4 text-right">
+                    <button @click="deleteRespondent(r)" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 font-bold rounded-lg text-xs transition cursor-pointer flex items-center gap-1 ml-auto">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      Hapus
+                    </button>
+                  </td>
                 </tr>
               </tbody>
+
             </table>
           </div>
         </div>
@@ -854,6 +862,12 @@ function submitCopyQuestions() {
         copyForm.reset()
       }
     })
+}
+
+function deleteRespondent(r) {
+  if (confirm(`Apakah Anda yakin ingin menghapus data responden "${r.respondent_name || 'Anonim'}"?`)) {
+    router.delete(route('admin.surveys.responses.destroy', r.id))
+  }
 }
 
 function recalculateStats() {
