@@ -7,13 +7,42 @@
         </Link>
         <div class="header-flex">
           <h1 class="req-detail-title">Permohonan Informasi #{{ ppidRequest.ticket_number }}</h1>
-          <span class="status-pill" :class="ppidRequest.status">{{ ppidRequest.status_label }}</span>
+          <div class="flex items-center gap-3">
+            <span class="status-pill" :class="ppidRequest.status">{{ ppidRequest.status_label }}</span>
+            <button @click="showDeleteModal = true" class="delete-header-btn">
+              <Trash2 :size="14" /> Hapus Permohonan
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Flash success -->
       <div v-if="$page.props.flash?.success" class="flash-msg">
         <CheckCircle :size="16" /> {{ $page.props.flash.success }}
+      </div>
+
+      <!-- Custom Vue Modal Overlay Hapus -->
+      <div v-if="showDeleteModal" class="modal-backdrop" @click.self="showDeleteModal = false">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-icon danger">
+              <Trash2 :size="22" />
+            </div>
+            <h3 class="modal-title">Hapus Permohonan PPID</h3>
+          </div>
+          <div class="modal-body">
+            <p>
+              Apakah Anda yakin ingin menghapus permohonan <strong>#{{ ppidRequest.ticket_number }}</strong> atas nama <strong>{{ ppidRequest.requester_name }}</strong>?
+            </p>
+            <p class="modal-subtext">Tindakan ini permanen dan data permohonan akan dihapus dari sistem.</p>
+          </div>
+          <div class="modal-footer">
+            <button @click="showDeleteModal = false" class="btn-secondary" :disabled="isDeleting">Batal</button>
+            <button @click="executeDelete" class="btn-danger" :disabled="isDeleting">
+              {{ isDeleting ? 'Menghapus...' : 'Ya, Hapus Permohonan' }}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="detail-grid">
@@ -107,11 +136,23 @@
 
 <script setup>
 import { ref } from 'vue'
-import { Link, useForm } from '@inertiajs/vue3'
-import { ArrowLeft, User, FileText, Send, CheckCircle, UploadCloud } from '@lucide/vue'
+import { Link, useForm, router } from '@inertiajs/vue3'
+import { ArrowLeft, User, FileText, Send, CheckCircle, UploadCloud, Trash2 } from '@lucide/vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const responseFileInput = ref(null)
+
+const showDeleteModal = ref(false)
+const isDeleting = ref(false)
+
+function executeDelete() {
+  isDeleting.value = true
+  router.delete(route('admin.ppid.requests.destroy', props.ppidRequest.id), {
+    onFinish: () => {
+      isDeleting.value = false
+    }
+  })
+}
 
 function formatBytes(bytes) {
   if (!bytes || bytes === 0) return '0 B';
@@ -157,6 +198,10 @@ function formatDate(dt) {
 .status-pill.diproses { background: #fef9c3; color: #b45309; }
 .status-pill.selesai { background: #dcfce7; color: #15803d; }
 .status-pill.ditolak { background: #fee2e2; color: #dc2626; }
+
+.delete-header-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+.delete-header-btn:hover { background: #fee2e2; }
+
 .flash-msg { display: flex; align-items: center; gap: 8px; background: #f0fdf4; border: 1px solid #86efac; color: #15803d; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.875rem; }
 
 .detail-grid { display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: start; }
@@ -178,6 +223,22 @@ function formatDate(dt) {
 .req { color: #dc2626; }
 .field select, .field textarea, .field input { border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; outline: none; }
 .submit-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; background: linear-gradient(135deg, #0f4c81, #1565c0); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.875rem; cursor: pointer; }
+
+/* Custom Vue Modal Overlay */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 999; padding: 16px; }
+.modal-card { background: white; border-radius: 18px; max-width: 440px; width: 100%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: popIn 0.2s ease-out; }
+@keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.modal-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.modal-icon.danger { width: 42px; height: 42px; border-radius: 12px; background: #fef2f2; color: #dc2626; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0; }
+.modal-body { font-size: 0.875rem; color: #334155; line-height: 1.5; margin-bottom: 20px; }
+.modal-subtext { font-size: 0.78rem; color: #94a3b8; margin-top: 6px; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; }
+.btn-secondary { padding: 9px 18px; border-radius: 10px; border: 1px solid #cbd5e1; background: white; color: #334155; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+.btn-secondary:hover { background: #f8fafc; }
+.btn-danger { padding: 9px 18px; border-radius: 10px; border: none; background: #dc2626; color: white; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+.btn-danger:hover { opacity: 0.9; }
+.btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
 
 @media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; } .response-card { position: static; } }
 </style>

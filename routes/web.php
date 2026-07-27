@@ -288,6 +288,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/requests', [\App\Http\Controllers\Admin\PpidController::class, 'requestsIndex'])->name('requests.index');
             Route::get('/requests/{request}', [\App\Http\Controllers\Admin\PpidController::class, 'requestsShow'])->name('requests.show');
             Route::post('/requests/{ppidRequest}/respond', [\App\Http\Controllers\Admin\PpidController::class, 'requestsRespond'])->name('requests.respond');
+            Route::delete('/requests/{request}', [\App\Http\Controllers\Admin\PpidController::class, 'requestsDestroy'])->name('requests.destroy');
         });
     });
 });

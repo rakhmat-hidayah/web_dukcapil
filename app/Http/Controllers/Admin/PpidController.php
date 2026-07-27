@@ -209,4 +209,11 @@ class PpidController extends Controller
 
         return back()->with('success', 'Permohonan PPID berhasil direspons.');
     }
+
+    public function requestsDestroy(PpidRequest $request): RedirectResponse
+    {
+        $request->delete();
+        return redirect()->route('admin.ppid.requests.index')
+            ->with('success', 'Permohonan PPID berhasil dihapus.');
+    }
 }
