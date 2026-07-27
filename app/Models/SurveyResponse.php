@@ -14,6 +14,8 @@ class SurveyResponse extends Model
     protected $fillable = [
         'survey_period_id',
         'respondent_name',
+        'respondent_phone',
+        'respondent_domicile',
         'respondent_age',
         'respondent_gender',
         'respondent_education',
