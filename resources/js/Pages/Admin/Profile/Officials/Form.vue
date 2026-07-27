@@ -49,12 +49,24 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Nomor Telepon / Kontak</label>
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Nomor Telepon / Kontak</label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" v-model="form.show_phone" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Tampilkan</span>
+              </label>
+            </div>
             <input v-model="form.phone" type="text" placeholder="(0373) 21124 / 08123456789" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Alamat Email Resmi Pejabat</label>
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Alamat Email Resmi Pejabat</label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" v-model="form.show_email" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Tampilkan</span>
+              </label>
+            </div>
             <input v-model="form.email" type="email" placeholder="kadis@dukcapil.dompukab.go.id" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
 
@@ -148,7 +160,9 @@ const form = useForm({
   main_duties: props.official?.main_duties || '',
   office_address: props.official?.office_address || 'Jl. Bhayangkara No. 01, Dompu',
   phone: props.official?.phone || '(0373) 21124',
+  show_phone: props.official ? Boolean(props.official.show_phone) : true,
   email: props.official?.email || '',
+  show_email: props.official ? Boolean(props.official.show_email) : true,
   status: props.official?.status || 'active',
   photo: null,
 })

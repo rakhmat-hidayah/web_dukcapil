@@ -22,7 +22,9 @@ class Official extends Model
         'main_duties',
         'office_address',
         'phone',
+        'show_phone',
         'email',
+        'show_email',
         'office_hours',
         'status',
         'start_date',
@@ -33,6 +35,8 @@ class Official extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'show_phone' => 'boolean',
+        'show_email' => 'boolean',
     ];
 
     public function educations(): HasMany

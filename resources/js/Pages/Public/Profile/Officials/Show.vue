@@ -25,8 +25,8 @@
             <p class="text-base text-blue-200 font-semibold mb-1">{{ official.position_title }}</p>
             <p v-if="official.nip" class="text-xs text-blue-300/80 mb-4">NIP. {{ official.nip }} &bull; {{ official.rank_golongan }}</p>
             <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs">
-              <span v-if="official.phone" class="px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/15">📞 {{ official.phone }}</span>
-              <span v-if="official.email" class="px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/15">✉️ {{ official.email }}</span>
+              <span v-if="official.show_phone && official.phone" class="px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/15">📞 {{ official.phone }}</span>
+              <span v-if="official.show_email && official.email" class="px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/15">✉️ {{ official.email }}</span>
             </div>
           </div>
         </div>

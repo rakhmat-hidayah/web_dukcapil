@@ -52,7 +52,9 @@ class OfficialController extends Controller
             'main_duties' => 'nullable|string',
             'office_address' => 'nullable|string',
             'phone' => 'nullable|string|max:50',
+            'show_phone' => 'required|boolean',
             'email' => 'nullable|email|max:255',
+            'show_email' => 'required|boolean',
             'office_hours' => 'nullable|string|max:100',
             'status' => 'required|in:active,inactive,retired,transferred',
         ]);
@@ -89,7 +91,9 @@ class OfficialController extends Controller
             'main_duties' => 'nullable|string',
             'office_address' => 'nullable|string',
             'phone' => 'nullable|string|max:50',
+            'show_phone' => 'required|boolean',
             'email' => 'nullable|email|max:255',
+            'show_email' => 'required|boolean',
             'office_hours' => 'nullable|string|max:100',
             'status' => 'required|in:active,inactive,retired,transferred',
         ]);
