@@ -222,7 +222,7 @@ import {
   LayoutDashboard, FileText, BellRing, ClipboardList, 
   FolderLock, Image, LibraryBig, Milestone, ShieldAlert, Globe, MapPin,
   Settings, UsersRound, Users, Network, Palette, BarChart3, Radio, Activity, Sliders,
-  Map, BarChart2, DatabaseZap, MessageSquareWarning, ShieldCheck, ArrowDownUp
+  Map, BarChart2, DatabaseZap, MessageSquareWarning, ShieldCheck, ArrowDownUp, HelpCircle
 } from '@lucide/vue';
 
 const page = usePage();
@@ -346,6 +346,7 @@ const menuGroups = [
       { label: 'Kategori Pengaduan', route: 'admin.complaints.categories', icon: ClipboardList },
       { label: 'Persyaratan Layanan', route: 'admin.service-requirements.index', icon: FileText },
       { label: 'Inovasi Pelayanan', route: 'admin.innovations.index', icon: DatabaseZap },
+      { label: 'Informasi Layanan (CMS)', route: 'admin.informasi-layanan.index', icon: HelpCircle },
       { label: 'Download Center', route: 'admin.downloads.index', icon: Milestone },
       { label: 'Tanya Jawab (FAQ)', route: 'admin.faqs.index', icon: ClipboardList },
     ]

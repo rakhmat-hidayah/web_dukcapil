@@ -166,6 +166,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/office-contact', [\App\Http\Controllers\Admin\OfficeContactController::class, 'index'])->name('office-contact.index');
         Route::post('/office-contact', [\App\Http\Controllers\Admin\OfficeContactController::class, 'update'])->name('office-contact.update');
 
+        // Informasi Layanan Sidebar Widget CMS
+        Route::get('/informasi-layanan', [\App\Http\Controllers\Admin\InformasiLayananController::class, 'index'])->name('informasi-layanan.index');
+        Route::post('/informasi-layanan', [\App\Http\Controllers\Admin\InformasiLayananController::class, 'update'])->name('informasi-layanan.update');
+
         // Dynamic Pages CMS
         Route::resource('/pages', \App\Http\Controllers\Admin\PageController::class)->except(['show']);
 

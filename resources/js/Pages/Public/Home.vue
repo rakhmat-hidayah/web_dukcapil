@@ -514,6 +514,9 @@
               Lihat Detail Survei IKM →
             </Link>
           </div>
+
+          <!-- Dynamic Informasi Layanan Widget (Mobil Pelayanan & Bantuan Cepat) -->
+          <InformasiLayananWidget />
         </div>
       </div>
     </div>
@@ -524,6 +527,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import InformasiLayananWidget from '@/Components/InformasiLayananWidget.vue';
 import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar } from '@lucide/vue';
 
 const props = defineProps({
