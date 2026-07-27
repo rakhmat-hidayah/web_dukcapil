@@ -12,6 +12,44 @@
         $siteUrl      = rtrim(config('app.url'), '/');
         $siteLogo     = $siteUrl . '/android-chrome-512x512.png';
         $siteKeywords = 'Dukcapil Dompu, KTP-el, Kartu Keluarga, Akta Kelahiran, Administrasi Kependudukan, Disdukcapil Dompu, NTB, Pelayanan Publik';
+
+        $schemaData = [
+            '@context' => 'https://schema.org',
+            '@type' => 'GovernmentOffice',
+            'name' => 'Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu',
+            'alternateName' => 'Dukcapil Dompu',
+            'url' => $siteUrl,
+            'logo' => $siteLogo,
+            'description' => $siteDesc,
+            'address' => [
+                '@type' => 'PostalAddress',
+                'streetAddress' => 'Jl. Mahoni No. 02, Kel. Badawa',
+                'addressLocality' => 'Dompu',
+                'addressRegion' => 'Nusa Tenggara Barat',
+                'postalCode' => '84211',
+                'addressCountry' => 'ID',
+            ],
+            'geo' => [
+                '@type' => 'GeoCoordinates',
+                'latitude' => '-8.5370',
+                'longitude' => '118.4624',
+            ],
+            'openingHoursSpecification' => [
+                [
+                    '@type' => 'OpeningHoursSpecification',
+                    'dayOfWeek' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+                    'opens' => '08:00',
+                    'closes' => '15:30',
+                ],
+                [
+                    '@type' => 'OpeningHoursSpecification',
+                    'dayOfWeek' => 'Friday',
+                    'opens' => '08:00',
+                    'closes' => '11:30',
+                ],
+            ],
+            'sameAs' => [$siteUrl],
+        ];
     @endphp
 
     <title inertia>{{ $siteTitle }} - {{ $siteTagline }}</title>
@@ -45,43 +83,7 @@
 
     <!-- Schema.org GovernmentOffice Structured Data -->
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "GovernmentOffice",
-        "name": "Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu",
-        "alternateName": "Dukcapil Dompu",
-        "url": "{{ $siteUrl }}",
-        "logo": "{{ $siteLogo }}",
-        "description": "{{ $siteDesc }}",
-        "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "Jl. Mahoni No. 02, Kel. Badawa",
-            "addressLocality": "Dompu",
-            "addressRegion": "Nusa Tenggara Barat",
-            "postalCode": "84211",
-            "addressCountry": "ID"
-        },
-        "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": "-8.5370",
-            "longitude": "118.4624"
-        },
-        "openingHoursSpecification": [
-            {
-                "@type": "OpeningHoursSpecification",
-                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday"],
-                "opens": "08:00",
-                "closes": "15:30"
-            },
-            {
-                "@type": "OpeningHoursSpecification",
-                "dayOfWeek": "Friday",
-                "opens": "08:00",
-                "closes": "11:30"
-            }
-        ],
-        "sameAs": ["{{ $siteUrl }}"]
-    }
+    {!! json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
 
     <!-- Dynamic Theme Customizer Styling Injection Hook -->
