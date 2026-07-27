@@ -29,10 +29,10 @@
     <div class="w-full relative flex flex-col items-center">
       
       <!-- LEVEL 2 CONNECTOR LINES -->
-      <!-- Left Dashed Horizontal Bar (from center 50% to 22%) -->
-      <div class="absolute top-0 left-[22%] right-1/2 h-0.5 border-t-2 border-dashed border-slate-400"></div>
-      <!-- Right Solid Horizontal Bar (from center 50% to 78%) -->
-      <div class="absolute top-0 left-1/2 right-[22%] h-0.5 bg-blue-400/80"></div>
+      <!-- Left Dashed Horizontal Bar (starts at center 50% and stops exactly at 25% center of Jabatan Fungsional) -->
+      <div class="absolute top-0 left-[25%] right-1/2 h-0.5 border-t-2 border-dashed border-slate-400"></div>
+      <!-- Right Solid Horizontal Bar (starts at center 50% and stops exactly at 75% center of Sekretariat) -->
+      <div class="absolute top-0 left-1/2 right-[25%] h-0.5 bg-blue-400/80"></div>
 
       <!-- Central Vertical Trunk Continuation (dropping through Level 2 down to Level 4) -->
       <div class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-blue-400/80 z-0"></div>
@@ -41,8 +41,8 @@
       <div class="grid grid-cols-2 w-full z-10 pt-0">
         
         <!-- LEFT COLUMN: JABATAN FUNGSIONAL -->
-        <div class="flex flex-col items-center pl-8 pr-12">
-          <!-- Drop line down to Jabatan Fungsional -->
+        <div class="flex flex-col items-center">
+          <!-- Vertical drop line down from 25% mark to center of Jabatan Fungsional -->
           <div class="w-0.5 h-6 border-l-2 border-dashed border-slate-400"></div>
           <div 
             @click="selectNode(fungsionalKadisNode)"
@@ -67,8 +67,8 @@
         </div>
 
         <!-- RIGHT COLUMN: SEKRETARIAT + SUB BAGIAN ROW -->
-        <div class="flex flex-col items-center pl-12 pr-4 relative">
-          <!-- Drop line down to Sekretariat -->
+        <div class="flex flex-col items-center px-4 relative">
+          <!-- Vertical drop line down from 75% mark to center of Sekretariat -->
           <div class="w-0.5 h-6 bg-blue-400/80"></div>
           
           <!-- Sekretariat Card -->
@@ -96,9 +96,9 @@
 
           <!-- SUB BAGIAN ROW (3 Columns under Sekretariat) -->
           <div class="w-full relative flex flex-col items-center">
-            <!-- Sub-horizontal connector bar for 3 Sub-Bagian cards -->
+            <!-- Sub-horizontal connector bar for 3 Sub-Bagian cards (starts at 16.67% center of Col 1 and stops at 83.33% center of Col 3) -->
             <div class="w-full relative h-4">
-              <div class="absolute top-0 left-[16.66%] right-[16.66%] h-0.5 bg-blue-400/80"></div>
+              <div class="absolute top-0 left-[16.67%] right-[16.67%] h-0.5 bg-blue-400/80"></div>
             </div>
 
             <div class="grid grid-cols-3 gap-3 w-full">
@@ -161,7 +161,7 @@
         <!-- Central Trunk Hits 4-Bidang Horizontal Bar -->
         <div class="w-0.5 h-6 bg-blue-400/80"></div>
         
-        <!-- Horizontal Bar connecting all 4 Bidangs (from 12.5% to 87.5%) -->
+        <!-- Horizontal Bar connecting all 4 Bidangs (starts at 12.5% center of Bidang 1 and stops at 87.5% center of Bidang 4) -->
         <div class="w-full relative h-6">
           <div class="absolute top-0 left-[12.5%] right-[12.5%] h-0.5 bg-blue-400/80"></div>
         </div>
