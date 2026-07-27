@@ -384,30 +384,59 @@ const menuGroups = [
 
 const userRoles = computed(() => page.props.auth?.roles || []);
 const isSuperAdmin = computed(() => userRoles.value.includes('Super Administrator'));
-const isContentEditor = computed(() => userRoles.value.includes('Content Editor') || isSuperAdmin.value);
-const isComplaintOfficer = computed(() => userRoles.value.includes('Complaint Officer') || isSuperAdmin.value);
-const isPpidAdmin = computed(() => userRoles.value.includes('PPID Admin') || isSuperAdmin.value);
+const isContentEditor = computed(() => userRoles.value.includes('Content Editor'));
+const isComplaintOfficer = computed(() => userRoles.value.includes('Complaint Officer'));
+const isPpidAdmin = computed(() => userRoles.value.includes('PPID Admin'));
 
 const filteredMenuGroups = computed(() => {
+  if (isSuperAdmin.value) {
+    return menuGroups;
+  }
+
   return menuGroups.map(group => {
     const items = group.items.filter(item => {
-      // System Settings & Security -> Super Admin Only
-      if (['admin.users.index', 'admin.theme.index', 'admin.api-keys.index', 'admin.api-dashboard.index', 'admin.api-settings.index', 'admin.audit-logs.index', 'admin.office-contact.index', 'admin.external-services.index'].includes(item.route)) {
-        return isSuperAdmin.value;
-      }
-      
-      // Complaints & Surveys -> Complaint Officer or Super Admin
-      if (['admin.complaints.index', 'admin.complaints.categories', 'admin.surveys.index'].includes(item.route)) {
-        return isComplaintOfficer.value;
+      const r = item.route;
+
+      // Always allow main Overview Dashboard to all authenticated operators
+      if (r === 'admin.dashboard') {
+        return true;
       }
 
-      // PPID -> PPID Admin or Super Admin
-      if (item.route && item.route.startsWith('admin.ppid.')) {
-        return isPpidAdmin.value;
+      // Content Editor allowed items
+      if (isContentEditor.value) {
+        if ([
+          'admin.files.index',
+          'admin.pages.index',
+          'admin.news.index',
+          'admin.announcements.index',
+          'admin.banners.index',
+          'admin.gallery.index',
+          'admin.downloads.index',
+          'admin.faqs.index',
+        ].includes(r)) {
+          return true;
+        }
       }
 
-      // Content & Media / Profile / Services / Demographics -> Content Editor or Super Admin
-      return isContentEditor.value || isPpidAdmin.value || isComplaintOfficer.value;
+      // Complaint Officer allowed items
+      if (isComplaintOfficer.value) {
+        if ([
+          'admin.complaints.index',
+          'admin.complaints.categories',
+          'admin.surveys.index',
+        ].includes(r)) {
+          return true;
+        }
+      }
+
+      // PPID Admin allowed items
+      if (isPpidAdmin.value) {
+        if (r && (r.startsWith('admin.ppid.') || r === 'admin.downloads.index')) {
+          return true;
+        }
+      }
+
+      return false;
     });
 
     return { ...group, items };
