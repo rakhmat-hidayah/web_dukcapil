@@ -788,7 +788,7 @@
                   Tugas Pokok &amp; Fungsi (Tupoksi)
                 </h3>
                 <p class="text-xs text-gray-400 dark:text-zinc-500">
-                  Kelola judul seksi dan daftar bidang tugas pokok instansi. Tambah atau hapus bidang sesuai kebutuhan.
+                  Kelola judul seksi dan rincian poin Tugas Pokok &amp; Fungsi. Tambah atau hapus poin sesuai kebutuhan.
                 </p>
               </div>
             </div>
@@ -798,7 +798,7 @@
               @click="addDutyItem"
               class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1.5 shrink-0"
             >
-              <span>+ Tambah Bidang Tugas</span>
+              <span>+ Tambah Poin Tupoksi</span>
             </button>
           </div>
 
@@ -820,11 +820,13 @@
                 class="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 space-y-3 relative group"
               >
                 <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Bidang {{ String(idx + 1).padStart(2, '0') }}</span>
+                  <span class="text-xs font-bold text-amber-600 dark:text-amber-400 truncate max-w-[220px]">
+                    {{ item.title ? item.title : ('Poin ' + String(idx + 1).padStart(2, '0')) }}
+                  </span>
                   <button 
                     type="button" 
                     @click="removeDutyItem(idx)"
-                    class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline px-2 py-0.5 rounded bg-red-50 dark:bg-red-950/40 transition"
+                    class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline px-2 py-0.5 rounded bg-red-50 dark:bg-red-950/40 transition shrink-0"
                   >
                     🗑 Hapus
                   </button>
@@ -832,7 +834,7 @@
                 <input 
                   type="text" 
                   v-model="item.title"
-                  placeholder="Nama Bidang Tugas..."
+                  placeholder="Judul Poin (Contoh: Tugas Pokok / Fungsi)..."
                   class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-bold focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
                 />
                 <textarea 
