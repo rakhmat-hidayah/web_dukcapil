@@ -28,6 +28,7 @@ class UserController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
+                    'role' => $user->roles->first()?->name ?? 'Content Editor',
                     'roles' => $user->roles->pluck('name'),
                     'created_at' => $user->created_at->format('d M Y'),
                 ];
@@ -50,8 +51,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'roles' => 'required|array',
-            'roles.*' => 'exists:roles,name',
+            'role' => 'required|string|exists:roles,name',
         ]);
 
         $user = User::create([
@@ -60,11 +60,12 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $user->syncRoles($request->roles);
+        // Sync single role
+        $user->syncRoles([$request->role]);
 
         ActivityLogger::log("Membuat user baru: {$user->name} ({$user->email})", $user, 'create_user');
 
-        return redirect()->back()->with('success', 'User berhasil dibuat.');
+        return redirect()->back()->with('success', 'Operator berhasil dibuat.');
     }
 
     /**
@@ -87,8 +88,7 @@ class UserController extends Controller
                 Rule::unique('users')->ignore($user->id),
             ],
             'password' => 'nullable|string|min:8',
-            'roles' => 'required|array',
-            'roles.*' => 'exists:roles,name',
+            'role' => 'required|string|exists:roles,name',
         ]);
 
         $user->name = $request->name;
@@ -99,11 +99,13 @@ class UserController extends Controller
         }
 
         $user->save();
-        $user->syncRoles($request->roles);
+
+        // Sync single role strictly
+        $user->syncRoles([$request->role]);
 
         ActivityLogger::log("Memperbarui user: {$user->name}", $user, 'update_user');
 
-        return redirect()->back()->with('success', 'User berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Operator berhasil diperbarui.');
     }
 
     /**
@@ -119,12 +121,9 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Akun Super Admin Utama tidak dapat dihapus.');
         }
 
-        $userName = $user->name;
-        $userEmail = $user->email;
-        
-        $user->delete();
+        ActivityLogger::log("Menghapus user: {$user->name} ({$user->email})", $user, 'delete_user');
 
-        ActivityLogger::log("Menghapus user: {$userName} ({$userEmail})", null, 'delete_user');
+        $user->delete();
 
         return redirect()->back()->with('success', 'User berhasil dihapus.');
     }

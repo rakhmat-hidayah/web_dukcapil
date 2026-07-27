@@ -28,7 +28,7 @@
               <tr class="bg-gray-50 dark:bg-zinc-800/40 text-gray-500 dark:text-zinc-400 uppercase tracking-wider font-semibold border-b border-gray-100 dark:border-zinc-800">
                 <th class="px-6 py-4">Nama Operator</th>
                 <th class="px-6 py-4">Email</th>
-                <th class="px-6 py-4">Peran (Roles)</th>
+                <th class="px-6 py-4">Peran (Role)</th>
                 <th class="px-6 py-4">Tgl Terdaftar</th>
                 <th class="px-6 py-4 text-right">Aksi</th>
               </tr>
@@ -49,18 +49,14 @@
                   {{ user.email }}
                 </td>
 
-                <!-- Roles -->
+                <!-- Single Role Badge -->
                 <td class="px-6 py-4">
-                  <div class="flex flex-wrap gap-1.5">
-                    <span 
-                      v-for="role in user.roles" 
-                      :key="role"
-                      class="px-2.5 py-1 rounded-lg font-bold text-[11px] tracking-wide"
-                      :class="getRoleClass(role)"
-                    >
-                      {{ role }}
-                    </span>
-                  </div>
+                  <span 
+                    class="px-3 py-1 rounded-lg font-bold text-[11px] tracking-wide inline-block"
+                    :class="getRoleClass(user.role)"
+                  >
+                    {{ user.role }}
+                  </span>
                 </td>
 
                 <!-- Created At -->
@@ -143,20 +139,22 @@
                 <span v-if="form.errors.password" class="text-[10px] text-red-500 mt-0.5 block">{{ form.errors.password }}</span>
               </div>
 
-              <!-- Roles checkbox list -->
+              <!-- Single Role Radio list -->
               <div>
-                <label class="block text-xs font-semibold text-gray-500 mb-2">Pilih Peran &amp; Hak Akses (Roles)</label>
-                <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto p-2 bg-gray-50 dark:bg-zinc-800/30 rounded-2xl border border-gray-100 dark:border-zinc-800 scrollbar-thin">
+                <label class="block text-xs font-semibold text-gray-500 mb-2">Pilih Peran &amp; Hak Akses (Single Role)</label>
+                <div class="grid grid-cols-1 gap-2 max-h-52 overflow-y-auto p-2 bg-gray-50 dark:bg-zinc-800/30 rounded-2xl border border-gray-100 dark:border-zinc-800 scrollbar-thin">
                   <label 
                     v-for="role in roles" 
                     :key="role" 
                     class="flex items-start gap-3 p-2.5 hover:bg-gray-100 dark:hover:bg-zinc-800/60 rounded-xl cursor-pointer text-xs transition border border-transparent hover:border-gray-200 dark:hover:border-zinc-700"
+                    :class="{ 'bg-primary-50/50 dark:bg-primary-950/20 border-primary-200 dark:border-primary-800/40': form.role === role }"
                   >
                     <input 
-                      type="checkbox" 
+                      type="radio" 
                       :value="role" 
-                      v-model="form.roles" 
-                      class="accent-primary-500 rounded border-gray-300 dark:border-zinc-700 mt-0.5 h-4 w-4 shrink-0" 
+                      v-model="form.role" 
+                      name="user_role"
+                      class="accent-primary-500 mt-0.5 h-4 w-4 shrink-0 cursor-pointer" 
                     />
                     <div class="flex-1">
                       <div class="font-bold text-gray-800 dark:text-zinc-200">{{ role }}</div>
@@ -166,7 +164,7 @@
                     </div>
                   </label>
                 </div>
-                <span v-if="form.errors.roles" class="text-[10px] text-red-500 mt-1 block">{{ form.errors.roles }}</span>
+                <span v-if="form.errors.role" class="text-[10px] text-red-500 mt-1 block">{{ form.errors.role }}</span>
               </div>
 
               <!-- Footer action buttons -->
@@ -246,15 +244,13 @@ const form = useForm({
   name: '',
   email: '',
   password: '',
-  roles: [],
+  role: 'Content Editor',
 });
 
 const getRoleClass = (role) => {
   switch (role) {
     case 'Super Administrator':
       return 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-100 dark:border-red-900/30';
-    case 'Website Administrator':
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30';
     case 'Content Editor':
       return 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30';
     case 'Complaint Officer':
@@ -269,11 +265,9 @@ const getRoleClass = (role) => {
 const getRoleDescription = (role) => {
   switch (role) {
     case 'Super Administrator':
-      return 'Akses penuh tanpa batas ke seluruh modul CMS dan Pengaturan Sistem.';
-    case 'Website Administrator':
-      return 'Mengelola konten website, halaman, dan konfigurasi umum.';
+      return 'Akses penuh tanpa batas ke seluruh modul CMS, Manajemen User, dan Pengaturan Sistem.';
     case 'Content Editor':
-      return 'Mengelola Berita, Artikel, Galeri Album, Pengumuman, dan FAQ.';
+      return 'Mengelola Berita, Artikel, Galeri Album, Pengumuman, Banner Slider, dan File Manager.';
     case 'Complaint Officer':
       return 'Mengelola Layanan Pengaduan Masyarakat & Survei Kepuasan (IKM).';
     case 'PPID Admin':
@@ -286,6 +280,7 @@ const getRoleDescription = (role) => {
 const openCreateModal = () => {
   editingUser.value = null;
   form.reset();
+  form.role = 'Content Editor';
   form.clearErrors();
   modalOpen.value = true;
 };
@@ -295,7 +290,7 @@ const openEditModal = (user) => {
   form.name = user.name;
   form.email = user.email;
   form.password = '';
-  form.roles = [...user.roles];
+  form.role = user.role || 'Content Editor';
   form.clearErrors();
   modalOpen.value = true;
 };
