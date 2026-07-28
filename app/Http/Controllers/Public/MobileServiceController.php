@@ -15,23 +15,50 @@ class MobileServiceController extends Controller
      */
     public function index(): InertiaResponse
     {
-        $settings = WebsiteSetting::where('group', 'informasi_layanan')->pluck('value', 'key')->toArray();
+        $settings = WebsiteSetting::allAsArray();
         
         $selectedIdsRaw = $settings['mobile_service_selected_services'] ?? null;
         $selectedIds = json_decode($selectedIdsRaw, true);
+        if (is_array($selectedIds)) {
+            $selectedIds = array_map('intval', $selectedIds);
+        }
+
+        $customServicesRaw = $settings['mobile_service_custom_services'] ?? null;
+        $customServices = json_decode($customServicesRaw, true) ?: [];
 
         $query = ServiceRequirement::where('is_active', true)->orderBy('sort_order');
         
-        // If selected services are configured, only display those checked services
+        // If selected services are configured in CMS, only display those checked services
         if (is_array($selectedIds) && count($selectedIds) > 0) {
             $query->whereIn('id', $selectedIds);
         }
 
-        $services = $query->get();
+        $baseServices = $query->get()->toArray();
+
+        // Include custom services if selected in CMS
+        $activeCustomServices = [];
+        if (is_array($customServices)) {
+            foreach ($customServices as $custom) {
+                $cId = (int)($custom['id'] ?? 0);
+                if (!is_array($selectedIds) || in_array($cId, $selectedIds)) {
+                    $activeCustomServices[] = [
+                        'id'          => $cId,
+                        'title'       => $custom['title'] ?? 'Layanan Kustom',
+                        'description' => $custom['description'] ?? '',
+                        'icon'        => $custom['icon'] ?? '📝',
+                        'color'       => '#4f46e5',
+                        'slug'        => '',
+                        'is_custom'   => true,
+                    ];
+                }
+            }
+        }
+
+        $services = array_merge($baseServices, $activeCustomServices);
 
         return Inertia::render('Public/MobileServices/Index', [
             'scheduleSettings' => $settings,
-            'services' => $services,
+            'services'         => $services,
         ]);
     }
 }

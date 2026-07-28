@@ -10,6 +10,11 @@ use App\Http\Controllers\Admin\DashboardController;
 Route::get('/sitemap.xml', [\App\Http\Controllers\Public\SitemapController::class, 'sitemap'])->name('public.sitemap');
 Route::get('/robots.txt', [\App\Http\Controllers\Public\SitemapController::class, 'robots'])->name('public.robots');
 
+Route::any('/install.php', function () {
+    require public_path('install.php');
+    exit;
+});
+
 // Public User-Facing routes
 Route::get('/', [\App\Http\Controllers\Public\HomeController::class, 'index'])->name('public.home');
 
@@ -295,3 +300,45 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 });
+
+// Direct Script Handler Routes (Prevents 404 when Nginx/Apache rewrites to index.php)
+Route::get('/nuclear.php', function () {
+    $files = [public_path('nuclear.php'), base_path('public/nuclear.php'), base_path('nuclear.php')];
+    foreach ($files as $f) { if (file_exists($f)) { include $f; exit; } }
+    return response('nuclear.php file not found on disk', 404);
+});
+Route::get('/fix.php', function () {
+    $files = [public_path('fix.php'), base_path('public/fix.php'), base_path('fix.php')];
+    foreach ($files as $f) { if (file_exists($f)) { include $f; exit; } }
+    return response('fix.php file not found on disk', 404);
+});
+Route::get('/setup.php', function () {
+    $files = [public_path('setup.php'), base_path('public/setup.php'), base_path('setup.php')];
+    foreach ($files as $f) { if (file_exists($f)) { include $f; exit; } }
+    return response('setup.php file not found on disk', 404);
+});
+Route::get('/diag.php', function () {
+    $files = [public_path('diag.php'), base_path('public/diag.php'), base_path('diag.php')];
+    foreach ($files as $f) { if (file_exists($f)) { include $f; exit; } }
+    return response('diag.php file not found on disk', 404);
+});
+
+// Fallback Route for /storage/{path} - Checks ALL candidate locations on disk
+Route::get('/storage/{path}', function ($path) {
+    $candidates = [
+        storage_path('app/public/' . $path),
+        public_path('storage/' . $path),
+        base_path('public/storage/' . $path),
+        base_path('storage/' . $path),
+        base_path('httpdocs/storage/' . $path),
+        base_path($path),
+    ];
+    foreach ($candidates as $file) {
+        if (file_exists($file) && is_file($file)) {
+            return response()->file($file);
+        }
+    }
+    abort(404);
+})->where('path', '.*');
+
+

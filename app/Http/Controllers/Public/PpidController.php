@@ -16,8 +16,17 @@ class PpidController extends Controller
     /** Shared data for all PPID pages */
     private function sharedData(): array
     {
+        $settings = \App\Models\WebsiteSetting::allAsArray();
         return [
             'pages' => PpidPage::published()->ordered()->get(['id', 'slug', 'title', 'icon']),
+            'officeContact' => [
+                'address'       => $settings['office_address'] ?? 'Dinas Kependudukan dan Pencatatan Sipil Kab. Dompu, Jl. Soekarno-Hatta No. 09, Dompu, Nusa Tenggara Barat (84211)',
+                'phone'         => $settings['office_phone'] ?? '',
+                'email'         => $settings['office_email'] ?? 'dukcapilkabdompu@gmail.com',
+                'hours_mon_thu' => $settings['office_hours_monday_thursday'] ?? 'Senin – Kamis: 08.00 – 16.00 WITA',
+                'hours_fri'     => $settings['office_hours_friday'] ?? 'Jumat: 08.00 – 16.30 WITA',
+                'hours_sat_sun' => $settings['office_hours_saturday_sunday'] ?? 'Sabtu – Minggu: Libur',
+            ],
         ];
     }
 
@@ -33,6 +42,33 @@ class PpidController extends Controller
                 ->orderBy('sort_order')
                 ->orderByDesc('year')
                 ->get();
+        }
+
+        if ($slug === 'kontak') {
+            $settings = \App\Models\WebsiteSetting::allAsArray();
+            $address  = $settings['office_address'] ?? 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211';
+            $phone    = $settings['office_phone'] ?? '';
+            $email    = $settings['office_email'] ?? 'dukcapilkabdompu@gmail.com';
+            $hoursMonThu = $settings['office_hours_monday_thursday'] ?? 'Senin – Kamis: 08.00 – 16.00 WITA';
+            $hoursFri    = $settings['office_hours_friday'] ?? 'Jumat: 08.00 – 16.30 WITA';
+
+            $content = $page->content;
+            $phoneDisplay = !empty($phone) ? e($phone) : '-';
+
+            if (str_contains($content, '<!-- Alamat -->')) {
+                $content = preg_replace('/(<!-- Alamat -->)(.*?)(?=<\/p>)/s', '$1' . e($address), $content);
+            }
+            if (str_contains($content, '<!-- Telepon -->')) {
+                $content = preg_replace('/(<!-- Telepon -->)(.*?)(?=<\/p>)/s', '$1' . $phoneDisplay, $content);
+            }
+            if (str_contains($content, '<!-- Email -->')) {
+                $content = preg_replace('/(<!-- Email -->)(.*?)(?=<\/p>)/s', '$1' . e($email), $content);
+            }
+            if (str_contains($content, '<!-- Jam Layanan -->')) {
+                $content = preg_replace('/(<!-- Jam Layanan -->)(.*?)(?=<\/p>)/s', '$1' . e($hoursMonThu) . '<br>' . e($hoursFri), $content);
+            }
+
+            $page->content = $content;
         }
 
         return Inertia::render('Public/Ppid/Page', [

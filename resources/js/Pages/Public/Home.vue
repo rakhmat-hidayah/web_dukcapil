@@ -76,7 +76,7 @@
           <!-- Soft Glassmorphic Gradient Overlay -->
           <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-blue-950/50 to-transparent z-10"></div>
           <img 
-            :src="banner.image === 'banners/placeholder.webp' ? 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80' : `/storage/${banner.image}`" 
+            :src="banner.image_url || 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80'" 
             class="w-full h-full object-cover mix-blend-overlay opacity-80"
             alt="Hero Slide" 
           />

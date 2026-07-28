@@ -21,22 +21,22 @@
       <header class="bg-white/98 dark:bg-zinc-900/98 backdrop-blur border-b border-gray-100 dark:border-zinc-800/80 transition-colors">
       <div class="max-w-7xl mx-auto px-3 xl:px-8 py-2.5 flex items-center justify-between gap-2 xl:gap-4">
         <!-- Logo Brand (Dual Logo: Logo Daerah Dompu & Logo Disdukcapil) -->
-        <Link href="/" class="flex items-center gap-2 select-none group shrink-0">
+        <Link href="/" class="flex items-center gap-2 select-none group shrink-0 px-2.5 py-1 rounded-xl transition-all dark:bg-white/95 dark:shadow-md dark:border dark:border-white/20">
           <!-- Logo 1: Logo Daerah Kabupaten Dompu -->
           <img 
             src="/img/logo-dompu.png" 
             alt="Logo Kabupaten Dompu" 
-            class="h-8 lg:h-9 w-auto object-contain drop-shadow-sm transition-transform duration-200 group-hover:scale-105"
+            class="h-8 lg:h-9 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
           />
 
           <!-- Thin Vertical Divider -->
-          <div class="h-5 lg:h-6 w-px bg-gray-200 dark:bg-zinc-700"></div>
+          <div class="h-5 lg:h-6 w-px bg-gray-200 dark:bg-gray-300"></div>
 
           <!-- Logo 2: Logo Official Disdukcapil Dompu -->
           <img 
             src="/img/logo-dukcapil.png" 
             alt="Logo Disdukcapil Dompu" 
-            class="h-9 lg:h-10 w-auto object-contain drop-shadow-sm dark:brightness-110 transition-transform duration-200 group-hover:scale-105"
+            class="h-9 lg:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
           />
         </Link>
 
@@ -382,10 +382,10 @@
       <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center sm:text-left">
         <!-- Brand Info -->
         <div class="space-y-3 flex flex-col items-center sm:items-start">
-          <div class="flex items-center justify-center sm:justify-start gap-3">
+          <div class="flex items-center justify-center sm:justify-start gap-3 p-2 rounded-xl dark:bg-white/95 dark:shadow-md">
             <img src="/img/logo-dompu.png" alt="Logo Dompu" class="h-11 w-auto object-contain" />
-            <div class="h-8 w-px bg-gray-200 dark:bg-zinc-700"></div>
-            <img src="/img/logo-dukcapil.png" alt="Logo Disdukcapil" class="h-12 w-auto object-contain dark:brightness-110" />
+            <div class="h-8 w-px bg-gray-200 dark:bg-gray-300"></div>
+            <img src="/img/logo-dukcapil.png" alt="Logo Disdukcapil" class="h-12 w-auto object-contain" />
           </div>
           <p class="text-gray-500 dark:text-zinc-400 leading-relaxed">
             Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu resmi menyelenggarakan tertib administrasi kependudukan prima.

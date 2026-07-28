@@ -134,6 +134,7 @@ class InformasiLayananController extends Controller
             'mobile_service_button_url'         => 'nullable|string|max:500',
             'mobile_service_notes'              => 'nullable|string|max:1000',
             'mobile_service_selected_services'  => 'nullable|array',
+            'mobile_service_custom_services'    => 'nullable',
 
             // Section 2: Persyaratan Umum Berkas
             'mobile_service_requirements'       => 'nullable|string|max:2000',
@@ -151,9 +152,12 @@ class InformasiLayananController extends Controller
             'mobile_service_contact_button_text'=> 'nullable|string|max:100',
             'mobile_service_contact_button_url' => 'nullable|string|max:500',
 
-            // Section 5: Bantuan Cepat Widget
+            // Section 5: Bantuan Cepat & Jam Operasional Widget
             'quick_help_whatsapp'               => 'nullable|string|max:255',
             'quick_help_google_maps_url'        => 'nullable|string|max:500',
+            'office_hours_mon_thu'              => 'nullable|string|max:100',
+            'office_hours_fri'                  => 'nullable|string|max:100',
+            'office_hours_weekend'              => 'nullable|string|max:100',
 
             // Section 6: Sambutan Pimpinan / Foto Kepala Dinas
             'leader_name'                       => 'nullable|string|max:255',
@@ -161,6 +165,7 @@ class InformasiLayananController extends Controller
             'leader_speech_title'               => 'nullable|string|max:255',
             'leader_speech_content'             => 'nullable|string|max:4000',
             'leader_photo'                      => 'nullable|string|max:500',
+            'leader_photo_file'                 => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
 
             // Section 7: Visi Misi Instansi
             'profile_visi_title'                => 'nullable|string|max:255',
@@ -190,8 +195,13 @@ class InformasiLayananController extends Controller
         ]);
 
         if ($request->hasFile('leader_photo_file')) {
-            $path = $request->file('leader_photo_file')->store('leader', 'public');
-            $data['leader_photo'] = $path;
+            $path = \App\Services\MediaStorage::store($request->file('leader_photo_file'), 'leader');
+            $data['leader_photo'] = '/storage/' . $path;
+        } elseif (isset($data['leader_photo']) && $data['leader_photo'] === '/images/kepala_dinas.jpg') {
+            $existing = WebsiteSetting::where('key', 'leader_photo')->first();
+            if ($existing && $existing->value && $existing->value !== '/images/kepala_dinas.jpg') {
+                unset($data['leader_photo']);
+            }
         }
 
         foreach ($data as $key => $val) {
@@ -217,6 +227,7 @@ class InformasiLayananController extends Controller
         }
 
         WebsiteSetting::clearCache();
+        \Illuminate\Support\Facades\Cache::forget('active_profile_sections');
 
         ActivityLogger::log("Memperbarui konfigurasi Informasi Layanan & Profil Instansi", null, 'update_informasi_layanan');
 

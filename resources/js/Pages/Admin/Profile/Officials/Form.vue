@@ -151,6 +151,7 @@ const photoInput = ref(null)
 const photoPreview = ref(null)
 
 const form = useForm({
+  _method: props.official ? 'put' : null,
   name: props.official?.name || '',
   nip: props.official?.nip || '',
   position_title: props.official?.position_title || '',
@@ -177,7 +178,7 @@ const handlePhotoUpload = (e) => {
 
 const submit = () => {
   if (isEdit.value) {
-    form.post('/admin/profile/officials/' + props.official.id + '?_method=PUT')
+    form.post('/admin/profile/officials/' + props.official.id)
   } else {
     form.post('/admin/profile/officials')
   }

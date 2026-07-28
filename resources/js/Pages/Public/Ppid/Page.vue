@@ -131,11 +131,12 @@
             <h4 class="font-extrabold text-xs text-primary-600 dark:text-primary-400 flex items-center gap-2">
               <Phone :size="14" /> Kontak Layanan PPID
             </h4>
-            <p class="text-xs text-gray-600 dark:text-zinc-300 font-semibold">Telp: (0373) 21124</p>
-            <p class="text-xs text-gray-600 dark:text-zinc-300 font-semibold">Email: ppid@dompukab.go.id</p>
-            <p class="text-[11px] text-gray-400 dark:text-zinc-500 pt-1 leading-relaxed font-medium">
-              Senin–Kamis: 08.00–16.00 WITA<br>Jumat: 08.00–11.30 WITA
-            </p>
+            <p v-if="officeContact?.phone" class="text-xs text-gray-600 dark:text-zinc-300 font-semibold">Telp: {{ officeContact.phone }}</p>
+            <p v-if="officeContact?.email" class="text-xs text-gray-600 dark:text-zinc-300 font-semibold">Email: {{ officeContact.email }}</p>
+            <div class="text-[11px] text-gray-400 dark:text-zinc-500 pt-1 leading-relaxed font-medium">
+              <div>{{ officeContact?.hours_mon_thu || 'Senin–Kamis: 08.00–16.00 WITA' }}</div>
+              <div>{{ officeContact?.hours_fri || 'Jumat: 08.00–16.30 WITA' }}</div>
+            </div>
           </div>
         </aside>
 
@@ -193,15 +194,15 @@
                       <!-- Integrated Download Button Inside Card -->
                       <div class="pt-2 border-t border-gray-100 dark:border-zinc-700/50">
                         <a 
-                          v-if="sk.doc" 
+                          v-if="sk.doc && (sk.doc.file_path || sk.doc.file_url)" 
                           :href="route('public.ppid.document.download', sk.doc.id)"
                           target="_blank"
                           class="w-full py-2 px-3 bg-primary-600 hover:bg-primary-500 text-white font-extrabold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
                         >
                           <span>📥 Unduh Berkas SK ({{ (sk.doc.file_type || 'PDF').toUpperCase() }})</span>
                         </a>
-                        <div v-else class="w-full py-2 px-3 bg-gray-50 dark:bg-zinc-800/60 text-gray-400 dark:text-zinc-500 text-[11px] font-semibold rounded-xl text-center border border-gray-100 dark:border-zinc-700/40">
-                          📌 Berkas Dokumen Fisik Tersedia di Kantor
+                        <div v-else class="w-full py-2.5 px-3 bg-gray-100 dark:bg-zinc-800/80 text-gray-400 dark:text-zinc-500 text-xs font-semibold rounded-xl text-center border border-gray-200/60 dark:border-zinc-700/60 select-none flex items-center justify-center gap-1.5 cursor-not-allowed opacity-75">
+                          <span>📌 Berkas Dokumen Fisik Tersedia di Kantor</span>
                         </div>
                       </div>
                     </div>
@@ -232,6 +233,7 @@ const props = defineProps({
   page: Object,
   pages: Array,
   documents: Array,
+  officeContact: Object,
 })
 
 const skCardDefs = [

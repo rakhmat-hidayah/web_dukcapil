@@ -32,12 +32,32 @@ class Official extends Model
         'sort_order',
     ];
 
+    protected $appends = ['photo_url'];
+
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
         'show_phone' => 'boolean',
         'show_email' => 'boolean',
     ];
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if (!$this->photo) {
+            return null;
+        }
+
+        if (str_starts_with($this->photo, 'http://') || str_starts_with($this->photo, 'https://')) {
+            return $this->photo;
+        }
+
+        $cleanPath = ltrim($this->photo, '/');
+        if (str_starts_with($cleanPath, 'storage/')) {
+            return '/' . $cleanPath;
+        }
+
+        return '/storage/' . $cleanPath;
+    }
 
     public function educations(): HasMany
     {

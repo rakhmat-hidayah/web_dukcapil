@@ -120,19 +120,20 @@
             </h3>
 
             <div v-if="services && services.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Link 
+              <component 
+                :is="service.slug ? 'Link' : 'div'"
                 v-for="service in services" 
                 :key="service.id"
-                :href="`/layanan/${service.slug}`"
+                :href="service.slug ? `/layanan/${service.slug}` : undefined"
                 class="p-4 rounded-2xl bg-gray-50/70 dark:bg-zinc-800/40 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-100 dark:border-zinc-800/60 flex items-start gap-3 transition group"
               >
                 <div 
                   class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base shrink-0 shadow-sm transition-transform group-hover:scale-110"
-                  :style="{ backgroundColor: service.color || '#2563eb', color: '#ffffff' }"
+                  :style="{ backgroundColor: service.color || '#4f46e5', color: '#ffffff' }"
                 >
                   {{ service.icon || '📜' }}
                 </div>
-                <div>
+                <div class="min-w-0 flex-1">
                   <h4 class="font-extrabold text-gray-900 dark:text-zinc-100 text-sm group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                     {{ service.title }}
                   </h4>
@@ -140,7 +141,7 @@
                     {{ service.description }}
                   </p>
                 </div>
-              </Link>
+              </component>
             </div>
 
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4">

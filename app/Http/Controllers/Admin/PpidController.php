@@ -125,7 +125,12 @@ class PpidController extends Controller
             'is_published'=> 'boolean',
         ]);
 
-        if ($request->hasFile('file')) {
+        if ($request->boolean('remove_file')) {
+            if ($document->file_path) Storage::disk('public')->delete($document->file_path);
+            $validated['file_path'] = null;
+            $validated['file_type'] = null;
+            $validated['file_size'] = null;
+        } elseif ($request->hasFile('file')) {
             if ($document->file_path) Storage::disk('public')->delete($document->file_path);
             $file   = $request->file('file');
             $path   = $file->store('ppid-documents', 'public');

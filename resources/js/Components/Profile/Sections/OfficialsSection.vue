@@ -13,7 +13,7 @@
       <div v-for="official in officials.data" :key="official.id" class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-xl border border-slate-100 dark:border-slate-700 hover:shadow-2xl transition group flex flex-col justify-between">
         <div>
           <div class="w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-700 mb-4 mx-auto border-2 border-slate-200 dark:border-slate-600 flex items-center justify-center">
-            <img v-if="official.photo" :src="'/storage/' + official.photo" :alt="official.name" class="w-full h-full object-cover" />
+            <img v-if="official.photo" :src="storageUrl(official.photo)" :alt="official.name" class="w-full h-full object-cover" />
             <svg v-else class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           </div>
           <h3 class="text-lg font-bold text-slate-900 dark:text-white text-center group-hover:text-blue-600 transition">{{ official.name }}</h3>
@@ -31,5 +31,6 @@
 </template>
 
 <script setup>
+import { storageUrl } from '@/utils/storage'
 defineProps({ setting: Object, officials: Object })
 </script>

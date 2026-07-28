@@ -26,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Auto-synchronize misplaced media and broken DB paths on boot
+        \App\Services\AutoMediaSync::sync();
+
         // Super Administrator has implicit full permissions override
         Gate::before(function ($user, $ability) {
             return $user->hasRole('Super Administrator') ? true : null;

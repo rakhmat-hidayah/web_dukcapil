@@ -71,7 +71,7 @@
           <div class="h-48 bg-slate-900 overflow-hidden flex items-center justify-center relative">
             <img 
               v-if="album.cover_image && !imageErrors[album.id]"
-              :src="`/storage/${album.cover_image}`" 
+              :src="storageUrl(album.cover_image)" 
               @error="imageErrors[album.id] = true"
               class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
               alt="Album Cover" 
@@ -116,6 +116,7 @@ import { ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { Camera, Video } from '@lucide/vue';
+import { storageUrl } from '@/utils/storage';
 
 const props = defineProps({
   albums: Array,

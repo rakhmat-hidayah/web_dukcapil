@@ -34,8 +34,8 @@
           <!-- Image preview -->
           <div class="h-44 relative bg-slate-900 overflow-hidden flex items-center justify-center">
             <img 
-              v-if="banner.image && !imageErrors[banner.id]"
-              :src="`/storage/${banner.image}`" 
+              v-if="banner.image_url && !imageErrors[banner.id]"
+              :src="banner.image_url" 
               @error="imageErrors[banner.id] = true"
               class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
               alt="Banner Image" 
@@ -181,7 +181,7 @@
                   <!-- Image Preview (if existing or newly selected) -->
                   <div v-if="previewUrl || (isEditing && currentBannerImage && !modalImageError)" class="relative h-36 w-full rounded-xl overflow-hidden bg-slate-900 border border-slate-700/60 shadow-inner group/img">
                     <img 
-                      :src="previewUrl || `/storage/${currentBannerImage}`" 
+                      :src="previewUrl || (editingBanner?.image_url || '')" 
                       @error="modalImageError = true"
                       class="w-full h-full object-cover group-hover/img:scale-105 transition duration-300" 
                     />

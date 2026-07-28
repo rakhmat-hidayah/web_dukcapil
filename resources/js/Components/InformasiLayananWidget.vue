@@ -150,15 +150,15 @@
       <div class="space-y-2 text-xs">
         <div class="flex justify-between items-center py-1.5 border-b border-gray-50 dark:border-zinc-800/60">
           <span class="text-gray-500 dark:text-zinc-400 font-semibold">Senin — Kamis</span>
-          <span class="font-bold font-mono text-gray-800 dark:text-zinc-200">08.00 - 15.30 WITA</span>
+          <span class="font-bold font-mono text-gray-800 dark:text-zinc-200">{{ settings.office_hours_mon_thu || '08.00 - 15.30 WITA' }}</span>
         </div>
         <div class="flex justify-between items-center py-1.5 border-b border-gray-50 dark:border-zinc-800/60">
           <span class="text-gray-500 dark:text-zinc-400 font-semibold">Jumat</span>
-          <span class="font-bold font-mono text-gray-800 dark:text-zinc-200">08.00 - 11.30 WITA</span>
+          <span class="font-bold font-mono text-gray-800 dark:text-zinc-200">{{ settings.office_hours_fri || '08.00 - 11.30 WITA' }}</span>
         </div>
         <div class="flex justify-between items-center py-1.5">
           <span class="text-gray-400 font-medium">Sabtu — Minggu &amp; Libur</span>
-          <span class="font-bold text-rose-500 text-[11px]">Tutup (Online Active)</span>
+          <span class="font-bold text-rose-500 text-[11px]">{{ settings.office_hours_weekend || 'Tutup (Online Active)' }}</span>
         </div>
       </div>
 
@@ -168,7 +168,7 @@
         <div class="min-w-0">
           <p class="font-bold text-gray-800 dark:text-zinc-200 text-[11px]">Alamat Kantor Dinas:</p>
           <p class="text-[10px] text-gray-500 dark:text-zinc-400 leading-relaxed mt-0.5">
-            Jl. Mahoni No. 02, Kel. Badawa, Kec. Dompu, Kab. Dompu, NTB 84211
+            {{ settings.office_address || 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211' }}
           </p>
         </div>
       </div>
@@ -228,6 +228,10 @@ const settings = computed(() => {
     quick_help_email: ws.quick_help_email || 'dukcapilkabdompu@gmail.com',
     quick_help_primary_button_text: ws.quick_help_primary_button_text || 'Hubungi Kami',
     quick_help_primary_button_url: ws.quick_help_primary_button_url || '/contact',
+    office_hours_mon_thu: ws.office_hours_mon_thu || '08.00 - 15.30 WITA',
+    office_hours_fri: ws.office_hours_fri || '08.00 - 11.30 WITA',
+    office_hours_weekend: ws.office_hours_weekend || 'Tutup (Online Active)',
+    office_address: ws.office_address || 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211',
   };
 });
 

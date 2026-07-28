@@ -49,7 +49,7 @@
           <div class="h-32 bg-gray-100 dark:bg-zinc-950 flex items-center justify-center overflow-hidden">
             <img 
               v-if="item.file_type === 'image'"
-              :src="`/storage/${item.thumbnail || item.file_path}`" 
+              :src="storageUrl(item.thumbnail || item.file_path)" 
               class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
               alt="Media item" 
             />
@@ -183,6 +183,7 @@ import { ref } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Plus, Trash2, Video, UploadCloud, X } from '@lucide/vue';
+import { storageUrl } from '@/utils/storage';
 
 const props = defineProps({
   album: Object,

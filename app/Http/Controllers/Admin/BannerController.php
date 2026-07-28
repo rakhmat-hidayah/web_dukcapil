@@ -38,14 +38,14 @@ class BannerController extends Controller
         // Upload main image
         $img = Image::decode($request->file('image'))->scale(width: 1920);
         $path = 'banners/' . Str::uuid() . '.webp';
-        Storage::disk('public')->put($path, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
+        \App\Services\MediaStorage::put($path, (string) $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
         $data['image'] = $path;
 
         // Upload mobile image if provided
         if ($request->hasFile('image_mobile')) {
             $mobileImg = Image::decode($request->file('image_mobile'))->scale(width: 768);
             $mobilePath = 'banners/mobile-' . Str::uuid() . '.webp';
-            Storage::disk('public')->put($mobilePath, $mobileImg->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
+            \App\Services\MediaStorage::put($mobilePath, (string) $mobileImg->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
             $data['image_mobile'] = $mobilePath;
         }
 
@@ -71,7 +71,7 @@ class BannerController extends Controller
             }
             $img = Image::decode($request->file('image'))->scale(width: 1920);
             $path = 'banners/' . Str::uuid() . '.webp';
-            Storage::disk('public')->put($path, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
+            \App\Services\MediaStorage::put($path, (string) $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
             $data['image'] = $path;
         }
 
@@ -81,7 +81,7 @@ class BannerController extends Controller
             }
             $mobileImg = Image::decode($request->file('image_mobile'))->scale(width: 768);
             $mobilePath = 'banners/mobile-' . Str::uuid() . '.webp';
-            Storage::disk('public')->put($mobilePath, $mobileImg->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
+            \App\Services\MediaStorage::put($mobilePath, (string) $mobileImg->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
             $data['image_mobile'] = $mobilePath;
         }
 

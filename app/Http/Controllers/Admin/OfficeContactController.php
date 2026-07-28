@@ -17,7 +17,7 @@ class OfficeContactController extends Controller
      */
     public function index(): InertiaResponse
     {
-        $settings = WebsiteSetting::whereIn('group', ['office_contact', 'footer'])->pluck('value', 'key')->toArray();
+        $settings = WebsiteSetting::allAsArray();
 
         return Inertia::render('Admin/OfficeContact/Index', [
             'settings' => [

@@ -35,7 +35,7 @@
           <div class="h-44 relative bg-slate-900 overflow-hidden flex items-center justify-center">
             <img 
               v-if="album.cover_image && !imageErrors[album.id]"
-              :src="`/storage/${album.cover_image}`" 
+              :src="storageUrl(album.cover_image)" 
               @error="imageErrors[album.id] = true"
               class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
               alt="Album Cover" 
@@ -212,6 +212,7 @@ import { ref } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Plus, Edit, Trash2, Camera, Video } from '@lucide/vue';
+import { storageUrl } from '@/utils/storage';
 
 const props = defineProps({
   albums: Array,
@@ -258,7 +259,7 @@ const openEditModal = (album) => {
   isEditing.value = true;
   editId.value = album.id;
   coverPreview.value = null;
-  currentCoverUrl.value = album.cover_image ? `/storage/${album.cover_image}` : null;
+  currentCoverUrl.value = storageUrl(album.cover_image);
   form.title = album.title;
   form.description = album.description || '';
   form.is_published = Boolean(album.is_published);

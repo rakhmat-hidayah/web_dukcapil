@@ -31,7 +31,7 @@
           <div class="h-36 bg-gray-100 dark:bg-zinc-950 flex items-center justify-center overflow-hidden relative">
             <img 
               v-if="item.file_type === 'image'"
-              :src="`/storage/${item.thumbnail || item.file_path}`" 
+              :src="storageUrl(item.thumbnail || item.file_path)" 
               class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
               alt="Media item" 
             />
@@ -76,13 +76,13 @@
             <!-- Render based on file type -->
             <img 
               v-if="activeItem.file_type === 'image'"
-              :src="`/storage/${activeItem.file_path}`" 
+              :src="storageUrl(activeItem.file_path)" 
               class="max-w-full max-h-[75vh] rounded-xl object-contain border border-white/10" 
               alt="Full size media"
             />
             <video 
               v-else
-              :src="`/storage/${activeItem.file_path}`" 
+              :src="storageUrl(activeItem.file_path)" 
               controls
               autoplay
               class="max-w-full max-h-[75vh] rounded-xl border border-white/10"
@@ -105,6 +105,7 @@ import { ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { Video } from '@lucide/vue';
+import { storageUrl } from '@/utils/storage';
 
 const props = defineProps({
   album: Object,

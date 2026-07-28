@@ -18,9 +18,9 @@
     >
       <!-- Sidebar Header -->
       <div class="h-16 flex items-center justify-between px-4 border-b border-gray-100 dark:border-zinc-800 overflow-hidden">
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2.5 px-2 py-1 rounded-xl dark:bg-white/95 dark:shadow-sm">
           <img src="/img/logo-dompu.png" alt="Logo Dompu" class="h-10 w-auto object-contain shrink-0" />
-          <img v-if="sidebarOpen" src="/img/logo-dukcapil.png" alt="Logo Dukcapil" class="h-9 w-auto object-contain shrink-0 dark:brightness-110" />
+          <img v-if="sidebarOpen" src="/img/logo-dukcapil.png" alt="Logo Dukcapil" class="h-9 w-auto object-contain shrink-0" />
         </div>
         <button 
           @click="toggleSidebar"

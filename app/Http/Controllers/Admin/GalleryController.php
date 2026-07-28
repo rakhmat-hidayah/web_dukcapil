@@ -47,7 +47,7 @@ class GalleryController extends Controller
             $file = $request->file('cover_image');
             $img = Image::decode($file)->cover(600, 400);
             $coverPath = 'gallery/covers/' . Str::uuid() . '.webp';
-            Storage::disk('public')->put($coverPath, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
+            \App\Services\MediaStorage::put($coverPath, (string) $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
         }
 
         GalleryAlbum::create([
@@ -79,7 +79,7 @@ class GalleryController extends Controller
             $file = $request->file('cover_image');
             $img = Image::decode($file)->cover(600, 400);
             $coverPath = 'gallery/covers/' . Str::uuid() . '.webp';
-            Storage::disk('public')->put($coverPath, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
+            \App\Services\MediaStorage::put($coverPath, (string) $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
             $data['cover_image'] = $coverPath;
         }
 
@@ -117,20 +117,16 @@ class GalleryController extends Controller
 
         if (!$isVideo) {
             $img = Image::decode($file)->scale(width: 1600);
-            Storage::disk('public')->put($filePath, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
+            $filePath = str_replace('.' . $file->getClientOriginalExtension(), '.webp', $filePath);
+            \App\Services\MediaStorage::put($filePath, (string) $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
 
             // Generate thumbnail
             $thumbPath = 'gallery/' . $galleryAlbum->id . '/thumb-' . Str::uuid() . '.webp';
             $thumb = Image::decode($file)->cover(400, 300);
-            Storage::disk('public')->put($thumbPath, $thumb->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 75)));
+            \App\Services\MediaStorage::put($thumbPath, (string) $thumb->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 75)));
             $thumbnailPath = $thumbPath;
-            $filePath = str_replace('.' . $file->getClientOriginalExtension(), '.webp', $filePath);
         } else {
-            Storage::disk('public')->putFileAs(
-                dirname($filePath),
-                $file,
-                basename($filePath)
-            );
+            $filePath = \App\Services\MediaStorage::store($file, 'gallery/' . $galleryAlbum->id);
         }
 
         GalleryItem::create([

@@ -23,7 +23,7 @@
             'description' => $siteDesc,
             'address' => [
                 '@type' => 'PostalAddress',
-                'streetAddress' => 'Jl. Mahoni No. 02, Kel. Badawa',
+                'streetAddress' => 'Jl. Bhayangkara No. 01, Kel. Bada',
                 'addressLocality' => 'Dompu',
                 'addressRegion' => 'Nusa Tenggara Barat',
                 'postalCode' => '84211',

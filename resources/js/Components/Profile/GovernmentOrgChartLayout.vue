@@ -14,7 +14,7 @@
         </div>
         <div class="bg-white dark:bg-slate-900 mx-1.5 my-1.5 p-2.5 rounded-xl flex items-center gap-3 border border-slate-100 dark:border-slate-800 shadow-sm">
           <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 flex items-center justify-center shadow-sm">
-            <img v-if="kadisOfficial?.photo" :src="'/storage/' + kadisOfficial.photo" :alt="kadisOfficial.name" class="w-full h-full object-cover" />
+            <img v-if="kadisOfficial?.photo" :src="storageUrl(kadisOfficial.photo)" :alt="kadisOfficial.name" class="w-full h-full object-cover" />
             <svg v-else class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           </div>
           <div class="overflow-hidden">
@@ -398,6 +398,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { storageUrl } from '@/utils/storage'
 
 const props = defineProps({
   tree: Array,

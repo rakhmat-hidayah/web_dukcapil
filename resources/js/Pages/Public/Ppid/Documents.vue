@@ -208,6 +208,13 @@
                 >
                   <Download :size="14" /> Unduh Berkas
                 </a>
+                <button
+                  v-else
+                  disabled
+                  class="w-full sm:w-auto px-4 py-2.5 bg-gray-100 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 font-semibold text-xs rounded-xl border border-gray-200 dark:border-zinc-700/60 flex items-center justify-center gap-2 cursor-not-allowed opacity-70 shrink-0"
+                >
+                  <Download :size="14" /> Berkas Belum Tersedia
+                </button>
               </div>
             </template>
           </div>

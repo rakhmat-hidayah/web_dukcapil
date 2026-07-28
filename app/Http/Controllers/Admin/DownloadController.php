@@ -83,7 +83,15 @@ class DownloadController extends Controller
 
         $data = $request->except('file');
 
-        if ($request->hasFile('file')) {
+        if ($request->boolean('remove_file')) {
+            if ($download->file_path) {
+                Storage::disk('public')->delete($download->file_path);
+            }
+            $data['file_path'] = null;
+            $data['file_name'] = null;
+            $data['file_type'] = null;
+            $data['file_size'] = null;
+        } elseif ($request->hasFile('file')) {
             if ($download->file_path) {
                 Storage::disk('public')->delete($download->file_path);
             }

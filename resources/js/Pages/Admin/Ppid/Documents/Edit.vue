@@ -49,21 +49,51 @@
                 accept=".pdf,.doc,.docx,.xls,.xlsx" 
                 class="hidden" 
               />
-              <div v-if="form.file" class="flex items-center justify-between gap-2 text-left">
+              <div v-if="form.file" class="flex items-center justify-between gap-2 text-left p-1">
                 <div class="flex items-center gap-2 min-w-0">
                   <UploadCloud class="w-4 h-4 text-primary-600 shrink-0" />
                   <span class="text-xs font-bold text-gray-800 dark:text-zinc-100 truncate">{{ form.file.name }}</span>
                 </div>
-                <span class="text-[10px] text-gray-400 font-mono shrink-0">{{ formatBytes(form.file.size) }}</span>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] text-gray-400 font-mono">{{ formatBytes(form.file.size) }}</span>
+                  <button 
+                    type="button" 
+                    @click.stop="form.file = null" 
+                    class="px-2 py-0.5 bg-red-100 hover:bg-red-200 text-red-600 text-[10px] font-bold rounded-md transition flex items-center gap-1 cursor-pointer"
+                    title="Batal Unggah Berkas Baru"
+                  >
+                    <Trash2 class="w-3 h-3" /> Batal
+                  </button>
+                </div>
               </div>
               <div v-else class="py-1 flex flex-col items-center justify-center">
                 <UploadCloud class="w-5 h-5 text-gray-400 group-hover:text-primary-600 mb-1 transition" />
                 <span class="text-xs font-bold text-gray-700 dark:text-zinc-300">
                   <span class="text-primary-600 hover:underline">Klik untuk mengganti dokumen</span> atau tarik berkas ke sini
                 </span>
-                <span v-if="document.file_path" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
-                  ✓ File terpasang: {{ document.file_path.split('/').pop() }}
-                </span>
+                
+                <div v-if="document.file_path && !form.remove_file" class="mt-2.5 inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 rounded-lg text-emerald-700 dark:text-emerald-300 font-semibold text-xs shadow-xs">
+                  <span class="truncate max-w-[220px]">✓ File terpasang: <strong>{{ document.file_path.split('/').pop() }}</strong></span>
+                  <button 
+                    type="button" 
+                    @click.stop="form.remove_file = true; form.file = null" 
+                    class="ml-1 px-2 py-0.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-[10px] rounded-md transition shadow-xs flex items-center gap-1 cursor-pointer shrink-0"
+                    title="Hapus File Dokumen Terpasang"
+                  >
+                    <Trash2 class="w-3 h-3" /> Hapus File
+                  </button>
+                </div>
+
+                <div v-else-if="form.remove_file" class="mt-2.5 inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/50 rounded-lg text-red-600 dark:text-red-400 font-semibold text-xs">
+                  <span>⚠️ File terpasang ditandai untuk dihapus</span>
+                  <button 
+                    type="button" 
+                    @click.stop="form.remove_file = false" 
+                    class="px-2 py-0.5 bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 text-gray-800 dark:text-zinc-200 font-bold text-[10px] rounded-md transition"
+                  >
+                    Batal
+                  </button>
+                </div>
               </div>
             </div>
             <span v-if="form.errors.file" class="error">{{ form.errors.file }}</span>
@@ -78,12 +108,12 @@
         <div class="form-grid-2">
           <div class="field">
             <label>Tahun Dokumen</label>
-            <input v-model="form.year" type="number" placeholder="2024" min="2000" max="2099" />
+            <input v-model.number="form.year" type="number" min="2000" max="2099" />
           </div>
 
           <div class="field">
             <label>Urutan Tampil (Sort Order)</label>
-            <input v-model="form.sort_order" type="number" min="0" />
+            <input v-model.number="form.sort_order" type="number" min="0" />
           </div>
         </div>
 
@@ -108,7 +138,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
-import { ArrowLeft, Save, UploadCloud } from '@lucide/vue'
+import { ArrowLeft, Save, UploadCloud, Trash2 } from '@lucide/vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps({
@@ -125,6 +155,7 @@ const form = useForm({
   title: props.document.title,
   description: props.document.description ?? '',
   file: null,
+  remove_file: false,
   file_url: props.document.file_url ?? '',
   year: props.document.year ?? new Date().getFullYear(),
   sort_order: props.document.sort_order ?? 0,

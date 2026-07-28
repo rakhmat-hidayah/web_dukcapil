@@ -343,10 +343,10 @@
           <!-- Service Checkbox Badge List -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div 
-              v-for="service in allServices" 
+              v-for="service in availableServicesList" 
               :key="service.id"
               @click="toggleServiceSelection(service.id)"
-              class="p-3.5 rounded-2xl border transition-all cursor-pointer select-none flex items-start gap-3"
+              class="p-3.5 rounded-2xl border transition-all cursor-pointer select-none flex items-start gap-3 relative group"
               :class="form.mobile_service_selected_services.includes(service.id) 
                 ? 'bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800/80 text-indigo-950 dark:text-indigo-100 shadow-xs' 
                 : 'bg-gray-50/50 dark:bg-zinc-800/30 border-gray-200 dark:border-zinc-800/60 opacity-60 text-gray-600 dark:text-zinc-400 hover:opacity-100'"
@@ -363,13 +363,75 @@
 
               <!-- Service Info -->
               <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <span class="text-base">{{ service.icon || '📄' }}</span>
-                  <span class="text-xs font-extrabold truncate">{{ service.title }}</span>
+                <div class="flex items-center justify-between gap-1">
+                  <div class="flex items-center gap-2">
+                    <span class="text-base">{{ service.icon || '📄' }}</span>
+                    <span class="text-xs font-extrabold truncate">{{ service.title }}</span>
+                  </div>
+                  <!-- Delete custom service button -->
+                  <button 
+                    v-if="service.is_custom"
+                    type="button"
+                    @click.stop="removeCustomService(service.id)"
+                    class="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-950/50 rounded-md transition"
+                    title="Hapus Layanan Kustom Ini"
+                  >
+                    <Trash2 class="w-3.5 h-3.5" />
+                  </button>
                 </div>
                 <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-1 line-clamp-1 leading-normal">
                   {{ service.description }}
                 </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Custom Service Form Box -->
+          <div class="mt-4 p-4 rounded-2xl bg-indigo-50/40 dark:bg-zinc-800/40 border border-indigo-100 dark:border-zinc-700/60 space-y-3">
+            <h4 class="text-xs font-extrabold text-indigo-700 dark:text-indigo-300 flex items-center gap-2">
+              <PlusCircle class="w-4 h-4" /> Tambah Jenis Layanan Lainnya / Kustom
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+              <div class="sm:col-span-3 lg:col-span-2">
+                <label class="block text-[10px] font-bold text-gray-500 dark:text-zinc-400 mb-1">Ikon Emoji</label>
+                <select v-model="newServiceIcon" class="w-full px-2.5 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-bold dark:text-zinc-100">
+                  <option value="📝">📝 Tulis</option>
+                  <option value="📄">📄 Dokumen</option>
+                  <option value="📋">📋 Formulir</option>
+                  <option value="🆔">🆔 Identitas</option>
+                  <option value="🏠">🏠 Keluarga</option>
+                  <option value="📑">📑 Akta</option>
+                  <option value="✉️">✉️ Surat</option>
+                  <option value="🏛️">🏛️ Instansi</option>
+                  <option value="📞">📞 Telepon</option>
+                </select>
+              </div>
+              <div class="sm:col-span-4 lg:col-span-4">
+                <label class="block text-[10px] font-bold text-gray-500 dark:text-zinc-400 mb-1">Nama Layanan Baru *</label>
+                <input 
+                  type="text" 
+                  v-model="newServiceTitle" 
+                  placeholder="Misal: Surat Pindah (SKPWNI)" 
+                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-indigo-500 dark:text-zinc-100"
+                />
+              </div>
+              <div class="sm:col-span-5 lg:col-span-4">
+                <label class="block text-[10px] font-bold text-gray-500 dark:text-zinc-400 mb-1">Deskripsi Singkat</label>
+                <input 
+                  type="text" 
+                  v-model="newServiceDesc" 
+                  placeholder="Misal: Persyaratan penerbitan..." 
+                  class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium focus:ring-2 focus:ring-indigo-500 dark:text-zinc-100"
+                />
+              </div>
+              <div class="sm:col-span-12 lg:col-span-2 flex items-end">
+                <button 
+                  type="button" 
+                  @click="addCustomService" 
+                  class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                >
+                  <Plus :size="14" /> Tambah
+                </button>
               </div>
             </div>
           </div>
@@ -590,7 +652,7 @@
             </div>
 
             <!-- Google Maps URL -->
-            <div class="space-y-1.5">
+            <div class="space-y-1.5 md:col-span-2">
               <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 flex items-center gap-1.5">
                 <span>📍 Link Google Maps Kantor</span>
               </label>
@@ -600,6 +662,55 @@
                 placeholder="Contoh: https://maps.google.com/?q=..."
                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
               />
+            </div>
+
+            <!-- Jam Operasional: Senin - Kamis -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                ⏰ Jam Operasional (Senin — Kamis)
+              </label>
+              <input 
+                type="text" 
+                v-model="form.office_hours_mon_thu"
+                placeholder="08.00 - 15.30 WITA"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <!-- Jam Operasional: Jumat -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                ⏰ Jam Operasional (Jumat)
+              </label>
+              <input 
+                type="text" 
+                v-model="form.office_hours_fri"
+                placeholder="08.00 - 11.30 WITA"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <!-- Jam Operasional: Akhir Pekan / Libur -->
+            <div class="space-y-1.5 md:col-span-2">
+              <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300">
+                🚫 Status Sabtu — Minggu &amp; Libur
+              </label>
+              <input 
+                type="text" 
+                v-model="form.office_hours_weekend"
+                placeholder="Tutup (Online Active)"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-800/50 text-xs font-medium focus:ring-2 focus:ring-primary-500 dark:text-zinc-100 transition"
+              />
+            </div>
+
+            <!-- Info Alamat Lengkap Kantor -->
+            <div class="space-y-1.5 md:col-span-2 p-3.5 bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 rounded-2xl">
+              <label class="block text-xs font-bold text-amber-800 dark:text-amber-300">
+                🏢 Alamat Lengkap Kantor Instansi
+              </label>
+              <p class="text-xs text-amber-700 dark:text-amber-400 leading-relaxed font-medium">
+                Alamat kantor dikelola terpusat via menu <strong>Pengaturan Kontak &amp; Peta Kantor</strong> agar tidak berubah secara tidak sengaja.
+              </p>
             </div>
           </div>
         </div>
@@ -972,7 +1083,8 @@
 import { ref, computed } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Save } from '@lucide/vue';
+import { Save, Plus, PlusCircle, Trash2 } from '@lucide/vue';
+import { storageUrl } from '@/utils/storage';
 
 const props = defineProps({
   settings: Object,
@@ -983,15 +1095,72 @@ const pickedDate = ref('');
 const timeStart = ref('08:00');
 const timeEnd = ref('14:00');
 
+// Custom Services List Parser
+const customServices = ref([]);
+try {
+  const rawCustom = props.settings?.mobile_service_custom_services;
+  if (rawCustom) {
+    customServices.value = typeof rawCustom === 'string' ? JSON.parse(rawCustom) : rawCustom;
+  }
+} catch (e) {
+  customServices.value = [];
+}
+
+const availableServicesList = computed(() => {
+  const base = (props.allServices || []).map(s => ({
+    id: s.id,
+    title: s.title,
+    icon: s.icon || '📄',
+    description: s.description || '',
+    is_custom: false
+  }));
+  const custom = customServices.value.map(c => ({
+    id: c.id,
+    title: c.title,
+    icon: c.icon || '📝',
+    description: c.description || '',
+    is_custom: true
+  }));
+  return [...base, ...custom];
+});
+
+const newServiceTitle = ref('');
+const newServiceIcon = ref('📝');
+const newServiceDesc = ref('');
+
+const addCustomService = () => {
+  if (!newServiceTitle.value.trim()) return;
+  const newId = 90000 + Math.floor(Date.now() % 10000);
+  const item = {
+    id: newId,
+    title: newServiceTitle.value.trim(),
+    icon: newServiceIcon.value,
+    description: newServiceDesc.value.trim() || 'Persyaratan pengurusan layanan kependudukan'
+  };
+  customServices.value.push(item);
+  form.mobile_service_selected_services.push(newId);
+  form.mobile_service_custom_services = JSON.stringify(customServices.value);
+  
+  newServiceTitle.value = '';
+  newServiceDesc.value = '';
+};
+
+const removeCustomService = (serviceId) => {
+  customServices.value = customServices.value.filter(c => c.id !== serviceId);
+  const idx = form.mobile_service_selected_services.indexOf(serviceId);
+  if (idx > -1) form.mobile_service_selected_services.splice(idx, 1);
+  form.mobile_service_custom_services = JSON.stringify(customServices.value);
+};
+
 // Initial Selected Service IDs parser
 const initialSelectedServices = computed(() => {
   try {
     const raw = props.settings?.mobile_service_selected_services;
-    if (!raw) return (props.allServices || []).map(s => s.id);
+    if (!raw) return availableServicesList.value.map(s => s.id);
     const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    return Array.isArray(parsed) ? parsed.map(Number) : (props.allServices || []).map(s => s.id);
+    return Array.isArray(parsed) ? parsed.map(Number) : availableServicesList.value.map(s => s.id);
   } catch (e) {
-    return (props.allServices || []).map(s => s.id);
+    return availableServicesList.value.map(s => s.id);
   }
 });
 
@@ -1074,7 +1243,7 @@ const toggleServiceSelection = (serviceId) => {
 };
 
 const selectAllServices = () => {
-  form.mobile_service_selected_services = (props.allServices || []).map(s => s.id);
+  form.mobile_service_selected_services = availableServicesList.value.map(s => s.id);
 };
 
 const deselectAllServices = () => {
@@ -1093,10 +1262,7 @@ const handlePhotoUpload = (e) => {
 
 const previewPhotoUrl = computed(() => {
   if (photoPreview.value) return photoPreview.value;
-  const photo = form.leader_photo;
-  if (!photo) return '/images/kepala_dinas.jpg';
-  if (photo.startsWith('http://') || photo.startsWith('https://') || photo.startsWith('/images/')) return photo;
-  return `/storage/${photo}`;
+  return storageUrl(form.leader_photo, '/images/kepala_dinas.jpg');
 });
 
 const initialDutiesItems = computed(() => {
@@ -1163,6 +1329,7 @@ const form = useForm({
   mobile_service_button_url: props.settings.mobile_service_button_url || '/layanan/mobile',
   mobile_service_notes: props.settings.mobile_service_notes || '',
   mobile_service_selected_services: initialSelectedServices.value,
+  mobile_service_custom_services: JSON.stringify(customServices.value),
 
   // Section 2: Persyaratan Umum Berkas
   mobile_service_requirements: props.settings.mobile_service_requirements || '',
@@ -1180,9 +1347,12 @@ const form = useForm({
   mobile_service_contact_button_text: props.settings.mobile_service_contact_button_text || 'Lihat Kontak Kantor',
   mobile_service_contact_button_url: props.settings.mobile_service_contact_button_url || '/contact',
 
-  // Section 5: Widget Bantuan Cepat
+  // Section 5: Widget Bantuan Cepat & Jam Operasional
   quick_help_whatsapp: props.settings.quick_help_whatsapp || 'https://wa.me/6282340001111',
   quick_help_google_maps_url: props.settings.quick_help_google_maps_url || 'https://maps.google.com/?q=Dukcapil+Dompu',
+  office_hours_mon_thu: props.settings.office_hours_mon_thu || '08.00 - 15.30 WITA',
+  office_hours_fri: props.settings.office_hours_fri || '08.00 - 11.30 WITA',
+  office_hours_weekend: props.settings.office_hours_weekend || 'Tutup (Online Active)',
 
   // Section 6: Sambutan Pimpinan & Foto Kepala Dinas
   leader_name: props.settings.leader_name || 'Drs. Abd. Najib',

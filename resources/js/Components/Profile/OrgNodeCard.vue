@@ -23,7 +23,7 @@
       <div class="bg-white dark:bg-slate-900 mx-1.5 mb-1.5 p-2.5 rounded-xl flex items-center gap-2.5 min-h-[54px] border border-slate-100 dark:border-slate-800">
         <!-- Photo Thumbnail -->
         <div v-if="node.official && node.official.photo" class="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0">
-          <img :src="'/storage/' + node.official.photo" :alt="node.official.name" class="w-full h-full object-cover" />
+          <img :src="storageUrl(node.official.photo)" :alt="node.official.name" class="w-full h-full object-cover" />
         </div>
         <div v-else-if="!node.node_title.includes('FUNGSIONAL')" class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 flex items-center justify-center text-slate-400">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -77,6 +77,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { storageUrl } from '@/utils/storage'
 
 const props = defineProps({
   node: Object,

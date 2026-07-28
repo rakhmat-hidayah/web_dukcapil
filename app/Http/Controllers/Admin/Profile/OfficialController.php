@@ -57,12 +57,13 @@ class OfficialController extends Controller
             'show_email' => 'required|boolean',
             'office_hours' => 'nullable|string|max:100',
             'status' => 'required|in:active,inactive,retired,transferred',
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
         $data['slug'] = Str::slug($data['name']) . '-' . Str::random(5);
 
         if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('officials', 'public');
+            $data['photo'] = \App\Services\MediaStorage::store($request->file('photo'), 'officials');
         }
 
         $official = Official::create($data);
@@ -96,10 +97,16 @@ class OfficialController extends Controller
             'show_email' => 'required|boolean',
             'office_hours' => 'nullable|string|max:100',
             'status' => 'required|in:active,inactive,retired,transferred',
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
-        if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('officials', 'public');
+        if ($request->boolean('remove_photo')) {
+            if ($official->photo) {
+                Storage::disk('public')->delete($official->photo);
+            }
+            $data['photo'] = null;
+        } elseif ($request->hasFile('photo')) {
+            $data['photo'] = \App\Services\MediaStorage::store($request->file('photo'), 'officials');
         }
 
         $official->update($data);

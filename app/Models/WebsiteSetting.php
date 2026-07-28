@@ -24,6 +24,14 @@ class WebsiteSetting extends Model
     }
 
     /**
+     * Get all website settings as a key-value array.
+     */
+    public static function allAsArray(): array
+    {
+        return self::pluck('value', 'key')->toArray();
+    }
+
+    /**
      * Clear the website settings cache.
      */
     public static function clearCache(): void
