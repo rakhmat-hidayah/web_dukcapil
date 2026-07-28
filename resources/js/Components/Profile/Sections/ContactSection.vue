@@ -77,8 +77,8 @@
             <div class="space-y-3">
               <div class="flex items-center gap-2 text-xs font-bold text-gray-800 dark:text-zinc-200">
                 <span class="text-gray-400 font-normal">Email:</span>
-                <a :href="`mailto:${websiteSettings.office_email || 'dukcapil@dompukab.go.id'}`" class="hover:underline text-blue-600 dark:text-blue-400 break-all">
-                  {{ websiteSettings.office_email || 'dukcapil@dompukab.go.id' }}
+                <a :href="`mailto:${websiteSettings.office_email || 'dukcapilkabdompu@gmail.com'}`" class="hover:underline text-blue-600 dark:text-blue-400 break-all">
+                  {{ websiteSettings.office_email || 'dukcapilkabdompu@gmail.com' }}
                 </a>
               </div>
 

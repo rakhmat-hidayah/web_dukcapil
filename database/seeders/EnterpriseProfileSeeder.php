@@ -18,6 +18,11 @@ class EnterpriseProfileSeeder extends Seeder
 {
     public function run(): void
     {
+        // Protect existing production content from being overwritten
+        if (Official::count() > 0 && ProfileSection::count() > 0) {
+            return;
+        }
+
         // 1. Seed Profile Sections Registry
         $sections = [
             ['key' => 'hero', 'name' => 'Hero Banner Profil', 'description' => 'Header banner utama profil instansi', 'sort' => 1],

@@ -1,0 +1,1 @@
+function e(e,t=null){if(!e)return t;let n=String(e).trim();return n?n.startsWith(`http://`)||n.startsWith(`https://`)||n.startsWith(`/images/`)||n.startsWith(`/storage/`)?n:`/storage/`+n.replace(/^\/+/,``):t}export{e as t};

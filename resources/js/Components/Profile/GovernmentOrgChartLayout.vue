@@ -18,7 +18,7 @@
             <svg v-else class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           </div>
           <div class="overflow-hidden">
-            <h4 class="font-bold text-xs text-slate-900 dark:text-white truncate">{{ kadisOfficial?.name || 'Drs. Abd. Najib' }}</h4>
+            <h4 class="font-bold text-xs text-slate-900 dark:text-white truncate">{{ kadisOfficial?.name || 'Belum dikonfigurasi' }}</h4>
             <span v-if="kadisOfficial?.nip" class="inline-block text-[9.5px] font-mono text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-blue-100 dark:border-slate-700 truncate mt-1">NIP. {{ kadisOfficial.nip }}</span>
           </div>
         </div>

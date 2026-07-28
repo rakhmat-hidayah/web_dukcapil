@@ -7,7 +7,7 @@
       <div class="bg-primary-900 text-white text-[10px] py-2 px-6 flex justify-between items-center font-medium">
         <div class="flex items-center gap-4">
           <span>📍 Dompu, Nusa Tenggara Barat</span>
-          <span class="hidden sm:inline">✉️ {{ websiteSettings.office_email || 'dukcapil@dompukab.go.id' }}</span>
+          <span class="hidden sm:inline">✉️ {{ websiteSettings.office_email || 'dukcapilkabdompu@gmail.com' }}</span>
           <a v-if="websiteSettings.social_instagram" :href="websiteSettings.social_instagram" target="_blank" rel="noopener noreferrer" class="hidden md:inline hover:text-amber-300 transition font-bold">📸 Instagram</a>
           <a v-if="websiteSettings.social_facebook" :href="websiteSettings.social_facebook" target="_blank" rel="noopener noreferrer" class="hidden md:inline hover:text-amber-300 transition font-bold">🌐 Facebook</a>
         </div>
@@ -451,12 +451,12 @@
           <div class="flex flex-col items-center sm:items-start gap-2.5 font-medium text-gray-600 dark:text-zinc-400 text-xs leading-relaxed">
             <div class="flex items-start justify-center sm:justify-start gap-2">
               <span class="p-1 bg-amber-50 dark:bg-amber-950/40 text-amber-600 rounded-md shrink-0 mt-0.5">📍</span>
-              <span class="break-words">{{ websiteSettings.office_address || 'Jl. Bhayangkara No. 01, Dompu, NTB' }}</span>
+              <span class="break-words">{{ websiteSettings.office_address || 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211' }}</span>
             </div>
             <div class="flex items-center justify-center sm:justify-start gap-2">
               <span class="p-1 bg-blue-50 dark:bg-blue-950/40 text-blue-600 rounded-md shrink-0">✉️</span>
-              <a :href="`mailto:${websiteSettings.office_email || 'dukcapil@dompukab.go.id'}`" class="hover:underline font-semibold text-gray-800 dark:text-zinc-200 break-all">
-                {{ websiteSettings.office_email || 'dukcapil@dompukab.go.id' }}
+              <a :href="`mailto:${websiteSettings.office_email || 'dukcapilkabdompu@gmail.com'}`" class="hover:underline font-semibold text-gray-800 dark:text-zinc-200 break-all">
+                {{ websiteSettings.office_email || 'dukcapilkabdompu@gmail.com' }}
               </a>
             </div>
 

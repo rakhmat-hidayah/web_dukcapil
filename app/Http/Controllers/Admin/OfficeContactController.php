@@ -22,7 +22,7 @@ class OfficeContactController extends Controller
         return Inertia::render('Admin/OfficeContact/Index', [
             'settings' => [
                 'office_address'    => $settings['office_address'] ?? 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211',
-                'office_email'      => $settings['office_email'] ?? 'dukcapil@dompukab.go.id',
+                'office_email'      => $settings['office_email'] ?? 'dukcapilkabdompu@gmail.com',
                 'office_work_hours' => $settings['office_work_hours'] ?? 'Senin - Kamis: 08:00 - 16:00 WITA | Jumat: 08:00 - 11:30 WITA',
                 'whatsapp_number'   => $settings['whatsapp_number'] ?? '628111222333',
                 'social_instagram'  => $settings['social_instagram'] ?? 'https://instagram.com/dukcapil.dompu',
@@ -49,17 +49,13 @@ class OfficeContactController extends Controller
             'map_longitude'     => 'required|string|max:50',
         ]);
 
-        foreach ($data as $key => $val) {
-            WebsiteSetting::updateOrCreate(
-                ['key' => $key],
-                [
-                    'value' => (string) ($val ?? ''),
-                    'group' => 'office_contact',
-                ]
-            );
+        try {
+            foreach ($data as $key => $val) {
+                \App\Services\ConfigurationService::set($key, $val, 'office_contact', auth()->id(), 'Update via Pengaturan Kontak CMS');
+            }
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
-
-        WebsiteSetting::clearCache();
 
         ActivityLogger::log("Memperbarui Kontak Kantor, Media Sosial (IG/FB), & Peta Instansi", null, 'update_office_contact');
 

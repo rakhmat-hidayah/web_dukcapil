@@ -11,6 +11,10 @@ class EnterpriseNavigationSeeder extends Seeder
 {
     public function run(): void
     {
+        if (Menu::count() > 0 && MenuItem::count() > 0) {
+            return;
+        }
+
         Cache::forget('nav_menus');
         Cache::forget('nav_menus_v2');
 

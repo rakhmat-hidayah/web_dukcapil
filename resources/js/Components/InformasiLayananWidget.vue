@@ -168,7 +168,8 @@
         <div class="min-w-0">
           <p class="font-bold text-gray-800 dark:text-zinc-200 text-[11px]">Alamat Kantor Dinas:</p>
           <p class="text-[10px] text-gray-500 dark:text-zinc-400 leading-relaxed mt-0.5">
-            {{ settings.office_address || 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211' }}
+            <span v-if="settings.office_address">{{ settings.office_address }}</span>
+            <span v-else class="px-2 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-semibold rounded text-[9px]">Belum dikonfigurasi</span>
           </p>
         </div>
       </div>
@@ -221,17 +222,17 @@ const settings = computed(() => {
     mobile_service_status: ws.mobile_service_status || 'hari_ini',
     mobile_service_button_text: ws.mobile_service_button_text || 'Lihat Jadwal Lengkap',
     mobile_service_button_url: ws.mobile_service_button_url || '/layanan/mobile',
-    quick_help_whatsapp: ws.quick_help_whatsapp || 'https://wa.me/6282340001111',
-    quick_help_call_center: ws.quick_help_call_center || '(0373) 21123',
+    quick_help_whatsapp: ws.quick_help_whatsapp || '',
+    quick_help_call_center: ws.quick_help_call_center || '',
     quick_help_tracking_url: ws.quick_help_tracking_url || '/layanan/tracking',
-    quick_help_google_maps_url: ws.quick_help_google_maps_url || 'https://maps.google.com/?q=Dukcapil+Dompu',
-    quick_help_email: ws.quick_help_email || 'dukcapilkabdompu@gmail.com',
+    quick_help_google_maps_url: ws.quick_help_google_maps_url || '',
+    quick_help_email: ws.quick_help_email || '',
     quick_help_primary_button_text: ws.quick_help_primary_button_text || 'Hubungi Kami',
     quick_help_primary_button_url: ws.quick_help_primary_button_url || '/contact',
-    office_hours_mon_thu: ws.office_hours_mon_thu || '08.00 - 15.30 WITA',
-    office_hours_fri: ws.office_hours_fri || '08.00 - 11.30 WITA',
-    office_hours_weekend: ws.office_hours_weekend || 'Tutup (Online Active)',
-    office_address: ws.office_address || 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211',
+    office_hours_mon_thu: ws.office_hours_mon_thu || '',
+    office_hours_fri: ws.office_hours_fri || '',
+    office_hours_weekend: ws.office_hours_weekend || '',
+    office_address: ws.office_address || '',
   };
 });
 

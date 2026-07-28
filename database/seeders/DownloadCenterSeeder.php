@@ -13,6 +13,10 @@ class DownloadCenterSeeder extends Seeder
 {
     public function run(): void
     {
+        if (Download::count() > 0 && DownloadCategory::count() > 0) {
+            return;
+        }
+
         // 1. Disable FK checks and truncate tables
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         Download::truncate();

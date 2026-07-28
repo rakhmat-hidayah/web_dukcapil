@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /storage/framework/
+Disallow: /storage/logs/
+Disallow: /vendor/
+Allow: /api/v1/
+
+# Sitemap
+Sitemap: https://dukcapil.dompukab.go.id/sitemap.xml

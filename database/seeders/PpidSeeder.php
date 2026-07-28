@@ -10,6 +10,10 @@ class PpidSeeder extends Seeder
 {
     public function run(): void
     {
+        if (PpidPage::count() > 0 && PpidDocument::count() > 0) {
+            return;
+        }
+
         // ── STATIC PAGES ────────────────────────────────────────────
         $pages = [
             [

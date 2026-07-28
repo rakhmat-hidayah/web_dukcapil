@@ -48,7 +48,7 @@ const props = defineProps({
 const ws = computed(() => page.props.website_settings || {})
 
 const leaderName = computed(() => {
-  return ws.value.leader_name || props.setting?.leader_name || 'Drs. Abd. Najib'
+  return ws.value.leader_name || props.setting?.leader_name || 'Belum dikonfigurasi'
 })
 
 const leaderTitle = computed(() => {

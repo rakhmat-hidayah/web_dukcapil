@@ -85,16 +85,16 @@ class ThemeSettingSeeder extends Seeder
         }
 
         foreach ($settings as $setting) {
-            DB::table('theme_settings')->updateOrInsert(
-                ['key' => $setting['key']],
-                [
+            if (!DB::table('theme_settings')->where('key', $setting['key'])->exists()) {
+                DB::table('theme_settings')->insert([
+                    'key' => $setting['key'],
                     'value' => $setting['value'],
                     'type' => $setting['type'],
                     'group' => $setting['group'],
                     'created_at' => now(),
                     'updated_at' => now()
-                ]
-            );
+                ]);
+            }
         }
     }
 }

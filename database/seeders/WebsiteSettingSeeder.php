@@ -56,15 +56,16 @@ class WebsiteSettingSeeder extends Seeder
         ];
 
         foreach ($settings as $setting) {
-            DB::table('website_settings')->updateOrInsert(
-                ['key' => $setting['key']],
-                [
+            // Only insert if key does not exist yet to prevent overwriting CMS production settings
+            if (!DB::table('website_settings')->where('key', $setting['key'])->exists()) {
+                DB::table('website_settings')->insert([
+                    'key' => $setting['key'],
                     'value' => $setting['value'],
                     'group' => $setting['group'],
                     'created_at' => now(),
                     'updated_at' => now()
-                ]
-            );
+                ]);
+            }
         }
     }
 }
