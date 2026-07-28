@@ -22,8 +22,9 @@ class DashboardController extends Controller
         $thisMonthStart = date('Y-m-01');
 
         // -------------------------------------------------------------
-        // SECTION 1: WEBSITE HEALTH
+        // SECTION 1: WEBSITE HEALTH & CONFIGURATION INTEGRITY
         // -------------------------------------------------------------
+        $configHealth = \App\Services\ConfigurationService::checkIntegrity();
         $dbLatency = $this->measureLatency(fn() => DB::select('SELECT 1'));
         $healthServices = [
             [
@@ -578,6 +579,7 @@ class DashboardController extends Controller
         ];
 
         return Inertia::render('Admin/Dashboard', [
+            'configurationHealth' => $configHealth,
             'healthServices' => $healthServices,
             'executiveSummary' => $executiveSummary,
             'contentStatus' => $contentStatus,

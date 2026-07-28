@@ -37,6 +37,69 @@
         </div>
       </div>
 
+      <!-- SECTION 0: ENTERPRISE CONFIGURATION HEALTH DASHBOARD -->
+      <div v-if="configurationHealth" class="p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-md space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-zinc-800">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-xl shrink-0">
+              🛡️
+            </div>
+            <div>
+              <h3 class="text-sm font-black text-gray-900 dark:text-zinc-100 tracking-tight">Configuration &amp; Integrity Health Check</h3>
+              <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-0.5">Audit real-time single source of truth, media assets, URL SEO, dan Production Lock</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <span 
+              :class="configurationHealth.is_healthy ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'"
+              class="px-3 py-1 rounded-xl text-xs font-black border flex items-center gap-1.5"
+            >
+              <span>{{ configurationHealth.is_healthy ? '✔ STATUS SEHAT (PASSED)' : '⚠️ ATTENTION REQUIRED' }}</span>
+            </span>
+
+            <span 
+              :class="configurationHealth.production_lock ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20'"
+              class="px-3 py-1 rounded-xl text-xs font-black border flex items-center gap-1.5"
+            >
+              🔒 LOCK: {{ configurationHealth.production_lock ? 'ACTIVE (PRODUCTION)' : 'UNLOCKED' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div class="p-3.5 bg-gray-50 dark:bg-zinc-800/40 rounded-2xl border border-gray-100 dark:border-zinc-800">
+            <span class="text-gray-400 text-[10px] uppercase font-bold block">Total Kunci DB</span>
+            <span class="text-sm font-extrabold text-gray-800 dark:text-zinc-200 mt-0.5 block">{{ configurationHealth.total_keys_count }} Settings</span>
+          </div>
+          <div class="p-3.5 bg-gray-50 dark:bg-zinc-800/40 rounded-2xl border border-gray-100 dark:border-zinc-800">
+            <span class="text-gray-400 text-[10px] uppercase font-bold block">Integritas Media</span>
+            <span :class="configurationHealth.media_issues?.length ? 'text-rose-600 font-bold' : 'text-emerald-600 font-extrabold'" class="text-sm mt-0.5 block">
+              {{ configurationHealth.media_issues?.length ? configurationHealth.media_issues.length + ' Masalah Asset' : '✔ 100% Valid' }}
+            </span>
+          </div>
+          <div class="p-3.5 bg-gray-50 dark:bg-zinc-800/40 rounded-2xl border border-gray-100 dark:border-zinc-800">
+            <span class="text-gray-400 text-[10px] uppercase font-bold block">Format URL &amp; SEO</span>
+            <span :class="configurationHealth.url_warnings?.length ? 'text-amber-600 font-bold' : 'text-emerald-600 font-extrabold'" class="text-sm mt-0.5 block">
+              {{ configurationHealth.url_warnings?.length ? configurationHealth.url_warnings.length + ' Peringatan' : '✔ Valid' }}
+            </span>
+          </div>
+          <div class="p-3.5 bg-gray-50 dark:bg-zinc-800/40 rounded-2xl border border-gray-100 dark:border-zinc-800">
+            <span class="text-gray-400 text-[10px] uppercase font-bold block">Audit Trail Logging</span>
+            <span class="text-sm font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5 block">ActivityLog Active</span>
+          </div>
+        </div>
+
+        <div v-if="configurationHealth.empty_keys?.length || configurationHealth.media_issues?.length" class="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-xs text-amber-800 dark:text-amber-300 space-y-1">
+          <p class="font-bold text-[11px]">⚠️ Catatan Integritas Konfigurasi:</p>
+          <ul class="list-disc list-inside text-[11px] space-y-0.5">
+            <li v-for="(msg, i) in [...(configurationHealth.empty_keys || []), ...(configurationHealth.media_issues || [])]" :key="i">
+              {{ msg }}
+            </li>
+          </ul>
+        </div>
+      </div>
+
       <!-- SECTION 1: WEBSITE HEALTH -->
       <WebsiteHealthWidget 
         :services="healthServices"
@@ -154,6 +217,7 @@ import PendingTasksWidget from '@/Components/Dashboard/PendingTasksWidget.vue';
 import QuickActionsWidget from '@/Components/Dashboard/QuickActionsWidget.vue';
 
 const props = defineProps({
+  configurationHealth: Object,
   healthServices: Array,
   executiveSummary: Array,
   contentStatus: Object,

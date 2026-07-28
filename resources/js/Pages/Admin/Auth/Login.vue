@@ -27,59 +27,75 @@
 
           <!-- Login Form -->
           <form @submit.prevent="submit" class="space-y-5">
-            <!-- Rate Limit / Global Error -->
-            <div v-if="form.errors.email && form.errors.email.includes('Terlalu banyak')" class="p-3.5 bg-rose-950/80 border border-rose-500/40 rounded-2xl text-xs font-semibold text-rose-300 shadow-sm">
-              ⚠️ {{ form.errors.email }}
+            <!-- Rate Limit / Global Error Banner -->
+            <div
+              v-if="form.errors.username && (form.errors.username.includes('Terlalu banyak') || form.errors.username.includes('dikunci'))"
+              class="p-3.5 bg-rose-950/80 border border-rose-500/40 rounded-2xl text-xs font-semibold text-rose-300 shadow-sm"
+            >
+              ⚠️ {{ form.errors.username }}
             </div>
 
             <!-- Honeypot (hidden field for bots) -->
-            <div class="hidden">
-              <input type="text" v-model="form.honeypot" tabindex="-1" autocomplete="off" />
+            <div class="hidden" aria-hidden="true">
+              <input type="text" v-model="form.honeypot" tabindex="-1" autocomplete="off" name="website" />
             </div>
 
-            <!-- Email Address Field -->
+            <!-- Username Field -->
             <div>
-              <label class="block text-[11px] font-extrabold uppercase tracking-wider text-zinc-300 mb-1.5">Alamat Email</label>
+              <label for="login-username" class="block text-[11px] font-extrabold uppercase tracking-wider text-zinc-300 mb-1.5">
+                Username
+              </label>
               <div class="relative">
                 <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-zinc-400 pointer-events-none">
+                  <!-- User icon -->
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </span>
-                <input 
-                  type="email" 
-                  v-model="form.email" 
+                <input
+                  id="login-username"
+                  type="text"
+                  v-model="form.username"
                   required
-                  placeholder="admin@dompukab.go.id"
-                  class="w-full pl-11 pr-4 py-3 bg-zinc-950/90 border border-zinc-700/80 rounded-2xl text-white placeholder-zinc-500 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-inner"
+                  autocomplete="username"
+                  placeholder="Masukkan username Anda"
+                  spellcheck="false"
+                  class="w-full pl-11 pr-4 py-3 bg-zinc-950/90 border border-zinc-700/80 rounded-2xl text-white placeholder-zinc-500 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-inner lowercase"
+                  @input="form.username = form.username.toLowerCase().replace(/[^a-z0-9_]/g, '')"
                 />
               </div>
-              <span v-if="form.errors.email && !form.errors.email.includes('Terlalu banyak')" class="text-xs font-semibold text-rose-400 mt-1.5 block">
-                {{ form.errors.email }}
+              <span
+                v-if="form.errors.username && !form.errors.username.includes('Terlalu banyak') && !form.errors.username.includes('dikunci')"
+                class="text-xs font-semibold text-rose-400 mt-1.5 block"
+              >
+                {{ form.errors.username }}
               </span>
+              <p class="text-[10px] text-zinc-600 mt-1">Huruf kecil, angka, dan underscore (_). Min. 4 karakter.</p>
             </div>
 
             <!-- Password Field -->
             <div>
-              <label class="block text-[11px] font-extrabold uppercase tracking-wider text-zinc-300 mb-1.5">Kata Sandi</label>
+              <label for="login-password" class="block text-[11px] font-extrabold uppercase tracking-wider text-zinc-300 mb-1.5">Kata Sandi</label>
               <div class="relative">
                 <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-zinc-400 pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </span>
-                <input 
-                  :type="showPassword ? 'text' : 'password'" 
-                  v-model="form.password" 
+                <input
+                  id="login-password"
+                  :type="showPassword ? 'text' : 'password'"
+                  v-model="form.password"
                   required
+                  autocomplete="current-password"
                   placeholder="••••••••"
                   class="w-full pl-11 pr-11 py-3 bg-zinc-950/90 border border-zinc-700/80 rounded-2xl text-white placeholder-zinc-500 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-inner"
                 />
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   @click="showPassword = !showPassword"
                   class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-400 hover:text-white transition focus:outline-none"
-                  title="Tampilkan / Sembunyikan Kata Sandi"
+                  :title="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
                 >
                   <Eye v-if="!showPassword" class="w-5 h-5" />
                   <EyeOff v-else class="w-5 h-5" />
@@ -96,12 +112,12 @@
               <div class="grid grid-cols-2 gap-3 items-center">
                 <!-- Crisp High-Contrast White CAPTCHA Frame -->
                 <div class="relative bg-white border border-zinc-300 rounded-2xl p-1 flex items-center justify-between overflow-hidden shadow-inner group">
-                  <img :src="currentCaptcha" class="h-12 w-full object-contain rounded-xl bg-white select-none" alt="CAPTCHA Verification Code" />
-                  <button 
+                  <img :src="currentCaptcha" class="h-12 w-full object-contain rounded-xl bg-white select-none" alt="Kode CAPTCHA Verifikasi" />
+                  <button
                     type="button"
-                    @click="refreshCaptcha" 
+                    @click="refreshCaptcha"
                     class="absolute right-1.5 top-2 p-1.5 bg-slate-900/90 hover:bg-slate-900 text-white rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95"
-                    title="Perbarui Kode CAPTCHA Baru"
+                    title="Perbarui Kode CAPTCHA"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3" />
@@ -110,9 +126,9 @@
                 </div>
 
                 <!-- Input CAPTCHA Code -->
-                <input 
-                  type="text" 
-                  v-model="form.captcha" 
+                <input
+                  type="text"
+                  v-model="form.captcha"
                   required
                   placeholder="Kode CAPTCHA"
                   autocomplete="off"
@@ -133,8 +149,8 @@
             </div>
 
             <!-- Submit Login Button -->
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               :disabled="form.processing"
               class="w-full py-3.5 bg-gradient-to-r from-blue-600 via-primary-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-blue-600/30 active:scale-[0.98] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:scale-100 cursor-pointer"
             >
@@ -173,9 +189,9 @@ const currentCaptcha = ref(props.captchaImage);
 const showPassword = ref(false);
 
 const form = useForm({
-  email: '',
+  username: '',
   password: '',
-  captcha: '',
+  captcha:  '',
   honeypot: '',
   remember: false,
 });
@@ -196,7 +212,7 @@ const submit = () => {
   form.post('/admin/login', {
     onFinish: () => {
       form.password = '';
-      form.captcha = '';
+      form.captcha  = '';
       refreshCaptcha();
     },
   });

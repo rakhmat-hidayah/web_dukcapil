@@ -370,6 +370,7 @@ const menuGroups = [
   {
     title: 'System Settings',
     items: [
+      { label: 'Keamanan Akun (2FA)', route: 'admin.security.index', icon: ShieldCheck },
       { label: 'Kontak & Lokasi Kantor', route: 'admin.office-contact.index', icon: MapPin },
       { label: 'User & Roles', route: 'admin.users.index', icon: UsersRound },
       { label: 'Layanan SANAI (CMS)', route: 'admin.external-services.index', icon: Globe },
@@ -403,8 +404,8 @@ const filteredMenuGroups = computed(() => {
     const items = group.items.filter(item => {
       const r = item.route;
 
-      // Always allow main Overview Dashboard to all authenticated operators
-      if (r === 'admin.dashboard') {
+      // Always allow main Overview Dashboard & Security page to all authenticated operators
+      if (r === 'admin.dashboard' || r === 'admin.security.index') {
         return true;
       }
 

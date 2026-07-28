@@ -67,21 +67,21 @@ class BannerController extends Controller
 
         if ($request->hasFile('image')) {
             if ($banner->image) {
-                Storage::disk('public')->delete($banner->image);
+                MediaStorage::delete($banner->image);
             }
             $img = Image::decode($request->file('image'))->scale(width: 1920);
             $path = 'banners/' . Str::uuid() . '.webp';
-            \App\Services\MediaStorage::put($path, (string) $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
+            MediaStorage::put($path, (string) $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
             $data['image'] = $path;
         }
 
         if ($request->hasFile('image_mobile')) {
             if ($banner->image_mobile) {
-                Storage::disk('public')->delete($banner->image_mobile);
+                MediaStorage::delete($banner->image_mobile);
             }
             $mobileImg = Image::decode($request->file('image_mobile'))->scale(width: 768);
             $mobilePath = 'banners/mobile-' . Str::uuid() . '.webp';
-            \App\Services\MediaStorage::put($mobilePath, (string) $mobileImg->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
+            MediaStorage::put($mobilePath, (string) $mobileImg->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 85)));
             $data['image_mobile'] = $mobilePath;
         }
 
@@ -102,9 +102,11 @@ class BannerController extends Controller
 
     public function destroy(Banner $banner): RedirectResponse
     {
-        $filesToDelete = array_filter([$banner->image, $banner->image_mobile]);
-        if (!empty($filesToDelete)) {
-            Storage::disk('public')->delete($filesToDelete);
+        if ($banner->image) {
+            MediaStorage::delete($banner->image);
+        }
+        if ($banner->image_mobile) {
+            MediaStorage::delete($banner->image_mobile);
         }
         $banner->delete();
         return redirect()->back()->with('success', 'Banner berhasil dihapus.');

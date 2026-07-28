@@ -74,7 +74,7 @@ class PageController extends Controller
         if ($request->hasFile('og_image')) {
             $img = Image::decode($request->file('og_image'))->scale(width: 1200);
             $path = 'pages/' . Str::uuid() . '.webp';
-            Storage::disk('public')->put($path, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
+            \App\Services\MediaStorage::put($path, (string) $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
             $data['og_image'] = $path;
         }
 
@@ -120,11 +120,11 @@ class PageController extends Controller
 
         if ($request->hasFile('og_image')) {
             if ($page->og_image) {
-                Storage::disk('public')->delete($page->og_image);
+                \App\Services\MediaStorage::delete($page->og_image);
             }
             $img = Image::decode($request->file('og_image'))->scale(width: 1200);
             $path = 'pages/' . Str::uuid() . '.webp';
-            Storage::disk('public')->put($path, $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
+            \App\Services\MediaStorage::put($path, (string) $img->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80)));
             $data['og_image'] = $path;
         }
 

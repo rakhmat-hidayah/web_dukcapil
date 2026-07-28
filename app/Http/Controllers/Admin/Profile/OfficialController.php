@@ -102,10 +102,13 @@ class OfficialController extends Controller
 
         if ($request->boolean('remove_photo')) {
             if ($official->photo) {
-                Storage::disk('public')->delete($official->photo);
+                MediaStorage::delete($official->photo);
             }
             $data['photo'] = null;
         } elseif ($request->hasFile('photo')) {
+            if ($official->photo) {
+                MediaStorage::delete($official->photo);
+            }
             $data['photo'] = \App\Services\MediaStorage::store($request->file('photo'), 'officials');
         }
 

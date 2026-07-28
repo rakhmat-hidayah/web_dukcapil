@@ -38,6 +38,7 @@
 <script setup>
 import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
+import { storageUrl } from '@/utils/storage'
 
 const page = usePage()
 
@@ -62,12 +63,7 @@ const speechTitle = computed(() => {
 const leaderPhotoUrl = computed(() => {
   const photo = ws.value.leader_photo || props.setting?.leader_photo
   if (!photo) return '/images/kepala_dinas.jpg'
-  // Full URL or /images/ path → gunakan langsung
-  if (photo.startsWith('http://') || photo.startsWith('https://') || photo.startsWith('/images/')) return photo
-  // Sudah punya /storage/ prefix → jangan tambah lagi
-  if (photo.startsWith('/storage/')) return photo
-  // Relative path (misal: leader/xxx.png) → tambah /storage/
-  return `/storage/${photo}`
+  return storageUrl(photo, '/images/kepala_dinas.jpg')
 })
 
 const speechParagraphs = computed(() => {

@@ -66,16 +66,16 @@ class FileManagerService
                 };
                 $compressedData = (string) $img->encode($encoder);
                 
-                Storage::disk('public')->put($storagePath, $compressedData);
+                $storagePath = MediaStorage::put($storagePath, $compressedData);
                 $size = strlen($compressedData); // update size to compressed size
             } catch (\Exception $e) {
                 // If optimization fails, fallback to normal storage
                 \Log::warning('Image optimization failed, falling back: ' . $e->getMessage());
-                $file->storeAs($subDirectory, $filename, 'public');
+                $storagePath = MediaStorage::store($file, 'file_manager');
             }
         } else {
-            // Store file as is
-            $file->storeAs($subDirectory, $filename, 'public');
+            // Store file directly into public/uploads/file_manager
+            $storagePath = MediaStorage::store($file, 'file_manager');
         }
 
         // Determine version number

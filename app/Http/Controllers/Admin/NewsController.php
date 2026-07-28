@@ -138,12 +138,12 @@ class NewsController extends Controller
         // Handle thumbnail
         if ($request->boolean('remove_thumbnail')) {
             if ($news->thumbnail) {
-                Storage::disk('public')->delete($news->thumbnail);
+                \App\Services\MediaStorage::delete($news->thumbnail);
             }
             $data['thumbnail'] = null;
         } elseif ($request->hasFile('thumbnail')) {
             if ($news->thumbnail) {
-                Storage::disk('public')->delete($news->thumbnail);
+                \App\Services\MediaStorage::delete($news->thumbnail);
             }
             $beritaFolder = \App\Models\FileFolder::firstOrCreate(
                 ['name' => 'Berita'],
@@ -169,7 +169,7 @@ class NewsController extends Controller
     {
         $title = $news->title;
         if ($news->thumbnail) {
-            Storage::disk('public')->delete($news->thumbnail);
+            \App\Services\MediaStorage::delete($news->thumbnail);
         }
         $news->forceDelete();
 

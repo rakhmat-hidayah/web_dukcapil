@@ -46,18 +46,11 @@ class ThemeController extends Controller
         foreach ($fileKeys as $key) {
             if ($request->hasFile($key)) {
                 $file = $request->file($key);
-                $originalName = $file->getClientOriginalName();
-                $extension = $file->getClientOriginalExtension();
-                $filename = "{$key}_" . time() . ".{$extension}";
-                
-                // Store in public brand path
-                $path = $file->storeAs('brand', $filename, 'public');
-                $publicUrl = Storage::disk('public')->url($path);
+                $path = \App\Services\MediaStorage::store($file, 'logos', $key);
 
-                // Update settings values
                 ThemeSetting::updateOrCreate(
                     ['key' => $key],
-                    ['value' => $publicUrl, 'type' => 'image', 'group' => 'brand']
+                    ['value' => $path, 'type' => 'image', 'group' => 'brand']
                 );
             }
         }

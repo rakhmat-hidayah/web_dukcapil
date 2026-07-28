@@ -47,7 +47,7 @@ class HandleInertiaRequests extends Middleware
             
             // Auth details with granular roles and permissions
             'auth' => [
-                'user' => $user ? $user->only('id', 'name', 'email') : null,
+                'user' => $user ? $user->only('id', 'username', 'name', 'email', 'is_active', 'last_login_at') : null,
                 'roles' => $user ? $user->getRoleNames() : [],
                 'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
             ],

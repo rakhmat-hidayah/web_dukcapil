@@ -7,23 +7,10 @@ use Illuminate\Console\Command;
 
 class CheckConfigurationIntegrity extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'config:check-integrity';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Check database website settings integrity against required schemas and validate format rules';
+    protected $description = 'Check database website settings, media assets, URLs, and SEO integrity';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
         $this->info("====================================================");
@@ -39,7 +26,7 @@ class CheckConfigurationIntegrity extends Command
         $this->newLine();
 
         if (!empty($report['missing_keys'])) {
-            $this->warn("Missing Keys:");
+            $this->warn("Missing Required Keys:");
             foreach ($report['missing_keys'] as $item) {
                 $this->line("  ❌ $item");
             }
@@ -47,23 +34,31 @@ class CheckConfigurationIntegrity extends Command
         }
 
         if (!empty($report['empty_keys'])) {
-            $this->warn("Empty Keys:");
+            $this->warn("Empty Required Values:");
             foreach ($report['empty_keys'] as $item) {
                 $this->line("  ⚠️ $item");
             }
             $this->newLine();
         }
 
-        if (!empty($report['warnings'])) {
-            $this->warn("Format Warnings:");
-            foreach ($report['warnings'] as $item) {
-                $this->line("  ⚠️ $item");
+        if (!empty($report['media_issues'])) {
+            $this->error("Broken Media Asset References:");
+            foreach ($report['media_issues'] as $item) {
+                $this->line("  🖼️ $item");
+            }
+            $this->newLine();
+        }
+
+        if (!empty($report['url_warnings'])) {
+            $this->warn("URL & Format Warnings:");
+            foreach ($report['url_warnings'] as $item) {
+                $this->line("  🔗 $item");
             }
             $this->newLine();
         }
 
         if ($report['is_healthy']) {
-            $this->info("✔ All configuration keys pass integrity check!");
+            $this->info("✔ All configuration keys, media assets, URLs, and SEO rules pass integrity check!");
             return Command::SUCCESS;
         }
 

@@ -268,7 +268,7 @@ class DemographicController extends Controller
 
         if ($request->hasFile('file')) {
             $file     = $request->file('file');
-            $filePath = $file->store('demographics', 'public');
+            $filePath = \App\Services\MediaStorage::store($file, 'demographics');
             $fileSize = $file->getSize();
             $fileType = $file->getClientOriginalExtension();
         }
@@ -356,7 +356,7 @@ class DemographicController extends Controller
     public function destroyDataset(DemographicDataset $dataset): RedirectResponse
     {
         if ($dataset->file_path) {
-            Storage::disk('public')->delete($dataset->file_path);
+            \App\Services\MediaStorage::delete($dataset->file_path);
         }
         $dataset->delete();
         return back()->with('success', 'Dataset dihapus.');

@@ -88,7 +88,7 @@ class PpidController extends Controller
 
         if ($request->hasFile('file')) {
             $file   = $request->file('file');
-            $path   = $file->store('ppid-documents', 'public');
+            $path   = \App\Services\MediaStorage::store($file, 'ppid-documents', Str::slug($request->title));
             $validated['file_path'] = $path;
             $validated['file_type'] = $file->getClientOriginalExtension();
             $validated['file_size'] = $file->getSize();
@@ -126,14 +126,14 @@ class PpidController extends Controller
         ]);
 
         if ($request->boolean('remove_file')) {
-            if ($document->file_path) Storage::disk('public')->delete($document->file_path);
+            if ($document->file_path) \App\Services\MediaStorage::delete($document->file_path);
             $validated['file_path'] = null;
             $validated['file_type'] = null;
             $validated['file_size'] = null;
         } elseif ($request->hasFile('file')) {
-            if ($document->file_path) Storage::disk('public')->delete($document->file_path);
+            if ($document->file_path) \App\Services\MediaStorage::delete($document->file_path);
             $file   = $request->file('file');
-            $path   = $file->store('ppid-documents', 'public');
+            $path   = \App\Services\MediaStorage::store($file, 'ppid-documents', Str::slug($request->title));
             $validated['file_path'] = $path;
             $validated['file_type'] = $file->getClientOriginalExtension();
             $validated['file_size'] = $file->getSize();
@@ -148,7 +148,7 @@ class PpidController extends Controller
 
     public function documentsDestroy(PpidDocument $document): RedirectResponse
     {
-        if ($document->file_path) Storage::disk('public')->delete($document->file_path);
+        if ($document->file_path) \App\Services\MediaStorage::delete($document->file_path);
         $document->delete();
 
         return back()->with('success', 'Dokumen berhasil dihapus.');

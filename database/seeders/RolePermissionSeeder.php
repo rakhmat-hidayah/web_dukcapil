@@ -12,13 +12,16 @@ class RolePermissionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * Safe to re-run: uses updateOrCreate so existing production data is not overwritten.
      */
     public function run(): void
     {
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Define permissions
+        // -------------------------------------------------------
+        // DEFINE PERMISSIONS
+        // -------------------------------------------------------
         $permissions = [
             'manage_settings',
             'manage_themes',
@@ -39,18 +42,19 @@ class RolePermissionSeeder extends Seeder
             'view_analytics',
         ];
 
-        // Create permissions
         foreach ($permissions as $permissionName) {
             Permission::findOrCreate($permissionName);
         }
 
-        // Create roles and assign existing permissions
-        
-        // 1. Super Administrator
+        // -------------------------------------------------------
+        // DEFINE ROLES
+        // -------------------------------------------------------
+
+        // 1. Super Administrator — full access
         $superAdminRole = Role::findOrCreate('Super Administrator');
         $superAdminRole->givePermissionTo(Permission::all());
 
-        // 2. Website Administrator
+        // 2. Website Administrator — full CMS, no user/role management
         $webAdminRole = Role::findOrCreate('Website Administrator');
         $webAdminRole->givePermissionTo([
             'manage_settings',
@@ -70,7 +74,7 @@ class RolePermissionSeeder extends Seeder
             'view_analytics',
         ]);
 
-        // 3. Content Editor
+        // 3. Content Editor — content only
         $contentEditorRole = Role::findOrCreate('Content Editor');
         $contentEditorRole->givePermissionTo([
             'manage_file_manager',
@@ -82,14 +86,14 @@ class RolePermissionSeeder extends Seeder
             'manage_faq',
         ]);
 
-        // 4. News Operator
+        // 4. News Operator — news only
         $newsOperatorRole = Role::findOrCreate('News Operator');
         $newsOperatorRole->givePermissionTo([
             'manage_file_manager',
             'manage_news',
         ]);
 
-        // 5. Publication Operator
+        // 5. Publication Operator — downloads & publications
         $pubOperatorRole = Role::findOrCreate('Publication Operator');
         $pubOperatorRole->givePermissionTo([
             'manage_file_manager',
@@ -97,38 +101,48 @@ class RolePermissionSeeder extends Seeder
             'manage_publications',
         ]);
 
-        // 6. Complaint Officer
+        // 6. Complaint Officer — complaints & surveys
         $complaintOfficerRole = Role::findOrCreate('Complaint Officer');
         $complaintOfficerRole->givePermissionTo([
             'manage_complaints',
         ]);
 
-        // 7. Media Manager
+        // 7. Media Manager — file manager only
         $mediaManagerRole = Role::findOrCreate('Media Manager');
         $mediaManagerRole->givePermissionTo([
             'manage_file_manager',
         ]);
 
-        // Create default Super Admin user for local deployment
+        // -------------------------------------------------------
+        // SEED DEFAULT SYSTEM USERS
+        // -------------------------------------------------------
+
+        // Super Admin — username: superadmin
         $superAdminUser = User::updateOrCreate(
             ['email' => 'admin@dompukab.go.id'],
             [
-                'name' => 'Super Administrator',
-                'password' => Hash::make('password123'),
-                'email_verified_at' => now(),
+                'username'           => 'superadmin',
+                'name'               => 'Super Administrator',
+                'password'           => Hash::make('password123'),
+                'email_verified_at'  => now(),
+                'is_active'          => true,
+                'failed_login_count' => 0,
             ]
         );
-        $superAdminUser->assignRole($superAdminRole);
+        $superAdminUser->syncRoles([$superAdminRole]);
 
-        // Create a few default users for testing
+        // Complaint Officer — username: complaint_officer
         $complaintOfficerUser = User::updateOrCreate(
             ['email' => 'complaint@dompukab.go.id'],
             [
-                'name' => 'Petugas Pengaduan',
-                'password' => Hash::make('password123'),
-                'email_verified_at' => now(),
+                'username'           => 'complaint_officer',
+                'name'               => 'Petugas Pengaduan',
+                'password'           => Hash::make('password123'),
+                'email_verified_at'  => now(),
+                'is_active'          => true,
+                'failed_login_count' => 0,
             ]
         );
-        $complaintOfficerUser->assignRole($complaintOfficerRole);
+        $complaintOfficerUser->syncRoles([$complaintOfficerRole]);
     }
 }

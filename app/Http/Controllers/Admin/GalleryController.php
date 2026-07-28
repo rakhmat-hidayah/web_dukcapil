@@ -74,7 +74,7 @@ class GalleryController extends Controller
 
         if ($request->hasFile('cover_image')) {
             if ($galleryAlbum->cover_image) {
-                Storage::disk('public')->delete($galleryAlbum->cover_image);
+                \App\Services\MediaStorage::delete($galleryAlbum->cover_image);
             }
             $file = $request->file('cover_image');
             $img = Image::decode($file)->cover(600, 400);
@@ -91,11 +91,10 @@ class GalleryController extends Controller
     {
         // Delete all items
         foreach ($galleryAlbum->items as $item) {
-            $filesToDelete = array_filter([$item->file_path, $item->thumbnail]);
-            if (!empty($filesToDelete)) {
-                Storage::disk('public')->delete($filesToDelete);
-            }
+            if ($item->file_path) \App\Services\MediaStorage::delete($item->file_path);
+            if ($item->thumbnail) \App\Services\MediaStorage::delete($item->thumbnail);
         }
+        if ($galleryAlbum->cover_image) \App\Services\MediaStorage::delete($galleryAlbum->cover_image);
         $galleryAlbum->delete();
         return redirect()->back()->with('success', 'Album berhasil dihapus.');
     }
@@ -150,10 +149,8 @@ class GalleryController extends Controller
 
     public function destroyItem(GalleryItem $galleryItem): RedirectResponse
     {
-        $filesToDelete = array_filter([$galleryItem->file_path, $galleryItem->thumbnail]);
-        if (!empty($filesToDelete)) {
-            Storage::disk('public')->delete($filesToDelete);
-        }
+        if ($galleryItem->file_path) \App\Services\MediaStorage::delete($galleryItem->file_path);
+        if ($galleryItem->thumbnail) \App\Services\MediaStorage::delete($galleryItem->thumbnail);
         $galleryItem->delete();
         return redirect()->back()->with('success', 'Media berhasil dihapus.');
     }

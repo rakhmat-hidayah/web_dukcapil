@@ -22,7 +22,12 @@ class DownloadController extends Controller
 
         $doc = Download::findOrFail($id);
 
-        if (!Storage::disk('public')->exists($doc->file_path)) {
+        $fullPath = public_path($doc->file_path);
+        if (!file_exists($fullPath) || !is_file($fullPath)) {
+            $fullPath = public_path('uploads/' . ltrim($doc->file_path, '/'));
+        }
+
+        if (!file_exists($fullPath) || !is_file($fullPath)) {
             abort(404, 'File fisik tidak ditemukan di server.');
         }
 
@@ -30,6 +35,6 @@ class DownloadController extends Controller
         $doc->increment('download_count');
 
         // 3. Stream file securely without exposing physical paths
-        return response()->download(Storage::disk('public')->path($doc->file_path), $doc->file_name);
+        return response()->download($fullPath, $doc->file_name);
     }
 }

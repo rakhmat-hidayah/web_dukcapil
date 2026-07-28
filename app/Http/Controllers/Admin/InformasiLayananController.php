@@ -196,7 +196,8 @@ class InformasiLayananController extends Controller
 
         if ($request->hasFile('leader_photo_file')) {
             $path = \App\Services\MediaStorage::store($request->file('leader_photo_file'), 'leader');
-            $data['leader_photo'] = '/storage/' . $path;
+            // $path sudah berformat 'uploads/leader/...' — simpan langsung tanpa tambahan prefix
+            $data['leader_photo'] = $path;
         } elseif (isset($data['leader_photo']) && $data['leader_photo'] === '/images/kepala_dinas.jpg') {
             $existing = WebsiteSetting::where('key', 'leader_photo')->first();
             if ($existing && $existing->value && $existing->value !== '/images/kepala_dinas.jpg') {

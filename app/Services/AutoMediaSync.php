@@ -10,17 +10,16 @@ class AutoMediaSync
     public static function sync(): void
     {
         try {
-            $basePath = base_path();
-            $publicStorage = public_path('storage');
+            $publicUploads = public_path('uploads');
             $storageAppPublic = storage_path('app/public');
 
             $subDirs = [
                 'officials', 'banners', 'branding', 'news', 'leader', 'gallery',
-                'gallery/covers', 'gallery/1', 'downloads', 'downloads/forms',
-                'file_manager', 'ppid-documents', 'ppid-responses', 'complaints', 'demographics'
+                'gallery/covers', 'downloads', 'file_manager', 'ppid-documents',
+                'ppid-responses', 'complaints', 'demographics', 'logos', 'favicon'
             ];
 
-            foreach ([$publicStorage, $storageAppPublic] as $targetDir) {
+            foreach ([$publicUploads, $storageAppPublic] as $targetDir) {
                 if (!is_dir($targetDir)) @mkdir($targetDir, 0775, true);
                 foreach ($subDirs as $sd) {
                     $p = $targetDir . '/' . $sd;
@@ -28,47 +27,20 @@ class AutoMediaSync
                 }
             }
 
-            // 1. Copy from storage/app/public -> public/storage if missing
-            self::copyMissing($storageAppPublic, $publicStorage);
+            // 1. Copy missing from storage/app/public -> public/uploads
+            self::copyMissing($storageAppPublic, $publicUploads);
 
-            // 2. Scan misplaced root folders (e.g. httpdocs/gallery, httpdocs/officials)
-            $mediaTypes = ['gallery', 'officials', 'banners', 'leader', 'news', 'downloads', 'branding', 'complaints'];
-            foreach ($mediaTypes as $mt) {
-                $misplaced = $basePath . '/' . $mt;
-                if (is_dir($misplaced)) {
-                    self::copyMissing($misplaced, $publicStorage . '/' . $mt);
-                    self::copyMissing($misplaced, $storageAppPublic . '/' . $mt);
-                }
-            }
-
-            // 3. Fix leader photo setting in DB if default or missing file
+            // 2. Fix leader photo setting in DB if pointing to old /storage/
             $leaderRow = DB::table('website_settings')->where('key', 'leader_photo')->first();
-            if (!$leaderRow || $leaderRow->value === '/images/kepala_dinas.jpg' || !file_exists(public_path(ltrim($leaderRow->value, '/')))) {
-                $leaderFiles = glob($publicStorage . '/leader/*.*');
-                if (!empty($leaderFiles)) {
-                    $fn = basename($leaderFiles[0]);
-                    DB::table('website_settings')->updateOrInsert(
-                        ['key' => 'leader_photo'],
-                        ['value' => '/storage/leader/' . $fn, 'group' => 'pimpinan', 'updated_at' => now()]
-                    );
-                    \App\Models\WebsiteSetting::clearCache();
-                    \Illuminate\Support\Facades\Cache::forget('website_settings_all');
-                }
+            if ($leaderRow && str_contains($leaderRow->value, '/storage/')) {
+                $newValue = str_replace('/storage/', 'uploads/', $leaderRow->value);
+                DB::table('website_settings')->where('key', 'leader_photo')->update([
+                    'value' => $newValue,
+                    'updated_at' => now()
+                ]);
+                \App\Models\WebsiteSetting::clearCache();
             }
 
-            // 4. Fix banner images in DB if missing file
-            $banners = DB::table('banners')->whereNull('deleted_at')->get();
-            $bannerFiles = array_values(array_filter(scandir($publicStorage . '/banners') ?: [], fn($f) => $f !== '.' && $f !== '..'));
-            if (!empty($bannerFiles)) {
-                $bi = 0;
-                foreach ($banners as $b) {
-                    if (!$b->image || !file_exists($publicStorage . '/' . $b->image)) {
-                        $newImg = 'banners/' . $bannerFiles[$bi % count($bannerFiles)];
-                        DB::table('banners')->where('id', $b->id)->update(['image' => $newImg, 'updated_at' => now()]);
-                        $bi++;
-                    }
-                }
-            }
         } catch (\Throwable $e) {
             Log::error('AutoMediaSync error: ' . $e->getMessage());
         }

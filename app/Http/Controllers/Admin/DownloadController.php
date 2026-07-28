@@ -51,8 +51,7 @@ class DownloadController extends Controller
 
         $file = $request->file('file');
         $originalName = $file->getClientOriginalName();
-        $path = 'downloads/' . date('Y/m') . '/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
-        Storage::disk('public')->putFileAs(dirname($path), $file, basename($path));
+        $path = \App\Services\MediaStorage::store($file, 'downloads', Str::slug($request->title));
 
         $download = Download::create([
             'user_id' => auth()->id(),
@@ -85,7 +84,7 @@ class DownloadController extends Controller
 
         if ($request->boolean('remove_file')) {
             if ($download->file_path) {
-                Storage::disk('public')->delete($download->file_path);
+                \App\Services\MediaStorage::delete($download->file_path);
             }
             $data['file_path'] = null;
             $data['file_name'] = null;
@@ -93,11 +92,10 @@ class DownloadController extends Controller
             $data['file_size'] = null;
         } elseif ($request->hasFile('file')) {
             if ($download->file_path) {
-                Storage::disk('public')->delete($download->file_path);
+                \App\Services\MediaStorage::delete($download->file_path);
             }
             $file = $request->file('file');
-            $path = 'downloads/' . date('Y/m') . '/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
-            Storage::disk('public')->putFileAs(dirname($path), $file, basename($path));
+            $path = \App\Services\MediaStorage::store($file, 'downloads', Str::slug($request->title));
             $data['file_path'] = $path;
             $data['file_name'] = $file->getClientOriginalName();
             $data['file_type'] = strtolower($file->getClientOriginalExtension());
@@ -113,7 +111,9 @@ class DownloadController extends Controller
 
     public function destroy(Download $download): RedirectResponse
     {
-        Storage::disk('public')->delete($download->file_path);
+        if ($download->file_path) {
+            \App\Services\MediaStorage::delete($download->file_path);
+        }
         $download->delete();
 
         ActivityLogger::log("Menghapus dokumen: {$download->title}", null, 'delete_download');

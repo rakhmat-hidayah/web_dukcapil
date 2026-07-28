@@ -102,12 +102,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
         Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+
+        // Two-Factor Authentication Challenge (Step 2 of Login)
+        Route::get('/login/two-factor', [AuthController::class, 'showTwoFactorChallenge'])->name('login.two-factor');
+        Route::post('/login/two-factor', [AuthController::class, 'verifyTwoFactorChallenge'])->name('login.two-factor.store');
     });
 
     // Authenticated Admin
     Route::middleware('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Account Security & 2FA Management (Available for all authenticated operators)
+        Route::get('/security', [\App\Http\Controllers\Admin\TwoFactorController::class, 'index'])->name('security.index');
+        Route::post('/security/2fa/setup', [\App\Http\Controllers\Admin\TwoFactorController::class, 'setup'])->name('security.2fa.setup');
+        Route::post('/security/2fa/confirm', [\App\Http\Controllers\Admin\TwoFactorController::class, 'confirm'])->name('security.2fa.confirm');
+        Route::post('/security/2fa/disable', [\App\Http\Controllers\Admin\TwoFactorController::class, 'disable'])->name('security.2fa.disable');
+        Route::post('/security/2fa/recovery-codes', [\App\Http\Controllers\Admin\TwoFactorController::class, 'regenerateRecoveryCodes'])->name('security.2fa.recovery-codes');
 
         // Notifications CMS (JSON APIs for all authenticated operators)
         Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
@@ -123,6 +134,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/users', [\App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
             Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
             Route::delete('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
+            Route::post('/users/{user}/toggle-active', [\App\Http\Controllers\Admin\UserController::class, 'toggleActive'])->name('users.toggle-active');
+            Route::post('/users/{user}/admin-reset-2fa', [\App\Http\Controllers\Admin\TwoFactorController::class, 'adminReset'])->name('users.admin-reset-2fa');
 
             // Theme Customizer CMS
             Route::get('/theme', [\App\Http\Controllers\Admin\ThemeController::class, 'index'])->name('theme.index');
