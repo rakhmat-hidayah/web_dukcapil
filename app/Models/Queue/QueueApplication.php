@@ -211,6 +211,11 @@ class QueueApplication extends Model
         return $this->belongsTo(\App\Models\User::class, 'handover_by');
     }
 
+    public function handover(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(KtpHandover::class, 'application_id');
+    }
+
     public function getIsRepresentedAttribute(): bool
     {
         return in_array($this->attendance_type, ['family_in_kk', 'family_out_kk', 'other']);

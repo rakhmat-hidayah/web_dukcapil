@@ -101,6 +101,7 @@ class ApplicationVerificationController extends Controller
             'checkedInUser',
             'physicalVerifiedUser',
             'handoverUser',
+            'handover',
         ])->findOrFail($id);
 
         $officer = Auth::user();

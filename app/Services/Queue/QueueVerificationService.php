@@ -61,6 +61,24 @@ class QueueVerificationService
                 $officer,
                 'Pra-verifikasi dokumen online berhasil disetujui. Pemohon dapat memilih jadwal antrean kedatangan.' . ($notes ? " Catatan: {$notes}" : '')
             );
+
+            // Daftarkan otomatis ke antrean serah terima fisik (MENUNGGU_KETERSEDIAAN)
+            $handover = \App\Models\Queue\KtpHandover::firstOrCreate(
+                ['application_id' => $application->id],
+                ['status' => \App\Models\Queue\KtpHandover::STATUS_PENDING]
+            );
+
+            if ($handover->wasRecentlyCreated) {
+                \App\Models\Queue\KtpHandoverLog::create([
+                    'handover_id'    => $handover->id,
+                    'application_id' => $application->id,
+                    'user_id'        => $officer?->id,
+                    'action'         => 'CREATED',
+                    'from_status'    => null,
+                    'to_status'      => \App\Models\Queue\KtpHandover::STATUS_PENDING,
+                    'notes'          => 'Permohonan memenuhi syarat verifikasi administrasi online dan masuk antrean ketersediaan fisik KTP-el.',
+                ]);
+            }
         });
 
         // Send notification email

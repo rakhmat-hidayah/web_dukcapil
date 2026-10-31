@@ -229,7 +229,7 @@ import {
   FolderLock, Image, LibraryBig, Milestone, ShieldAlert, Globe, MapPin,
   Settings, UsersRound, Users, Network, Palette, BarChart3, Radio, Activity, Sliders,
   Map, BarChart2, DatabaseZap, MessageSquareWarning, ShieldCheck, ArrowDownUp, HelpCircle, Bell,
-  FileCheck, CalendarDays, UserCheck
+  FileCheck, CalendarDays, UserCheck, Clock, CheckCircle2, History, AlertTriangle, PackageCheck
 } from '@lucide/vue';
 
 const page = usePage();
@@ -369,6 +369,16 @@ const menuGroups = [
     ]
   },
   {
+    title: 'Serah Terima KTP-el',
+    items: [
+      { label: 'Dashboard Serah Terima', route: 'admin.handover.dashboard', icon: LayoutDashboard },
+      { label: 'Menunggu Ketersediaan KTP-el', route: 'admin.handover.pending', icon: Clock },
+      { label: 'Siap Diambil', route: 'admin.handover.ready', icon: CheckCircle2 },
+      { label: 'Riwayat Penyerahan', route: 'admin.handover.history', icon: History },
+      { label: 'Kendala Pengambilan', route: 'admin.handover.exceptions', icon: AlertTriangle },
+    ]
+  },
+  {
     title: 'Layanan PPID',
     items: [
       { label: 'Halaman Statis PPID', route: 'admin.ppid.pages.index', icon: FileText },
@@ -421,6 +431,8 @@ const isComplaintOfficer = computed(() => userRoles.value.includes('Complaint Of
 const isPpidAdmin = computed(() => userRoles.value.includes('PPID Admin'));
 const isQueueOfficer = computed(() => userRoles.value.includes('Queue Officer'));
 const isQueueVerifier = computed(() => userRoles.value.includes('Queue Verifier'));
+const isHandoverOfficer = computed(() => userRoles.value.includes('petugas_pengambilan_ktpel'));
+const userPermissions = computed(() => page.props.auth?.permissions || []);
 
 const filteredMenuGroups = computed(() => {
   if (isSuperAdmin.value) {
@@ -488,6 +500,13 @@ const filteredMenuGroups = computed(() => {
       // Queue Verifier allowed items
       if (isQueueVerifier.value) {
         if (['admin.queue.dashboard', 'admin.queue.applications.index', 'admin.queue.applications.show'].includes(r)) {
+          return true;
+        }
+      }
+
+      // Serah Terima KTP-el allowed items
+      if (isHandoverOfficer.value || isQueueOfficer.value || userPermissions.value.some(p => p.startsWith('handover.'))) {
+        if (r && r.startsWith('admin.handover.')) {
           return true;
         }
       }

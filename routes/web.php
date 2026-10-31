@@ -406,15 +406,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::get('/dashboard', [\App\Http\Controllers\Admin\Queue\QueueDashboardController::class, 'index'])->name('dashboard');
 
-            // Counter Check-In, Physical Verification & Handover (Redirect to Verifikasi Dokumen)
+            // Legacy Counter Route (Redirect to Serah Terima)
             Route::get('/counter', function () {
-                return redirect()->route('admin.queue.applications.index');
+                return redirect()->route('admin.handover.dashboard');
             })->name('counter.index');
-            Route::post('/counter/{id}/checkin', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'checkIn'])->name('counter.checkin');
-            Route::post('/counter/{id}/physical-verification', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'physicalVerification'])->name('counter.physical-verification');
-            Route::post('/counter/{id}/start-processing', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'startProcessing'])->name('counter.start-processing');
-            Route::post('/counter/{id}/ready-for-pickup', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'markReadyForPickup'])->name('counter.ready-pickup');
-            Route::post('/counter/{id}/handover', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'completeHandover'])->name('counter.handover');
 
             // Applications & Online Document Verification
             Route::get('/applications', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'index'])->name('applications.index');
@@ -451,6 +446,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Settings
             Route::get('/settings', [\App\Http\Controllers\Admin\Queue\QueueSettingsController::class, 'index'])->name('settings.index');
             Route::post('/settings', [\App\Http\Controllers\Admin\Queue\QueueSettingsController::class, 'update'])->name('settings.update');
+        });
+
+        // -------------------------------------------------------------
+        // Serah Terima KTP-el (Standalone Module)
+        // -------------------------------------------------------------
+        Route::middleware('role_or_permission:Super Administrator|Website Administrator|petugas_pengambilan_ktpel|handover.dashboard.view')
+            ->prefix('handover')->name('handover.')->group(function () {
+
+            Route::get('/dashboard', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'dashboard'])->name('dashboard');
+            Route::get('/pending', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'pending'])->name('pending');
+            Route::get('/ready', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'ready'])->name('ready');
+            Route::get('/history', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'history'])->name('history');
+            Route::get('/exceptions', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'exceptions'])->name('exceptions');
+            Route::get('/{id}', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'show'])->name('show');
+            Route::post('/{id}/mark-ready', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'markReady'])->name('mark-ready');
+            Route::post('/{id}/report-exception', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'reportException'])->name('report-exception');
+            Route::post('/{id}/resolve-exception', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'resolveException'])->name('resolve-exception');
+            Route::post('/{id}/complete', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'complete'])->name('complete');
+            Route::get('/{id}/photo', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'photo'])->name('photo');
         });
     });
 });

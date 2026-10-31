@@ -302,53 +302,43 @@
             </div>
           </div>
 
-          <!-- Physical Counter & Handover History Card if checked-in or verified -->
+          <!-- Integrasi Modul Serah Terima KTP-el -->
           <div
-            v-if="application.checked_in_at || application.physical_verified_at || application.handover_at"
-            class="bg-white dark:bg-slate-800 rounded-3xl p-6 border-2 border-teal-200 dark:border-teal-800 shadow-sm space-y-4"
+            v-if="application.handover"
+            class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3"
           >
             <div class="flex items-center justify-between">
               <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                Pemeriksaan Fisik Loket & Serah Terima
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Status Serah Terima Fisik KTP-el
               </h3>
-              <StatusBadge :status="application.status" size="sm" />
+              <Link
+                :href="route('admin.handover.show', application.handover.id)"
+                class="px-3.5 py-1.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white text-xs font-bold transition flex items-center gap-1.5"
+              >
+                Buka Modul Serah Terima &rarr;
+              </Link>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-              <!-- Check-In Status -->
-              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                <span class="text-slate-400 text-[10px] uppercase font-bold block">1. Kedatangan di Loket</span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                <span class="text-slate-400 text-[10px] uppercase font-bold block">Status Fisik Kartu</span>
                 <p class="font-bold text-slate-900 dark:text-white mt-1">
-                  {{ application.checked_in_at ? formatDate(application.checked_in_at) : 'Belum Hadir' }}
-                </p>
-                <p v-if="application.checked_in_user" class="text-[11px] text-slate-500 mt-0.5">
-                  Petugas: {{ application.checked_in_user.name }}
+                  {{ application.handover.status_label }}
                 </p>
               </div>
 
-              <!-- Physical Inspection -->
-              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                <span class="text-slate-400 text-[10px] uppercase font-bold block">2. Verifikasi Dokumen Asli</span>
+              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                <span class="text-slate-400 text-[10px] uppercase font-bold block">Pemeriksaan Ketersediaan</span>
                 <p class="font-bold text-slate-900 dark:text-white mt-1">
-                  {{ application.physical_verified_status || (application.physical_verified_at ? 'Terverifikasi' : 'Belum Diperiksa') }}
-                </p>
-                <p v-if="application.physical_verified_at" class="text-[11px] text-slate-500 mt-0.5">
-                  {{ formatDate(application.physical_verified_at) }} · Oleh: {{ application.physical_verified_user?.name || 'Petugas Loket' }}
-                </p>
-                <p v-if="application.physical_verified_notes" class="text-[11px] text-amber-600 italic mt-1">
-                  "{{ application.physical_verified_notes }}"
+                  {{ application.handover.ready_marked_at ? application.handover.ready_marked_at_formatted : 'Belum Ditandai Siap' }}
                 </p>
               </div>
 
-              <!-- Handover -->
-              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                <span class="text-slate-400 text-[10px] uppercase font-bold block">3. Serah Terima KTP-el</span>
+              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                <span class="text-slate-400 text-[10px] uppercase font-bold block">Penyerahan ke Pemohon</span>
                 <p class="font-bold text-slate-900 dark:text-white mt-1">
-                  {{ application.handover_at ? 'Diserahkan' : 'Belum Diserahkan' }}
-                </p>
-                <p v-if="application.handover_recipient_name" class="text-[11px] text-slate-700 dark:text-slate-300 mt-0.5">
-                  Penerima: <strong>{{ application.handover_recipient_name }}</strong> (NIK: {{ application.handover_recipient_nik }})
+                  {{ application.handover.handover_at ? application.handover.handover_at_formatted : 'Belum Diserahkan' }}
                 </p>
               </div>
             </div>
