@@ -585,7 +585,9 @@ const scheduleDateFormatted = computed(() => {
 const scheduleTimeFormatted = computed(() => {
   const slot = props.application.slot;
   if (!slot || !slot.schedule) return '08:00 - 15:30 WITA';
-  return `${slot.schedule.open_time.slice(0, 5)} - ${slot.schedule.close_time.slice(0, 5)} WITA`;
+  const open = (slot.schedule.open_time || '08:00').toString().slice(0, 5);
+  const close = (slot.schedule.close_time || '15:30').toString().slice(0, 5);
+  return `${open} - ${close} WITA`;
 });
 
 const accentBarColor = computed(() => {

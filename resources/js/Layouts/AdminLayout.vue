@@ -363,7 +363,6 @@ const menuGroups = [
     items: [
       { label: 'Dashboard Antrian', route: 'admin.queue.dashboard', icon: LayoutDashboard },
       { label: 'Verifikasi Dokumen', route: 'admin.queue.applications.index', icon: FileCheck },
-      { label: 'Meja Loket & Fisik', route: 'admin.queue.counter.index', icon: UserCheck },
       { label: 'Jenis Layanan KTP-el', route: 'admin.queue.service-types.index', icon: FileText },
       { label: 'Jadwal & Kuota', route: 'admin.queue.schedules.index', icon: CalendarDays },
       { label: 'Pengaturan Antrian', route: 'admin.queue.settings.index', icon: Settings },
@@ -488,7 +487,7 @@ const filteredMenuGroups = computed(() => {
 
       // Queue Verifier allowed items
       if (isQueueVerifier.value) {
-        if (['admin.queue.dashboard', 'admin.queue.applications.index', 'admin.queue.applications.show', 'admin.queue.counter.index'].includes(r)) {
+        if (['admin.queue.dashboard', 'admin.queue.applications.index', 'admin.queue.applications.show'].includes(r)) {
           return true;
         }
       }

@@ -406,8 +406,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::get('/dashboard', [\App\Http\Controllers\Admin\Queue\QueueDashboardController::class, 'index'])->name('dashboard');
 
-            // Counter Check-In, Physical Verification & Handover (Front Desk Loket)
-            Route::get('/counter', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'index'])->name('counter.index');
+            // Counter Check-In, Physical Verification & Handover (Redirect to Verifikasi Dokumen)
+            Route::get('/counter', function () {
+                return redirect()->route('admin.queue.applications.index');
+            })->name('counter.index');
             Route::post('/counter/{id}/checkin', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'checkIn'])->name('counter.checkin');
             Route::post('/counter/{id}/physical-verification', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'physicalVerification'])->name('counter.physical-verification');
             Route::post('/counter/{id}/start-processing', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'startProcessing'])->name('counter.start-processing');

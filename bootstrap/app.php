@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
             users: '/admin/dashboard',
         );
 
+        $middleware->validateCsrfTokens(except: [
+            'layanan/antrian/status/*/booking',
+            'layanan/antrian/status/*/resubmit',
+        ]);
+
         $middleware->web(append: [
             \App\Http\Middleware\FixStoragePaths::class,
             \App\Http\Middleware\HandleInertiaRequests::class,

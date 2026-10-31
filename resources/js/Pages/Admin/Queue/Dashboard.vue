@@ -21,14 +21,6 @@
 
         <div class="flex flex-wrap items-center gap-2">
           <Link
-            :href="route('admin.queue.counter.index')"
-            class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition flex items-center gap-2"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-            Meja Loket & Fisik
-          </Link>
-
-          <Link
             :href="route('admin.queue.applications.index', { status: 'SUBMITTED' })"
             class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center gap-2"
           >
@@ -282,10 +274,10 @@
               <p class="text-xs text-slate-400">Pemohon yang memiliki jadwal hadir pada tanggal {{ todayDate }}</p>
             </div>
             <Link
-              :href="route('admin.queue.counter.index')"
+              :href="route('admin.queue.applications.index')"
               class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
             >
-              Buka Meja Loket &rarr;
+              Lihat Semua Antrean &rarr;
             </Link>
           </div>
 
@@ -332,10 +324,10 @@
                   </td>
                   <td class="py-3 text-right">
                     <Link
-                      :href="route('admin.queue.counter.index', { search: app.queue_number || app.reg_number })"
+                      :href="route('admin.queue.applications.show', app.id)"
                       class="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold transition"
                     >
-                      Proses di Loket
+                      Detail / Layani
                     </Link>
                   </td>
                 </tr>
