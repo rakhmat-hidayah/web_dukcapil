@@ -154,6 +154,16 @@ const statusMap = {
     badge: 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
     dot: 'bg-amber-400',
   },
+  VERIFIED: {
+    label: 'Sudah Diperiksa',
+    badge: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+    dot: 'bg-emerald-500',
+  },
+  EXAMINED: {
+    label: 'Sudah Diperiksa',
+    badge: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+    dot: 'bg-emerald-500',
+  },
 };
 
 const resolvedConfig = computed(() => {

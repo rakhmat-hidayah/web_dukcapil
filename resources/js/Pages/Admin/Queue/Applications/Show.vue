@@ -259,15 +259,15 @@
                       <div class="text-right mr-2">
                         <span
                           :class="[
-                            'px-2 py-0.5 rounded-full text-[10px] font-bold uppercase font-mono',
-                            getDocument(docConfig.id).status === 'APPROVED' || getDocument(docConfig.id).status === 'VERIFIED'
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
-                              : getDocument(docConfig.id).status === 'REJECTED'
-                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400'
-                              : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400'
+                            'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase',
+                            ['APPROVED', 'VERIFIED', 'EXAMINED'].includes(getDocument(docConfig.id).status)
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700'
+                              : ['REJECTED', 'REVISION_REQUIRED'].includes(getDocument(docConfig.id).status)
+                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400 border border-rose-300 dark:border-rose-700'
+                              : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400 border border-amber-300 dark:border-amber-700'
                           ]"
                         >
-                          {{ getDocument(docConfig.id).status }}
+                          {{ ['APPROVED', 'VERIFIED', 'EXAMINED'].includes(getDocument(docConfig.id).status) ? 'Sudah Diperiksa' : getDocument(docConfig.id).status === 'REVISION_REQUIRED' ? 'Perlu Perbaikan' : getDocument(docConfig.id).status === 'REJECTED' ? 'Ditolak' : 'Belum Diperiksa' }}
                         </span>
                         <p class="text-[10px] text-slate-400 mt-0.5 font-mono">
                           {{ getDocument(docConfig.id).formatted_size || (Math.round((getDocument(docConfig.id).file_size_bytes || 0) / 1024) + ' KB') }}
@@ -662,6 +662,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
+import axios from 'axios'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import StatusBadge from '@/Components/Queue/StatusBadge.vue'
 import DocumentViewerModal from '@/Components/Queue/DocumentViewerModal.vue'
@@ -739,6 +740,10 @@ const formatStatusName = (code) => {
 
 const previewSelfie = () => {
   if (!selfieDocument.value) return
+  if (selfieDocument.value.status === 'PENDING') {
+    selfieDocument.value.status = 'APPROVED'
+    axios.post(`/admin/queue/applications/${props.application.id}/documents/${selfieDocument.value.id}/approve`).catch(() => {})
+  }
   const url = selfieDocument.value.admin_serve_url || (selfieDocument.value.id ? `/admin/queue/documents/${selfieDocument.value.id}/serve` : '')
   viewerState.value = {
     open: true,
@@ -750,6 +755,10 @@ const previewSelfie = () => {
 
 const openViewer = (doc, label) => {
   if (!doc) return
+  if (doc.status === 'PENDING') {
+    doc.status = 'APPROVED'
+    axios.post(`/admin/queue/applications/${props.application.id}/documents/${doc.id}/approve`).catch(() => {})
+  }
   const url = doc.admin_serve_url || (doc.id ? `/admin/queue/documents/${doc.id}/serve` : '')
   viewerState.value = {
     open: true,

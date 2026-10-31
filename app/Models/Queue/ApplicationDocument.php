@@ -81,10 +81,12 @@ class ApplicationDocument extends Model
     public function getStatusLabelAttribute(): string
     {
         return [
-            self::STATUS_PENDING => 'Menunggu Verifikasi',
-            self::STATUS_APPROVED => 'Dokumen Sah / Disetujui',
+            self::STATUS_PENDING => 'Belum Diperiksa',
+            self::STATUS_APPROVED => 'Sudah Diperiksa',
+            'VERIFIED' => 'Sudah Diperiksa',
+            'EXAMINED' => 'Sudah Diperiksa',
             self::STATUS_REJECTED => 'Dokumen Ditolak',
-            self::STATUS_REVISION_REQUIRED => 'Perlu Upload Ulang',
+            self::STATUS_REVISION_REQUIRED => 'Perlu Perbaikan',
         ][$this->status] ?? $this->status;
     }
 

@@ -37,6 +37,27 @@ class ApplicantDashboardController extends Controller
             ])
             ->firstOrFail();
 
+        // Sinkronkan status dokumen jika permohonan sudah lolos pra-verifikasi atau dalam tahap pelayanan
+        if (in_array($application->status, [
+            QueueApplication::STATUS_PRE_VERIFIED,
+            QueueApplication::STATUS_QUEUE_BOOKED,
+            QueueApplication::STATUS_ARRIVED,
+            QueueApplication::STATUS_PHYSICAL_VERIFICATION,
+            QueueApplication::STATUS_APPROVED_FOR_SERVICE,
+            QueueApplication::STATUS_PROCESSING,
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+            QueueApplication::STATUS_COMPLETED,
+        ])) {
+            $hasPending = $application->documents->where('status', ApplicationDocument::STATUS_PENDING)->isNotEmpty();
+            if ($hasPending) {
+                $application->documents()->where('status', ApplicationDocument::STATUS_PENDING)->update([
+                    'status'      => ApplicationDocument::STATUS_APPROVED,
+                    'reviewed_at' => now(),
+                ]);
+                $application->load('documents.serviceDocument');
+            }
+        }
+
         $officeAddress = QueueSetting::get('queue.office_address', 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211');
         $helpdeskPhone = QueueSetting::get('queue.helpdesk_phone', '0823-4000-0000');
 

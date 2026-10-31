@@ -363,7 +363,7 @@
                 <span class="font-bold text-sm text-slate-900 dark:text-white">
                   {{ doc.service_document?.label || doc.original_filename }}
                 </span>
-                <StatusBadge :status="doc.status" size="sm" />
+                <StatusBadge :status="doc.status" :custom-label="docStatusLabel(doc.status)" size="sm" />
               </div>
 
               <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">
@@ -608,6 +608,22 @@ const revisionDocuments = computed(() => {
     (d) => d.status === 'REVISION_REQUIRED' || d.status === 'REJECTED'
   ) || [];
 });
+
+function docStatusLabel(status) {
+  switch (status) {
+    case 'APPROVED':
+    case 'VERIFIED':
+    case 'EXAMINED':
+      return 'Sudah Diperiksa';
+    case 'REVISION_REQUIRED':
+      return 'Perlu Perbaikan';
+    case 'REJECTED':
+      return 'Dokumen Ditolak';
+    case 'PENDING':
+    default:
+      return 'Belum Diperiksa';
+  }
+}
 
 function openPreviewDoc(doc) {
   activePreviewDoc.value = {

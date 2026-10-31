@@ -37,6 +37,15 @@ class ApplicationDocumentController extends Controller
         // Audit log preview activity without recording sensitive NIK
         Log::info("Queue document previewed: DocID {$document->id} by User {$user->id} ({$user->name}) from IP {$request->ip()}");
 
+        // Otomatis sinkronkan status dokumen menjadi Sudah Diperiksa (APPROVED) saat dibuka oleh verifikator
+        if ($document->status === ApplicationDocument::STATUS_PENDING) {
+            $document->update([
+                'status'      => ApplicationDocument::STATUS_APPROVED,
+                'reviewed_by' => $user->id,
+                'reviewed_at' => now(),
+            ]);
+        }
+
         $download = $request->boolean('download', false);
 
         return QueueDocumentStorage::serve($document, !$download);
