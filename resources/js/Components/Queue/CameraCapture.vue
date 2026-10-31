@@ -22,21 +22,35 @@
       <!-- Main Body -->
       <div class="p-4 sm:p-5 flex-1 overflow-y-auto flex flex-col items-center">
         <!-- Capture Viewfinder / Preview Container -->
-        <div class="w-full relative rounded-2xl overflow-hidden bg-black h-[56vh] max-h-[500px] min-h-[380px] sm:h-[460px] flex items-center justify-center shadow-inner">
-          <!-- 1. LIVE CAMERA STREAM -->
+        <div class="w-full relative rounded-2xl overflow-hidden bg-black h-[58vh] max-h-[520px] min-h-[380px] sm:h-[480px] flex items-center justify-center shadow-inner">
+          <!-- 1. LIVE CAMERA STREAM (Always kept in DOM for smooth hardware stream) -->
           <video
-            v-show="isCameraActive && !capturedBlob"
             ref="videoRef"
             autoplay
             playsinline
+            webkit-playsinline
             muted
-            :class="['w-full h-full object-cover', isSelfie && currentFacingMode === 'user' ? '-scale-x-100' : '']"
+            :class="[
+              'w-full h-full object-cover transition-opacity duration-300',
+              isCameraActive && !capturedBlob ? 'opacity-100 block' : 'opacity-0 hidden',
+              isSelfie && currentFacingMode === 'user' ? '-scale-x-100' : ''
+            ]"
           ></video>
+
+          <!-- Loading Indicator when starting camera -->
+          <div
+            v-if="isStartingCamera && !capturedBlob"
+            class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center text-white z-20 space-y-3 p-4"
+          >
+            <div class="w-10 h-10 border-3 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs font-semibold tracking-wide text-slate-200">Menghubungkan Kamera Langsung...</p>
+            <p class="text-[11px] text-slate-400 text-center max-w-xs">Mohon izinkan akses kamera jika browser menampilkan permintaan izin.</p>
+          </div>
 
           <!-- Guideline Overlay on Live Camera -->
           <div
             v-if="isCameraActive && !capturedBlob"
-            class="absolute inset-0 pointer-events-none flex flex-col items-center justify-between p-3.5 sm:p-4 overflow-hidden"
+            class="absolute inset-0 pointer-events-none flex flex-col items-center justify-between p-3.5 sm:p-4 overflow-hidden z-10"
           >
             <!-- Top Guide Badge -->
             <div class="z-10 bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-lg text-center max-w-[92%]">
@@ -124,13 +138,13 @@
             v-if="capturedBlob"
             :src="previewUrl"
             alt="Preview Dokumen"
-            class="w-full h-full object-contain bg-slate-950"
+            class="w-full h-full object-contain bg-slate-950 z-20"
           />
 
-          <!-- 3. CAMERA STREAM RESTRICTED / FALLBACK -->
+          <!-- 3. CAMERA STREAM RESTRICTED / PERMISSION NOTICE -->
           <div
-            v-if="!isCameraActive && !capturedBlob && cameraError"
-            class="text-center p-6 text-slate-300 space-y-3.5 max-w-md"
+            v-if="!isCameraActive && !isStartingCamera && !capturedBlob && cameraError"
+            class="text-center p-6 text-slate-300 space-y-3.5 max-w-md z-30"
           >
             <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center">
               <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -138,41 +152,30 @@
 
             <div>
               <p class="text-sm font-bold text-white">
-                {{ isContextInsecure && !isMobileDevice ? 'Webcam PC Memerlukan Koneksi Aman' : 'Kamera Belum Aktif' }}
+                Kamera Langsung Memerlukan Izin Browser
               </p>
-              <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                <span v-if="isContextInsecure && !isMobileDevice">
-                  Browser Chrome di PC/Komputer membatasi akses video webcam pada domain HTTP biasa (<code>.test</code>). Di Windows PC, tombol HTML hanya membuka File Explorer.
-                </span>
-                <span v-else>
-                  {{ cameraError }}
-                </span>
+              <p class="text-xs text-slate-300 mt-2 leading-relaxed bg-black/50 p-3 rounded-xl border border-white/10 text-left">
+                {{ cameraError }}
               </p>
             </div>
 
-            <!-- If on Desktop & Insecure: Offer Localhost Button or Guide -->
-            <div v-if="isContextInsecure && !isMobileDevice" class="space-y-2 pt-1">
-              <a
-                :href="localhostRedirectUrl"
-                class="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/30 transition flex items-center justify-center gap-2"
+            <div class="space-y-2 pt-2">
+              <button
+                type="button"
+                @click="startCamera"
+                class="w-full px-5 py-3 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2 cursor-pointer"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                <span>Buka via Localhost:8000 (Webcam Otomatis Aktif)</span>
-              </a>
-              <p class="text-[11px] text-slate-400 leading-normal">
-                Catatan: Di HP/Smartphone (Android & iPhone) atau server production ber-HTTPS, kamera akan menyala secara native tanpa kendala.
-              </p>
-            </div>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <span>Coba Lagi Aktifkan Kamera Langsung</span>
+              </button>
 
-            <!-- If on Mobile: Native Camera Button -->
-            <div v-else class="pt-1">
               <button
                 type="button"
                 @click="triggerNativeCameraInput"
-                class="w-full px-5 py-3.5 bg-blue-600 hover:bg-blue-500 active:scale-[0.99] text-white rounded-2xl text-xs font-bold shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 cursor-pointer"
+                class="w-full px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition flex items-center justify-center gap-2 cursor-pointer border border-slate-700"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <span>Buka Kamera HP (Kamera Bawaan)</span>
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>Gunakan Kamera Bawaan HP (Tanpa Garis Pemandu)</span>
               </button>
             </div>
           </div>
@@ -186,26 +189,10 @@
           </p>
         </div>
 
-        <!-- Compression Information Badge (when captured) -->
-        <div
-          v-if="compressionStats"
-          class="w-full mt-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-300"
-        >
-          <div class="flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span class="font-medium">Kompresi Otomatis Berhasil</span>
-          </div>
-          <div class="text-[11px] font-mono">
-            <span class="line-through text-emerald-600/70">{{ formatSize(compressionStats.originalSize) }}</span>
-            &rarr; <span class="font-bold">{{ formatSize(compressionStats.compressedSize) }}</span>
-            <span v-if="compressionStats.reductionPercent > 0" class="text-emerald-700 dark:text-emerald-400 font-bold ml-1">(-{{ compressionStats.reductionPercent }}%)</span>
-          </div>
-        </div>
-
         <!-- Hidden Canvas for Snapshot -->
         <canvas ref="canvasRef" class="hidden"></canvas>
 
-        <!-- Hidden Native Camera Capture Input (HTML5 Camera Capture) -->
+        <!-- Hidden Native Camera Capture Input (Fallback Only) -->
         <input
           ref="nativeCameraInputRef"
           type="file"
@@ -221,7 +208,7 @@
         <!-- Left: Switch Camera (Front / Back) -->
         <div>
           <button
-            v-if="isCameraActive && !capturedBlob && hasMultipleCameras"
+            v-if="isCameraActive && !capturedBlob"
             type="button"
             @click="toggleCameraFacing"
             class="px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
@@ -232,28 +219,8 @@
           </button>
         </div>
 
-        <!-- Right: Actions (Buka Kamera / Retake / Snapshot / Confirm) -->
+        <!-- Right: Actions (Ambil Foto / Retake / Confirm) -->
         <div class="flex items-center gap-2 ml-auto">
-          <!-- Fallback Trigger if camera stream was blocked -->
-          <button
-            v-if="!isCameraActive && !capturedBlob && isMobileDevice"
-            type="button"
-            @click="triggerNativeCameraInput"
-            class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-lg shadow-blue-600/30 flex items-center gap-2 cursor-pointer"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            Buka Kamera HP
-          </button>
-
-          <a
-            v-if="!isCameraActive && !capturedBlob && !isMobileDevice && isContextInsecure"
-            :href="localhostRedirectUrl"
-            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-600/30 flex items-center gap-2"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-            Buka di Localhost (Webcam)
-          </a>
-
           <!-- Retake Button -->
           <button
             v-if="capturedBlob"
@@ -269,10 +236,11 @@
             v-if="isCameraActive && !capturedBlob"
             type="button"
             @click="takeSnapshot"
-            class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-lg shadow-blue-600/30 flex items-center gap-2 cursor-pointer"
+            class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white text-xs font-bold transition shadow-lg shadow-blue-600/30 flex items-center gap-2 cursor-pointer"
           >
             <div class="w-3 h-3 rounded-full bg-white animate-pulse"></div>
-            Ambil Foto
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Ambil Foto Sekarang
           </button>
 
           <!-- Confirm & Use Photo Button -->
@@ -280,10 +248,10 @@
             v-if="capturedBlob"
             type="button"
             @click="confirmPhoto"
-            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-600/30 flex items-center gap-1.5 cursor-pointer"
+            class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white text-xs font-bold transition shadow-lg shadow-emerald-600/30 flex items-center gap-1.5 cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-            Gunakan Foto Ini
+            Gunakan Foto Ini & Lanjut
           </button>
         </div>
       </div>
@@ -292,8 +260,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { compressImage, formatFileSize } from './ImageCompressor';
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 
 const props = defineProps({
   documentLabel: {
@@ -320,15 +287,14 @@ const videoRef = ref(null);
 const canvasRef = ref(null);
 const nativeCameraInputRef = ref(null);
 
+const isStartingCamera = ref(false);
 const isCameraActive = ref(false);
 const currentFacingMode = ref(props.captureMode === 'user' ? 'user' : 'environment');
 const mediaStream = ref(null);
 const cameraError = ref(null);
-const hasMultipleCameras = ref(true);
 
 const capturedBlob = ref(null);
 const previewUrl = ref(null);
-const compressionStats = ref(null);
 
 const isSelfie = computed(() => {
   if (props.captureMode === 'user') return true;
@@ -355,23 +321,6 @@ const guideHint = computed(() => {
   return 'Pastikan dokumen tidak miring, tidak terpotong, dan tulisan terbaca jelas';
 });
 
-const isMobileDevice = computed(() => {
-  if (typeof navigator === 'undefined') return false;
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-});
-
-const isContextInsecure = computed(() => {
-  if (typeof window === 'undefined') return false;
-  return window.isSecureContext === false;
-});
-
-const localhostRedirectUrl = computed(() => {
-  if (typeof window === 'undefined') return '#';
-  return 'http://127.0.0.1:8000' + window.location.pathname + window.location.search;
-});
-
-const formatSize = (bytes) => formatFileSize(bytes);
-
 onMounted(async () => {
   await startCamera();
 });
@@ -386,40 +335,77 @@ onBeforeUnmount(() => {
 async function startCamera() {
   stopCamera();
   cameraError.value = null;
+  isStartingCamera.value = true;
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    if (isContextInsecure.value && !isMobileDevice.value) {
-      cameraError.value = 'Browser Chrome di PC/Komputer membatasi akses webcam pada koneksi HTTP (tidak ber-SSL).';
-    } else {
-      cameraError.value = 'Akses live camera tidak didukung oleh browser pada koneksi ini.';
-    }
+    cameraError.value = 'Akses live camera tidak didukung oleh browser pada perangkat ini.';
     isCameraActive.value = false;
+    isStartingCamera.value = false;
     return;
   }
 
+  const preferredFacing = currentFacingMode.value || (isSelfie.value ? 'user' : 'environment');
+  let stream = null;
+
+  // Waterfall 1: Try with ideal facingMode
   try {
-    const constraints = {
+    stream = await navigator.mediaDevices.getUserMedia({
       video: {
-        facingMode: { ideal: currentFacingMode.value },
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
+        facingMode: { ideal: preferredFacing },
       },
       audio: false,
-    };
+    });
+  } catch (err1) {
+    console.warn('Attempt 1 (ideal facingMode) failed:', err1);
+    // Waterfall 2: Try exact facingMode
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: preferredFacing,
+        },
+        audio: false,
+      });
+    } catch (err2) {
+      console.warn('Attempt 2 (exact facingMode) failed:', err2);
+      // Waterfall 3: Try generic video
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+      } catch (err3) {
+        console.error('All camera attempts failed:', err3);
+        isCameraActive.value = false;
+        isStartingCamera.value = false;
 
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    mediaStream.value = stream;
-
-    if (videoRef.value) {
-      videoRef.value.srcObject = stream;
-      await videoRef.value.play();
-      isCameraActive.value = true;
+        if (err3.name === 'NotAllowedError' || err3.name === 'PermissionDeniedError') {
+          cameraError.value = 'Izin kamera belum aktif. Silakan klik ikon gembok 🔒 atau setelan di samping alamat web (atas browser), ubah izin Kamera menjadi "Izinkan", lalu klik "Coba Lagi Aktifkan Kamera Langsung".';
+        } else {
+          cameraError.value = 'Kamera tidak dapat diakses (' + (err3.message || err3.name || 'Error') + '). Pastikan tidak ada aplikasi lain yang sedang menggunakan kamera.';
+        }
+        return;
+      }
     }
-  } catch (err) {
-    console.warn('Camera access denied or unavailable:', err);
-    isCameraActive.value = false;
-    cameraError.value = 'Izin kamera langsung belum aktif. Silakan klik tombol di bawah untuk memotret dengan kamera perangkat Anda.';
   }
+
+  mediaStream.value = stream;
+
+  await nextTick();
+
+  if (videoRef.value) {
+    videoRef.value.srcObject = stream;
+    videoRef.value.setAttribute('playsinline', 'true');
+    videoRef.value.setAttribute('webkit-playsinline', 'true');
+    videoRef.value.muted = true;
+    try {
+      await videoRef.value.play();
+    } catch (playErr) {
+      console.warn('Video play warning:', playErr);
+    }
+  }
+
+  isCameraActive.value = true;
+  isStartingCamera.value = false;
 }
 
 function stopCamera() {
@@ -460,10 +446,10 @@ async function takeSnapshot() {
 
     const rawFile = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
 
-    // Store in memory directly without waiting for compression
+    // Store directly in memory, 0 delay
     capturedBlob.value = rawFile;
     previewUrl.value = URL.createObjectURL(rawFile);
-  }, 'image/jpeg', 0.95);
+  }, 'image/jpeg', 0.92);
 }
 
 function retakePhoto() {
@@ -472,7 +458,6 @@ function retakePhoto() {
     URL.revokeObjectURL(previewUrl.value);
     previewUrl.value = null;
   }
-  compressionStats.value = null;
   startCamera();
 }
 
@@ -488,7 +473,7 @@ function handleNativeFilePicked(e) {
 
   stopCamera();
 
-  // Store in memory directly without waiting for compression
+  // Instant in-memory storage, 0 compression delay
   capturedBlob.value = file;
   previewUrl.value = URL.createObjectURL(file);
 }
