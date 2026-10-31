@@ -27,12 +27,12 @@ class ApplicationSubmittedNotification extends Notification
             ->subject("Pengajuan Pelayanan KTP-el Diterima [{$this->application->reg_number}]")
             ->greeting("Yth. Bapak/Ibu {$this->application->applicant_name},")
             ->line("Pendaftaran pelayanan kependudukan Anda telah berhasil diterima di sistem Disdukcapil Kabupaten Dompu.")
-            ->line("**Nomor Registrasi Sementara:** `{$this->application->reg_number}`")
+            ->line("**Nomor Registrasi Permohonan:** `{$this->application->reg_number}`")
             ->line("**Jenis Pelayanan:** {$serviceName}")
             ->line("Saat ini berkas dokumen persyaratan digital Anda sedang berada dalam tahap **Pra-Verifikasi Petugas**.")
             ->action('Pantau Status & Dokumen', $statusUrl)
-            ->line("Nomor antrian dan jadwal kedatangan akan diterbitkan secara otomatis setelah seluruh dokumen diverifikasi dan disetujui.")
-            ->line("Simpan email ini atau tautan di atas untuk memantau proses verifikasi secara berkala.")
+            ->line("Nomor antrean dan jadwal kedatangan akan diterbitkan secara otomatis setelah seluruh dokumen diverifikasi dan disetujui.")
+            ->line("Anda juga dapat mengakses seluruh riwayat permohonan Anda kapan saja melalui website Disdukcapil.")
             ->salutation("Salam hangat,\nTim Pelayanan Disdukcapil Kabupaten Dompu");
     }
 }

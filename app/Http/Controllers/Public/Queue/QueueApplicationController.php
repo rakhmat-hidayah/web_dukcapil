@@ -132,6 +132,12 @@ class QueueApplicationController extends Controller
             ->first();
 
         if ($existing) {
+            // Register verified session for applicant's NIK
+            session([
+                'applicant_verified_nik' => $existing->applicant_nik,
+                'applicant_verified_at'  => now()->timestamp,
+            ]);
+
             // If already drafted, resume it directly
             if ($existing->status === QueueApplication::STATUS_DRAFT) {
                 return redirect()->route('queue.apply.documents', ['regNumber' => $existing->reg_number]);
@@ -142,6 +148,12 @@ class QueueApplicationController extends Controller
         }
 
         $draft = $this->applicationService->createDraft($validated, (int) $validated['service_type_id']);
+
+        // Establish verified session for applicant's NIK
+        session([
+            'applicant_verified_nik' => $draft->applicant_nik,
+            'applicant_verified_at'  => now()->timestamp,
+        ]);
 
         return redirect()->route('queue.apply.documents', ['regNumber' => $draft->reg_number]);
     }
@@ -253,6 +265,12 @@ class QueueApplicationController extends Controller
         ]);
 
         $this->applicationService->submit($application, true);
+
+        // Establish verified session for applicant's NIK
+        session([
+            'applicant_verified_nik' => $application->applicant_nik,
+            'applicant_verified_at'  => now()->timestamp,
+        ]);
 
         return redirect()->route('queue.status', ['token' => $application->access_token])
             ->with('success', 'Permohonan Anda berhasil dikirim! Simpan Nomor Registrasi ini untuk memantau hasil pra-verifikasi berkas oleh petugas.');

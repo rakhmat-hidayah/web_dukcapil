@@ -33,12 +33,20 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </Link>
 
-            <a
-              href="#lacak-antrian"
+            <Link
+              :href="route('queue.history')"
               class="px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm backdrop-blur border border-white/20 transition flex items-center justify-center gap-2"
             >
-              <span>Cek Status Pengajuan</span>
-              <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+              <span>Riwayat Permohonan Saya</span>
+            </Link>
+
+            <a
+              href="#lacak-antrian"
+              class="px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white font-semibold text-sm border border-white/10 transition flex items-center justify-center gap-1.5"
+            >
+              <span>Lacak Nomor</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </a>
           </div>
         </div>
@@ -225,16 +233,16 @@
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
 
-          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Pantau Status Pengajuan Anda</h3>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Pantau Status Pengajuan & Temukan Nomor</h3>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-6">
-            Masukkan 16 digit NIK atau Nomor Registrasi (contoh: REG-2610-XXXXXX) untuk mengecek status berkas dan tiket antrian Anda.
+            Masukkan Nomor Registrasi (contoh: REG-2610-XXXXXX) untuk membuka status pengajuan, atau masukkan 16 digit NIK untuk membuka seluruh Riwayat Permohonan Anda.
           </p>
 
           <form @submit.prevent="submitSearch" class="flex flex-col sm:flex-row gap-2.5">
             <input
               v-model="searchForm.query"
               type="text"
-              placeholder="Masukkan NIK atau No. Registrasi..."
+              placeholder="Masukkan No. Registrasi atau 16 digit NIK..."
               class="flex-1 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -250,6 +258,13 @@
           <p v-if="searchForm.errors.query" class="text-xs text-rose-500 text-left mt-2">
             {{ searchForm.errors.query }}
           </p>
+
+          <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <span>Lupa nomor registrasi Anda?</span>
+            <Link :href="route('queue.history')" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
+              Buka Riwayat Permohonan Saya &rarr;
+            </Link>
+          </div>
         </div>
       </div>
     </div>

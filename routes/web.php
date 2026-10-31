@@ -100,6 +100,11 @@ Route::prefix('layanan/antrian')->name('queue.')->group(function () {
     Route::post('/status/{token}/revisi', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'resubmit'])->name('resubmit');
     Route::post('/status/{token}/batal', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'cancel'])->name('cancel');
     Route::get('/status/{token}/dokumen/{documentId}', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'serveDocument'])->name('serve-doc');
+
+    // Riwayat Permohonan Saya (Secure Multi-Application History Access)
+    Route::get('/riwayat', [\App\Http\Controllers\Public\Queue\ApplicantHistoryController::class, 'index'])->name('history');
+    Route::post('/riwayat/verifikasi', [\App\Http\Controllers\Public\Queue\ApplicantHistoryController::class, 'verify'])->name('history.verify');
+    Route::post('/riwayat/keluar', [\App\Http\Controllers\Public\Queue\ApplicantHistoryController::class, 'forget'])->name('history.forget');
 });
 
 Route::get('/layanan', [\App\Http\Controllers\Public\ServiceRequirementController::class, 'index'])->name('public.services.index');

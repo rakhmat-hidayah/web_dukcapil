@@ -37,6 +37,12 @@ class ApplicantDashboardController extends Controller
             ])
             ->firstOrFail();
 
+        // Establish verified session for this applicant's NIK so they can access their history seamlessly
+        session([
+            'applicant_verified_nik' => $application->applicant_nik,
+            'applicant_verified_at'  => now()->timestamp,
+        ]);
+
         // Sinkronkan status dokumen jika permohonan sudah lolos pra-verifikasi atau dalam tahap pelayanan
         if (in_array($application->status, [
             QueueApplication::STATUS_PRE_VERIFIED,
@@ -77,6 +83,12 @@ class ApplicantDashboardController extends Controller
             ->with(['serviceType', 'slot.schedule'])
             ->firstOrFail();
 
+        // If queue number is already issued, redirect directly to status
+        if ($application->queue_number) {
+            return redirect()->route('queue.status', ['token' => $token])
+                ->with('info', "Nomor antrean resmi Anda telah diterbitkan: {$application->queue_number}.");
+        }
+
         if (!in_array($application->status, [QueueApplication::STATUS_PRE_VERIFIED, QueueApplication::STATUS_APPROVED])) {
             return redirect()->route('queue.status', ['token' => $token])
                 ->with('info', 'Pemesanan jadwal antrean hanya dapat dilakukan setelah dokumen dinyatakan lolos pra-verifikasi (PRE_VERIFIED).');
@@ -114,6 +126,12 @@ class ApplicantDashboardController extends Controller
         ]);
 
         $application = QueueApplication::where('access_token', $token)->firstOrFail();
+
+        // If queue number is already issued, prevent double-booking
+        if ($application->queue_number) {
+            return redirect()->route('queue.status', ['token' => $token])
+                ->with('info', "Nomor antrean resmi Anda telah diterbitkan: {$application->queue_number}.");
+        }
 
         try {
             $this->verificationService->bookQueueSlot($application, (int) $request->input('slot_id'));

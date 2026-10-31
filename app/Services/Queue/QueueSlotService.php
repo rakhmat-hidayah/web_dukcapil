@@ -68,6 +68,19 @@ class QueueSlotService
     public function bookSlot(int $slotId, QueueApplication $application): QueueSlot
     {
         return DB::transaction(function () use ($slotId, $application) {
+            // Lock application row first to guarantee idempotency across concurrent requests
+            $app = QueueApplication::lockForUpdate()->findOrFail($application->id);
+
+            // If already booked to this exact slot and already has queue_number, return existing slot idempotently
+            if ($app->queue_number && $app->queue_slot_id === $slotId) {
+                return QueueSlot::with(['schedule', 'serviceType'])->findOrFail($slotId);
+            }
+
+            // If already booked to another slot, prevent double-booking without release
+            if ($app->queue_number && $app->status === QueueApplication::STATUS_QUEUE_BOOKED) {
+                throw new \InvalidArgumentException("Permohonan ini telah memiliki nomor antrean resmi ({$app->queue_number}).");
+            }
+
             // lockForUpdate prevents concurrent transactions from reading stale booked_count
             $slot = QueueSlot::with(['schedule', 'serviceType'])
                 ->lockForUpdate()
@@ -91,7 +104,7 @@ class QueueSlotService
             // Generate verified final queue number
             $queueNumber = QueueNumberGenerator::generateQueueNumber($slot);
 
-            $application->update([
+            $app->update([
                 'queue_slot_id' => $slot->id,
                 'queue_number'  => $queueNumber,
             ]);

@@ -89,6 +89,7 @@ class QueueInfoController extends Controller
 
     /**
      * Search application status by Registration Number or NIK.
+     * Directs NIK searches securely to Applicant History verification.
      */
     public function checkStatus(Request $request)
     {
@@ -100,18 +101,41 @@ class QueueInfoController extends Controller
         ]);
 
         $query = trim($request->input('query'));
+        $digitsOnly = preg_replace('/[^0-9]/', '', $query);
 
-        // Search by exact reg_number or exact applicant_nik
-        $application = QueueApplication::where('reg_number', $query)
-            ->orWhere('applicant_nik', $query)
+        // Case A: User entered a 16-digit NIK -> Direct to secure history verification
+        if (strlen($digitsOnly) === 16) {
+            $verifiedNik = $request->session()->get('applicant_verified_nik');
+            if ($verifiedNik === $digitsOnly) {
+                return redirect()->route('queue.history');
+            }
+
+            $hasApp = QueueApplication::where('applicant_nik', $digitsOnly)->exists();
+            if (!$hasApp) {
+                return back()->withErrors([
+                    'query' => 'Tidak ditemukan permohonan dengan NIK tersebut. Pastikan NIK benar atau silakan ajukan pendaftaran baru.',
+                ])->withInput();
+            }
+
+            return redirect()->route('queue.history', ['nik' => $digitsOnly])
+                ->with('info', 'Silakan masukkan nomor WhatsApp/HP terdaftar untuk memverifikasi dan melihat seluruh riwayat permohonan Anda.');
+        }
+
+        // Case B: Search by Registration Number (e.g. REG-2610-XXXXXX)
+        $application = QueueApplication::where('reg_number', strtoupper($query))
+            ->orWhere('reg_number', $query)
             ->latest()
             ->first();
 
         if (!$application) {
             return back()->withErrors([
                 'query' => 'Pengajuan tidak ditemukan. Pastikan Nomor Registrasi atau NIK yang Anda masukkan sudah benar.',
-            ]);
+            ])->withInput();
         }
+
+        // Establish session so user can access their other applications
+        $request->session()->put('applicant_verified_nik', $application->applicant_nik);
+        $request->session()->put('applicant_verified_at', now()->timestamp);
 
         return redirect()->route('queue.status', ['token' => $application->access_token]);
     }

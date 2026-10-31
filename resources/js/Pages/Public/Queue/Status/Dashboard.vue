@@ -3,6 +3,56 @@
 
   <PublicLayout>
     <div class="queue-dashboard-container py-8 sm:py-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 print:p-0 print:m-0 print:max-w-none print:space-y-0">
+      <!-- Top Quick Nav & Persistent Registration Identity Bar -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-4 sm:p-5 shadow-lg border border-slate-700/80 flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
+        <!-- Left: Persistent Registration Number with One-Click Copy -->
+        <div class="flex items-center gap-3 flex-wrap">
+          <div class="w-10 h-10 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400 shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold tracking-widest text-blue-300 block">
+              NOMOR REGISTRASI PERMOHONAN
+            </span>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="text-xl sm:text-2xl font-black font-mono tracking-wide text-white">
+                {{ application.reg_number }}
+              </span>
+              <button
+                type="button"
+                @click="copyText(application.reg_number, 'Nomor Registrasi')"
+                class="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-[11px] font-bold transition flex items-center gap-1 active:scale-95"
+                title="Salin Nomor Registrasi ke Clipboard"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                <span>Salin</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Print / Save PDF & Riwayat Links -->
+        <div class="flex items-center gap-2.5 self-start md:self-center shrink-0 flex-wrap">
+          <button
+            type="button"
+            @click="windowPrint"
+            class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95"
+            title="Cetak Tanda Terima atau Simpan PDF"
+          >
+            <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            <span>Cetak / Simpan PDF</span>
+          </button>
+
+          <Link
+            :href="route('queue.history')"
+            class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-blue-600/30"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <span>Riwayat Permohonan Saya</span>
+          </Link>
+        </div>
+      </div>
+
       <!-- Status Top Card -->
       <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-xl relative overflow-hidden print:hidden">
         <!-- Colored top border accent -->
@@ -12,7 +62,7 @@
         ></div>
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div class="space-y-1">
+          <div class="space-y-1 flex-1">
             <div class="flex items-center gap-2 flex-wrap">
               <span class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
                 NO. REGISTRASI: {{ application.reg_number }}
@@ -47,19 +97,45 @@
             </div>
           </div>
 
-          <!-- Queue Ticket Number Pill if Booked/Beyond -->
+          <!-- Separated Queue Number Box -->
+          <!-- A. PUBLISHED QUEUE NUMBER -->
           <div
             v-if="application.queue_number"
-            class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-3xl p-5 text-center shadow-lg shadow-blue-600/30 min-w-[200px]"
+            class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-3xl p-5 text-center shadow-lg shadow-blue-600/30 min-w-[210px] shrink-0"
           >
             <p class="text-[10px] uppercase font-bold tracking-widest text-blue-200">
-              Nomor Antrean
+              NOMOR ANTREAN RESMI
             </p>
-            <p class="text-4xl font-black font-mono tracking-tight mt-1">
+            <p class="text-4xl sm:text-5xl font-black font-mono tracking-tight mt-1">
               {{ application.queue_number }}
             </p>
             <p class="text-[11px] text-blue-100 mt-1 font-medium">
               {{ scheduleDateFormatted }}
+            </p>
+            <button
+              type="button"
+              @click="copyText(application.queue_number, 'Nomor Antrean')"
+              class="mt-3 px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition inline-flex items-center gap-1 w-full justify-center active:scale-95"
+              title="Salin Nomor Antrean"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              <span>Salin No. Antrean</span>
+            </button>
+          </div>
+
+          <!-- B. NOT YET PUBLISHED QUEUE NUMBER -->
+          <div
+            v-else
+            class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-3xl p-5 text-center min-w-[210px] shrink-0"
+          >
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+              Nomor Antrean
+            </span>
+            <p class="text-sm font-bold text-slate-600 dark:text-slate-300 mt-2">
+              Belum Diterbitkan
+            </p>
+            <p class="text-[11px] text-slate-400 mt-1 max-w-[180px] mx-auto leading-tight">
+              Nomor antrean dan jadwal akan terbit setelah verifikasi berkas disetujui.
             </p>
           </div>
         </div>
@@ -244,44 +320,61 @@
         </div>
       </div>
 
-      <!-- PRINTABLE TICKET CARD (If Booked or beyond) -->
+      <!-- UNIVERSAL PRINTABLE TICKET / REGISTRATION RECEIPT (Formatted for Paper Print / Save as PDF) -->
       <div
-        v-if="['QUEUE_BOOKED', 'SCHEDULED', 'ARRIVED', 'CHECKED_IN', 'PHYSICAL_VERIFICATION', 'APPROVED_FOR_SERVICE', 'PROCESSING', 'IN_SERVICE', 'READY_FOR_PICKUP', 'COMPLETED'].includes(application.status)"
-        id="tiket-antrian"
+        id="bukti-permohonan"
         class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border-2 border-dashed border-blue-300 dark:border-blue-800 shadow-xl relative"
+        :class="{ 'print:block': true, 'hidden sm:block': !application.queue_number }"
       >
         <!-- Print Trigger -->
         <button
+          type="button"
           @click="windowPrint"
           class="absolute top-6 right-6 p-2 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition print:hidden"
-          title="Cetak Tiket Antrian"
+          title="Cetak Bukti atau Simpan PDF"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
         </button>
 
         <div class="text-center pb-6 border-b border-slate-100 dark:border-slate-700">
           <p class="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
-            DINAS KEPENDUDUKAN DAN PENCATATAN SIPIL KABUPATEN DOMPU
+            PEMERINTAH KABUPATEN DOMPU — DINAS KEPENDUDUKAN DAN PENCATATAN SIPIL
           </p>
           <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
-            TIKET ANTREAN PELAYANAN KTP-EL
+            {{ application.queue_number ? 'TIKET ANTREAN & BUKTI PELAYANAN KTP-EL' : 'BUKTI TANDA TERIMA PENDAFTARAN KTP-EL' }}
           </h2>
-          <p class="text-xs text-slate-400 mt-0.5">
-            Nomor Registrasi: <span class="font-mono font-bold">{{ application.reg_number }}</span>
-          </p>
+          <div class="mt-1 flex items-center justify-center gap-3 text-xs text-slate-500">
+            <span>Nomor Registrasi: <strong class="font-mono text-slate-800 dark:text-slate-200">{{ application.reg_number }}</strong></span>
+            <span>·</span>
+            <span>Status: <strong class="text-blue-600 dark:text-blue-400">{{ application.status_label }}</strong></span>
+          </div>
         </div>
 
         <div class="py-8 text-center bg-slate-50 dark:bg-slate-900/60 rounded-2xl my-6 border border-slate-200/50 dark:border-slate-800">
-          <p class="text-xs uppercase font-bold tracking-widest text-slate-400">Nomor Antrean Anda</p>
-          <p class="text-5xl sm:text-6xl font-black font-mono tracking-tight text-blue-600 dark:text-blue-400 mt-2">
-            {{ application.queue_number || '-' }}
-          </p>
-          <p class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-2">
-            {{ application.service_type?.name }}
-          </p>
-          <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
-            Sesi: {{ application.slot?.name || 'Sesi Pelayanan' }} ({{ scheduleTimeFormatted }})
-          </div>
+          <template v-if="application.queue_number">
+            <p class="text-xs uppercase font-bold tracking-widest text-slate-400">Nomor Antrean Resmi Anda</p>
+            <p class="text-5xl sm:text-6xl font-black font-mono tracking-tight text-blue-600 dark:text-blue-400 mt-2">
+              {{ application.queue_number }}
+            </p>
+            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-2">
+              {{ application.service_type?.name }}
+            </p>
+            <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
+              Sesi: {{ application.slot?.name || 'Sesi Pelayanan' }} ({{ scheduleTimeFormatted }})
+            </div>
+          </template>
+          <template v-else>
+            <p class="text-xs uppercase font-bold tracking-widest text-slate-400">Nomor Registrasi Pendaftaran</p>
+            <p class="text-3xl sm:text-4xl font-black font-mono tracking-tight text-slate-800 dark:text-slate-100 mt-2">
+              {{ application.reg_number }}
+            </p>
+            <p class="text-sm font-bold text-slate-700 dark:text-slate-300 mt-2">
+              {{ application.service_type?.name }}
+            </p>
+            <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300">
+              Tahap: Pra-Verifikasi Dokumen Online (Nomor Antrean Diterbitkan Setelah Lolos Verifikasi)
+            </div>
+          </template>
         </div>
 
         <!-- Schedule & Location Details -->
@@ -289,7 +382,7 @@
           <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-700">
             <span class="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Tanggal & Waktu Kedatangan</span>
             <p class="text-sm font-bold text-slate-900 dark:text-white mt-1">{{ scheduleDateFormatted }}</p>
-            <p class="text-slate-500 mt-0.5">{{ scheduleTimeFormatted }}</p>
+            <p class="text-slate-500 mt-0.5">{{ application.queue_number ? scheduleTimeFormatted : 'Menunggu pemilihan jadwal setelah verifikasi' }}</p>
           </div>
 
           <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-700">
@@ -518,6 +611,24 @@
       @close="activeRevisionCameraDoc = null"
       @captured="handleRevisionPhotoCaptured"
     />
+
+    <!-- Copy Toast Notification -->
+    <transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="transform translate-y-2 opacity-0"
+      enter-to-class="transform translate-y-0 opacity-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="transform translate-y-0 opacity-100"
+      leave-to-class="transform translate-y-2 opacity-0"
+    >
+      <div
+        v-if="toastMessage"
+        class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-2 print:hidden"
+      >
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        <span>{{ toastMessage }}</span>
+      </div>
+    </transition>
   </PublicLayout>
 </template>
 
@@ -548,6 +659,21 @@ const activePreviewDoc = ref(null);
 const activeRevisionCameraDoc = ref(null);
 const revisionFiles = ref({});
 const revisionForm = useForm({});
+const toastMessage = ref('');
+let toastTimer = null;
+
+function copyText(text, label) {
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    toastMessage.value = `${label} (${text}) berhasil disalin ke clipboard!`;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastMessage.value = '';
+    }, 3000);
+  }).catch(() => {
+    toastMessage.value = `${label}: ${text}`;
+  });
+}
 
 const bookingUrl = computed(() => {
   try {
@@ -742,13 +868,13 @@ const printTimestamp = computed(() => {
     width: 100% !important;
   }
 
-  /* Force hide all siblings except the ticket card */
-  .queue-dashboard-container > *:not(#tiket-antrian) {
+  /* Force hide all siblings except the receipt/ticket card */
+  .queue-dashboard-container > *:not(#bukti-permohonan) {
     display: none !important;
   }
 
-  /* Ticket Card Print Layout */
-  #tiket-antrian {
+  /* Receipt / Ticket Card Print Layout */
+  #bukti-permohonan {
     display: block !important;
     position: relative !important;
     width: 100% !important;
@@ -766,31 +892,31 @@ const printTimestamp = computed(() => {
   }
 
   /* Hide print trigger button inside ticket */
-  #tiket-antrian button {
+  #bukti-permohonan button {
     display: none !important;
   }
 
-  /* Subcontainers inside ticket: preserve borders & light backgrounds */
-  #tiket-antrian .bg-slate-50,
-  #tiket-antrian .dark\:bg-slate-900\/60,
-  #tiket-antrian .dark\:bg-slate-900\/40 {
+  /* Subcontainers inside receipt: preserve borders & light backgrounds */
+  #bukti-permohonan .bg-slate-50,
+  #bukti-permohonan .dark\:bg-slate-900\/60,
+  #bukti-permohonan .dark\:bg-slate-900\/40 {
     background-color: #f8fafc !important;
     border-color: #cbd5e1 !important;
   }
 
-  #tiket-antrian .bg-amber-50\/70,
-  #tiket-antrian .dark\:bg-amber-950\/30 {
+  #bukti-permohonan .bg-amber-50\/70,
+  #bukti-permohonan .dark\:bg-amber-950\/30 {
     background-color: #fefce8 !important;
     border-color: #fde047 !important;
   }
 
-  #tiket-antrian .text-blue-600,
-  #tiket-antrian .dark\:text-blue-400 {
+  #bukti-permohonan .text-blue-600,
+  #bukti-permohonan .dark\:text-blue-400 {
     color: #1d4ed8 !important;
   }
 
-  #tiket-antrian .bg-blue-100,
-  #tiket-antrian .dark\:bg-blue-900\/40 {
+  #bukti-permohonan .bg-blue-100,
+  #bukti-permohonan .dark\:bg-blue-900\/40 {
     background-color: #dbeafe !important;
     color: #1e40af !important;
   }

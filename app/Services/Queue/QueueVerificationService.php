@@ -90,6 +90,11 @@ class QueueVerificationService
      */
     public function bookQueueSlot(QueueApplication $application, int $slotId): QueueApplication
     {
+        // If already booked with a queue number, return idempotently to prevent duplicate issuance
+        if ($application->status === QueueApplication::STATUS_QUEUE_BOOKED && $application->queue_number) {
+            return $application->fresh(['serviceType', 'slot.schedule', 'documents']);
+        }
+
         if (!in_array($application->status, [QueueApplication::STATUS_PRE_VERIFIED, QueueApplication::STATUS_APPROVED])) {
             throw new \InvalidArgumentException("Pemesanan antrean hanya dapat dilakukan setelah dokumen dinyatakan lolos pra-verifikasi online (PRE_VERIFIED).");
         }

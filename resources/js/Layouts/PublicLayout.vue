@@ -98,6 +98,7 @@
               <div class="absolute left-0 top-full pt-1.5 hidden group-hover:block w-56 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-none py-2 overflow-hidden">
                   <Link href="/layanan/antrian" class="block px-4 py-2 hover:bg-emerald-50/70 dark:hover:bg-zinc-800/80 hover:text-emerald-600 dark:hover:text-emerald-400 text-xs font-bold text-emerald-600 dark:text-emerald-400">Antrian Online KTP-el</Link>
+                  <Link href="/layanan/antrian/riwayat" class="block px-4 py-2 hover:bg-blue-50/70 dark:hover:bg-zinc-800/80 hover:text-blue-600 dark:hover:text-blue-400 text-xs font-bold text-blue-600 dark:text-blue-400">Riwayat Permohonan KTP-el</Link>
                   <Link href="/layanan" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Persyaratan Layanan</Link>
                   <Link href="/layanan/mobile" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Pelayanan Mobile</Link>
                   <Link href="/downloads" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Formulir Pendaftaran</Link>
@@ -314,6 +315,8 @@
               <ChevronDown class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200" :class="mobileAccordion.includes('layanan') ? 'rotate-180 text-primary-600' : ''" />
             </button>
             <div v-if="mobileAccordion.includes('layanan')" class="bg-gray-50/70 dark:bg-zinc-800/30 px-5 py-2 flex flex-col gap-1">
+              <Link href="/layanan/antrian" @click="mobileMenuOpen = false" class="py-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 border-b border-gray-100 dark:border-zinc-800">Antrian Online KTP-el</Link>
+              <Link href="/layanan/antrian/riwayat" @click="mobileMenuOpen = false" class="py-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 border-b border-gray-100 dark:border-zinc-800">Riwayat Permohonan KTP-el</Link>
               <Link href="/layanan" @click="mobileMenuOpen = false" class="py-2 text-xs font-medium text-gray-600 dark:text-zinc-400 hover:text-primary-600 border-b border-gray-100 dark:border-zinc-800">Persyaratan Layanan</Link>
               <Link href="/downloads" @click="mobileMenuOpen = false" class="py-2 text-xs font-medium text-gray-600 dark:text-zinc-400 hover:text-primary-600 border-b border-gray-100 dark:border-zinc-800">Formulir Pendaftaran</Link>
               <Link href="/layanan/survei" @click="mobileMenuOpen = false" class="py-2 text-xs font-medium text-gray-600 dark:text-zinc-400 hover:text-primary-600 border-b border-gray-100 dark:border-zinc-800">Survei Kepuasan (IKM)</Link>

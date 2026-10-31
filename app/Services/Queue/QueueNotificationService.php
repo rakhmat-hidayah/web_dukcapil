@@ -63,7 +63,7 @@ class QueueNotificationService
         return match ($event) {
             'submit', 'submitted' => new ApplicationSubmittedNotification($application),
             'revision', 'revision_required' => new RevisionRequiredNotification($application),
-            'approved' => new ApplicationApprovedNotification($application),
+            'approved', 'queue_booked' => new ApplicationApprovedNotification($application),
             'rejected' => new ApplicationRejectedNotification($application),
             default => null,
         };
