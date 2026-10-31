@@ -224,7 +224,7 @@
             <!-- Documents Grid -->
             <div class="space-y-4">
               <div
-                v-for="docConfig in application.service_type?.documents"
+                v-for="docConfig in requirementsList"
                 :key="docConfig.id"
                 class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 transition"
               >
@@ -761,15 +761,34 @@ const openViewer = (doc, label) => {
 
 // Helpers
 const getDocument = (serviceDocId) => {
-  return props.application.documents?.find(d => d.service_document_id === serviceDocId)
+  return props.application.documents?.find(d => d.service_document_id === serviceDocId || d.id === serviceDocId)
 }
+
+const requirementsList = computed(() => {
+  if (props.application.service_type?.documents && props.application.service_type.documents.length > 0) {
+    return props.application.service_type.documents
+  }
+  if (props.application.documents && props.application.documents.length > 0) {
+    return props.application.documents.map(d => ({
+      id: d.service_document_id || d.id,
+      label: d.service_document?.label || d.original_filename || 'Dokumen Persyaratan',
+      is_required: d.service_document?.is_required ?? true,
+      description: d.service_document?.description || '',
+      accepted_formats: d.service_document?.accepted_formats || 'jpg,jpeg,png,pdf',
+    }))
+  }
+  return []
+})
 
 const uploadedCount = computed(() => {
   return props.application.documents?.length || 0
 })
 
 const totalDocsRequired = computed(() => {
-  return props.application.service_type?.documents?.filter(d => d.is_required)?.length || 0
+  if (props.application.service_type?.documents && props.application.service_type.documents.length > 0) {
+    return props.application.service_type.documents.filter(d => d.is_required)?.length || 0
+  }
+  return props.application.documents?.length || 0
 })
 
 // Approve Modal State

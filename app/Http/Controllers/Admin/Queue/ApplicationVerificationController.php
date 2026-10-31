@@ -108,8 +108,18 @@ class ApplicationVerificationController extends Controller
         // Automatically start review if status is SUBMITTED or RESUBMITTED
         if (in_array($application->status, [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED])) {
             $this->verificationService->startReview($application, $officer);
-            $application->refresh();
+            $application->load([
+                'serviceType.documents' => fn($q) => $q->orderBy('sort_order'),
+                'documents.serviceDocument',
+                'verificationHistory.user',
+            ]);
         }
+
+        // Ensure relations are fully loaded and not lost
+        $application->loadMissing([
+            'serviceType.documents' => fn($q) => $q->orderBy('sort_order'),
+            'documents.serviceDocument',
+        ]);
 
         // Available upcoming slots for approval assignment
         $availableSlots = $this->slotService->getAvailableSlots(
