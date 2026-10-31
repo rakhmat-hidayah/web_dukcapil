@@ -5,7 +5,7 @@
       <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <div>
           <h3 class="font-bold text-slate-900 dark:text-white text-base">
-            {{ isSelfie ? 'Foto Wajah Pemohon' : 'Foto Dokumen Persyaratan' }}
+            {{ isSelfie ? 'Foto Wajah Pemohon' : (isKtp ? 'Foto KTP-el' : 'Foto Dokumen Persyaratan') }}
           </h3>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
             {{ documentLabel }}
@@ -22,7 +22,7 @@
       <!-- Main Body -->
       <div class="p-4 sm:p-5 flex-1 overflow-y-auto flex flex-col items-center">
         <!-- Capture Viewfinder / Preview Container -->
-        <div class="w-full relative rounded-2xl overflow-hidden bg-black aspect-[4/3] sm:aspect-[4/3] flex items-center justify-center shadow-inner">
+        <div class="w-full relative rounded-2xl overflow-hidden bg-black h-[56vh] max-h-[500px] min-h-[380px] sm:h-[460px] flex items-center justify-center shadow-inner">
           <!-- 1. LIVE CAMERA STREAM -->
           <video
             v-show="isCameraActive && !capturedBlob"
@@ -30,30 +30,92 @@
             autoplay
             playsinline
             muted
-            class="w-full h-full object-cover"
+            :class="['w-full h-full object-cover', isSelfie && currentFacingMode === 'user' ? '-scale-x-100' : '']"
           ></video>
 
           <!-- Guideline Overlay on Live Camera -->
           <div
             v-if="isCameraActive && !capturedBlob"
-            class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center p-6"
+            class="absolute inset-0 pointer-events-none flex flex-col items-center justify-between p-3.5 sm:p-4 overflow-hidden"
           >
-            <!-- Guide border for document or face -->
-            <div
-              v-if="!isSelfie"
-              class="w-full h-full border-2 border-dashed border-white/80 rounded-xl relative shadow-[0_0_0_9999px_rgba(0,0,0,0.3)]"
-            >
-              <div class="absolute top-2 left-2 text-[10px] text-white/90 bg-black/60 px-2 py-0.5 rounded">
-                Posisikan dokumen dalam bingkai ini
+            <!-- Top Guide Badge -->
+            <div class="z-10 bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-lg text-center max-w-[92%]">
+              <p class="text-xs font-semibold text-white flex items-center justify-center gap-1.5">
+                <span v-if="isKtp" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span v-else-if="isSelfie" class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                <span v-else class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>{{ guideTitle }}</span>
+              </p>
+            </div>
+
+            <!-- Center Cutout Frame -->
+            <div class="w-full flex-1 flex items-center justify-center relative my-1">
+              <!-- 1. KTP GUIDELINE (Green card outline + Pasfoto box on right) -->
+              <div
+                v-if="isKtp"
+                class="relative w-[94%] sm:w-[86%] max-w-[460px] aspect-[1.58/1] rounded-2xl border-2 sm:border-[3px] border-emerald-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] flex items-center"
+              >
+                <!-- Left: Area NIK & Identitas -->
+                <div class="absolute left-2.5 sm:left-3.5 top-2.5 sm:top-3.5 bottom-2.5 sm:bottom-3.5 right-[34%] rounded-xl border border-dashed border-emerald-400/50 p-2 sm:p-2.5 flex flex-col justify-between text-emerald-300">
+                  <div class="flex items-center gap-1.5 font-mono font-bold tracking-wider text-[10px] sm:text-[11px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-ping"></span>
+                    AREA NIK & IDENTITAS
+                  </div>
+                  <div class="text-[9px] sm:text-[10px] text-emerald-100/80 leading-tight">
+                    Posisikan teks KTP agar terlihat tajam dan tidak silau
+                  </div>
+                </div>
+
+                <!-- Right: Pasfoto Box (Dedicated matching user's image) -->
+                <div class="absolute right-2.5 sm:right-3.5 top-2.5 sm:top-3.5 bottom-2.5 sm:bottom-3.5 w-[30%] rounded-xl border-2 sm:border-[3px] border-emerald-400 bg-emerald-400/10 flex flex-col items-center justify-center p-1 text-center shadow-sm">
+                  <svg class="w-6 h-6 sm:w-8 sm:h-8 text-emerald-300 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                  </svg>
+                  <span class="text-[9px] sm:text-[10px] font-bold text-emerald-200 mt-1 leading-tight tracking-wide">
+                    PASFOTO KTP
+                  </span>
+                  <span class="text-[8px] text-emerald-300/80 mt-0.5 leading-tight">
+                    Paskan foto di sini
+                  </span>
+                </div>
+              </div>
+
+              <!-- 2. SELFIE GUIDELINE (White dashed oval for face) -->
+              <div
+                v-else-if="isSelfie"
+                class="relative w-48 h-64 sm:w-56 sm:h-72 border-2 sm:border-[3px] border-dashed border-white rounded-[50%] shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex flex-col items-center justify-center"
+              >
+                <!-- Eye-level line -->
+                <div class="w-2/3 border-b border-white/40 mb-6 relative">
+                  <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 text-[9px] text-white/80 font-semibold tracking-wider whitespace-nowrap">
+                    POSISI MATA
+                  </span>
+                </div>
+              </div>
+
+              <!-- 3. GENERAL DOCUMENT GUIDELINE (KK, Surat, Akta, dll) -->
+              <div
+                v-else
+                class="relative w-[92%] sm:w-[88%] h-[88%] sm:h-[84%] border-2 sm:border-[3px] border-emerald-400 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] flex items-center justify-center"
+              >
+                <!-- 4 Corner Bracket Accents -->
+                <div class="absolute top-2 left-2 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
+                <div class="absolute top-2 right-2 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
+                <div class="absolute bottom-2 left-2 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
+                <div class="absolute bottom-2 right-2 w-6 h-6 border-b-4 border-r-4 border-white rounded-br"></div>
+
+                <!-- Center guidance hint -->
+                <div class="text-center p-3 text-white/85 max-w-xs drop-shadow">
+                  <p class="text-[11px] font-semibold leading-relaxed">
+                    Pastikan 4 sudut lembar dokumen berada di dalam kotak hijau
+                  </p>
+                </div>
               </div>
             </div>
-            <div
-              v-else
-              class="w-48 h-64 border-2 border-dashed border-white/80 rounded-full relative shadow-[0_0_0_9999px_rgba(0,0,0,0.3)]"
-            >
-              <div class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] text-white/90 bg-black/60 px-2 py-0.5 rounded">
-                Posisikan wajah di dalam oval
-              </div>
+
+            <!-- Bottom Hint Badge -->
+            <div class="z-10 bg-slate-950/70 backdrop-blur-sm px-3 py-1 rounded-full text-[11px] text-white/90 text-center max-w-[92%]">
+              {{ guideHint }}
             </div>
           </div>
 
@@ -268,7 +330,30 @@ const capturedBlob = ref(null);
 const previewUrl = ref(null);
 const compressionStats = ref(null);
 
-const isSelfie = computed(() => props.captureMode === 'user');
+const isSelfie = computed(() => {
+  if (props.captureMode === 'user') return true;
+  const label = (props.documentLabel || '').toLowerCase();
+  return label.includes('selfie') || label.includes('wajah') || label.includes('face');
+});
+
+const isKtp = computed(() => {
+  if (isSelfie.value) return false;
+  const label = (props.documentLabel || '').toLowerCase();
+  return label.includes('ktp') || label.includes('e-ktp') || label.includes('identitas');
+});
+
+const guideTitle = computed(() => {
+  if (isSelfie.value) return 'Posisikan Wajah Tepat di Dalam Garis Oval';
+  if (isKtp.value) return 'Posisikan KTP & Pasfoto Pas Pada Kotak Hijau';
+  return 'Posisikan Seluruh Dokumen Dalam Kotak Hijau';
+});
+
+const guideHint = computed(() => {
+  if (props.captureHint) return props.captureHint;
+  if (isSelfie.value) return 'Hadapkan wajah lurus ke kamera dengan pencahayaan yang cukup';
+  if (isKtp.value) return 'Sejajarkan fisik KTP ke bingkai hijau dan paskan foto wajah di kotak kanan';
+  return 'Pastikan dokumen tidak miring, tidak terpotong, dan tulisan terbaca jelas';
+});
 
 const isMobileDevice = computed(() => {
   if (typeof navigator === 'undefined') return false;
@@ -360,6 +445,12 @@ async function takeSnapshot() {
   canvas.height = video.videoHeight || 720;
 
   const ctx = canvas.getContext('2d');
+
+  if (isSelfie.value && currentFacingMode.value === 'user') {
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+  }
+
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
   stopCamera();
