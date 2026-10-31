@@ -144,38 +144,43 @@
           <!-- 3. CAMERA STREAM RESTRICTED / PERMISSION NOTICE -->
           <div
             v-if="!isCameraActive && !isStartingCamera && !capturedBlob && cameraError"
-            class="text-center p-6 text-slate-300 space-y-3.5 max-w-md z-30"
+            class="text-center p-5 sm:p-6 text-slate-300 space-y-3.5 max-w-md z-30"
           >
-            <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center">
-              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
 
             <div>
               <p class="text-sm font-bold text-white">
-                Kamera Langsung Memerlukan Izin Browser
+                Izin Kamera Browser Belum Aktif
               </p>
-              <p class="text-xs text-slate-300 mt-2 leading-relaxed bg-black/50 p-3 rounded-xl border border-white/10 text-left">
-                {{ cameraError }}
-              </p>
+              <div class="text-[11px] text-slate-300 mt-2 bg-slate-900/90 p-3.5 rounded-2xl border border-white/10 text-left space-y-2">
+                <p class="font-semibold text-emerald-400">Cara Memunculkan / Mengaktifkan Izin:</p>
+                <ol class="list-decimal list-inside space-y-1 text-slate-300/90 leading-relaxed">
+                  <li>Klik tombol <span class="text-emerald-400 font-bold">"Minta Izin & Aktifkan Kamera"</span> di bawah.</li>
+                  <li>Jika Chrome belum memunculkan konfirmasi, ketuk <strong>ikon setelan / gembok 🔒</strong> di sebelah kiri alamat web <code class="text-emerald-300">dukcapil.dompukab.go.id</code>.</li>
+                  <li>Pilih menu <strong>Izin</strong> &rarr; pilih <strong>Kamera</strong> &rarr; pilih <strong>Izinkan</strong>.</li>
+                </ol>
+              </div>
             </div>
 
-            <div class="space-y-2 pt-2">
+            <div class="space-y-2 pt-1">
               <button
                 type="button"
                 @click="startCamera"
-                class="w-full px-5 py-3 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2 cursor-pointer"
+                class="w-full px-5 py-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2 cursor-pointer"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                <span>Coba Lagi Aktifkan Kamera Langsung</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                <span>Minta Izin & Aktifkan Kamera Sekarang</span>
               </button>
 
               <button
                 type="button"
                 @click="triggerNativeCameraInput"
-                class="w-full px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition flex items-center justify-center gap-2 cursor-pointer border border-slate-700"
+                class="w-full px-4 py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl text-[11px] font-medium transition flex items-center justify-center gap-2 cursor-pointer border border-slate-700"
               >
-                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <span>Gunakan Kamera Bawaan HP (Tanpa Garis Pemandu)</span>
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>Buka Lewat Kamera Bawaan HP (Alternatif)</span>
               </button>
             </div>
           </div>
@@ -321,12 +326,34 @@ const guideHint = computed(() => {
   return 'Pastikan dokumen tidak miring, tidak terpotong, dan tulisan terbaca jelas';
 });
 
+let permissionStatusObj = null;
+
+async function setupPermissionListener() {
+  if (navigator.permissions && navigator.permissions.query) {
+    try {
+      const res = await navigator.permissions.query({ name: 'camera' });
+      permissionStatusObj = res;
+      res.onchange = () => {
+        if (res.state === 'granted' && !isCameraActive.value) {
+          startCamera();
+        }
+      };
+    } catch (e) {
+      // Permission query not supported for camera in some browsers
+    }
+  }
+}
+
 onMounted(async () => {
+  setupPermissionListener();
   await startCamera();
 });
 
 onBeforeUnmount(() => {
   stopCamera();
+  if (permissionStatusObj) {
+    permissionStatusObj.onchange = null;
+  }
   if (previewUrl.value) {
     URL.revokeObjectURL(previewUrl.value);
   }
