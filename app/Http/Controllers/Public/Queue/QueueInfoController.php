@@ -20,6 +20,17 @@ class QueueInfoController extends Controller
      */
     public function index(): Response
     {
+        // Auto-seed initial queue services & settings if table is empty in production
+        if (ServiceType::count() === 0) {
+            try {
+                (new \Database\Seeders\QueueServiceTypeSeeder())->run();
+                (new \Database\Seeders\QueueSettingsSeeder())->run();
+                (new \Database\Seeders\QueueScheduleSeeder())->run();
+            } catch (\Throwable $e) {
+                \Log::warning('Queue auto-seed error: ' . $e->getMessage());
+            }
+        }
+
         $today = Carbon::today()->format('Y-m-d');
 
         // Fetch active service types with their requirement counts

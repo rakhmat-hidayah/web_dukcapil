@@ -29,6 +29,17 @@ class QueueApplicationController extends Controller
      */
     public function create(Request $request): Response
     {
+        // Auto-seed initial queue services & settings if table is empty in production
+        if (ServiceType::count() === 0) {
+            try {
+                (new \Database\Seeders\QueueServiceTypeSeeder())->run();
+                (new \Database\Seeders\QueueSettingsSeeder())->run();
+                (new \Database\Seeders\QueueScheduleSeeder())->run();
+            } catch (\Throwable $e) {
+                \Log::warning('Queue auto-seed error: ' . $e->getMessage());
+            }
+        }
+
         $serviceSlug = $request->query('layanan');
         $selectedService = null;
 
