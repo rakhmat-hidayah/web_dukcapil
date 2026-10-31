@@ -14,6 +14,7 @@ class InstallationSeeder extends Seeder
     {
         $this->call([
             RolePermissionSeeder::class,
+            KtpHandoverPermissionSeeder::class,
             WebsiteSettingSeeder::class,
             ThemeSettingSeeder::class,
             PpidSeeder::class,
