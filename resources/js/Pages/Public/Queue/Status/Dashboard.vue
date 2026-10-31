@@ -113,7 +113,7 @@
             </div>
 
             <Link
-              :href="route('queue.booking.show', { token: application.access_token })"
+              :href="bookingUrl"
               class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white text-emerald-800 hover:bg-emerald-50 text-xs font-black transition shadow-md hover:scale-105 text-center shrink-0"
             >
               Pilih Jadwal & Ambil Antrean &rarr;
@@ -354,7 +354,7 @@
 
         <div class="divide-y divide-slate-100 dark:divide-slate-700/60">
           <div
-            v-for="doc in application.documents"
+            v-for="doc in (application.documents || [])"
             :key="doc.id"
             class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
           >
@@ -465,7 +465,7 @@
 
         <div class="space-y-6 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700">
           <div
-            v-for="(hist, idx) in application.verification_history"
+            v-for="(hist, idx) in (application.verification_history || [])"
             :key="idx"
             class="flex items-start gap-4 relative"
           >
@@ -548,6 +548,22 @@ const activePreviewDoc = ref(null);
 const activeRevisionCameraDoc = ref(null);
 const revisionFiles = ref({});
 const revisionForm = useForm({});
+
+const bookingUrl = computed(() => {
+  try {
+    if (typeof route === 'function') {
+      if (route().has && route().has('queue.booking')) {
+        return route('queue.booking', { token: props.application?.access_token });
+      }
+      if (route().has && route().has('queue.booking.show')) {
+        return route('queue.booking.show', { token: props.application?.access_token });
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+  return `/layanan/antrian/status/${props.application?.access_token}/booking`;
+});
 
 const attendanceLabel = computed(() => {
   const map = {
@@ -643,8 +659,13 @@ function windowPrint() {
 
 function formatDate(isoStr) {
   if (!isoStr) return '-';
-  const d = new Date(isoStr);
-  return d.toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  try {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return '-';
+    return d.toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  } catch (e) {
+    return '-';
+  }
 }
 
 const printTimestamp = computed(() => {

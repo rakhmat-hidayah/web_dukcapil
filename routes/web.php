@@ -95,6 +95,7 @@ Route::prefix('layanan/antrian')->name('queue.')->group(function () {
     // Status tracking, schedule booking & re-submission
     Route::get('/status/{token}', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'show'])->name('status');
     Route::get('/status/{token}/booking', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'showBooking'])->name('booking');
+    Route::get('/status/{token}/booking-show', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'showBooking'])->name('booking.show');
     Route::post('/status/{token}/booking', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'storeBooking'])->name('booking.store');
     Route::post('/status/{token}/revisi', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'resubmit'])->name('resubmit');
     Route::post('/status/{token}/batal', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'cancel'])->name('cancel');
