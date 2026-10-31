@@ -14,6 +14,8 @@ use App\Services\Queue\QueueSlotService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -275,6 +277,16 @@ class QueueApplicationController extends Controller
     protected function ensureMandatoryDocumentsExist(): void
     {
         try {
+            // Auto-run pending migration if template_url column is not yet present on production
+            if (!Schema::hasColumn('queue_service_documents', 'template_url')) {
+                try {
+                    Artisan::call('migrate', ['--force' => true]);
+                } catch (\Throwable $mErr) {
+                    \Log::warning('Queue auto-migrate error: ' . $mErr->getMessage());
+                }
+            }
+
+            $hasTemplateUrlColumn = Schema::hasColumn('queue_service_documents', 'template_url');
             $downloadUrl = 'https://dukcapil.dompukab.go.id/downloads';
             $f102Label = 'Formulir F-1.02 (Pendaftaran Peristiwa Kependudukan)';
             $f107Label = 'Formulir F-1.07 / F.017 (Surat Kuasa dalam Pelayanan Administrasi Kependudukan)';
@@ -290,26 +302,35 @@ class QueueApplicationController extends Controller
                     })
                     ->first();
 
+                $f102Data = [
+                    'service_type_id'  => $service->id,
+                    'label'            => $f102Label,
+                    'description'      => 'Formulir resmi permohonan pendaftaran peristiwa kependudukan yang telah diisi lengkap dan ditandatangani. Blanko formulir dapat diunduh pada link di bawah.',
+                    'is_required'      => true,
+                    'applicable_to'    => 'all',
+                    'accepted_formats' => 'jpg,jpeg,png,pdf',
+                    'max_size_kb'      => 5120,
+                    'capture_hint'     => 'Foto seluruh lembar Formulir F-1.02 yang telah diisi dan ditandatangani. Pastikan tulisan terbaca jelas dan tidak terpotong.',
+                    'capture_mode'     => 'environment',
+                    'sort_order'       => 1,
+                ];
+
+                if ($hasTemplateUrlColumn) {
+                    $f102Data['template_url'] = $downloadUrl;
+                }
+
                 if (!$f102Doc) {
-                    ServiceDocument::create([
-                        'service_type_id'  => $service->id,
-                        'label'            => $f102Label,
-                        'description'      => 'Formulir resmi permohonan pendaftaran peristiwa kependudukan yang telah diisi lengkap dan ditandatangani. Blanko formulir dapat diunduh pada link di bawah.',
-                        'is_required'      => true,
-                        'applicable_to'    => 'all',
-                        'accepted_formats' => 'jpg,jpeg,png,pdf',
-                        'max_size_kb'      => 5120,
-                        'capture_hint'     => 'Foto seluruh lembar Formulir F-1.02 yang telah diisi dan ditandatangani. Pastikan tulisan terbaca jelas dan tidak terpotong.',
-                        'capture_mode'     => 'environment',
-                        'template_url'     => $downloadUrl,
-                        'sort_order'       => 1,
-                    ]);
+                    ServiceDocument::create($f102Data);
                 } else {
-                    $f102Doc->update([
+                    $updatePayload = [
                         'label'        => $f102Label,
                         'is_required'  => true,
-                        'template_url' => $downloadUrl,
-                    ]);
+                        'applicable_to'=> 'all',
+                    ];
+                    if ($hasTemplateUrlColumn) {
+                        $updatePayload['template_url'] = $downloadUrl;
+                    }
+                    $f102Doc->update($updatePayload);
                 }
 
                 // 2. Update or ensure Surat Kuasa F-1.07 exists for representative if applicable
@@ -322,11 +343,14 @@ class QueueApplicationController extends Controller
                     ->first();
 
                 if ($suratKuasaDoc) {
-                    $suratKuasaDoc->update([
+                    $kuasaPayload = [
                         'label'        => $f107Label,
                         'description'  => 'Wajib jika permohonan diwakilkan. Surat Kuasa bermeterai Rp 10.000 yang ditandatangani oleh pemberi dan penerima kuasa. Blanko formulir dapat diunduh pada link di bawah.',
-                        'template_url' => $downloadUrl,
-                    ]);
+                    ];
+                    if ($hasTemplateUrlColumn) {
+                        $kuasaPayload['template_url'] = $downloadUrl;
+                    }
+                    $suratKuasaDoc->update($kuasaPayload);
                 }
             }
         } catch (\Throwable $e) {

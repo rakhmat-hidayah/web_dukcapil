@@ -22,7 +22,7 @@ class SecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=(), payment=()');
+        $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=(self), payment=()');
 
         // HSTS — only on production HTTPS (Plesk + SSL)
         // Instructs browsers to always use HTTPS for 1 year, including subdomains
@@ -51,7 +51,7 @@ class SecurityHeaders
                 . " https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org"
                 . " https://c.tile.openstreetmap.org;",
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
-            "media-src 'self';",
+            "media-src 'self' blob: data:;",
             "object-src 'none';",
             "base-uri 'self';",
             "form-action 'self';",
