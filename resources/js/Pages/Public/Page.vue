@@ -8,7 +8,7 @@
         v-if="page.og_image" 
         class="h-64 sm:h-80 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-zinc-800 shadow-md"
       >
-        <img :src="`/storage/${page.og_image}`" class="w-full h-full object-cover" alt="Banner Halaman" />
+        <img :src="`/uploads/${(page.og_image||'').replace(/^\/?(storage|uploads)\//, '')}`" class="w-full h-full object-cover" alt="Banner Halaman" />
       </div>
 
       <!-- Main card container -->

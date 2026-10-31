@@ -61,7 +61,7 @@
                 <span class="text-xs font-bold text-gray-700 dark:text-zinc-300">
                   <span class="text-primary-600 hover:underline">Klik untuk memilih dokumen</span> atau tarik berkas ke sini
                 </span>
-                <span class="text-[10px] text-gray-400 mt-0.5">Format: PDF, Word, Excel (Max 50MB)</span>
+                <span class="text-[10px] text-gray-400 mt-0.5">Format: PDF, Word, Excel (Max 3 MB)</span>
               </div>
             </div>
             <span v-if="form.errors.file" class="error">{{ form.errors.file }}</span>
@@ -134,7 +134,16 @@ function formatBytes(bytes) {
 }
 
 function handleFileUpload(e) {
-  form.file = e.target.files[0]
+  const selectedFile = e.target.files[0];
+  if (!selectedFile) return;
+
+  if (selectedFile.size > 3 * 1024 * 1024) {
+    form.setError('file', 'Ukuran berkas dokumen tidak boleh lebih dari 3 MB.');
+    if (fileInput.value) fileInput.value.value = '';
+    return;
+  }
+  form.clearErrors('file');
+  form.file = selectedFile;
 }
 
 function submit() {

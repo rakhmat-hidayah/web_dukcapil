@@ -2,7 +2,6 @@
   <section id="org_chart" class="py-12 mb-12 scroll-mt-24">
     <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
       <div class="max-w-3xl">
-        <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 inline-block border border-blue-400/30">Engine Interaktif</span>
         <h2 class="text-3xl font-black mb-4">Struktur Organisasi Interaktif</h2>
         <p class="text-slate-300 text-sm leading-relaxed mb-6">
           Jelajahi hirarki bagan organisasi Dinas Dukcapil Kabupaten Dompu secara visual. Klik setiap simpul jabatan untuk melihat profil lengkap pejabat, NIP, tugas fungsi, dan unduh SK.

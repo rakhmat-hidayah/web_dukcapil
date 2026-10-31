@@ -6,6 +6,9 @@
     RewriteEngine On
 
     # HTTPS Enforcement
+    RewriteCond %{HTTP_HOST} !\.test$ [NC]
+    RewriteCond %{HTTP_HOST} !^localhost [NC]
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
     RewriteCond %{HTTPS} off
     RewriteCond %{HTTP:X-Forwarded-Proto} !https
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
@@ -13,6 +16,12 @@
     # Direct PHP scripts allowed in root
     RewriteCond %{REQUEST_URI} ^/(install|nuclear|fix|diag|setup)\.php$ [NC]
     RewriteRule ^ - [L]
+
+    # Serve site.webmanifest directly via root index.php
+    RewriteRule ^site\.webmanifest$ index.php [L,QSA]
+
+    # Direct /storage/ requests to index.php (Smart Image Finder)
+    RewriteRule ^storage/(.*)$ index.php [L,QSA]
 
     # If file exists in public/ directory, rewrite to public/
     RewriteCond %{REQUEST_URI} !^/public/
@@ -24,7 +33,7 @@
     RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -d
     RewriteRule ^(.*)$ public/$1 [L]
 
-    # Send all other requests to public/index.php or index.php
+    # Send all other requests to index.php
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]

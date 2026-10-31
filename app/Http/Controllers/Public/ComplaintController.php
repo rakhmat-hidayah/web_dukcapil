@@ -45,8 +45,8 @@ class ComplaintController extends Controller
         ]);
 
         $data = $request->validate([
-            'submitter_name'        => 'required_unless:is_anonymous,true,1|nullable|string|max:150',
-            'submitter_phone'       => 'nullable|string|max:20',
+            'submitter_name'        => 'required_unless:is_anonymous,true,1|nullable|string|max:150|regex:/^[a-zA-Z\s\.\']*$/',
+            'submitter_phone'       => 'nullable|string|max:20|regex:/^[0-9]+$/',
             'submitter_email'       => 'nullable|email|max:150',
             'is_anonymous'          => 'nullable|boolean',
             'complaint_category_id' => 'required|exists:complaint_categories,id',
@@ -56,6 +56,9 @@ class ComplaintController extends Controller
             'captcha_answer'        => 'required|integer',
             'captcha_hash'          => 'required|string',
         ], [
+            'submitter_name.regex' => 'Nama hanya boleh berisi huruf, spasi, titik, atau tanda petik.',
+            'submitter_phone.regex' => 'Nomor HP / WhatsApp hanya boleh berisi angka (0-9).',
+            'submitter_email.email' => 'Format alamat email tidak valid (contoh: nama@email.com).',
             'complaint_category_id.required' => 'Silakan pilih salah satu Kategori Pengaduan terlebih dahulu.',
             'complaint_category_id.exists'   => 'Kategori pengaduan tidak valid.',
         ]);
@@ -90,6 +93,9 @@ class ComplaintController extends Controller
             'ip_address'            => $request->ip(),
             'user_agent'            => $request->userAgent(),
         ]);
+
+        // COMPLAINT FIRST, NOTIFICATION SECOND: Dispatch async email notification safely
+        \App\Services\ComplaintNotificationService::dispatchNewComplaintNotification($complaint);
 
         return redirect()->route('public.complaint.success', $complaint->ticket_number);
     }

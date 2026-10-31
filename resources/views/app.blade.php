@@ -23,7 +23,7 @@
             'description' => $siteDesc,
             'address' => [
                 '@type' => 'PostalAddress',
-                'streetAddress' => 'Jl. Bhayangkara No. 01, Kel. Bada',
+                'streetAddress' => 'Jl. Soekarno Hatta No. 9',
                 'addressLocality' => 'Dompu',
                 'addressRegion' => 'Nusa Tenggara Barat',
                 'postalCode' => '84211',
@@ -52,39 +52,93 @@
         ];
     @endphp
 
-    <title inertia>{{ $siteTitle }} - {{ $siteTagline }}</title>
+    @if(isset($seoData))
+        <title inertia>{{ $seoData['title'] }}</title>
+        <meta name="title" content="{{ $seoData['title'] }}">
+        <meta name="description" content="{{ $seoData['description'] }}">
+        <meta name="author" content="{{ $seoData['og']['author'] ?? 'Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu' }}">
+        <meta name="robots" content="index, follow">
+        <meta name="theme-color" content="{{ $theme['primary_600'] ?? '#0274cb' }}">
+        <link rel="canonical" href="{{ $seoData['canonical'] }}">
 
-    <!-- Primary Meta Tags -->
-    <meta name="title" content="{{ $siteTitle }} - {{ $siteTagline }}">
-    <meta name="description" content="{{ $siteDesc }}">
-    <meta name="keywords" content="{{ $siteKeywords }}">
-    <meta name="author" content="Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu">
-    <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="{{ $theme['primary_600'] ?? '#0274cb' }}">
-    <link rel="canonical" href="{{ $siteUrl }}">
+        <!-- Open Graph / Facebook / WhatsApp -->
+        <meta property="og:type" content="{{ $seoData['og']['type'] ?? 'article' }}">
+        <meta property="og:url" content="{{ $seoData['og']['url'] }}">
+        <meta property="og:title" content="{{ $seoData['og']['title'] }}">
+        <meta property="og:description" content="{{ $seoData['og']['description'] }}">
+        <meta property="og:image" content="{{ $seoData['og']['image'] }}">
+        <meta property="og:image:secure_url" content="{{ $seoData['og']['image'] }}">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="{{ $seoData['og']['image_width'] }}">
+        <meta property="og:image:height" content="{{ $seoData['og']['image_height'] }}">
+        <meta property="og:locale" content="id_ID">
+        <meta property="og:site_name" content="{{ $seoData['og']['site_name'] }}">
+        @if(!empty($seoData['og']['published_time']))
+            <meta property="article:published_time" content="{{ $seoData['og']['published_time'] }}">
+        @endif
+        @if(!empty($seoData['og']['modified_time']))
+            <meta property="article:modified_time" content="{{ $seoData['og']['modified_time'] }}">
+        @endif
+        @if(!empty($seoData['og']['author']))
+            <meta property="article:author" content="{{ $seoData['og']['author'] }}">
+        @endif
+        @if(!empty($seoData['og']['section']))
+            <meta property="article:section" content="{{ $seoData['og']['section'] }}">
+        @endif
+        @if(!empty($seoData['og']['tags']))
+            @foreach($seoData['og']['tags'] as $tag)
+                <meta property="article:tag" content="{{ $tag }}">
+            @endforeach
+        @endif
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ $siteUrl }}">
-    <meta property="og:title" content="{{ $siteTitle }} - {{ $siteTagline }}">
-    <meta property="og:description" content="{{ $siteDesc }}">
-    <meta property="og:image" content="{{ $siteLogo }}">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
-    <meta property="og:locale" content="id_ID">
-    <meta property="og:site_name" content="{{ $siteTitle }}">
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="{{ $seoData['twitter']['card'] }}">
+        <meta name="twitter:url" content="{{ $seoData['twitter']['url'] }}">
+        <meta name="twitter:title" content="{{ $seoData['twitter']['title'] }}">
+        <meta name="twitter:description" content="{{ $seoData['twitter']['description'] }}">
+        <meta name="twitter:image" content="{{ $seoData['twitter']['image'] }}">
+        <meta name="twitter:image:alt" content="{{ $seoData['twitter']['image_alt'] }}">
+        <meta name="twitter:site" content="{{ $seoData['twitter']['site'] }}">
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="{{ $siteUrl }}">
-    <meta name="twitter:title" content="{{ $siteTitle }} - {{ $siteTagline }}">
-    <meta name="twitter:description" content="{{ $siteDesc }}">
-    <meta name="twitter:image" content="{{ $siteLogo }}">
+        <!-- Schema.org NewsArticle Structured Data -->
+        <script type="application/ld+json">
+        {!! json_encode($seoData['schema'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+        </script>
+    @else
+        <title inertia>{{ $siteTitle }} - {{ $siteTagline }}</title>
 
-    <!-- Schema.org GovernmentOffice Structured Data -->
-    <script type="application/ld+json">
-    {!! json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
-    </script>
+        <!-- Primary Meta Tags -->
+        <meta name="title" content="{{ $siteTitle }} - {{ $siteTagline }}">
+        <meta name="description" content="{{ $siteDesc }}">
+        <meta name="keywords" content="{{ $siteKeywords }}">
+        <meta name="author" content="Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu">
+        <meta name="robots" content="index, follow">
+        <meta name="theme-color" content="{{ $theme['primary_600'] ?? '#0274cb' }}">
+        <link rel="canonical" href="{{ request()->url() }}">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ request()->url() }}">
+        <meta property="og:title" content="{{ $siteTitle }} - {{ $siteTagline }}">
+        <meta property="og:description" content="{{ $siteDesc }}">
+        <meta property="og:image" content="{{ $siteLogo }}">
+        <meta property="og:image:width" content="512">
+        <meta property="og:image:height" content="512">
+        <meta property="og:locale" content="id_ID">
+        <meta property="og:site_name" content="{{ $siteTitle }}">
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:url" content="{{ request()->url() }}">
+        <meta name="twitter:title" content="{{ $siteTitle }} - {{ $siteTagline }}">
+        <meta name="twitter:description" content="{{ $siteDesc }}">
+        <meta name="twitter:image" content="{{ $siteLogo }}">
+
+        <!-- Schema.org GovernmentOffice Structured Data -->
+        <script type="application/ld+json">
+        {!! json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+        </script>
+    @endif
 
     <!-- Dynamic Theme Customizer Styling Injection Hook -->
     <style id="dynamic-theme-variables">
@@ -137,11 +191,9 @@
     <!-- Favicon Links (Transparent Emblem) -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="shortcut icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
     @routes
     @vite(['resources/js/app.js'])

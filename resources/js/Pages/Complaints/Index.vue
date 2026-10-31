@@ -10,6 +10,20 @@
           <h1 class="text-xl font-black text-gray-900 dark:text-zinc-50 tracking-tight">Daftar Pengaduan Masuk</h1>
           <p class="text-xs text-gray-400 mt-0.5">Kelola tiket aduan pelayanan kependudukan dari masyarakat.</p>
         </div>
+        <div class="flex items-center gap-2">
+          <span 
+            class="px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5"
+            :class="[
+              notificationConfig?.enabled 
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40' 
+                : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/40'
+            ]"
+            :title="`Email Notifikasi: ${notificationConfig?.recipient || 'dukcapilkabdompu@gmail.com'}`"
+          >
+            <span class="w-2 h-2 rounded-full" :class="notificationConfig?.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'"></span>
+            <span>Notifikasi Email: {{ notificationConfig?.enabled ? 'Aktif' : 'Nonaktif' }}</span>
+          </span>
+        </div>
       </div>
 
       <!-- Flash message -->
@@ -94,6 +108,7 @@
                 <th class="px-5 py-3 text-[9px] font-bold uppercase tracking-wider text-gray-400">Pelapor</th>
                 <th class="px-5 py-3 text-[9px] font-bold uppercase tracking-wider text-gray-400">Subjek Pengaduan</th>
                 <th class="px-5 py-3 text-[9px] font-bold uppercase tracking-wider text-gray-400">Kategori</th>
+                <th class="px-5 py-3 text-[9px] font-bold uppercase tracking-wider text-gray-400">Notifikasi Email</th>
                 <th class="px-5 py-3 text-[9px] font-bold uppercase tracking-wider text-gray-400">Status</th>
                 <th class="px-5 py-3 text-[9px] font-bold uppercase tracking-wider text-gray-400">Tanggal Masuk</th>
                 <th class="px-5 py-3"></th>
@@ -101,7 +116,7 @@
             </thead>
             <tbody class="divide-y divide-gray-50 dark:divide-zinc-800/60">
               <tr v-if="complaints.data.length === 0">
-                <td colspan="7" class="px-5 py-8 text-center text-gray-400 italic">Belum ada pengaduan masuk.</td>
+                <td colspan="8" class="px-5 py-8 text-center text-gray-400 italic">Belum ada pengaduan masuk.</td>
               </tr>
               <tr 
                 v-for="item in complaints.data" 
@@ -145,6 +160,47 @@
                     {{ item.category.name }}
                   </span>
                   <span v-else class="text-gray-400">-</span>
+                </td>
+
+                <!-- Email Notification Delivery Status Indicator -->
+                <td class="px-5 py-4">
+                  <div class="flex items-center gap-1.5 font-mono text-[10px]">
+                    <span 
+                      v-if="!notificationConfig?.enabled" 
+                      class="px-2 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 text-gray-400 font-semibold border border-gray-200 dark:border-zinc-700"
+                      title="Notifikasi email otomatis dinonaktifkan di konfigurasi."
+                    >
+                      ⚪ Nonaktif
+                    </span>
+                    <span 
+                      v-else-if="item.latest_notification_log?.status === 'SENT'" 
+                      class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-800/40 flex items-center gap-1"
+                      :title="`Notifikasi terkirim ke ${item.latest_notification_log?.recipient}`"
+                    >
+                      🟢 Terkirim
+                    </span>
+                    <span 
+                      v-else-if="item.latest_notification_log?.status === 'FAILED'" 
+                      class="px-2 py-0.5 rounded bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-bold border border-rose-200 dark:border-rose-800/40 flex items-center gap-1"
+                      :title="`Gagal dikirim: ${item.latest_notification_log?.error_message || 'SMTP Connection Error'}`"
+                    >
+                      🔴 Gagal
+                    </span>
+                    <span 
+                      v-else-if="item.latest_notification_log?.status === 'PENDING' || item.latest_notification_log?.status === 'SENDING'" 
+                      class="px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-bold border border-amber-200 dark:border-amber-800/40 flex items-center gap-1"
+                      :title="`Dalam antrean queue pengiriman ke ${item.latest_notification_log?.recipient}`"
+                    >
+                      🟡 Menunggu
+                    </span>
+                    <span 
+                      v-else 
+                      class="px-2 py-0.5 rounded bg-gray-50 dark:bg-zinc-800 text-gray-400 font-semibold border border-gray-100 dark:border-zinc-700"
+                      title="Belum ada catatan pengiriman notifikasi."
+                    >
+                      ⚪ Tidak dikirim
+                    </span>
+                  </div>
                 </td>
 
                 <!-- Status -->
@@ -214,6 +270,7 @@ const props = defineProps({
   statusCounts: Object,
   statusLabels: Object,
   statusColors: Object,
+  notificationConfig: Object,
   filters: Object,
 });
 

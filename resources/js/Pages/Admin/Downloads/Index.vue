@@ -176,14 +176,25 @@
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-1.5">
                     <button 
+                      @click="handleAdminDownload(doc)"
+                      :disabled="downloadingDocId === doc.id"
+                      class="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-lg transition"
+                      title="Unduh Dokumen (Pre-Flight Verified)"
+                    >
+                      <DownloadCloud v-if="downloadingDocId !== doc.id" class="w-4 h-4" />
+                      <Loader2 v-else class="w-4 h-4 animate-spin text-blue-500" />
+                    </button>
+                    <button 
                       @click="openEditModal(doc)"
                       class="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 rounded-lg transition"
+                      title="Edit Dokumen"
                     >
                       <Edit class="w-4 h-4" />
                     </button>
                     <button 
                       @click="deleteDoc(doc)"
                       class="p-1.5 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 rounded-lg transition"
+                      title="Hapus Dokumen"
                     >
                       <Trash2 class="w-4 h-4" />
                     </button>
@@ -220,6 +231,10 @@
             <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4">
               {{ isEditing ? 'Edit Metadata Dokumen' : 'Upload Dokumen Baru' }}
             </h3>
+
+            <div v-if="form.hasErrors" class="mb-4 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-xs text-rose-600 dark:text-rose-300 font-semibold space-y-1">
+              <p v-for="(err, key) in form.errors" :key="key">⚠️ {{ err }}</p>
+            </div>
 
             <form @submit.prevent="submit" class="space-y-4">
               <!-- Title -->
@@ -340,7 +355,7 @@
                     <p class="text-xs font-bold text-gray-700 dark:text-zinc-300">
                       <span class="text-primary-600 dark:text-primary-400 hover:underline">Klik untuk memilih file</span> atau tarik file ke sini
                     </p>
-                    <p class="text-[10px] text-gray-400 mt-1">Maksimal 50MB (Format: PDF, Word, Excel, ZIP)</p>
+                    <p class="text-[10px] text-gray-400 mt-1">Maksimal 3 MB (Format: PDF, Word, Excel, ZIP)</p>
                     <p v-if="isEditing" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 px-2.5 py-1 rounded-lg">
                       ✓ File saat ini sudah terpasang. Pilih file baru hanya jika ingin menggantinya.
                     </p>
@@ -450,6 +465,29 @@
         </div>
       </transition>
 
+      <!-- PRE-FLIGHT ERROR ALERT MODAL -->
+      <transition name="fade">
+        <div v-if="downloadErrorModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl w-full max-w-sm shadow-2xl p-6 text-left relative space-y-4">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto">
+              <AlertTriangle class="w-6 h-6" />
+            </div>
+            <div class="text-center space-y-1">
+              <h3 class="text-sm font-bold text-gray-900 dark:text-zinc-100">Unduhan Tidak Dapat Diproses</h3>
+              <p class="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
+                {{ downloadErrorData?.reason_text || 'Dokumen tidak dapat diunduh saat ini.' }}
+              </p>
+            </div>
+            <button 
+              @click="downloadErrorModal = false"
+              class="w-full py-2.5 bg-gray-900 dark:bg-zinc-800 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </transition>
+
     </div>
   </AdminLayout>
 </template>
@@ -458,7 +496,8 @@
 import { ref } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Plus, Search, Edit, Trash2, FileDown, UploadCloud, FileText, X, RotateCcw } from '@lucide/vue';
+import { Plus, Search, Edit, Trash2, FileDown, UploadCloud, DownloadCloud, FileText, X, RotateCcw, Loader2, AlertTriangle } from '@lucide/vue';
+import axios from 'axios';
 
 const props = defineProps({
   downloads: Object,
@@ -478,6 +517,30 @@ const fileInput = ref(null);
 const deletingDoc = ref(null);
 const isDeletingDoc = ref(false);
 
+const downloadingDocId = ref(null);
+const downloadErrorModal = ref(false);
+const downloadErrorData = ref(null);
+
+const handleAdminDownload = async (doc) => {
+  downloadingDocId.value = doc.id;
+  try {
+    const res = await axios.get(route('downloads.check', doc.id));
+    if (res.data && res.data.allowed) {
+      window.location.href = route('downloads.download', doc.id);
+    } else {
+      downloadErrorData.value = res.data;
+      downloadErrorModal.value = true;
+    }
+  } catch (err) {
+    downloadErrorData.value = {
+      reason_text: 'Terjadi kesalahan sistem saat melakukan verifikasi pra-unduhan.'
+    };
+    downloadErrorModal.value = true;
+  } finally {
+    downloadingDocId.value = null;
+  }
+};
+
 const form = useForm({
   title: '',
   description: '',
@@ -486,6 +549,8 @@ const form = useForm({
   document_date: '',
   status: 'draft',
   file: null,
+  file_base64: null,
+  file_name: null,
 });
 
 const catForm = useForm({
@@ -524,11 +589,33 @@ const resetAllFilters = () => {
 };
 
 const handleFileUpload = (e) => {
-  form.file = e.target.files[0];
+  const selectedFile = e.target.files[0];
+  if (!selectedFile) return;
+
+  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB
+  if (selectedFile.size > MAX_FILE_SIZE) {
+    form.setError('file', 'Ukuran berkas dokumen tidak boleh lebih dari 3 MB.');
+    if (fileInput.value) {
+      fileInput.value.value = '';
+    }
+    return;
+  }
+
+  form.clearErrors('file');
+  form.file = selectedFile;
+  form.file_name = selectedFile.name;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    form.file_base64 = event.target.result;
+  };
+  reader.readAsDataURL(selectedFile);
 };
 
 const removeSelectedFile = () => {
   form.file = null;
+  form.file_base64 = null;
+  form.file_name = null;
   if (fileInput.value) {
     fileInput.value.value = '';
   }
@@ -569,6 +656,12 @@ const openEditModal = (doc) => {
 };
 
 const submit = () => {
+  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB
+  if (form.file && form.file.size > MAX_FILE_SIZE) {
+    form.setError('file', 'Ukuran berkas dokumen tidak boleh lebih dari 3 MB.');
+    return;
+  }
+
   if (isEditing.value) {
     form.transform((data) => ({
       ...data,

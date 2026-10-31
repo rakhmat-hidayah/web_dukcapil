@@ -1,0 +1,264 @@
+<?php
+
+namespace App\Http\Controllers\Admin\Queue;
+
+use App\Http\Controllers\Controller;
+use App\Models\Queue\ApplicationDocument;
+use App\Models\Queue\QueueApplication;
+use App\Models\Queue\QueueSlot;
+use App\Models\Queue\ServiceType;
+use App\Services\Queue\QueueSlotService;
+use App\Services\Queue\QueueVerificationService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class ApplicationVerificationController extends Controller
+{
+    public function __construct(
+        protected QueueVerificationService $verificationService,
+        protected QueueSlotService $slotService
+    ) {}
+
+    /**
+     * Display a filtered, searchable list of applications.
+     */
+    public function index(Request $request): Response
+    {
+        $status = $request->query('status');
+        $serviceId = $request->query('service_id');
+        $search = $request->query('search');
+
+        $query = QueueApplication::with(['serviceType', 'slot.schedule'])
+            ->latest('submitted_at');
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($serviceId) {
+            $query->where('service_type_id', $serviceId);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('reg_number', 'like', "%{$search}%")
+                  ->orWhere('queue_number', 'like', "%{$search}%")
+                  ->orWhere('applicant_name', 'like', "%{$search}%")
+                  ->orWhere('applicant_nik', 'like', "%{$search}%")
+                  ->orWhere('representative_name', 'like', "%{$search}%")
+                  ->orWhere('representative_nik', 'like', "%{$search}%")
+                  ->orWhere('applicant_phone', 'like', "%{$search}%");
+            });
+        }
+
+        $applications = $query->paginate(15)->withQueryString();
+
+        // Real aggregated counts for badge tabs
+        $statusCounts = [
+            'all'                   => QueueApplication::count(),
+            'SUBMITTED'             => QueueApplication::whereIn('status', [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED])->count(),
+            'UNDER_REVIEW'          => QueueApplication::where('status', QueueApplication::STATUS_UNDER_REVIEW)->count(),
+            'REVISION_REQUIRED'     => QueueApplication::where('status', QueueApplication::STATUS_REVISION_REQUIRED)->count(),
+            'PRE_VERIFIED'          => QueueApplication::where('status', QueueApplication::STATUS_PRE_VERIFIED)->count(),
+            'QUEUE_BOOKED'          => QueueApplication::where('status', QueueApplication::STATUS_QUEUE_BOOKED)->count(),
+            'ARRIVED'               => QueueApplication::where('status', QueueApplication::STATUS_ARRIVED)->count(),
+            'PHYSICAL_VERIFICATION' => QueueApplication::where('status', QueueApplication::STATUS_PHYSICAL_VERIFICATION)->count(),
+            'APPROVED_FOR_SERVICE'  => QueueApplication::where('status', QueueApplication::STATUS_APPROVED_FOR_SERVICE)->count(),
+            'PROCESSING'            => QueueApplication::where('status', QueueApplication::STATUS_PROCESSING)->count(),
+            'READY_FOR_PICKUP'      => QueueApplication::where('status', QueueApplication::STATUS_READY_FOR_PICKUP)->count(),
+            'COMPLETED'             => QueueApplication::where('status', QueueApplication::STATUS_COMPLETED)->count(),
+            'REJECTED'              => QueueApplication::where('status', QueueApplication::STATUS_REJECTED)->count(),
+            'EXPIRED'               => QueueApplication::where('status', QueueApplication::STATUS_EXPIRED)->count(),
+        ];
+
+        $services = ServiceType::active()->get(['id', 'name', 'color']);
+
+        return Inertia::render('Admin/Queue/Applications/Index', [
+            'applications' => $applications,
+            'statusCounts' => $statusCounts,
+            'services'     => $services,
+            'filters'      => [
+                'status'     => $status,
+                'service_id' => $serviceId,
+                'search'     => $search,
+            ],
+        ]);
+    }
+
+    /**
+     * Show detailed verification screen for an application.
+     */
+    public function show(int $id): Response
+    {
+        $application = QueueApplication::with([
+            'serviceType.documents' => fn($q) => $q->orderBy('sort_order'),
+            'documents.serviceDocument',
+            'slot.schedule',
+            'verificationHistory.user',
+            'checkedInUser',
+            'physicalVerifiedUser',
+            'handoverUser',
+        ])->findOrFail($id);
+
+        $officer = Auth::user();
+
+        // Automatically start review if status is SUBMITTED or RESUBMITTED
+        if (in_array($application->status, [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED])) {
+            $this->verificationService->startReview($application, $officer);
+            $application->refresh();
+        }
+
+        // Available upcoming slots for approval assignment
+        $availableSlots = $this->slotService->getAvailableSlots(
+            $application->service_type_id,
+            now(),
+            14
+        );
+
+        return Inertia::render('Admin/Queue/Applications/Show', [
+            'application'    => $application,
+            'availableSlots' => $availableSlots,
+        ]);
+    }
+
+    /**
+     * Pre-verify online documents. Marks application as PRE_VERIFIED.
+     */
+    public function preVerify(Request $request, int $id): RedirectResponse
+    {
+        $application = QueueApplication::findOrFail($id);
+        $notes = $request->input('notes');
+
+        $this->verificationService->preVerify($application, Auth::user(), $notes);
+
+        return back()->with('success', "Pra-verifikasi berhasil disetujui! Pemohon kini dapat memilih jadwal antrean kedatangan di portal.");
+    }
+
+    /**
+     * Direct approve with slot assignment (legacy/admin quick assign).
+     */
+    public function approve(Request $request, int $id): RedirectResponse
+    {
+        $application = QueueApplication::findOrFail($id);
+
+        $request->validate([
+            'queue_slot_id' => 'required|exists:queue_slots,id',
+            'notes'         => 'nullable|string|max:500',
+        ], [
+            'queue_slot_id.required' => 'Pilih tanggal jadwal pelayanan untuk menetapkan nomor antrean.',
+        ]);
+
+        $this->verificationService->approve(
+            $application,
+            (int) $request->input('queue_slot_id'),
+            Auth::user(),
+            $request->input('notes')
+        );
+
+        return back()->with('success', "Pengajuan berhasil disetujui! Nomor antrean: {$application->fresh()->queue_number}");
+    }
+
+    /**
+     * Request document revision from applicant.
+     */
+    public function requestRevision(Request $request, int $id): RedirectResponse
+    {
+        $application = QueueApplication::findOrFail($id);
+
+        $request->validate([
+            'notes'             => 'required|string|min:5|max:1000',
+            'document_feedback' => 'nullable|array',
+        ], [
+            'notes.required' => 'Tuliskan catatan alasan perbaikan dokumen secara jelas untuk pemohon.',
+        ]);
+
+        $this->verificationService->requestRevision(
+            $application,
+            $request->input('notes'),
+            $request->input('document_feedback', []),
+            Auth::user()
+        );
+
+        return back()->with('success', 'Permintaan perbaikan dokumen berhasil dikirim ke pemohon.');
+    }
+
+    /**
+     * Reject application permanently.
+     */
+    public function reject(Request $request, int $id): RedirectResponse
+    {
+        $application = QueueApplication::findOrFail($id);
+
+        $request->validate([
+            'reason' => 'required|string|min:5|max:1000',
+        ], [
+            'reason.required' => 'Tuliskan alasan penolakan secara jelas.',
+        ]);
+
+        $this->verificationService->reject(
+            $application,
+            $request->input('reason'),
+            Auth::user()
+        );
+
+        return back()->with('success', 'Pengajuan telah ditolak.');
+    }
+
+    /**
+     * Mark applicant as checked in at counter.
+     */
+    public function checkIn(Request $request, int $id): RedirectResponse
+    {
+        $application = QueueApplication::findOrFail($id);
+        $this->verificationService->checkIn($application, $request->all(), Auth::user());
+
+        return back()->with('success', "Pemohon {$application->applicant_name} ({$application->queue_number}) telah check-in.");
+    }
+
+    /**
+     * Process physical verification.
+     */
+    public function physicalVerification(Request $request, int $id): RedirectResponse
+    {
+        $application = QueueApplication::findOrFail($id);
+        $this->verificationService->physicalVerification($application, $request->all(), Auth::user());
+
+        return back()->with('success', "Verifikasi fisik selesai dicatat.");
+    }
+
+    /**
+     * Mark application as in service / processing.
+     */
+    public function startProcessing(Request $request, int $id): RedirectResponse
+    {
+        $application = QueueApplication::findOrFail($id);
+        $this->verificationService->startProcessing($application, Auth::user(), $request->input('notes'));
+
+        return back()->with('success', "Status pelayanan diubah: Sedang Diproses.");
+    }
+
+    /**
+     * Mark ready for pickup.
+     */
+    public function markReadyForPickup(Request $request, int $id): RedirectResponse
+    {
+        $application = QueueApplication::findOrFail($id);
+        $this->verificationService->markReadyForPickup($application, Auth::user(), $request->input('notes'));
+
+        return back()->with('success', "KTP-el fisik telah selesai dicetak dan siap diambil.");
+    }
+
+    /**
+     * Mark service as completed via handover.
+     */
+    public function complete(Request $request, int $id): RedirectResponse
+    {
+        $application = QueueApplication::findOrFail($id);
+        $this->verificationService->completeHandover($application, $request->all(), Auth::user());
+
+        return back()->with('success', "Pelayanan untuk {$application->applicant_name} ({$application->queue_number}) telah selesai.");
+    }
+}

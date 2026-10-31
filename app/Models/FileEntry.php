@@ -57,7 +57,8 @@ class FileEntry extends Model
             return $this->path;
         }
 
-        return url('/storage/' . ltrim($this->path, '/'));
+        $cleanPath = ltrim(str_replace(['/storage/', 'storage/', '/uploads/', 'uploads/'], '', $this->path), '/');
+        return asset('uploads/' . $cleanPath);
     }
 
     /**

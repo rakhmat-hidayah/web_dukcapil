@@ -59,20 +59,25 @@ class ConfigurationService
             ['value' => $newVal, 'group' => $group]
         );
 
-        // Audit Trail via Spatie ActivityLog (Single Source of Truth Audit Trail)
-        activity('configuration')
-            ->performedOn($setting)
-            ->causedBy($userId ?? (auth()->check() ? auth()->id() : null))
-            ->withTrashed()
-            ->withProperties([
-                'old'        => ['value' => $oldVal],
-                'attributes' => ['value' => $newVal],
-                'key'        => $key,
-                'group'      => $group,
-                'reason'     => $reason ?? 'CMS Configuration Update',
-                'ip_address' => request()->ip() ?? '127.0.0.1',
-            ])
-            ->log("Updated website setting [$key]");
+        $causer = $userId ?? (app()->runningInConsole() ? null : (auth()->check() ? auth()->id() : null));
+        $ip = app()->runningInConsole() ? '127.0.0.1' : (request()->ip() ?? '127.0.0.1');
+
+        try {
+            $activity = activity('configuration')->performedOn($setting);
+            if ($causer) {
+                $activity->causedBy($causer);
+            }
+            $activity->withTrashed()
+                ->withProperties([
+                    'old'        => ['value' => $oldVal],
+                    'attributes' => ['value' => $newVal],
+                    'key'        => $key,
+                    'group'      => $group,
+                    'reason'     => $reason ?? 'CMS Configuration Update',
+                    'ip_address' => $ip,
+                ])
+                ->log("Updated website setting [$key]");
+        } catch (\Throwable $e) {}
 
         self::clearCache();
 

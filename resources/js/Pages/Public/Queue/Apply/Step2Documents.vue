@@ -1,0 +1,334 @@
+<template>
+  <Head title="Langkah 2: Unggah Persyaratan Digital - Antrian Online KTP-el" />
+
+  <PublicLayout>
+    <div class="py-8 sm:py-12 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Wizard Progress -->
+      <ProgressWizard :current-step="2" />
+
+      <!-- Registration Banner -->
+      <div class="mb-6 bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-5 sm:p-6 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-blue-700/50">
+        <div>
+          <span class="text-[11px] font-semibold text-blue-300 uppercase tracking-wider block">
+            Nomor Registrasi Sementara:
+          </span>
+          <span class="text-2xl sm:text-3xl font-black font-mono tracking-wider text-white">
+            {{ application.reg_number }}
+          </span>
+          <p class="text-xs text-blue-200 mt-1">
+            Layanan: <strong>{{ serviceType.name }}</strong> · Pemohon: <strong>{{ application.applicant_name }}</strong>
+          </p>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-blue-500/20 text-blue-200 border border-blue-400/30">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+              Kehadiran: {{ attendanceLabel }}
+            </span>
+            <span v-if="application.attendance_type !== 'self'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/20 text-amber-200 border border-amber-400/30">
+              Perwakilan: {{ application.representative_name }} ({{ application.representative_relationship }})
+            </span>
+          </div>
+        </div>
+
+        <div class="px-4 py-2 rounded-2xl bg-white/10 backdrop-blur border border-white/20 text-xs text-blue-200">
+          Kelengkapan Berkas:
+          <span class="font-bold text-white ml-1">
+            {{ uploadedCount }} / {{ requirements.length }} Dokumen
+          </span>
+        </div>
+      </div>
+
+      <!-- Main Upload Workspace -->
+      <div class="space-y-6">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-md">
+          <div class="mb-6">
+            <h3 class="text-xl font-black text-slate-900 dark:text-white">
+              Foto Dokumen Persyaratan Langsung
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Seluruh dokumen persyaratan wajib difoto langsung menggunakan kamera handphone/perangkat Anda. Dokumen fisik akan otomatis dioptimasi dan dikompresi oleh sistem tanpa mengurangi keterbacaan teks demi kecepatan verifikasi.
+            </p>
+          </div>
+
+          <!-- Document Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DocumentUploadCard
+              v-for="req in requirements"
+              :key="req.id"
+              :requirement="req"
+              :uploaded-doc="getUploadedDoc(req.id)"
+              :can-edit="true"
+              @open-camera="openCameraModal(req)"
+              @preview="openPreviewModal"
+              @delete="handleDeleteDocument"
+            />
+          </div>
+        </div>
+
+        <!-- Statement of Integrity & Physical Verification Agreement (Tahap 5) -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-blue-200 dark:border-blue-900 shadow-md relative overflow-hidden">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center shrink-0 mt-0.5 font-bold text-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <div>
+              <h4 class="text-base font-bold text-slate-900 dark:text-white">
+                Pernyataan Pemohon & Integritas Dokumen
+              </h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Harap baca dan setujui pernyataan kepatuhan berikut sebelum mengirimkan berkas pengajuan Anda ke meja verifikasi.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 space-y-2 leading-relaxed">
+            <p>
+              1. <strong>Keabsahan Data:</strong> Seluruh data identitas dan foto dokumen yang saya unggah adalah benar, sah, dan sesuai dengan dokumen aslinya yang diterbitkan oleh instansi berwenang.
+            </p>
+            <p>
+              2. <strong>Bukan Pengganti Verifikasi Fisik:</strong> Saya memahami sepenuhnya bahwa verifikasi online ini <em>HANYA</em> merupakan pemeriksaan administrasi awal, dan <em>BUKAN</em> pengganti pemeriksaan identitas serta dokumen fisik di kantor.
+            </p>
+            <p>
+              3. <strong>Kewajiban Kehadiran Fisik:</strong> Saya atau perwakilan yang telah ditunjuk berkomitmen untuk hadir langsung ke Kantor Disdukcapil Kabupaten Dompu sesuai jadwal yang telah ditentukan dengan membawa seluruh dokumen fisik asli untuk diverifikasi oleh petugas di loket.
+            </p>
+            <p>
+              4. <strong>Konsekuensi Hukum:</strong> Apabila di kemudian hari ditemukan ketidaksesuaian data, dokumen palsu, atau pemalsuan identitas, saya bersedia menerima pembatalan permohonan dan dituntut sesuai dengan peraturan perundang-undangan yang berlaku.
+            </p>
+          </div>
+
+          <div class="mt-4 flex items-start gap-3">
+            <input
+              id="statement_checkbox"
+              v-model="statementAgreed"
+              type="checkbox"
+              class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 mt-0.5 cursor-pointer"
+            />
+            <label for="statement_checkbox" class="text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
+              Saya telah membaca, memahami, dan menyetujui seluruh ketentuan dan pernyataan di atas dengan penuh tanggung jawab. <span class="text-rose-500">*</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Validation Error Alert if any -->
+        <div
+          v-if="errorMessage"
+          class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-xs text-rose-800 dark:text-rose-200 flex items-start gap-2.5"
+        >
+          <svg class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <p class="font-medium leading-relaxed">{{ errorMessage }}</p>
+        </div>
+
+        <!-- Submission Actions Card -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div
+              :class="[
+                'w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 font-bold text-sm',
+                canSubmit
+                  ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600'
+                  : 'bg-amber-100 dark:bg-amber-950/60 text-amber-600'
+              ]"
+            >
+              <svg v-if="canSubmit" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+              <span v-else>!</span>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-900 dark:text-white">
+                {{ canSubmit ? 'Semua Berkas & Pernyataan Lengkap' : 'Lengkapi Berkas & Centang Pernyataan' }}
+              </p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                {{ canSubmit ? 'Klik tombol di samping untuk mengirimkan berkas Anda ke meja verifikator.' : 'Pastikan seluruh dokumen wajib terunggah dan pernyataan pemohon telah dicentang.' }}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            @click="handleSubmitApplication"
+            :disabled="!canSubmit || isSubmitting"
+            :class="[
+              'w-full sm:w-auto px-8 py-3.5 rounded-2xl text-xs font-bold transition shadow-lg flex items-center justify-center gap-2',
+              canSubmit && !isSubmitting
+                ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30 cursor-pointer hover:scale-[1.02]'
+                : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+            ]"
+          >
+            <span>{{ isSubmitting ? 'Mengirim Pendaftaran...' : 'Kirim Berkas untuk Pra-Verifikasi' }}</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Camera Capture Modal -->
+    <CameraCapture
+      v-if="activeCameraReq"
+      :document-label="activeCameraReq.label"
+      :capture-mode="activeCameraReq.capture_mode"
+      :capture-hint="activeCameraReq.capture_hint"
+      :accepted-formats="activeCameraReq.accepted_formats"
+      @close="activeCameraReq = null"
+      @captured="handleCameraPhotoCaptured"
+    />
+
+    <!-- Document Viewer Modal -->
+    <DocumentViewerModal
+      v-if="activePreviewDoc"
+      :src="activePreviewDoc.preview_url"
+      :title="activePreviewDoc.original_filename"
+      :mime-type="activePreviewDoc.mime_type"
+      @close="activePreviewDoc = null"
+    />
+  </PublicLayout>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue';
+import { Head, router } from '@inertiajs/vue3';
+import axios from 'axios';
+import PublicLayout from '@/Layouts/PublicLayout.vue';
+import ProgressWizard from '@/Components/Queue/ProgressWizard.vue';
+import DocumentUploadCard from '@/Components/Queue/DocumentUploadCard.vue';
+import CameraCapture from '@/Components/Queue/CameraCapture.vue';
+import DocumentViewerModal from '@/Components/Queue/DocumentViewerModal.vue';
+
+const props = defineProps({
+  application: {
+    type: Object,
+    required: true,
+  },
+  serviceType: {
+    type: Object,
+    required: true,
+  },
+  requirements: {
+    type: Array,
+    default: () => [],
+  },
+  uploadedDocs: {
+    type: Array,
+    default: () => [],
+  },
+});
+
+const docs = ref([...props.uploadedDocs]);
+const statementAgreed = ref(false);
+const activeCameraReq = ref(null);
+const activePreviewDoc = ref(null);
+const errorMessage = ref(null);
+const isSubmitting = ref(false);
+
+const uploadedCount = computed(() => docs.value.length);
+
+const allRequiredUploaded = computed(() => {
+  const required = props.requirements.filter((r) => r.is_required);
+  const uploadedReqIds = docs.value.map((d) => d.service_document_id);
+  return required.every((r) => uploadedReqIds.includes(r.id));
+});
+
+const canSubmit = computed(() => {
+  return allRequiredUploaded.value && statementAgreed.value;
+});
+
+const attendanceLabel = computed(() => {
+  const map = {
+    self: 'Saya Sendiri (Pemilik Dokumen)',
+    family_in_kk: 'Keluarga (Satu KK)',
+    family_out_kk: 'Keluarga (Beda KK)',
+    other: 'Orang Lain (Penerima Kuasa)',
+  };
+  return map[props.application.attendance_type] || props.application.attendance_type;
+});
+
+function getUploadedDoc(serviceDocId) {
+  return docs.value.find((d) => d.service_document_id === serviceDocId) || null;
+}
+
+function openCameraModal(req) {
+  errorMessage.value = null;
+  activeCameraReq.value = req;
+}
+
+async function handleCameraPhotoCaptured(file) {
+  if (!activeCameraReq.value) return;
+  const req = activeCameraReq.value;
+  activeCameraReq.value = null;
+
+  await uploadFileToServer(req.id, file);
+}
+
+async function uploadFileToServer(serviceDocumentId, file) {
+  errorMessage.value = null;
+
+  const formData = new FormData();
+  formData.append('service_document_id', serviceDocumentId);
+  formData.append('file', file);
+
+  try {
+    const res = await axios.post(
+      route('queue.apply.upload-doc', { regNumber: props.application.reg_number }),
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+
+    if (res.data && res.data.document) {
+      docs.value = docs.value.filter((d) => d.service_document_id !== serviceDocumentId);
+      docs.value.push(res.data.document);
+    }
+  } catch (err) {
+    if (err.response && err.response.data && err.response.data.message) {
+      errorMessage.value = err.response.data.message;
+    } else {
+      errorMessage.value = 'Gagal mengunggah dokumen ke server. Pastikan jaringan internet Anda stabil.';
+    }
+  }
+}
+
+async function handleDeleteDocument(doc) {
+  if (!confirm(`Hapus dokumen "${doc.original_filename}"?`)) return;
+
+  try {
+    await axios.delete(
+      route('queue.apply.remove-doc', {
+        regNumber: props.application.reg_number,
+        documentId: doc.id,
+      })
+    );
+
+    docs.value = docs.value.filter((d) => d.id !== doc.id);
+  } catch (err) {
+    alert('Gagal menghapus dokumen.');
+  }
+}
+
+function openPreviewModal(doc) {
+  activePreviewDoc.value = {
+    ...doc,
+    preview_url: route('queue.apply.preview-doc', {
+      regNumber: props.application.reg_number,
+      documentId: doc.id,
+    }),
+  };
+}
+
+function handleSubmitApplication() {
+  if (!allRequiredUploaded.value) {
+    errorMessage.value = 'Harap lengkapi semua dokumen bertanda Wajib sebelum mengirimkan pendaftaran.';
+    return;
+  }
+
+  if (!statementAgreed.value) {
+    errorMessage.value = 'Anda wajib mencentang persetujuan pernyataan pemohon sebelum mengirimkan berkas.';
+    return;
+  }
+
+  isSubmitting.value = true;
+  router.post(route('queue.apply.submit', { regNumber: props.application.reg_number }), {
+    statement_agreed: true,
+  }, {
+    onError: (errors) => {
+      isSubmitting.value = false;
+      errorMessage.value = errors.statement_agreed || Object.values(errors)[0] || 'Terjadi kesalahan saat mengirim pendaftaran.';
+    },
+  });
+}
+</script>

@@ -38,16 +38,16 @@ class SecurityHeaders
         $siteUrl = rtrim(config('app.url'), '/');
         $domain  = parse_url($siteUrl, PHP_URL_HOST) ?? 'dukcapil.dompukab.go.id';
 
-        $csp = implode(' ', [
+        $cspParts = [
             "default-src 'self';",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net;",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com;",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com;",
             "img-src 'self' data: blob: https://images.unsplash.com"
                 . " https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org"
                 . " https://c.tile.openstreetmap.org"
                 . " https://i.ytimg.com https://img.youtube.com;",
             "font-src 'self' https://fonts.gstatic.com;",
-            "connect-src 'self'"
+            "connect-src 'self' https://cloudflareinsights.com"
                 . " https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org"
                 . " https://c.tile.openstreetmap.org;",
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;",
@@ -55,10 +55,13 @@ class SecurityHeaders
             "object-src 'none';",
             "base-uri 'self';",
             "form-action 'self';",
-            "upgrade-insecure-requests;",
-        ]);
+        ];
 
-        $response->headers->set('Content-Security-Policy', $csp);
+        if ($request->isSecure() || (config('app.env') === 'production' && !str_ends_with($request->getHost(), '.test'))) {
+            $cspParts[] = "upgrade-insecure-requests;";
+        }
+
+        $response->headers->set('Content-Security-Policy', implode(' ', $cspParts));
 
         return $response;
     }

@@ -181,7 +181,7 @@ const props = defineProps({
 
 const isEdit = computed(() => !!props.pageData);
 const fileInput = ref(null);
-const imagePreview = ref(props.pageData?.og_image ? `/storage/${props.pageData.og_image}` : null);
+const imagePreview = ref(props.pageData?.og_image ? `/uploads/${(props.pageData.og_image||'').replace(/^\/?(storage|uploads)\//, '')}` : null);
 
 const form = useForm({
   title: props.pageData?.title || '',

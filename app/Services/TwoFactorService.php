@@ -49,12 +49,18 @@ class TwoFactorService
         $otpauthUrl = $this->getOtpAuthUrl($user, $secret);
 
         $renderer = new ImageRenderer(
-            new RendererStyle(220, 2),
+            new RendererStyle(240, 2),
             new SvgImageBackEnd()
         );
 
         $writer = new Writer($renderer);
-        return $writer->writeString($otpauthUrl);
+        $svg = $writer->writeString($otpauthUrl);
+
+        // Ensure SVG scales responsively to container without collapsing
+        $svg = preg_replace('/width="[^"]*"/i', 'width="100%"', $svg);
+        $svg = preg_replace('/height="[^"]*"/i', 'height="100%"', $svg);
+
+        return $svg;
     }
 
     /**

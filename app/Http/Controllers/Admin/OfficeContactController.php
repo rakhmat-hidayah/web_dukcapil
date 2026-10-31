@@ -21,7 +21,7 @@ class OfficeContactController extends Controller
 
         return Inertia::render('Admin/OfficeContact/Index', [
             'settings' => [
-                'office_address'    => $settings['office_address'] ?? 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211',
+                'office_address'    => $settings['office_address'] ?? 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211',
                 'office_email'      => $settings['office_email'] ?? 'dukcapilkabdompu@gmail.com',
                 'office_work_hours' => $settings['office_work_hours'] ?? 'Senin - Kamis: 08:00 - 16:00 WITA | Jumat: 08:00 - 11:30 WITA',
                 'whatsapp_number'   => $settings['whatsapp_number'] ?? '628111222333',

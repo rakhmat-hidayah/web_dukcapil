@@ -61,7 +61,7 @@
 
         <div class="text-center mb-6">
           <div class="w-28 h-28 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-700 mx-auto mb-4 border-2 border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-lg">
-            <img v-if="selectedNode.official && selectedNode.official.photo" :src="'/storage/' + selectedNode.official.photo" :alt="selectedNode.official.name" class="w-full h-full object-cover" />
+            <img v-if="selectedNode.official && selectedNode.official.photo" :src="`/uploads/${selectedNode.official.photo.replace(/^\/?(storage|uploads)\//, '')}`" :alt="selectedNode.official.name" class="w-full h-full object-cover" />
             <svg v-else class="w-14 h-14 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           </div>
           <h2 class="text-xl font-bold text-slate-900 dark:text-white">{{ selectedNode.official ? selectedNode.official.name : selectedNode.node_title }}</h2>

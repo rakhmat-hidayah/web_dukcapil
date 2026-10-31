@@ -5,7 +5,6 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Header -->
       <div class="mb-8">
-        <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-400 rounded-full text-xs font-bold uppercase tracking-wider mb-2 inline-block">Single Source of Truth</span>
         <h1 class="text-3xl font-black text-slate-900 dark:text-white">Direktori Pejabat Utama</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Daftar Jajaran Pimpinan & Struktur Pejabat Dinas Dukcapil Kabupaten Dompu</p>
       </div>

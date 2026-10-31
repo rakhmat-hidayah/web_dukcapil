@@ -2,7 +2,7 @@
   <div :class="{ 'dark': isDark }" class="min-h-screen flex flex-col bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 transition-colors duration-200">
     
     <!-- Sticky Navigation Wrapper (Top Bar + Header Menu) -->
-    <div class="sticky top-0 z-50 shadow-md shadow-gray-200/40 dark:shadow-none">
+    <div class="sticky top-0 z-50 shadow-md shadow-gray-200/40 dark:shadow-none print:hidden">
       <!-- Top info bar -->
       <div class="bg-primary-900 text-white text-[10px] py-2 px-6 flex justify-between items-center font-medium">
         <div class="flex items-center gap-4">
@@ -25,6 +25,7 @@
           <!-- Logo 1: Logo Daerah Kabupaten Dompu -->
           <img 
             src="/img/logo-dompu.png" 
+            @error="$event.target.src = '/images/logo-dompu.png'"
             alt="Logo Kabupaten Dompu" 
             class="h-8 lg:h-9 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
           />
@@ -35,6 +36,7 @@
           <!-- Logo 2: Logo Official Disdukcapil Dompu -->
           <img 
             src="/img/logo-dukcapil.png" 
+            @error="$event.target.src = '/images/logo-dukcapil.png'"
             alt="Logo Disdukcapil Dompu" 
             class="h-9 lg:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
           />
@@ -95,6 +97,7 @@
               </Link>
               <div class="absolute left-0 top-full pt-1.5 hidden group-hover:block w-56 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                 <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-none py-2 overflow-hidden">
+                  <Link href="/layanan/antrian" class="block px-4 py-2 hover:bg-emerald-50/70 dark:hover:bg-zinc-800/80 hover:text-emerald-600 dark:hover:text-emerald-400 text-xs font-bold text-emerald-600 dark:text-emerald-400">Antrian Online KTP-el</Link>
                   <Link href="/layanan" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Persyaratan Layanan</Link>
                   <Link href="/layanan/mobile" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Pelayanan Mobile</Link>
                   <Link href="/downloads" class="block px-4 py-2 hover:bg-primary-50/70 dark:hover:bg-zinc-800/80 hover:text-primary-600 dark:hover:text-primary-400 text-xs font-semibold">Formulir Pendaftaran</Link>
@@ -164,6 +167,17 @@
 
         <!-- Header Actions (right side) -->
         <div class="flex items-center gap-1 sm:gap-1.5 xl:gap-2 shrink-0">
+          <!-- Antrian Online CTA Button -->
+          <Link 
+            href="/layanan/antrian"
+            class="flex items-center gap-1 shrink-0 px-2 py-1.5 sm:px-3 lg:px-3.5 lg:py-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-full shadow-md shadow-emerald-600/25 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
+            title="Pendaftaran Antrian Online KTP-el"
+          >
+            <Ticket class="w-3 h-3 text-emerald-200 shrink-0" />
+            <span class="hidden sm:inline text-[10px] lg:text-[10.5px]">Antrian</span>
+            <span class="hidden lg:inline text-[10.5px]"> KTP-el</span>
+          </Link>
+
           <!-- SANAI Online Dedicated Call-To-Action Button -->
           <a 
             v-if="sanaiConfig.sanai_is_active && sanaiConfig.sanai_display_navbar"
@@ -373,19 +387,19 @@
     </div>
 
     <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+    <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8 print:p-0 print:m-0 print:max-w-none print:w-full">
       <slot />
     </main>
 
     <!-- Public Footer -->
-    <footer class="bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 py-12 text-xs">
+    <footer class="mt-auto w-full bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 py-12 text-xs print:hidden">
       <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center sm:text-left">
         <!-- Brand Info -->
         <div class="space-y-3 flex flex-col items-center sm:items-start">
           <div class="flex items-center justify-center sm:justify-start gap-3 p-2 rounded-xl dark:bg-white/95 dark:shadow-md">
-            <img src="/img/logo-dompu.png" alt="Logo Dompu" class="h-11 w-auto object-contain" />
+            <img src="/img/logo-dompu.png" @error="$event.target.src = '/images/logo-dompu.png'" alt="Logo Dompu" class="h-11 w-auto object-contain" />
             <div class="h-8 w-px bg-gray-200 dark:bg-gray-300"></div>
-            <img src="/img/logo-dukcapil.png" alt="Logo Disdukcapil" class="h-12 w-auto object-contain" />
+            <img src="/img/logo-dukcapil.png" @error="$event.target.src = '/images/logo-dukcapil.png'" alt="Logo Disdukcapil" class="h-12 w-auto object-contain" />
           </div>
           <p class="text-gray-500 dark:text-zinc-400 leading-relaxed">
             Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu resmi menyelenggarakan tertib administrasi kependudukan prima.
@@ -427,6 +441,10 @@
         <div class="space-y-3 flex flex-col items-center sm:items-start">
           <h4 class="font-extrabold text-gray-800 dark:text-zinc-200">Portal Layanan</h4>
           <div class="flex flex-col items-center sm:items-start gap-2 font-medium text-gray-500 dark:text-zinc-400">
+            <Link href="/layanan/antrian" class="text-emerald-600 dark:text-emerald-400 font-extrabold hover:underline flex items-center justify-center sm:justify-start gap-1">
+              <Ticket class="w-3.5 h-3.5" />
+              <span>Antrian Online KTP-el</span>
+            </Link>
             <a 
               v-if="sanaiConfig.sanai_is_active && sanaiConfig.sanai_display_footer"
               :href="sanaiConfig.sanai_url"
@@ -451,7 +469,7 @@
           <div class="flex flex-col items-center sm:items-start gap-2.5 font-medium text-gray-600 dark:text-zinc-400 text-xs leading-relaxed">
             <div class="flex items-start justify-center sm:justify-start gap-2">
               <span class="p-1 bg-amber-50 dark:bg-amber-950/40 text-amber-600 rounded-md shrink-0 mt-0.5">📍</span>
-              <span class="break-words">{{ websiteSettings.office_address || 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211' }}</span>
+              <span class="break-words">{{ websiteSettings.office_address || 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211' }}</span>
             </div>
             <div class="flex items-center justify-center sm:justify-start gap-2">
               <span class="p-1 bg-blue-50 dark:bg-blue-950/40 text-blue-600 rounded-md shrink-0">✉️</span>
@@ -502,7 +520,7 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { Search, Sun, Moon, Menu, ChevronDown, Globe, ArrowUpRight } from '@lucide/vue';
+import { Search, Sun, Moon, Menu, ChevronDown, Globe, ArrowUpRight, Ticket } from '@lucide/vue';
 
 const isDark = ref(false);
 const mobileMenuOpen = ref(false);

@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $middleware->web(append: [
+            \App\Http\Middleware\FixStoragePaths::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
             \App\Http\Middleware\TrackVisitors::class,
             \App\Http\Middleware\SecurityHeaders::class,
@@ -32,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             '2fa' => \App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
+            'record.visitor' => \App\Http\Middleware\RecordVisitor::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

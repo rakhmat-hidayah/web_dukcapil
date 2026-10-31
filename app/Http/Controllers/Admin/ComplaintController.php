@@ -19,7 +19,7 @@ class ComplaintController extends Controller
 
     public function index(Request $request): InertiaResponse
     {
-        $query = Complaint::with(['category', 'assignee'])
+        $query = Complaint::with(['category', 'assignee', 'latestNotificationLog'])
             ->orderByRaw("FIELD(status, 'pending', 'in_review', 'in_progress', 'resolved', 'rejected')")
             ->orderByDesc('created_at');
 
@@ -47,12 +47,16 @@ class ComplaintController extends Controller
             ->pluck('total', 'status');
 
         return Inertia::render('Complaints/Index', [
-            'complaints'   => $complaints,
-            'categories'   => $categories,
-            'statusCounts' => $statusCounts,
-            'statusLabels' => Complaint::STATUS_LABELS,
-            'statusColors' => Complaint::STATUS_COLORS,
-            'filters'      => $request->only(['status', 'category', 'search']),
+            'complaints'         => $complaints,
+            'categories'         => $categories,
+            'statusCounts'       => $statusCounts,
+            'statusLabels'       => Complaint::STATUS_LABELS,
+            'statusColors'       => Complaint::STATUS_COLORS,
+            'notificationConfig' => [
+                'enabled'   => (bool) config('complaint.notifications.enabled', true),
+                'recipient' => config('complaint.notifications.email'),
+            ],
+            'filters'            => $request->only(['status', 'category', 'search']),
         ]);
     }
 

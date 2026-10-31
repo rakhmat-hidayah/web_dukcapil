@@ -26,15 +26,15 @@ class Banner extends Model
     {
         if (!$this->image) return null;
         if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) return $this->image;
-        if (str_starts_with($this->image, '/storage/')) return $this->image;
-        return '/storage/' . $this->image;
+        $clean = ltrim(str_replace(['/storage/', 'storage/', '/uploads/', 'uploads/'], '', $this->image), '/');
+        return '/uploads/' . $clean;
     }
 
     public function getImageMobileUrlAttribute(): ?string
     {
         if (!$this->image_mobile) return null;
         if (str_starts_with($this->image_mobile, 'http://') || str_starts_with($this->image_mobile, 'https://')) return $this->image_mobile;
-        if (str_starts_with($this->image_mobile, '/storage/')) return $this->image_mobile;
-        return '/storage/' . $this->image_mobile;
+        $clean = ltrim(str_replace(['/storage/', 'storage/', '/uploads/', 'uploads/'], '', $this->image_mobile), '/');
+        return '/uploads/' . $clean;
     }
 }

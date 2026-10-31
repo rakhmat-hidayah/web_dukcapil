@@ -23,7 +23,7 @@
             'description' => $siteDesc,
             'address' => [
                 '@type' => 'PostalAddress',
-                'streetAddress' => 'Jl. Bhayangkara No. 01, Kel. Bada',
+                'streetAddress' => 'Jl. Soekarno Hatta No. 9',
                 'addressLocality' => 'Dompu',
                 'addressRegion' => 'Nusa Tenggara Barat',
                 'postalCode' => '84211',
@@ -52,40 +52,95 @@
         ];
     ?>
 
-    <title inertia><?php echo e($siteTitle); ?> - <?php echo e($siteTagline); ?></title>
+    <?php if(isset($seoData)): ?>
+        <title inertia><?php echo e($seoData['title']); ?></title>
+        <meta name="title" content="<?php echo e($seoData['title']); ?>">
+        <meta name="description" content="<?php echo e($seoData['description']); ?>">
+        <meta name="author" content="<?php echo e($seoData['og']['author'] ?? 'Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu'); ?>">
+        <meta name="robots" content="index, follow">
+        <meta name="theme-color" content="<?php echo e($theme['primary_600'] ?? '#0274cb'); ?>">
+        <link rel="canonical" href="<?php echo e($seoData['canonical']); ?>">
 
-    <!-- Primary Meta Tags -->
-    <meta name="title" content="<?php echo e($siteTitle); ?> - <?php echo e($siteTagline); ?>">
-    <meta name="description" content="<?php echo e($siteDesc); ?>">
-    <meta name="keywords" content="<?php echo e($siteKeywords); ?>">
-    <meta name="author" content="Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu">
-    <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="<?php echo e($theme['primary_600'] ?? '#0274cb'); ?>">
-    <link rel="canonical" href="<?php echo e($siteUrl); ?>">
+        <!-- Open Graph / Facebook / WhatsApp -->
+        <meta property="og:type" content="<?php echo e($seoData['og']['type'] ?? 'article'); ?>">
+        <meta property="og:url" content="<?php echo e($seoData['og']['url']); ?>">
+        <meta property="og:title" content="<?php echo e($seoData['og']['title']); ?>">
+        <meta property="og:description" content="<?php echo e($seoData['og']['description']); ?>">
+        <meta property="og:image" content="<?php echo e($seoData['og']['image']); ?>">
+        <meta property="og:image:secure_url" content="<?php echo e($seoData['og']['image']); ?>">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="<?php echo e($seoData['og']['image_width']); ?>">
+        <meta property="og:image:height" content="<?php echo e($seoData['og']['image_height']); ?>">
+        <meta property="og:locale" content="id_ID">
+        <meta property="og:site_name" content="<?php echo e($seoData['og']['site_name']); ?>">
+        <?php if(!empty($seoData['og']['published_time'])): ?>
+            <meta property="article:published_time" content="<?php echo e($seoData['og']['published_time']); ?>">
+        <?php endif; ?>
+        <?php if(!empty($seoData['og']['modified_time'])): ?>
+            <meta property="article:modified_time" content="<?php echo e($seoData['og']['modified_time']); ?>">
+        <?php endif; ?>
+        <?php if(!empty($seoData['og']['author'])): ?>
+            <meta property="article:author" content="<?php echo e($seoData['og']['author']); ?>">
+        <?php endif; ?>
+        <?php if(!empty($seoData['og']['section'])): ?>
+            <meta property="article:section" content="<?php echo e($seoData['og']['section']); ?>">
+        <?php endif; ?>
+        <?php if(!empty($seoData['og']['tags'])): ?>
+            <?php $__currentLoopData = $seoData['og']['tags']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tag): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <meta property="article:tag" content="<?php echo e($tag); ?>">
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        <?php endif; ?>
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="<?php echo e($siteUrl); ?>">
-    <meta property="og:title" content="<?php echo e($siteTitle); ?> - <?php echo e($siteTagline); ?>">
-    <meta property="og:description" content="<?php echo e($siteDesc); ?>">
-    <meta property="og:image" content="<?php echo e($siteLogo); ?>">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
-    <meta property="og:locale" content="id_ID">
-    <meta property="og:site_name" content="<?php echo e($siteTitle); ?>">
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="<?php echo e($seoData['twitter']['card']); ?>">
+        <meta name="twitter:url" content="<?php echo e($seoData['twitter']['url']); ?>">
+        <meta name="twitter:title" content="<?php echo e($seoData['twitter']['title']); ?>">
+        <meta name="twitter:description" content="<?php echo e($seoData['twitter']['description']); ?>">
+        <meta name="twitter:image" content="<?php echo e($seoData['twitter']['image']); ?>">
+        <meta name="twitter:image:alt" content="<?php echo e($seoData['twitter']['image_alt']); ?>">
+        <meta name="twitter:site" content="<?php echo e($seoData['twitter']['site']); ?>">
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="<?php echo e($siteUrl); ?>">
-    <meta name="twitter:title" content="<?php echo e($siteTitle); ?> - <?php echo e($siteTagline); ?>">
-    <meta name="twitter:description" content="<?php echo e($siteDesc); ?>">
-    <meta name="twitter:image" content="<?php echo e($siteLogo); ?>">
+        <!-- Schema.org NewsArticle Structured Data -->
+        <script type="application/ld+json">
+        <?php echo json_encode($seoData['schema'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT); ?>
 
-    <!-- Schema.org GovernmentOffice Structured Data -->
-    <script type="application/ld+json">
-    <?php echo json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT); ?>
+        </script>
+    <?php else: ?>
+        <title inertia><?php echo e($siteTitle); ?> - <?php echo e($siteTagline); ?></title>
 
-    </script>
+        <!-- Primary Meta Tags -->
+        <meta name="title" content="<?php echo e($siteTitle); ?> - <?php echo e($siteTagline); ?>">
+        <meta name="description" content="<?php echo e($siteDesc); ?>">
+        <meta name="keywords" content="<?php echo e($siteKeywords); ?>">
+        <meta name="author" content="Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu">
+        <meta name="robots" content="index, follow">
+        <meta name="theme-color" content="<?php echo e($theme['primary_600'] ?? '#0274cb'); ?>">
+        <link rel="canonical" href="<?php echo e(request()->url()); ?>">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="<?php echo e(request()->url()); ?>">
+        <meta property="og:title" content="<?php echo e($siteTitle); ?> - <?php echo e($siteTagline); ?>">
+        <meta property="og:description" content="<?php echo e($siteDesc); ?>">
+        <meta property="og:image" content="<?php echo e($siteLogo); ?>">
+        <meta property="og:image:width" content="512">
+        <meta property="og:image:height" content="512">
+        <meta property="og:locale" content="id_ID">
+        <meta property="og:site_name" content="<?php echo e($siteTitle); ?>">
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:url" content="<?php echo e(request()->url()); ?>">
+        <meta name="twitter:title" content="<?php echo e($siteTitle); ?> - <?php echo e($siteTagline); ?>">
+        <meta name="twitter:description" content="<?php echo e($siteDesc); ?>">
+        <meta name="twitter:image" content="<?php echo e($siteLogo); ?>">
+
+        <!-- Schema.org GovernmentOffice Structured Data -->
+        <script type="application/ld+json">
+        <?php echo json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT); ?>
+
+        </script>
+    <?php endif; ?>
 
     <!-- Dynamic Theme Customizer Styling Injection Hook -->
     <style id="dynamic-theme-variables">
@@ -138,11 +193,9 @@
     <!-- Favicon Links (Transparent Emblem) -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="shortcut icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
     <?php echo app('Tighten\Ziggy\BladeRouteGenerator')->generate(); ?>
     <?php echo app('Illuminate\Foundation\Vite')(['resources/js/app.js']); ?>

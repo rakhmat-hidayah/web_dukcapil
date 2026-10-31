@@ -33,7 +33,7 @@
               <textarea
                 v-model="form.office_address"
                 rows="3"
-                placeholder="Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211"
+                placeholder="Jl. Soekarno Hatta No. 9, Dompu - NTB 84211"
                 class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none"
               ></textarea>
               <p class="text-[11px] text-gray-400 dark:text-zinc-500 mt-1">Ditampilkan pada halaman Kontak, Footer Portal, dan Widget Layanan Informasi.</p>

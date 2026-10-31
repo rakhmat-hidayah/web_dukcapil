@@ -116,16 +116,21 @@ class PublicSurveyController extends Controller
     {
         $request->validate([
             'survey_period_id' => 'required|exists:survey_periods,id',
-            'respondent_name'  => 'nullable|string|max:255',
-            'respondent_phone' => 'nullable|string|max:20',
+            'respondent_name'  => 'nullable|string|max:255|regex:/^[a-zA-Z\s\.\']*$/',
+            'respondent_phone' => 'nullable|string|max:20|regex:/^[0-9]+$/',
             'respondent_domicile' => 'nullable|string|max:100',
-            'respondent_age'   => 'nullable|max:50',
+            'respondent_age'   => 'nullable|numeric|min:17|max:120',
             'respondent_gender' => 'nullable|string|max:50',
             'respondent_education' => 'nullable|string|max:50',
             'respondent_job'   => 'nullable|string|max:100',
             'service_accessed' => 'nullable|string|max:255',
             'suggestion'       => 'nullable|string|max:1000',
             'answers'          => 'nullable|array',
+        ], [
+            'respondent_name.regex' => 'Nama hanya boleh berisi huruf, spasi, titik, atau tanda petik.',
+            'respondent_phone.regex' => 'Nomor HP hanya boleh berisi angka (0-9).',
+            'respondent_age.min' => 'Umur minimal 17 tahun.',
+            'respondent_age.max' => 'Umur tidak valid (maksimal 120 tahun).',
         ]);
 
         $this->surveyService->storeSubmission($request->all());

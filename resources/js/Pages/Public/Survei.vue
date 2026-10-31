@@ -168,14 +168,14 @@
 
           <!-- WIZARD HEADER -->
           <div class="bg-sky-600 text-white px-6 py-3 flex items-center justify-between">
-            <span class="font-bold text-sm">Indeks Kepuasan Masyarakat | Surveillance</span>
+            <span class="font-bold text-sm">Indeks Kepuasan Masyarakat (IKM)</span>
             <button @click="showWizard = false" class="text-white/70 hover:text-white text-2xl leading-none cursor-pointer">&times;</button>
           </div>
 
           <!-- INTRO TEXT -->
           <div class="px-6 py-3 bg-sky-50 dark:bg-sky-950/30 border-b border-sky-100 dark:border-sky-900/50">
             <p class="text-xs text-sky-800 dark:text-sky-300 leading-relaxed">
-              Form kuesioner untuk survey bagi pengguna layanan / pencari keadilan yang mengacu pada peraturan KEMENPAN RB Nomor 14 Tahun 2017.
+              Formulir kuesioner survei kepuasan masyarakat bagi pemohon layanan kependudukan yang mengacu pada PermenPAN-RB Nomor 14 Tahun 2017.
             </p>
           </div>
 
@@ -209,7 +209,7 @@
 
               <div class="grid grid-cols-[130px_1fr] items-center gap-3">
                 <label class="text-sm text-gray-700 dark:text-zinc-300 text-right">Nama</label>
-                <input v-model="form.respondent_name" type="text" placeholder="boleh inisial atau tidak diisi.." class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <input v-model="form.respondent_name" type="text" @input="filterNameInput" placeholder="Nama lengkap pemohon (atau inisial)..." class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
 
               <div class="grid grid-cols-[130px_1fr] items-start gap-3">
@@ -217,7 +217,7 @@
                 <div class="space-y-1">
                   <div class="flex gap-2">
                     <div class="relative flex-1">
-                      <input v-model="form.respondent_age" type="number" min="18" max="99" placeholder="Umur" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-zinc-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" :class="step1Errors.age ? 'border-red-400' : 'border-gray-300 dark:border-zinc-600'" />
+                      <input v-model="form.respondent_age" type="text" inputmode="numeric" @input="filterAgeInput" maxlength="3" placeholder="Umur" class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-zinc-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" :class="step1Errors.age ? 'border-red-400' : 'border-gray-300 dark:border-zinc-600'" />
                       <span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-blue-600 font-semibold pointer-events-none">thn</span>
                     </div>
                     <select v-model="form.respondent_gender" class="flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-zinc-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" :class="step1Errors.gender ? 'border-red-400' : 'border-gray-300 dark:border-zinc-600'">
@@ -236,9 +236,9 @@
                 <div class="space-y-1">
                   <div class="flex items-center border rounded-lg overflow-hidden" :class="step1Errors.phone ? 'border-red-400' : 'border-gray-300 dark:border-zinc-600'">
                     <span class="bg-gray-100 dark:bg-zinc-700 px-3 py-2 text-xs font-bold text-blue-700 border-r border-gray-300 dark:border-zinc-600 shrink-0">+62</span>
-                    <input v-model="form.respondent_phone" type="text" placeholder="81211112222" maxlength="15" class="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 text-xs focus:outline-none" />
+                    <input v-model="form.respondent_phone" type="text" inputmode="numeric" @input="filterPhoneInput" placeholder="81211112222" maxlength="13" class="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 text-xs focus:outline-none" />
                   </div>
-                  <p v-if="step1Errors.phone" class="text-[10px] text-red-500">Nomor HP wajib diisi. Contoh: 81211112222</p>
+                  <p v-if="step1Errors.phone" class="text-[10px] text-red-500">Nomor HP wajib diisi dengan angka. Contoh: 81211112222</p>
                   <p v-else class="text-[10px] text-gray-400">Contoh: 81211112222</p>
                 </div>
               </div>
@@ -456,10 +456,25 @@ onMounted(() => {
 })
 
 const steps = [
-  { title: 'Data Responden', desc: 'Nama, Umur, Jenis Kelamin, Pekerjaan dan Pendidikan' },
-  { title: 'Form Kuesioner', desc: 'isian form kuesioner IKM' },
-  { title: 'Kesan & pesan', desc: 'mohon isi kesan dan pesan Anda' },
+  { title: 'Data Responden', desc: 'Nama, Umur, Jenis Kelamin, Pekerjaan, dan Pendidikan' },
+  { title: 'Form Kuesioner IKM', desc: 'Isian Penilaian Kualitas Layanan' },
+  { title: 'Kesan & Pesan', desc: 'Masukan & Saran Pelayanan' },
 ]
+
+function filterNameInput(e) {
+  form.respondent_name = e.target.value.replace(/[^a-zA-Z\s\.\']/g, '');
+}
+
+function filterAgeInput(e) {
+  let val = e.target.value.replace(/[^0-9]/g, '');
+  if (val.length > 3) val = val.slice(0, 3);
+  if (parseInt(val) > 120) val = '120';
+  form.respondent_age = val;
+}
+
+function filterPhoneInput(e) {
+  form.respondent_phone = e.target.value.replace(/[^0-9]/g, '');
+}
 
 const ratingLabels = ['Tidak Baik', 'Kurang Baik', 'Baik', 'Sangat Baik']
 

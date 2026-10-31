@@ -15,6 +15,37 @@ Route::any('/install.php', function () {
     exit;
 });
 
+// Media Proxy Route for Bypassing Cloudflare WAF
+Route::get('/media-file/{path}', function ($path) {
+    $cleanPath = ltrim(str_replace(['../', '..\\'], '', $path), '/');
+    $file = public_path('uploads/' . $cleanPath);
+
+    if (!file_exists($file) || !is_file($file)) {
+        $file = public_path('storage/' . $cleanPath);
+    }
+
+    if (!file_exists($file) || !is_file($file)) {
+        abort(404);
+    }
+
+    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    $mimes = [
+        'webp' => 'image/webp',
+        'png'  => 'image/png',
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'gif'  => 'image/gif',
+        'svg'  => 'image/svg+xml',
+    ];
+
+    $type = $mimes[$ext] ?? mime_content_type($file);
+
+    return response()->file($file, [
+        'Content-Type' => $type,
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*')->name('public.media.proxy');
+
 // Public User-Facing routes
 Route::get('/', [\App\Http\Controllers\Public\HomeController::class, 'index'])->name('public.home');
 
@@ -31,16 +62,45 @@ Route::middleware(['throttle:60,1'])->prefix('api/v1/profile')->group(function (
     Route::get('/officials', [\App\Http\Controllers\Api\ProfileApiController::class, 'officials']);
     Route::get('/officials/{identifier}', [\App\Http\Controllers\Api\ProfileApiController::class, 'officialDetail']);
 });
-Route::get('/page/{slug}', [\App\Http\Controllers\Public\PageController::class, 'show'])->name('public.pages.show');
 Route::get('/news', [\App\Http\Controllers\Public\NewsController::class, 'index'])->name('public.news.index');
+Route::get('/berita', [\App\Http\Controllers\Public\NewsController::class, 'index']);
+Route::get('/news/tag/{slug}', [\App\Http\Controllers\Public\NewsController::class, 'tagArchive'])->name('public.news.tag');
+Route::get('/tag/{slug}', [\App\Http\Controllers\Public\NewsController::class, 'tagArchive']);
+Route::get('/news/{slug}/og-image.png', [\App\Http\Controllers\Public\NewsController::class, 'ogBanner'])->name('public.news.og-banner');
 Route::get('/news/{slug}', [\App\Http\Controllers\Public\NewsController::class, 'show'])->name('public.news.show');
+Route::get('/berita/{slug}', [\App\Http\Controllers\Public\NewsController::class, 'show']);
+Route::post('/news/{id}/share-record', [\App\Http\Controllers\Public\NewsController::class, 'trackShare'])->name('public.news.track-share');
+Route::post('/news/{news}/react', [\App\Http\Controllers\Public\NewsController::class, 'postReaction'])->name('public.news.react');
 Route::get('/gallery', [\App\Http\Controllers\Public\GalleryController::class, 'index'])->name('public.gallery.index');
 Route::get('/gallery/{slug}', [\App\Http\Controllers\Public\GalleryController::class, 'show'])->name('public.gallery.show');
 Route::get('/downloads', [\App\Http\Controllers\Public\DownloadCenterController::class, 'index'])->name('public.downloads.index');
-Route::get('/downloads/stream/{id}', [\App\Http\Controllers\Public\DownloadController::class, 'stream'])->name('public.downloads.stream')->middleware('signed');
+Route::get('/downloads/check/{id}', [\App\Http\Controllers\Public\DownloadController::class, 'check'])->name('public.downloads.check');
+Route::get('/downloads/stream/{id}', [\App\Http\Controllers\Public\DownloadController::class, 'stream'])->name('public.downloads.stream');
 Route::get('/contact', [\App\Http\Controllers\Public\ContactController::class, 'index'])->name('public.contact');
 Route::get('/search', [\App\Http\Controllers\Public\SearchController::class, 'search'])->name('public.search');
 Route::get('/statistik-kependudukan', [\App\Http\Controllers\Public\DemographicController::class, 'statistics'])->name('public.statistics');
+
+// ── Online Queue & Document Pre-verification (Public Portal) ─────────
+Route::prefix('layanan/antrian')->name('queue.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Public\Queue\QueueInfoController::class, 'index'])->name('index');
+    Route::post('/cek-status', [\App\Http\Controllers\Public\Queue\QueueInfoController::class, 'checkStatus'])->name('check');
+    Route::get('/daftar', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'create'])->name('apply.create');
+    Route::post('/daftar', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'storeDraft'])->name('apply.store');
+    Route::get('/daftar/{regNumber}/dokumen', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'showDocuments'])->name('apply.documents');
+    Route::post('/daftar/{regNumber}/dokumen', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'uploadDocument'])->name('apply.upload-doc');
+    Route::delete('/daftar/{regNumber}/dokumen/{documentId}', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'removeDocument'])->name('apply.remove-doc');
+    Route::post('/daftar/{regNumber}/submit', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'submit'])->name('apply.submit');
+    Route::get('/daftar/{regNumber}/dokumen/{documentId}/preview', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'serveDraftDocument'])->name('apply.preview-doc');
+    
+    // Status tracking, schedule booking & re-submission
+    Route::get('/status/{token}', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'show'])->name('status');
+    Route::get('/status/{token}/booking', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'showBooking'])->name('booking');
+    Route::post('/status/{token}/booking', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'storeBooking'])->name('booking.store');
+    Route::post('/status/{token}/revisi', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'resubmit'])->name('resubmit');
+    Route::post('/status/{token}/batal', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'cancel'])->name('cancel');
+    Route::get('/status/{token}/dokumen/{documentId}', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'serveDocument'])->name('serve-doc');
+});
+
 Route::get('/layanan', [\App\Http\Controllers\Public\ServiceRequirementController::class, 'index'])->name('public.services.index');
 Route::get('/layanan/survei', [\App\Http\Controllers\Public\PublicSurveyController::class, 'index'])->name('public.survey.index');
 Route::post('/layanan/survei', [\App\Http\Controllers\Public\PublicSurveyController::class, 'store'])->name('public.survey.store');
@@ -162,14 +222,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/office-contact', [\App\Http\Controllers\Admin\OfficeContactController::class, 'index'])->name('office-contact.index');
             Route::post('/office-contact', [\App\Http\Controllers\Admin\OfficeContactController::class, 'update'])->name('office-contact.update');
 
+            // Notification & Integration System Settings
+            Route::get('/notification-settings', [\App\Http\Controllers\Admin\NotificationSettingController::class, 'index'])->name('notification-settings.index');
+            Route::post('/notification-settings', [\App\Http\Controllers\Admin\NotificationSettingController::class, 'update'])->name('notification-settings.update');
+            Route::post('/notification-settings/test', [\App\Http\Controllers\Admin\NotificationSettingController::class, 'sendTestEmail'])->name('notification-settings.test');
+
             // System Health Dashboard
             Route::get('/system/health', [\App\Http\Controllers\Admin\SystemHealthController::class, 'index'])->name('system.health');
+        });
+
+        // Visitor Analytics Module (Super Administrator & Website Administrator)
+        Route::middleware('role:Super Administrator|Website Administrator')->group(function () {
+            Route::get('/visitor-analytics', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'index'])->name('visitor-analytics.index');
+            Route::get('/visitor-analytics/export', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'export'])->name('visitor-analytics.export');
+            Route::get('/visitor-analytics/{id}', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'show'])->name('visitor-analytics.show');
+            Route::post('/visitor-analytics/{id}/retry-geolocation', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'retryGeolocation'])->name('visitor-analytics.retry-geolocation');
+
+            // Visitor Analytics Retention Settings
+            Route::get('/visitor-analytics-retention', [\App\Http\Controllers\Admin\VisitorRetentionController::class, 'index'])->name('visitor-analytics-retention.index');
+            Route::post('/visitor-analytics-retention/settings', [\App\Http\Controllers\Admin\VisitorRetentionController::class, 'updateSettings'])->name('visitor-analytics-retention.settings');
+            Route::post('/visitor-analytics-retention/cleanup-now', [\App\Http\Controllers\Admin\VisitorRetentionController::class, 'cleanupNow'])->name('visitor-analytics-retention.cleanup-now');
+            Route::get('/visitor-analytics-retention/cleanup-status', [\App\Http\Controllers\Admin\VisitorRetentionController::class, 'cleanupStatus'])->name('visitor-analytics-retention.cleanup-status');
         });
 
         // -------------------------------------------------------------
         // Content & Media, Profile, Services, Demographics Route Group
         // -------------------------------------------------------------
-        Route::middleware('role:Super Administrator|Website Administrator|Content Editor')->group(function () {
+        Route::middleware('role:Super Administrator|Website Administrator|Publication Operator|Content Editor|PPID Admin')->group(function () {
             // Enterprise Profile Module CMS
             Route::prefix('profile')->name('profile.')->group(function () {
                 Route::get('/dashboard', [\App\Http\Controllers\Admin\Profile\ProfileDashboardController::class, 'index'])->name('dashboard');
@@ -200,11 +279,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('/pages', \App\Http\Controllers\Admin\PageController::class)->except(['show']);
 
             Route::get('/news/categories', [\App\Http\Controllers\Admin\NewsController::class, 'categories'])->name('news.categories');
+            Route::get('/news/tags/search', [\App\Http\Controllers\Admin\NewsController::class, 'searchTags'])->name('news.tags.search');
             Route::post('/news/categories', [\App\Http\Controllers\Admin\NewsController::class, 'storeCategory'])->name('news.categories.store');
             Route::put('/news/categories/{newsCategory}', [\App\Http\Controllers\Admin\NewsController::class, 'updateCategory'])->name('news.categories.update');
             Route::delete('/news/categories/{newsCategory}', [\App\Http\Controllers\Admin\NewsController::class, 'destroyCategory'])->name('news.categories.destroy');
             Route::post('/news/{id}/restore', [\App\Http\Controllers\Admin\NewsController::class, 'restore'])->name('news.restore');
             Route::post('/news/upload-image', [\App\Http\Controllers\Admin\NewsController::class, 'uploadInlineImage'])->name('news.upload-image');
+            Route::get('/news/share-stats', [\App\Http\Controllers\Admin\NewsController::class, 'shareAnalytics'])->name('news.share-analytics');
+            Route::get('/news/reader-stats', [\App\Http\Controllers\Admin\NewsController::class, 'readerAnalytics'])->name('news.reader-analytics');
             Route::resource('/news', \App\Http\Controllers\Admin\NewsController::class)->except(['show']);
 
             Route::resource('/announcements', \App\Http\Controllers\Admin\AnnouncementController::class)->only(['index', 'store', 'update', 'destroy']);
@@ -284,16 +366,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         // -------------------------------------------------------------
-        // PPID Admin & Content Editor & Super Administrator Routes
+        // Downloads Management (Super Admin, Website Admin, Publication Operator, Content Editor & PPID Admin)
         // -------------------------------------------------------------
-        // Note: Downloads resource is handled in the Content group above (role: Super Admin|Website Admin|Content Editor).
-        // PPID Admin additionally gets access to download category management only.
-        Route::middleware('role:Super Administrator|PPID Admin|Content Editor')->group(function () {
+        Route::middleware('role:Super Administrator|Website Administrator|Publication Operator|Content Editor|PPID Admin')->group(function () {
+            Route::get('/downloads/{id}/check', [\App\Http\Controllers\Admin\DownloadController::class, 'check'])->name('downloads.check');
+            Route::get('/downloads/{id}/download', [\App\Http\Controllers\Admin\DownloadController::class, 'download'])->name('downloads.download');
             Route::post('/downloads/categories', [\App\Http\Controllers\Admin\DownloadController::class, 'storeCategory'])->name('downloads.categories.store');
             Route::delete('/downloads/categories/{downloadCategory}', [\App\Http\Controllers\Admin\DownloadController::class, 'destroyCategory'])->name('downloads.categories.destroy');
         });
 
-        Route::middleware('role:Super Administrator|PPID Admin')->group(function () {
+        // -------------------------------------------------------------
+        // PPID Management (Super Administrator, Website Administrator & PPID Admin)
+        // -------------------------------------------------------------
+        Route::middleware('role:Super Administrator|Website Administrator|PPID Admin')->group(function () {
             // PPID Management
             Route::prefix('ppid')->name('ppid.')->group(function () {
                 Route::get('/pages', [\App\Http\Controllers\Admin\PpidController::class, 'pagesIndex'])->name('pages.index');
@@ -310,6 +395,59 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/requests/{ppidRequest}/respond', [\App\Http\Controllers\Admin\PpidController::class, 'requestsRespond'])->name('requests.respond');
                 Route::delete('/requests/{request}', [\App\Http\Controllers\Admin\PpidController::class, 'requestsDestroy'])->name('requests.destroy');
             });
+        });
+
+        // -------------------------------------------------------------
+        // Online Queue Management & Pre-Verification (Admin CMS)
+        // -------------------------------------------------------------
+        Route::middleware('role_or_permission:Super Administrator|Website Administrator|Queue Officer|Queue Verifier|manage_online_queue|manage_queue_verification|view_queue_reports')
+            ->prefix('queue')->name('queue.')->group(function () {
+
+            Route::get('/dashboard', [\App\Http\Controllers\Admin\Queue\QueueDashboardController::class, 'index'])->name('dashboard');
+
+            // Counter Check-In, Physical Verification & Handover (Front Desk Loket)
+            Route::get('/counter', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'index'])->name('counter.index');
+            Route::post('/counter/{id}/checkin', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'checkIn'])->name('counter.checkin');
+            Route::post('/counter/{id}/physical-verification', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'physicalVerification'])->name('counter.physical-verification');
+            Route::post('/counter/{id}/start-processing', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'startProcessing'])->name('counter.start-processing');
+            Route::post('/counter/{id}/ready-for-pickup', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'markReadyForPickup'])->name('counter.ready-pickup');
+            Route::post('/counter/{id}/handover', [\App\Http\Controllers\Admin\Queue\QueueCounterController::class, 'completeHandover'])->name('counter.handover');
+
+            // Applications & Online Document Verification
+            Route::get('/applications', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'index'])->name('applications.index');
+            Route::get('/applications/{id}', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'show'])->name('applications.show');
+            Route::post('/applications/{id}/pre-verify', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'preVerify'])->name('applications.pre-verify');
+            Route::post('/applications/{id}/approve', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'approve'])->name('applications.approve');
+            Route::post('/applications/{id}/revision', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'requestRevision'])->name('applications.revision');
+            Route::post('/applications/{id}/reject', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'reject'])->name('applications.reject');
+            Route::post('/applications/{id}/checkin', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'checkIn'])->name('applications.checkin');
+            Route::post('/applications/{id}/physical-verification', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'physicalVerification'])->name('applications.physical-verification');
+            Route::post('/applications/{id}/start-processing', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'startProcessing'])->name('applications.start-processing');
+            Route::post('/applications/{id}/ready-for-pickup', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'markReadyForPickup'])->name('applications.ready-pickup');
+            Route::post('/applications/{id}/complete', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'complete'])->name('applications.complete');
+
+            // Document stream & actions
+            Route::get('/documents/{documentId}/serve', [\App\Http\Controllers\Admin\Queue\ApplicationDocumentController::class, 'serve'])->name('documents.serve');
+            Route::post('/applications/{applicationId}/documents/{docId}/approve', [\App\Http\Controllers\Admin\Queue\ApplicationDocumentController::class, 'approve'])->name('documents.approve');
+            Route::post('/applications/{applicationId}/documents/{docId}/reject', [\App\Http\Controllers\Admin\Queue\ApplicationDocumentController::class, 'reject'])->name('documents.reject');
+
+            // Service Types & Requirement Documents
+            Route::resource('/service-types', \App\Http\Controllers\Admin\Queue\ServiceTypeController::class)->except(['show']);
+            Route::post('/service-types/{id}/toggle', [\App\Http\Controllers\Admin\Queue\ServiceTypeController::class, 'toggleActive'])->name('service-types.toggle');
+            Route::post('/service-types/{serviceTypeId}/documents', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'store'])->name('service-documents.store');
+            Route::put('/service-types/{serviceTypeId}/documents/{documentId}', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'update'])->name('service-documents.update');
+            Route::delete('/service-types/{serviceTypeId}/documents/{documentId}', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'destroy'])->name('service-documents.destroy');
+            Route::post('/service-types/{serviceTypeId}/documents/reorder', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'reorder'])->name('service-documents.reorder');
+
+            // Schedules & Daily Quotas
+            Route::get('/schedules', [\App\Http\Controllers\Admin\Queue\QueueScheduleController::class, 'index'])->name('schedules.index');
+            Route::post('/schedules', [\App\Http\Controllers\Admin\Queue\QueueScheduleController::class, 'store'])->name('schedules.store');
+            Route::post('/schedules/bulk', [\App\Http\Controllers\Admin\Queue\QueueScheduleController::class, 'bulkCreate'])->name('schedules.bulk');
+            Route::delete('/schedules/{id}', [\App\Http\Controllers\Admin\Queue\QueueScheduleController::class, 'destroy'])->name('schedules.destroy');
+
+            // Settings
+            Route::get('/settings', [\App\Http\Controllers\Admin\Queue\QueueSettingsController::class, 'index'])->name('settings.index');
+            Route::post('/settings', [\App\Http\Controllers\Admin\Queue\QueueSettingsController::class, 'update'])->name('settings.update');
         });
     });
 });

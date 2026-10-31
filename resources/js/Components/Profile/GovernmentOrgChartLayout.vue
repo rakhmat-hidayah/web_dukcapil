@@ -88,7 +88,7 @@
               </div>
               <div class="bg-white dark:bg-slate-900 mx-1.5 my-1.5 p-2.5 rounded-xl flex items-center gap-3 border border-slate-100 dark:border-slate-800 shadow-sm">
                 <div class="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 flex items-center justify-center shadow-sm">
-                  <img v-if="sekretarisOfficial?.photo" :src="'/storage/' + sekretarisOfficial.photo" :alt="sekretarisOfficial.name" class="w-full h-full object-cover" />
+                  <img v-if="sekretarisOfficial?.photo" :src="storageUrl(sekretarisOfficial.photo)" :alt="sekretarisOfficial.name" class="w-full h-full object-cover" />
                   <svg v-else class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 </div>
                 <div class="overflow-hidden">
@@ -127,7 +127,7 @@
                     </div>
                     <div class="bg-white dark:bg-slate-900 m-1 p-2 rounded-lg flex items-center gap-1.5 border border-slate-100 dark:border-slate-800 min-h-[52px]">
                       <div class="w-7 h-7 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center text-slate-400 shadow-sm">
-                        <img v-if="subNode2?.official?.photo" :src="'/storage/' + subNode2.official.photo" :alt="subNode2.official.name" class="w-full h-full object-cover" />
+                        <img v-if="subNode2?.official?.photo" :src="storageUrl(subNode2.official.photo)" :alt="subNode2.official.name" class="w-full h-full object-cover" />
                         <svg v-else class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                       </div>
                       <div class="overflow-hidden">
@@ -153,7 +153,7 @@
                     </div>
                     <div class="bg-white dark:bg-slate-900 m-1 p-2 rounded-lg flex items-center gap-1.5 border border-slate-100 dark:border-slate-800 min-h-[52px]">
                       <div class="w-7 h-7 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center text-slate-400 shadow-sm">
-                        <img v-if="subNode3?.official?.photo" :src="'/storage/' + subNode3.official.photo" :alt="subNode3.official.name" class="w-full h-full object-cover" />
+                        <img v-if="subNode3?.official?.photo" :src="storageUrl(subNode3.official.photo)" :alt="subNode3.official.name" class="w-full h-full object-cover" />
                         <svg v-else class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                       </div>
                       <div class="overflow-hidden">
@@ -226,7 +226,7 @@
               </div>
               <div class="bg-white dark:bg-slate-900 mx-1.5 mb-1.5 p-2 rounded-xl flex items-center gap-2 border border-slate-100 dark:border-slate-800 shadow-sm">
                 <div class="w-9 h-9 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center shadow-sm">
-                  <img v-if="bidang1Official?.photo" :src="'/storage/' + bidang1Official.photo" :alt="bidang1Official.name" class="w-full h-full object-cover" />
+                  <img v-if="bidang1Official?.photo" :src="storageUrl(bidang1Official.photo)" :alt="bidang1Official.name" class="w-full h-full object-cover" />
                   <svg v-else class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 </div>
                 <div class="overflow-hidden">
@@ -272,7 +272,7 @@
               </div>
               <div class="bg-white dark:bg-slate-900 mx-1.5 mb-1.5 p-2 rounded-xl flex items-center gap-2 border border-slate-100 dark:border-slate-800 shadow-sm">
                 <div class="w-9 h-9 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center shadow-sm">
-                  <img v-if="bidang2Official?.photo" :src="'/storage/' + bidang2Official.photo" :alt="bidang2Official.name" class="w-full h-full object-cover" />
+                  <img v-if="bidang2Official?.photo" :src="storageUrl(bidang2Official.photo)" :alt="bidang2Official.name" class="w-full h-full object-cover" />
                   <svg v-else class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 </div>
                 <div class="overflow-hidden">
@@ -317,7 +317,7 @@
               </div>
               <div class="bg-white dark:bg-slate-900 mx-1.5 mb-1.5 p-2 rounded-xl flex items-center gap-2 border border-slate-100 dark:border-slate-800 shadow-sm">
                 <div class="w-9 h-9 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center shadow-sm">
-                  <img v-if="bidang3Official?.photo" :src="'/storage/' + bidang3Official.photo" :alt="bidang3Official.name" class="w-full h-full object-cover" />
+                  <img v-if="bidang3Official?.photo" :src="storageUrl(bidang3Official.photo)" :alt="bidang3Official.name" class="w-full h-full object-cover" />
                   <svg v-else class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 </div>
                 <div class="overflow-hidden">
@@ -362,7 +362,7 @@
               </div>
               <div class="bg-white dark:bg-slate-900 mx-1.5 mb-1.5 p-2 rounded-xl flex items-center gap-2 border border-slate-100 dark:border-slate-800 shadow-sm">
                 <div class="w-9 h-9 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 shrink-0 flex items-center justify-center shadow-sm">
-                  <img v-if="bidang4Official?.photo" :src="'/storage/' + bidang4Official.photo" :alt="bidang4Official.name" class="w-full h-full object-cover" />
+                  <img v-if="bidang4Official?.photo" :src="storageUrl(bidang4Official.photo)" :alt="bidang4Official.name" class="w-full h-full object-cover" />
                   <svg v-else class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 </div>
                 <div class="overflow-hidden">

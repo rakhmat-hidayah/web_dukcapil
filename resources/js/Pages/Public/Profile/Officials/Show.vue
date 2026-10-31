@@ -16,7 +16,7 @@
       <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-3xl p-8 md:p-12 shadow-2xl mb-8 relative overflow-hidden">
         <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
           <div class="w-36 h-36 md:w-44 md:h-44 rounded-3xl overflow-hidden bg-white/10 border-4 border-white/20 shadow-xl shrink-0 flex items-center justify-center">
-            <img v-if="official.photo" :src="'/storage/' + official.photo" :alt="official.name" class="w-full h-full object-cover" />
+            <img v-if="official.photo" :src="`/uploads/${official.photo.replace(/^\/?(storage|uploads)\//, '')}`" :alt="official.name" class="w-full h-full object-cover" />
             <svg v-else class="w-20 h-20 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           </div>
           <div class="text-center md:text-left">

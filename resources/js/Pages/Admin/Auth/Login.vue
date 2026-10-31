@@ -16,11 +16,11 @@
           <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center gap-3.5 px-6 py-3.5 bg-white rounded-2xl shadow-xl shadow-black/30 border border-zinc-200/60 mb-3 transition-transform hover:scale-[1.02]">
               <!-- Logo 1: Logo Pemkab Dompu -->
-              <img src="/img/logo-dompu.png" alt="Logo Kabupaten Dompu" class="h-10 sm:h-11 w-auto object-contain drop-shadow-sm" />
+              <img src="/img/logo-dompu.png" @error="$event.target.src = '/images/logo-dompu.png'" alt="Logo Kabupaten Dompu" class="h-10 sm:h-11 w-auto object-contain drop-shadow-sm" />
               <!-- Vertical Divider Line -->
               <div class="h-8 w-px bg-zinc-300"></div>
               <!-- Logo 2: Logo Disdukcapil Dompu -->
-              <img src="/img/logo-dukcapil.png" alt="Logo Disdukcapil Dompu" class="h-10 sm:h-11 w-auto object-contain drop-shadow-sm" />
+              <img src="/img/logo-dukcapil.png" @error="$event.target.src = '/images/logo-dukcapil.png'" alt="Logo Disdukcapil Dompu" class="h-10 sm:h-11 w-auto object-contain drop-shadow-sm" />
             </div>
             <p class="text-xs font-semibold text-zinc-400">Portal Admin Website Disdukcapil Kab. Dompu</p>
           </div>
@@ -111,12 +111,12 @@
               <label class="block text-[11px] font-extrabold uppercase tracking-wider text-zinc-300 mb-1.5">Verifikasi Keamanan</label>
               <div class="grid grid-cols-2 gap-3 items-center">
                 <!-- Crisp High-Contrast White CAPTCHA Frame -->
-                <div class="relative bg-white border border-zinc-300 rounded-2xl p-1 flex items-center justify-between overflow-hidden shadow-inner group">
-                  <img :src="currentCaptcha" class="h-12 w-full object-contain rounded-xl bg-white select-none" alt="Kode CAPTCHA Verifikasi" />
+                <div class="bg-white border border-zinc-300 rounded-2xl p-1 flex items-center justify-between gap-1 shadow-inner group">
+                  <img :src="currentCaptcha" class="h-11 flex-1 object-contain rounded-xl bg-white select-none min-w-0" alt="Kode CAPTCHA Verifikasi" />
                   <button
                     type="button"
                     @click="refreshCaptcha"
-                    class="absolute right-1.5 top-2 p-1.5 bg-slate-900/90 hover:bg-slate-900 text-white rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95"
+                    class="p-2.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95 shrink-0 flex items-center justify-center"
                     title="Perbarui Kode CAPTCHA"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

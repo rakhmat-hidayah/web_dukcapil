@@ -3,38 +3,49 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use App\Models\Download;
+use App\Services\DownloadPolicyService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DownloadController extends Controller
 {
     /**
-     * Stream the secure download file from local storage using temporary signed URL.
+     * Pre-Flight Validation API Endpoint for Public Downloads.
+     * Validates file availability, physical existence, and size metadata before transfer.
      */
-    public function stream(Request $request, int $id): BinaryFileResponse|\Illuminate\Http\RedirectResponse
+    public function check(Request $request, int $id): JsonResponse
     {
-        // 1. Verify signed signature (Laravel handles this via signed middleware, but we check here too for safety)
-        if (!$request->hasValidSignature()) {
-            abort(403, 'Tautan unduhan kedaluwarsa atau tanda tangan tidak valid.');
+        $result = DownloadPolicyService::validateDownload($id, null);
+
+        if (!$result['allowed']) {
+            DownloadPolicyService::logDownloadAttempt($result, $request, null);
         }
 
-        $doc = Download::findOrFail($id);
+        return response()->json([
+            'allowed'     => $result['allowed'],
+            'reason'      => $result['reason'],
+            'reason_text' => $result['reason_text'],
+            'size_bytes'  => $result['size_bytes'],
+            'size_human'  => $result['size_human'],
+            'file_name'   => $result['file_name'],
+            'file_type'   => $result['file_type'],
+        ]);
+    }
 
-        $fullPath = public_path($doc->file_path);
-        if (!file_exists($fullPath) || !is_file($fullPath)) {
-            $fullPath = public_path('uploads/' . ltrim($doc->file_path, '/'));
+    /**
+     * Memory-Safe Public File Streaming Download.
+     */
+    public function stream(Request $request, int $id)
+    {
+        $result = DownloadPolicyService::validateDownload($id, null);
+
+        if (!$result['allowed']) {
+            DownloadPolicyService::logDownloadAttempt($result, $request, null);
+            return redirect()->route('public.downloads.index')->with('error', $result['reason_text']);
         }
 
-        if (!file_exists($fullPath) || !is_file($fullPath)) {
-            abort(404, 'File fisik tidak ditemukan di server.');
-        }
+        DownloadPolicyService::logDownloadAttempt($result, $request, null);
 
-        // 2. Increment download counter
-        $doc->increment('download_count');
-
-        // 3. Stream file securely without exposing physical paths
-        return response()->download($fullPath, $doc->file_name);
+        return DownloadPolicyService::createStreamResponse($result);
     }
 }

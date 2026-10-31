@@ -90,6 +90,7 @@ class UserController extends Controller
         ]);
 
         $user->syncRoles([$request->role]);
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         ActivityLogger::log(
             "Membuat user baru: {$user->username} ({$user->name})",
@@ -152,6 +153,7 @@ class UserController extends Controller
         $user->save();
 
         $user->syncRoles([$request->role]);
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         ActivityLogger::log(
             "Memperbarui user: {$user->username} ({$user->name})",

@@ -5,10 +5,23 @@
     <div class="space-y-8 text-left">
       <!-- Title section -->
       <div>
-        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">Kabar Berita & Rilis Resmi</h1>
+        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">
+          <template v-if="currentTag">Arsip Tag: #{{ currentTag.name }}</template>
+          <template v-else>Kabar Berita & Rilis Resmi</template>
+        </h1>
         <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-          Dapatkan berita terkini seputar administrasi kependudukan dan kegiatan Disdukcapil Kabupaten Dompu.
+          <template v-if="currentTag">Menampilkan seluruh artikel berita yang ditandai dengan tag #{{ currentTag.name }}.</template>
+          <template v-else>Dapatkan berita terkini seputar administrasi kependudukan dan kegiatan Disdukcapil Kabupaten Dompu.</template>
         </p>
+      </div>
+
+      <!-- Tag Active Banner if currentTag present -->
+      <div v-if="currentTag" class="p-4 bg-primary-50 dark:bg-primary-950/40 border border-primary-200 dark:border-primary-900/40 rounded-2xl flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-xs font-bold text-primary-700 dark:text-primary-300">
+          <span>🏷️ Filter Tag Aktif:</span>
+          <span class="font-mono bg-white dark:bg-zinc-900 px-2.5 py-1 rounded-xl border border-primary-200 dark:border-primary-800">#{{ currentTag.name }}</span>
+        </div>
+        <Link href="/news" class="text-xs font-bold text-primary-600 hover:underline">Hapus Filter Tag ✕</Link>
       </div>
 
       <!-- Filters panel -->
@@ -78,7 +91,7 @@
           <!-- Image -->
           <div class="h-48 bg-zinc-100 dark:bg-zinc-950 overflow-hidden flex items-center justify-center">
             <img 
-              :src="item.thumbnail ? `/storage/${item.thumbnail}` : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=400&q=80'" 
+              :src="item.thumbnail ? `/uploads/${item.thumbnail.replace(/^\/?(storage|uploads)\//, '')}` : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=400&q=80'" 
               class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
               alt="Thumbnail" 
             />
@@ -144,6 +157,7 @@ import { Search } from '@lucide/vue';
 const props = defineProps({
   news: Object,
   categories: Array,
+  currentTag: Object,
   filters: Object,
 });
 

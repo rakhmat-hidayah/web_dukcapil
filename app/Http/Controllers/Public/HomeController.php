@@ -52,11 +52,19 @@ class HomeController extends Controller
             ->orderBy('is_pinned', 'desc')
             ->first();
 
-        // 4. Get 6 recent news articles
+        // 4. Get 6 recent news articles (Berita Terkini/Terbaru)
         $recentNews = News::with('category')
             ->published()
+            ->orderBy('published_at', 'desc')
+            ->orderBy('created_at', 'desc')
             ->limit(6)
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                if ($item->thumbnail) {
+                    $item->thumbnail = ltrim(str_replace(['/storage/', 'storage/', '/uploads/', 'uploads/'], '', $item->thumbnail), '/');
+                }
+                return $item;
+            });
 
         // 4b. Get active featured innovations
         $innovations = \App\Models\Innovation::where('is_active', true)

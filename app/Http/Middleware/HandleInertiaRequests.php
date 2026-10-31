@@ -21,6 +21,36 @@ class HandleInertiaRequests extends Middleware
      */
     protected $rootView = 'app';
 
+    public function handle(Request $request, \Closure $next)
+    {
+        $response = parent::handle($request, $next);
+
+        if (method_exists($response, 'getContent')) {
+            $content = $response->getContent();
+            if ($content && (str_contains($content, 'Rakyat') || str_contains($content, 'Aspirasi'))) {
+                $newContent = str_replace([
+                    'Aspirasi & Pengaduan Rakyat (Lapor!)',
+                    'Aspirasi &amp; Pengaduan Rakyat (Lapor!)',
+                    'Aspirasi \u0026 Pengaduan Rakyat (Lapor!)',
+                    'Aspirasi \u0026amp; Pengaduan Rakyat (Lapor!)',
+                    'Pengaduan Rakyat (Lapor)',
+                    'Pengaduan Rakyat',
+                ], [
+                    'Aspirasi & Pengaduan Masyarakat (Lapor!)',
+                    'Aspirasi &amp; Pengaduan Masyarakat (Lapor!)',
+                    'Aspirasi \u0026 Pengaduan Masyarakat (Lapor!)',
+                    'Aspirasi \u0026amp; Pengaduan Masyarakat (Lapor!)',
+                    'Pengaduan Masyarakat (Lapor)',
+                    'Pengaduan Masyarakat',
+                ], $content);
+
+                $response->setContent($newContent);
+            }
+        }
+
+        return $response;
+    }
+
     /**
      * Determines the current asset version.
      *

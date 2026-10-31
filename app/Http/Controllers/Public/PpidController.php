@@ -46,7 +46,7 @@ class PpidController extends Controller
 
         if ($slug === 'kontak') {
             $settings = \App\Models\WebsiteSetting::allAsArray();
-            $address  = $settings['office_address'] ?? 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211';
+            $address  = $settings['office_address'] ?? 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211';
             $phone    = $settings['office_phone'] ?? '';
             $email    = $settings['office_email'] ?? 'dukcapilkabdompu@gmail.com';
             $hoursMonThu = $settings['office_hours_monday_thursday'] ?? 'Senin – Kamis: 08.00 – 16.00 WITA';
@@ -190,7 +190,7 @@ class PpidController extends Controller
     public function submitRequest(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'requester_name'       => 'required|string|min:3|max:255',
+            'requester_name'       => 'required|string|min:3|max:255|regex:/^[a-zA-Z\s\.\']*$/',
             'requester_email'      => 'required|email|max:255',
             'requester_phone'      => 'nullable|numeric|digits_between:10,15',
             'requester_address'    => 'nullable|string|max:500',
@@ -202,6 +202,7 @@ class PpidController extends Controller
         ], [
             'requester_name.required'       => 'Nama lengkap pemohon wajib diisi.',
             'requester_name.min'            => 'Nama lengkap minimal 3 karakter.',
+            'requester_name.regex'          => 'Nama lengkap hanya boleh berisi huruf, spasi, titik, atau tanda petik (tanpa angka).',
             'requester_email.required'      => 'Alamat email wajib diisi.',
             'requester_email.email'         => 'Format alamat email tidak valid (contoh: nama@email.com).',
             'requester_phone.numeric'       => 'Nomor telepon/WhatsApp harus berupa angka saja.',

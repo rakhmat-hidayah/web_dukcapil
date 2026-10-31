@@ -48,7 +48,7 @@
             </div>
 
             <p class="text-xs font-semibold text-gray-800 dark:text-zinc-200 leading-relaxed">
-              {{ websiteSettings.office_address || 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211' }}
+              {{ websiteSettings.office_address || 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211' }}
             </p>
           </div>
 

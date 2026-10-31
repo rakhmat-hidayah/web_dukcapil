@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between mb-8">
       <div>
         <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">Direktori Pejabat Utama</h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Single Source of Truth Jajaran Pimpinan Instansi</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Jajaran Pimpinan & Struktur Pejabat Dinas Dukcapil</p>
       </div>
       <a href="/profil/pejabat" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
         Lihat Semua Pejabat &rarr;

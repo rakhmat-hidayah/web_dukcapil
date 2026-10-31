@@ -132,6 +132,14 @@ class MediaStorage
             $cleanPath = 'uploads/' . $cleanPath;
         }
 
-        return asset($cleanPath);
+        return '/' . ltrim($cleanPath, '/');
+    }
+
+    /**
+     * Alias for url()
+     */
+    public static function getUrl(?string $path): ?string
+    {
+        return static::url($path);
     }
 }

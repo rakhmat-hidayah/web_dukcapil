@@ -76,36 +76,81 @@
         </h3>
 
         <form @submit.prevent="submitForm" class="space-y-4">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="col-span-2">
+          <div class="space-y-3">
+            <div>
               <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Nama Layanan *</label>
               <input v-model="form.title" required type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
             </div>
 
-            <div>
-              <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Waktu Penyelesaian *</label>
-              <input v-model="form.processing_time" required type="text" placeholder="Contoh: 1 Hari Kerja" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Waktu Penyelesaian *</label>
+                <input v-model="form.processing_time" required type="text" placeholder="Contoh: 1 Hari Kerja" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
+              </div>
+
+              <div>
+                <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Biaya / Tarif *</label>
+                <input v-model="form.cost" required type="text" placeholder="Contoh: Gratis / Rp 0" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
+              </div>
+
+              <div>
+                <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Urutan Sortir</label>
+                <input v-model="form.sort_order" type="number" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
+              </div>
+            </div>
+
+            <!-- Pilihan Icon Layanan (Emoji / Simbol) -->
+            <div class="p-3.5 bg-gray-50/70 dark:bg-zinc-800/50 rounded-2xl border border-gray-150 dark:border-zinc-800 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-500 dark:text-zinc-400">Pilihan Icon Layanan (Emoji / Simbol)</label>
+                  <p class="text-[10px] text-gray-400 mt-0.5">Klik salah satu pilihan icon di bawah atau ketik langsung emoji pilihan Anda.</p>
+                </div>
+                <span class="hidden sm:inline-block text-[9px] text-gray-400 font-mono">
+                  Pintasan: <kbd class="px-1.5 py-0.5 bg-gray-200 dark:bg-zinc-700 rounded text-[9px] font-mono text-gray-700 dark:text-zinc-300">Win + .</kbd>
+                </span>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <!-- Selected Icon Box & Manual Input -->
+                <div class="flex flex-col items-center shrink-0">
+                  <input 
+                    v-model="form.icon" 
+                    type="text" 
+                    placeholder="📝"
+                    class="w-14 h-14 bg-white dark:bg-zinc-900 border-2 border-primary-500/50 rounded-2xl text-2xl font-bold text-center focus:ring-2 focus:ring-primary-500 focus:outline-none shadow-sm hover:border-primary-500 transition" 
+                    title="Klik untuk ketik atau tempel emoji custom"
+                  />
+                  <span class="text-[9px] text-gray-400 font-bold mt-1">Terpilih</span>
+                </div>
+
+                <!-- Categorized Emojis Palette -->
+                <div class="flex-1 space-y-2.5 max-h-48 overflow-y-auto pr-1.5 scrollbar-thin">
+                  <div v-for="cat in emojiCollection" :key="cat.name" class="space-y-1">
+                    <span class="text-[9px] font-extrabold uppercase tracking-wider text-primary-600 dark:text-primary-400 block">{{ cat.name }}</span>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <button 
+                        v-for="item in cat.items" 
+                        :key="item.emoji"
+                        type="button"
+                        @click="form.icon = item.emoji"
+                        class="h-7 px-2 flex items-center gap-1 rounded-lg bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-700/80 hover:bg-primary-50 dark:hover:bg-primary-950/40 hover:border-primary-400 hover:scale-105 active:scale-95 transition"
+                        :class="{ 'border-primary-600 bg-primary-50 dark:bg-primary-950/60 ring-2 ring-primary-500/30 font-bold shadow-xs': form.icon === item.emoji }"
+                        :title="`Pilih ${item.label} (${item.emoji})`"
+                      >
+                        <span class="text-sm">{{ item.emoji }}</span>
+                        <span class="text-[10px] text-gray-600 dark:text-zinc-300">{{ item.label }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div>
-              <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Biaya / Tarif *</label>
-              <input v-model="form.cost" required type="text" placeholder="Contoh: Gratis / Rp 0" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
+              <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Deskripsi Ringkas</label>
+              <input v-model="form.description" type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
             </div>
-
-            <div>
-              <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Icon (Emoji / Text)</label>
-              <input v-model="form.icon" type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
-            </div>
-
-            <div>
-              <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Urutan Sortir</label>
-              <input v-model="form.sort_order" type="number" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1">Deskripsi Ringkas</label>
-            <input v-model="form.description" type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" />
           </div>
 
           <!-- Visual Rich Requirements Details Editor -->
@@ -139,6 +184,66 @@ import { Plus, SquarePen, Trash2 } from '@lucide/vue';
 const props = defineProps({
   services: Array,
 });
+
+const emojiCollection = [
+  {
+    name: 'Pencatatan Sipil (Perkawinan, Kelahiran, Kematian, dll.)',
+    items: [
+      { emoji: '💍', label: 'Perkawinan' },
+      { emoji: '👰', label: 'Pengantin' },
+      { emoji: '💒', label: 'Pemberkatan' },
+      { emoji: '💔', label: 'Perceraian' },
+      { emoji: '👶', label: 'Akta Kelahiran' },
+      { emoji: '🍼', label: 'Bayi / Balita' },
+      { emoji: '🕊️', label: 'Akta Kematian' },
+      { emoji: '⚰️', label: 'Pemakaman' },
+      { emoji: '📜', label: 'Kutipan Akta' },
+      { emoji: '⚖️', label: 'Pengesahan Anak' },
+    ]
+  },
+  {
+    name: 'Pendaftaran Penduduk (KTP, KK, KIA, Pindah Datang)',
+    items: [
+      { emoji: '🪪', label: 'KTP-el' },
+      { emoji: '👨‍👩‍👧‍👦', label: 'Kartu Keluarga' },
+      { emoji: '🆔', label: 'IKD (Digital)' },
+      { emoji: '🧒', label: 'KIA (Kartu Anak)' },
+      { emoji: '👤', label: 'Biodata Penduduk' },
+      { emoji: '👥', label: 'Anggota Keluarga' },
+      { emoji: '🏠', label: 'Pindah Domisili' },
+      { emoji: '🚚', label: 'Pindah Datang' },
+      { emoji: '✈️', label: 'Luar Daerah / LN' },
+    ]
+  },
+  {
+    name: 'Dokumen, Formulir & Administrasi',
+    items: [
+      { emoji: '📝', label: 'Formulir / Catatan' },
+      { emoji: '📋', label: 'Persyaratan' },
+      { emoji: '📄', label: 'Surat Keterangan' },
+      { emoji: '📑', label: 'Legalisir Berkas' },
+      { emoji: '📁', label: 'Arsip Berkas' },
+      { emoji: '🗂️', label: 'Map Dokumen' },
+      { emoji: '🖨️', label: 'Cetak Dokumen' },
+      { emoji: '🔍', label: 'Validasi / Cek Data' },
+    ]
+  },
+  {
+    name: 'Layanan & Saluran Publik',
+    items: [
+      { emoji: '🏛️', label: 'Kantor Dukcapil' },
+      { emoji: '🏢', label: 'Kecamatan' },
+      { emoji: '🚐', label: 'Layanan Keliling' },
+      { emoji: '📱', label: 'Layanan Online / WA' },
+      { emoji: '🌐', label: 'Portal SANAI' },
+      { emoji: '⏱️', label: 'Layanan Cepat' },
+      { emoji: '🆓', label: 'Layanan Gratis' },
+      { emoji: 'ℹ️', label: 'Pusat Informasi' },
+      { emoji: '🤝', label: 'Konsultasi Petugas' },
+      { emoji: '🌟', label: 'Inovasi Baru' },
+    ]
+  },
+];
 
 const modal = reactive({
   open: false,

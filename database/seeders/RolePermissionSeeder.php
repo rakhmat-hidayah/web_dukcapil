@@ -38,6 +38,11 @@ class RolePermissionSeeder extends Seeder
             'manage_demographic',
             'manage_publications',
             'manage_complaints',
+            'manage_ppid',
+            'notifications.view',
+            'notifications.manage',
+            'notifications.test',
+            'notifications.logs',
             'view_audit_logs',
             'view_analytics',
         ];
@@ -70,6 +75,11 @@ class RolePermissionSeeder extends Seeder
             'manage_demographic',
             'manage_publications',
             'manage_complaints',
+            'manage_ppid',
+            'notifications.view',
+            'notifications.manage',
+            'notifications.test',
+            'notifications.logs',
             'view_audit_logs',
             'view_analytics',
         ]);

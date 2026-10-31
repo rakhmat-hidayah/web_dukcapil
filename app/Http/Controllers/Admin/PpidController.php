@@ -79,7 +79,7 @@ class PpidController extends Controller
             'subcategory' => 'nullable|string|max:100',
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
-            'file'        => 'nullable|file|mimes:pdf,doc,docx,xlsx,xls|max:20480',
+            'file'        => 'nullable|file|mimes:pdf,doc,docx,xlsx,xls|max:3072',
             'file_url'    => 'nullable|url',
             'year'        => 'nullable|integer|min:2000|max:2099',
             'sort_order'  => 'integer',
@@ -88,10 +88,12 @@ class PpidController extends Controller
 
         if ($request->hasFile('file')) {
             $file   = $request->file('file');
+            $ext    = $file->getClientOriginalExtension();
+            $size   = $file->getSize();
             $path   = \App\Services\MediaStorage::store($file, 'ppid-documents', Str::slug($request->title));
             $validated['file_path'] = $path;
-            $validated['file_type'] = $file->getClientOriginalExtension();
-            $validated['file_size'] = $file->getSize();
+            $validated['file_type'] = $ext;
+            $validated['file_size'] = $size;
         }
         unset($validated['file']);
 
@@ -118,7 +120,7 @@ class PpidController extends Controller
             'subcategory' => 'nullable|string|max:100',
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
-            'file'        => 'nullable|file|mimes:pdf,doc,docx,xlsx,xls|max:20480',
+            'file'        => 'nullable|file|mimes:pdf,doc,docx,xlsx,xls|max:3072',
             'file_url'    => 'nullable|url',
             'year'        => 'nullable|integer|min:2000|max:2099',
             'sort_order'  => 'integer',
@@ -133,10 +135,12 @@ class PpidController extends Controller
         } elseif ($request->hasFile('file')) {
             if ($document->file_path) \App\Services\MediaStorage::delete($document->file_path);
             $file   = $request->file('file');
+            $ext    = $file->getClientOriginalExtension();
+            $size   = $file->getSize();
             $path   = \App\Services\MediaStorage::store($file, 'ppid-documents', Str::slug($request->title));
             $validated['file_path'] = $path;
-            $validated['file_type'] = $file->getClientOriginalExtension();
-            $validated['file_size'] = $file->getSize();
+            $validated['file_type'] = $ext;
+            $validated['file_size'] = $size;
         }
         unset($validated['file']);
 

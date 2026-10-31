@@ -74,20 +74,23 @@
             </p>
           </div>
 
-          <!-- Document stats & temporary signed download url -->
+          <!-- Document stats & pre-flight stream download -->
           <div class="border-t border-gray-50 dark:border-zinc-800 pt-4 flex justify-between items-center text-[10px] text-gray-400 font-semibold">
             <div class="flex flex-col gap-0.5">
-              <span>Format: <strong class="uppercase text-primary-500">{{ doc.file_type }}</strong> ({{ formatBytes(doc.file_size) }})</span>
+              <span>Format: <strong class="uppercase text-primary-500">{{ doc.file_type }}</strong> ({{ doc.file_size_human || formatBytes(doc.file_size) }})</span>
               <span>Didownload: {{ doc.download_count || 0 }} kali</span>
             </div>
             
-            <a 
-              :href="doc.download_url" 
-              class="flex items-center gap-1 px-3.5 py-2 bg-primary-600 hover:bg-primary-500 text-white text-[10px] font-black rounded-xl shadow shadow-primary-500/10 active:scale-95 transition"
+            <button 
+              type="button"
+              @click="handlePublicDownload(doc)"
+              :disabled="downloadingDocId === doc.id"
+              class="flex items-center gap-1.5 px-3.5 py-2 bg-primary-600 hover:bg-primary-500 text-white text-[10px] font-black rounded-xl shadow shadow-primary-500/10 active:scale-95 transition disabled:opacity-50"
             >
-              <FileDown class="w-3.5 h-3.5" />
-              Unduh
-            </a>
+              <FileDown v-if="downloadingDocId !== doc.id" class="w-3.5 h-3.5" />
+              <Loader2 v-else class="w-3.5 h-3.5 animate-spin" />
+              <span>{{ downloadingDocId === doc.id ? 'Memeriksa...' : 'Unduh' }}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -110,6 +113,29 @@
         />
       </div>
     </div>
+
+    <!-- PRE-FLIGHT ERROR ALERT MODAL -->
+    <transition name="fade">
+      <div v-if="downloadErrorModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl w-full max-w-sm shadow-2xl p-6 text-left relative space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto">
+            <AlertTriangle class="w-6 h-6" />
+          </div>
+          <div class="text-center space-y-1">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-zinc-100">Unduhan Tidak Dapat Diproses</h3>
+            <p class="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
+              {{ downloadErrorData?.reason_text || 'Dokumen tidak dapat diunduh saat ini.' }}
+            </p>
+          </div>
+          <button 
+            @click="downloadErrorModal = false"
+            class="w-full py-2.5 bg-gray-900 dark:bg-zinc-800 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </transition>
   </PublicLayout>
 </template>
 
@@ -117,7 +143,8 @@
 import { ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
-import { Search, FileDown } from '@lucide/vue';
+import { Search, FileDown, Loader2, AlertTriangle } from '@lucide/vue';
+import axios from 'axios';
 
 const props = defineProps({
   downloads: Object,
@@ -128,6 +155,10 @@ const props = defineProps({
 const search = ref(props.filters.search || '');
 const category = ref(props.filters.category || '');
 
+const downloadingDocId = ref(null);
+const downloadErrorModal = ref(false);
+const downloadErrorData = ref(null);
+
 const applyFilters = () => {
   router.get(route('public.downloads.index'), {
     search: search.value,
@@ -137,8 +168,29 @@ const applyFilters = () => {
   });
 };
 
+const handlePublicDownload = async (doc) => {
+  downloadingDocId.value = doc.id;
+  try {
+    const checkUrl = doc.check_url || route('public.downloads.check', doc.id);
+    const res = await axios.get(checkUrl);
+    if (res.data && res.data.allowed) {
+      window.location.href = doc.download_url || route('public.downloads.stream', doc.id);
+    } else {
+      downloadErrorData.value = res.data;
+      downloadErrorModal.value = true;
+    }
+  } catch (err) {
+    downloadErrorData.value = {
+      reason_text: 'Terjadi kendala jaringan saat melakukan verifikasi dokumen.'
+    };
+    downloadErrorModal.value = true;
+  } finally {
+    downloadingDocId.value = null;
+  }
+};
+
 const formatBytes = (bytes) => {
-  if (bytes === 0) return '0 B';
+  if (!bytes || bytes === 0) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));

@@ -5,13 +5,17 @@
 
     RewriteEngine On
 
-    # -----------------------------------------------------------------------
-    # HTTPS Enforcement (Plesk + SSL)
-    # Force all HTTP requests to HTTPS
-    # -----------------------------------------------------------------------
+    # HTTPS Enforcement
+    RewriteCond %{HTTP_HOST} !\.test$ [NC]
+    RewriteCond %{HTTP_HOST} !^localhost [NC]
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
     RewriteCond %{HTTPS} off
     RewriteCond %{HTTP:X-Forwarded-Proto} !https
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # CRITICAL: Map /storage/ → /uploads/ (Apache blocks symlink follow)
+    # This rule has NO RewriteCond so it applies unconditionally before any dir check
+    RewriteRule ^storage/(.+)$ uploads/$1 [L,NC]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -32,9 +36,7 @@
     RewriteRule ^ index.php [L]
 </IfModule>
 
-# -----------------------------------------------------------------------
 # Security: Block access to sensitive files
-# -----------------------------------------------------------------------
 <FilesMatch "^\.">
     Order allow,deny
     Deny from all
@@ -48,106 +50,14 @@
 # Prevent directory listing
 Options -Indexes
 
-# -----------------------------------------------------------------------
-# Performance: Browser Caching (Plesk Apache)
-# -----------------------------------------------------------------------
-<IfModule mod_expires.c>
-    ExpiresActive On
-
-    # HTML - no cache (dynamic)
-    ExpiresByType text/html                 "access plus 0 seconds"
-    ExpiresByType application/json          "access plus 0 seconds"
-
-    # Fonts
-    ExpiresByType font/woff                 "access plus 1 year"
-    ExpiresByType font/woff2                "access plus 1 year"
-    ExpiresByType application/font-woff     "access plus 1 year"
-    ExpiresByType application/font-woff2    "access plus 1 year"
-    ExpiresByType application/vnd.ms-fontobject "access plus 1 year"
-    ExpiresByType font/ttf                  "access plus 1 year"
-    ExpiresByType font/eot                  "access plus 1 year"
-
-    # CSS & JavaScript (Vite assets have content-hash — safe to cache long)
-    ExpiresByType text/css                  "access plus 1 year"
-    ExpiresByType application/javascript    "access plus 1 year"
-    ExpiresByType text/javascript           "access plus 1 year"
-
-    # Images
-    ExpiresByType image/png                 "access plus 6 months"
-    ExpiresByType image/jpg                 "access plus 6 months"
-    ExpiresByType image/jpeg                "access plus 6 months"
-    ExpiresByType image/gif                 "access plus 6 months"
-    ExpiresByType image/svg+xml             "access plus 6 months"
-    ExpiresByType image/webp                "access plus 6 months"
-    ExpiresByType image/x-icon              "access plus 1 year"
-    ExpiresByType image/ico                 "access plus 1 year"
-
-    # Documents (PDFs served from /storage are user-uploaded, shorter cache)
-    ExpiresByType application/pdf           "access plus 1 week"
+# PHP Upload Limits Override for Plesk
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 64M
+    php_value memory_limit 256M
 </IfModule>
-
-# -----------------------------------------------------------------------
-# Performance: Gzip Compression (mod_deflate)
-# -----------------------------------------------------------------------
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html
-    AddOutputFilterByType DEFLATE text/plain
-    AddOutputFilterByType DEFLATE text/xml
-    AddOutputFilterByType DEFLATE text/css
-    AddOutputFilterByType DEFLATE text/javascript
-    AddOutputFilterByType DEFLATE application/javascript
-    AddOutputFilterByType DEFLATE application/x-javascript
-    AddOutputFilterByType DEFLATE application/json
-    AddOutputFilterByType DEFLATE application/xml
-    AddOutputFilterByType DEFLATE application/xhtml+xml
-    AddOutputFilterByType DEFLATE application/rss+xml
-    AddOutputFilterByType DEFLATE application/atom_xml
-    AddOutputFilterByType DEFLATE image/svg+xml
-    AddOutputFilterByType DEFLATE font/woff
-    AddOutputFilterByType DEFLATE font/woff2
-    AddOutputFilterByType DEFLATE font/ttf
-
-    # Remove browser bugs (no longer needed for modern browsers)
-    BrowserMatch ^Mozilla/4 gzip-only-text/html
-    BrowserMatch ^Mozilla/4\.0[678] no-gzip
-    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
-    Header append Vary User-Agent
+<IfModule mod_php.c>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 64M
+    php_value memory_limit 256M
 </IfModule>
-
-# -----------------------------------------------------------------------
-# Performance: Cache-Control Headers for Vite Hashed Assets
-# -----------------------------------------------------------------------
-<IfModule mod_headers.c>
-    # Vite build assets (content-hashed filenames) — immutable cache
-    <FilesMatch "\.(js|css)$">
-        Header set Cache-Control "public, max-age=31536000, immutable"
-    </FilesMatch>
-
-    # Fonts — long cache
-    <FilesMatch "\.(woff|woff2|ttf|eot)$">
-        Header set Cache-Control "public, max-age=31536000, immutable"
-    </FilesMatch>
-
-    # Images — 6 months
-    <FilesMatch "\.(ico|png|jpg|jpeg|gif|svg|webp)$">
-        Header set Cache-Control "public, max-age=15552000"
-    </FilesMatch>
-
-    # PDFs from storage — 1 week
-    <FilesMatch "\.pdf$">
-        Header set Cache-Control "public, max-age=604800"
-    </FilesMatch>
-
-    # X-Robots-Tag: prevent indexing of admin panel even if bot ignores robots.txt
-    <If "%{REQUEST_URI} =~ m|^/admin|">
-        Header set X-Robots-Tag "noindex, nofollow"
-    </If>
-</IfModule>
-
-# -----------------------------------------------------------------------
-# ETags (disable for Nginx+Apache reverse proxy in Plesk)
-# -----------------------------------------------------------------------
-<IfModule mod_headers.c>
-    Header unset ETag
-</IfModule>
-FileETag None

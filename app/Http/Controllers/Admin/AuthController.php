@@ -140,9 +140,8 @@ class AuthController extends Controller
         }
 
         // 7. TWO-FACTOR AUTHENTICATION CHECK
-        $requires2fa = $user->hasTwoFactorEnabled() || $user->requiresTwoFactorByRole();
-
-        if ($requires2fa && config('two-factor.enabled', true)) {
+        // Challenge OTP only if user has already activated 2FA
+        if ($user->hasTwoFactorEnabled() && config('two-factor.enabled', true)) {
             // Save pending login state in session
             session([
                 'pending_2fa_user_id'  => $user->id,

@@ -166,6 +166,56 @@
         </div>
       </div>
 
+      <!-- Antrian Online KTP-el Dedicated Promotional Card -->
+      <div 
+        class="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-teal-950 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 shadow-xl shadow-teal-950/20 border border-teal-800/40 group"
+      >
+        <!-- Background Decorative Ambient Overlay -->
+        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-teal-500/20 transition duration-500"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <!-- Left details & typography -->
+          <div class="space-y-3 max-w-2xl text-left">
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider rounded-lg shadow-sm flex items-center gap-1">
+                <Ticket class="w-3.5 h-3.5" />
+                Sistem Antrian &amp; Pra-Verifikasi
+              </span>
+              <span class="px-2.5 py-1 bg-white/10 text-white text-[10px] font-bold rounded-lg backdrop-blur-sm">
+                Pelayanan KTP-el
+              </span>
+            </div>
+
+            <h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
+              Antrian Online KTP-el Disdukcapil Dompu
+            </h3>
+
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+              Daftar antrian cetak KTP-el hilang, rusak, perubahan elemen data, dan perekaman baru secara online. Unggah foto berkas langsung dari kamera HP, diverifikasi sebelum datang ke kantor, tanpa antre panjang.
+            </p>
+          </div>
+
+          <!-- Right Action Buttons -->
+          <div class="flex flex-wrap items-center gap-3 shrink-0 w-full md:w-auto">
+            <Link 
+              href="/layanan/antrian/daftar" 
+              class="px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 text-xs sm:text-sm font-black rounded-2xl shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 flex-1 md:flex-initial"
+            >
+              <Ticket class="w-4 h-4 text-slate-950" />
+              <span>Daftar Antrian Online</span>
+              <ArrowRight class="w-4 h-4 text-slate-950" />
+            </Link>
+
+            <Link 
+              href="/layanan/antrian" 
+              class="px-5 py-3.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs sm:text-sm font-bold rounded-2xl backdrop-blur-md transition flex items-center justify-center gap-1.5 flex-1 md:flex-initial"
+            >
+              <span>Cek Status &amp; Kuota</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
       <!-- Public Statistics highlights panel -->
       <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 shadow-lg shadow-gray-100/70 dark:shadow-none space-y-4">
         <!-- Data Period Header Badge -->
@@ -307,12 +357,17 @@
                 :href="route('public.news.show', item.slug)"
                 class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden flex flex-col group hover:shadow-md hover:-translate-y-0.5 transition duration-200"
               >
-                <div class="h-32 bg-gray-100 dark:bg-zinc-950 overflow-hidden flex items-center justify-center">
+                <div class="h-32 bg-gradient-to-br from-primary-500/10 via-indigo-500/5 to-amber-500/10 dark:bg-zinc-950 overflow-hidden flex items-center justify-center relative">
                   <img 
-                    :src="item.thumbnail ? `/storage/${item.thumbnail}` : 'https://images.unsplash.com/photo-1495020689067-958852a6565d?auto=format&fit=crop&w=400&q=80'" 
+                    v-if="item.thumbnail"
+                    :src="storageUrl(item.thumbnail)" 
                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    alt="Thumbnail" 
+                    :alt="item.title" 
                   />
+                  <div v-else class="flex flex-col items-center justify-center space-y-1 text-gray-400 dark:text-zinc-600">
+                    <span class="text-2xl">📰</span>
+                    <span class="text-[9px] font-bold font-mono tracking-wider uppercase text-gray-400 dark:text-zinc-500">Dukcapil News</span>
+                  </div>
                 </div>
                 <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
                   <div>
@@ -566,7 +621,8 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import InformasiLayananWidget from '@/Components/InformasiLayananWidget.vue';
-import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar, Download, FileText, ArrowRight } from '@lucide/vue';
+import { storageUrl } from '@/utils/storage';
+import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar, Download, FileText, ArrowRight, Ticket } from '@lucide/vue';
 
 const props = defineProps({
   banners: Array,

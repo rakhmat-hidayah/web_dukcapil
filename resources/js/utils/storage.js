@@ -19,11 +19,17 @@
  */
 export function storageUrl(path, fallback = null) {
   if (!path) return fallback
-  const p = String(path).trim()
+  let p = String(path).trim()
   if (!p) return fallback
 
-  // Return full HTTP/HTTPS or /images/ as is
-  if (p.startsWith('http://') || p.startsWith('https://')) return p
+  // Convert full HTTP/HTTPS containing /storage/ to /uploads/
+  if (p.startsWith('http://') || p.startsWith('https://')) {
+    if (p.includes('/storage/')) {
+      return p.replace('/storage/', '/uploads/')
+    }
+    return p
+  }
+
   if (p.startsWith('/images/')) return p
 
   // Convert legacy /storage/ or storage/ to /uploads/

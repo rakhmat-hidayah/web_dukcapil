@@ -19,8 +19,8 @@
       <!-- Sidebar Header -->
       <div class="h-16 flex items-center justify-between px-4 border-b border-gray-100 dark:border-zinc-800 overflow-hidden">
         <div class="flex items-center gap-2.5 px-2 py-1 rounded-xl dark:bg-white/95 dark:shadow-sm">
-          <img src="/img/logo-dompu.png" alt="Logo Dompu" class="h-10 w-auto object-contain shrink-0" />
-          <img v-if="sidebarOpen" src="/img/logo-dukcapil.png" alt="Logo Dukcapil" class="h-9 w-auto object-contain shrink-0" />
+          <img src="/img/logo-dompu.png" @error="$event.target.src = '/images/logo-dompu.png'" alt="Logo Dompu" class="h-10 w-auto object-contain shrink-0" />
+          <img v-if="sidebarOpen" src="/img/logo-dukcapil.png" @error="$event.target.src = '/images/logo-dukcapil.png'" alt="Logo Dukcapil" class="h-9 w-auto object-contain shrink-0" />
         </div>
         <button 
           @click="toggleSidebar"
@@ -42,7 +42,7 @@
             <Link 
               v-for="(item, iIdx) in group.items" 
               :key="iIdx"
-              :href="item.route ? route(item.route) : '#'"
+              :href="safeRoute(item.route)"
               preserve-scroll
               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group"
               :class="[
@@ -63,19 +63,25 @@
 
       <!-- Sidebar Footer -->
       <div class="p-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between gap-3 overflow-hidden">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-9 h-9 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold shrink-0">
+        <Link
+          :href="route('admin.security.index')"
+          class="flex items-center gap-3 min-w-0 group hover:opacity-80 transition cursor-pointer"
+          title="Kelola Keamanan Akun & 2FA"
+        >
+          <div class="w-9 h-9 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold shrink-0 shadow-sm group-hover:scale-105 transition-transform">
             {{ $page.props.auth.user ? $page.props.auth.user.name.charAt(0) : 'A' }}
           </div>
           <div v-if="sidebarOpen" class="min-w-0 text-left">
-            <p class="text-xs font-semibold text-gray-800 dark:text-zinc-200 truncate">
+            <p class="text-xs font-semibold text-gray-800 dark:text-zinc-200 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
               {{ $page.props.auth.user ? $page.props.auth.user.name : 'Administrator' }}
             </p>
-            <p class="text-[10px] text-gray-400 dark:text-zinc-500 truncate">
-              {{ $page.props.auth.roles[0] || 'Operator' }}
+            <p class="text-[10px] text-gray-400 dark:text-zinc-500 truncate flex items-center gap-1">
+              <span>{{ $page.props.auth.roles[0] || 'Operator' }}</span>
+              <span class="text-zinc-300 dark:text-zinc-700">•</span>
+              <span class="text-blue-500 font-semibold underline">2FA</span>
             </p>
           </div>
-        </div>
+        </Link>
         <Link 
           v-if="sidebarOpen"
           :href="route('admin.logout')" 
@@ -222,7 +228,8 @@ import {
   LayoutDashboard, FileText, BellRing, ClipboardList, 
   FolderLock, Image, LibraryBig, Milestone, ShieldAlert, Globe, MapPin,
   Settings, UsersRound, Users, Network, Palette, BarChart3, Radio, Activity, Sliders,
-  Map, BarChart2, DatabaseZap, MessageSquareWarning, ShieldCheck, ArrowDownUp, HelpCircle
+  Map, BarChart2, DatabaseZap, MessageSquareWarning, ShieldCheck, ArrowDownUp, HelpCircle, Bell,
+  FileCheck, CalendarDays, UserCheck
 } from '@lucide/vue';
 
 const page = usePage();
@@ -352,6 +359,17 @@ const menuGroups = [
     ]
   },
   {
+    title: 'Antrian Online KTP-el',
+    items: [
+      { label: 'Dashboard Antrian', route: 'admin.queue.dashboard', icon: LayoutDashboard },
+      { label: 'Verifikasi Dokumen', route: 'admin.queue.applications.index', icon: FileCheck },
+      { label: 'Meja Loket & Fisik', route: 'admin.queue.counter.index', icon: UserCheck },
+      { label: 'Jenis Layanan KTP-el', route: 'admin.queue.service-types.index', icon: FileText },
+      { label: 'Jadwal & Kuota', route: 'admin.queue.schedules.index', icon: CalendarDays },
+      { label: 'Pengaturan Antrian', route: 'admin.queue.settings.index', icon: Settings },
+    ]
+  },
+  {
     title: 'Layanan PPID',
     items: [
       { label: 'Halaman Statis PPID', route: 'admin.ppid.pages.index', icon: FileText },
@@ -368,9 +386,22 @@ const menuGroups = [
     ]
   },
   {
-    title: 'System Settings',
+    title: 'Pengaturan Akun',
     items: [
       { label: 'Keamanan Akun (2FA)', route: 'admin.security.index', icon: ShieldCheck },
+    ]
+  },
+  {
+    title: 'Analitik & Visitor',
+    items: [
+      { label: 'Visitor Analytics', route: 'admin.visitor-analytics.index', icon: Activity },
+      { label: 'Retention & Cleanup', route: 'admin.visitor-analytics-retention.index', icon: DatabaseZap },
+    ]
+  },
+  {
+    title: 'System Settings',
+    items: [
+      { label: 'Notifikasi & Integrasi', route: 'admin.notification-settings.index', icon: Bell },
       { label: 'Kontak & Lokasi Kantor', route: 'admin.office-contact.index', icon: MapPin },
       { label: 'User & Roles', route: 'admin.users.index', icon: UsersRound },
       { label: 'Layanan SANAI (CMS)', route: 'admin.external-services.index', icon: Globe },
@@ -389,15 +420,20 @@ const isWebsiteAdmin = computed(() => userRoles.value.includes('Website Administ
 const isContentEditor = computed(() => userRoles.value.includes('Content Editor'));
 const isComplaintOfficer = computed(() => userRoles.value.includes('Complaint Officer'));
 const isPpidAdmin = computed(() => userRoles.value.includes('PPID Admin'));
+const isQueueOfficer = computed(() => userRoles.value.includes('Queue Officer'));
+const isQueueVerifier = computed(() => userRoles.value.includes('Queue Verifier'));
 
 const filteredMenuGroups = computed(() => {
   if (isSuperAdmin.value) {
     return menuGroups;
   }
 
-  // Website Administrator sees EVERYTHING except System Settings
+  // Website Administrator sees EVERYTHING except User & Roles management
   if (isWebsiteAdmin.value) {
-    return menuGroups.filter(group => group.title !== 'System Settings');
+    return menuGroups.map(group => ({
+      ...group,
+      items: group.items.filter(item => item.route !== 'admin.users.index')
+    })).filter(group => group.items.length > 0);
   }
 
   return menuGroups.map(group => {
@@ -443,6 +479,20 @@ const filteredMenuGroups = computed(() => {
         }
       }
 
+      // Queue Officer allowed items
+      if (isQueueOfficer.value) {
+        if (r && r.startsWith('admin.queue.')) {
+          return true;
+        }
+      }
+
+      // Queue Verifier allowed items
+      if (isQueueVerifier.value) {
+        if (['admin.queue.dashboard', 'admin.queue.applications.index', 'admin.queue.applications.show', 'admin.queue.counter.index'].includes(r)) {
+          return true;
+        }
+      }
+
       return false;
     });
 
@@ -456,9 +506,22 @@ const activePageName = computed(() => {
   return 'Admin';
 });
 
+const safeRoute = (name, params) => {
+  if (!name) return '#';
+  try {
+    return route().has(name) ? route(name, params) : '#';
+  } catch (e) {
+    return '#';
+  }
+};
+
 const isActiveRoute = (routeName) => {
   if (!routeName) return false;
-  return route().current(routeName);
+  try {
+    return route().has(routeName) ? route().current(routeName) : false;
+  } catch (e) {
+    return false;
+  }
 };
 
 // Sidebar scroll position preservation

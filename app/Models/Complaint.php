@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Complaint extends Model
@@ -60,6 +61,16 @@ class Complaint extends Model
         return $this->hasMany(ComplaintReply::class)
             ->where('is_visible_to_submitter', true)
             ->orderBy('created_at');
+    }
+
+    public function notificationLogs(): HasMany
+    {
+        return $this->hasMany(ComplaintNotificationLog::class)->orderBy('created_at', 'desc');
+    }
+
+    public function latestNotificationLog(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ComplaintNotificationLog::class)->latestOfMany();
     }
 
     public function getStatusLabelAttribute(): string

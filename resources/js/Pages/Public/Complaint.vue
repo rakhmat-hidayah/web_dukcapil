@@ -74,6 +74,7 @@
                   v-model="form.submitter_name" 
                   type="text" 
                   :disabled="form.is_anonymous"
+                  @input="e => form.submitter_name = e.target.value.replace(/[^a-zA-Z\s\.\']/g, '')"
                   placeholder="Nama sesuai KTP"
                   class="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" 
                   :class="errors.submitter_name ? 'border-red-400 bg-red-50/20' : 'border-gray-200 dark:border-zinc-700'"
@@ -85,7 +86,10 @@
                 <input 
                   v-model="form.submitter_phone" 
                   type="text" 
-                  placeholder="628xx..." 
+                  inputmode="numeric"
+                  maxlength="13"
+                  @input="e => form.submitter_phone = e.target.value.replace(/[^0-9]/g, '')"
+                  placeholder="08xxxxxxxxxx" 
                   class="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" 
                 />
               </div>
@@ -94,6 +98,7 @@
                 <input 
                   v-model="form.submitter_email" 
                   type="email" 
+                  @input="e => form.submitter_email = e.target.value.replace(/\s+/g, '')"
                   placeholder="email@contoh.com" 
                   class="w-full px-3 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs focus:ring-2 focus:ring-primary-500 focus:outline-none" 
                 />

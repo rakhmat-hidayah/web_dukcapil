@@ -158,8 +158,8 @@
               </p>
 
               <!-- QR Code SVG Render Frame -->
-              <div class="p-4 bg-white border border-gray-200 rounded-2xl text-center shadow-inner inline-block mx-auto max-w-[240px] w-full">
-                <div v-html="setupData.qrCodeSvg" class="w-full h-auto mx-auto select-none"></div>
+              <div class="p-4 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl text-center shadow-inner flex items-center justify-center mx-auto max-w-[240px] w-full min-h-[220px]">
+                <div v-html="setupData.qrCodeSvg" class="w-[190px] h-[190px] sm:w-[200px] sm:h-[200px] mx-auto select-none flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full"></div>
               </div>
 
               <!-- Manual Secret Key Option -->

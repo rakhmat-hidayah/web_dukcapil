@@ -72,7 +72,7 @@
 
           <div class="md:col-span-2">
             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Alamat Kantor</label>
-            <input v-model="form.office_address" type="text" placeholder="Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" />
+            <input v-model="form.office_address" type="text" placeholder="Jl. Soekarno Hatta No. 9, Dompu - NTB 84211" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
         </div>
 
@@ -159,7 +159,7 @@ const form = useForm({
   department: props.official?.department || 'Dinas Kependudukan dan Pencatatan Sipil',
   biography: props.official?.biography || '',
   main_duties: props.official?.main_duties || '',
-  office_address: props.official?.office_address || 'Jl. Bhayangkara No. 01, Dompu',
+  office_address: props.official?.office_address || 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211',
   phone: props.official?.phone || '(0373) 21124',
   show_phone: props.official ? Boolean(props.official.show_phone) : true,
   email: props.official?.email || '',

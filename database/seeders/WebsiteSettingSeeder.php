@@ -46,7 +46,7 @@ class WebsiteSettingSeeder extends Seeder
             ['key' => 'sanai_display_footer', 'value' => '1', 'group' => 'external_services'],
 
             // --- Office Contact & Map Location ---
-            ['key' => 'office_address', 'value' => 'Jl. Bhayangkara No. 01, Kel. Bada, Dompu, NTB 84211', 'group' => 'office_contact'],
+            ['key' => 'office_address', 'value' => 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211', 'group' => 'office_contact'],
             ['key' => 'office_phone', 'value' => '(0373) 21124', 'group' => 'office_contact'],
             ['key' => 'office_email', 'value' => 'dukcapil@dompukab.go.id', 'group' => 'office_contact'],
             ['key' => 'office_work_hours', 'value' => 'Senin - Kamis: 08:00 - 16:00 WITA | Jumat: 08:00 - 11:30 WITA', 'group' => 'office_contact'],

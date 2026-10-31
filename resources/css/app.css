@@ -77,9 +77,25 @@
         letter-spacing: -0.01em;
     }
 
-    input, select, textarea, button {
-        font-family: inherit;
+    /* Bulletproof SVG icon size lock to prevent unstyled icons from exploding to 100% viewport */
+    svg {
+        display: inline-block;
+        vertical-align: middle;
+        width: 1.25rem;
+        height: 1.25rem;
+        max-width: 100%;
+        max-height: 100%;
     }
+
+    svg.w-3, [class*="w-3"] > svg { width: 0.75rem !important; height: 0.75rem !important; }
+    svg.w-3\.5, [class*="w-3.5"] > svg { width: 0.875rem !important; height: 0.875rem !important; }
+    svg.w-4, [class*="w-4"] > svg { width: 1rem !important; height: 1rem !important; }
+    svg.w-5, [class*="w-5"] > svg { width: 1.25rem !important; height: 1.25rem !important; }
+    svg.w-6, [class*="w-6"] > svg { width: 1.5rem !important; height: 1.5rem !important; }
+    svg.w-8, [class*="w-8"] > svg { width: 2rem !important; height: 2rem !important; }
+    svg.w-10, [class*="w-10"] > svg { width: 2.5rem !important; height: 2.5rem !important; }
+    svg.w-12, [class*="w-12"] > svg { width: 3rem !important; height: 3rem !important; }
+    svg.w-16, [class*="w-16"] > svg { width: 4rem !important; height: 4rem !important; }
 }
 
 /* Custom transitions and utility styles */
@@ -121,4 +137,72 @@
 }
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(156, 163, 175, 0.7);
+}
+
+/* Universal Article Typography & WYSIWYG Styling (100% Match with Tiptap Editor) */
+article blockquote,
+.prose blockquote {
+  border-left: 4px solid #0284c7 !important;
+  padding-left: 1.25rem !important;
+  padding-right: 1.25rem !important;
+  margin-top: 1.25rem !important;
+  margin-bottom: 1.25rem !important;
+  font-style: italic !important;
+  color: #334155 !important;
+  background-color: rgba(2, 132, 199, 0.06) !important;
+  padding-top: 0.85rem !important;
+  padding-bottom: 0.85rem !important;
+  border-radius: 0 0.75rem 0.75rem 0 !important;
+  quotes: none !important;
+}
+
+.dark article blockquote,
+.dark .prose blockquote {
+  border-left-color: #38bdf8 !important;
+  color: #e2e8f0 !important;
+  background-color: rgba(56, 189, 248, 0.1) !important;
+}
+
+article ul, .prose ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+article ol, .prose ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+article li, .prose li {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Callout Box Utilities */
+.callout-info, [data-callout="info"] {
+  border-left: 4px solid #0284c7 !important;
+  background-color: rgba(2, 132, 199, 0.08) !important;
+  padding: 1rem 1.25rem !important;
+  border-radius: 0 0.75rem 0.75rem 0 !important;
+  margin: 1.25rem 0 !important;
+}
+
+.callout-warning, [data-callout="warning"] {
+  border-left: 4px solid #d97706 !important;
+  background-color: rgba(217, 119, 6, 0.08) !important;
+  padding: 1rem 1.25rem !important;
+  border-radius: 0 0.75rem 0.75rem 0 !important;
+  margin: 1.25rem 0 !important;
+}
+
+.callout-success, [data-callout="success"] {
+  border-left: 4px solid #059669 !important;
+  background-color: rgba(5, 150, 105, 0.08) !important;
+  padding: 1rem 1.25rem !important;
+  border-radius: 0 0.75rem 0.75rem 0 !important;
+  margin: 1.25rem 0 !important;
 }

@@ -58,6 +58,9 @@
       <button type="button" @click="editor?.chain().focus().setTextAlign('right').run()" :class="{ 'is-active': editor?.isActive({ textAlign: 'right' }) }" class="toolbar-btn" title="Rata Kanan">
         <AlignRight class="w-3.5 h-3.5" />
       </button>
+      <button type="button" @click="editor?.chain().focus().setTextAlign('justify').run()" :class="{ 'is-active': editor?.isActive({ textAlign: 'justify' }) }" class="toolbar-btn" title="Rata Kiri-Kanan (Justify)">
+        <AlignJustify class="w-3.5 h-3.5" />
+      </button>
 
       <div class="h-4 w-px bg-gray-300 dark:bg-zinc-700 mx-1"></div>
 
@@ -196,7 +199,7 @@ import { TextAlign } from '@tiptap/extension-text-align';
 import axios from 'axios';
 import { 
   Undo, Redo, Bold, Italic, Underline as UnderlineIcon, Strikethrough, Highlighter,
-  AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Quote, Info, AlertTriangle, CheckCircle2,
+  AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Quote, Info, AlertTriangle, CheckCircle2,
   Table as TableIcon, Image as ImageIcon, Video, Video as CloudVideo, Upload, Link as LinkIcon, Code, Maximize2, Minimize2, Sparkles
 } from '@lucide/vue';
 
@@ -219,13 +222,21 @@ const handleFileUpload = async (event) => {
   if (!file) return;
 
   isUploading.value = true;
-  const formData = new FormData();
-  formData.append('image', file);
 
   try {
-    const response = await axios.post('/admin/news/upload-image', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+    const base64String = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
     });
+
+    const payload = {
+      image_base64: base64String,
+      image_name: file.name,
+    };
+
+    const response = await axios.post('/admin/news/upload-image', payload);
 
     if (response.data?.url) {
       editor.value.chain().focus().setImage({ src: response.data.url }).run();
@@ -354,7 +365,45 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
-/* Tiptap Custom Styles */
+/* Tiptap List & Blockquote Styles */
+.tiptap-rich-editor .ProseMirror ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.tiptap-rich-editor .ProseMirror ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.tiptap-rich-editor .ProseMirror li {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.tiptap-rich-editor .ProseMirror blockquote {
+  border-left: 4px solid #0284c7 !important;
+  padding-left: 1rem !important;
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+  font-style: italic !important;
+  color: #374151 !important;
+  background-color: rgba(2, 132, 199, 0.05) !important;
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+  border-radius: 0 0.5rem 0.5rem 0 !important;
+}
+
+.dark .tiptap-rich-editor .ProseMirror blockquote {
+  border-left-color: #38bdf8 !important;
+  color: #d1d5db !important;
+  background-color: rgba(56, 189, 248, 0.1) !important;
+}
+
 .tiptap-rich-editor .ProseMirror p.is-editor-empty:first-child::before {
   color: #a1a1aa;
   content: attr(data-placeholder);
@@ -388,6 +437,30 @@ onBeforeUnmount(() => {
   background-color: #f9fafb;
   font-weight: 700;
 }
+/* Tiptap Auto-Resize & Responsive Image Styling */
+.tiptap-rich-editor .ProseMirror img {
+  display: block;
+  max-width: 100% !important;
+  max-height: 480px !important; /* Auto-scale giant vertical images to fit neatly inside editor */
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  margin: 1rem auto !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.tiptap-rich-editor .ProseMirror img:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.14), 0 8px 10px -6px rgba(0, 0, 0, 0.08) !important;
+}
+
+.tiptap-rich-editor .ProseMirror img.ProseMirror-selectednode {
+  outline: 3px solid #0284c7 !important;
+  outline-offset: 3px !important;
+}
+
 .dark .tiptap-rich-editor th, .dark .tiptap-rich-editor td {
   border-color: #27272a;
 }

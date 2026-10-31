@@ -71,7 +71,7 @@
                   {{ complaint.attachment_name || 'lampiran_dokumen' }}
                 </span>
                 <a 
-                  :href="`/storage/${complaint.attachment_path}`" 
+                  :href="`/uploads/${(complaint.attachment_path||'').replace(/^\/?(storage|uploads)\//, '')}`" 
                   target="_blank" 
                   class="px-3 py-1 bg-primary-600 hover:bg-primary-500 text-white text-[10px] font-bold rounded-lg transition"
                 >

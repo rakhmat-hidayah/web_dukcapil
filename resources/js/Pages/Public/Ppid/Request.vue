@@ -125,6 +125,7 @@
                     <input 
                       v-model="form.requester_name" 
                       type="text" 
+                      @input="e => form.requester_name = e.target.value.replace(/[^a-zA-Z\s\.\']/g, '')"
                       placeholder="Nama sesuai KTP" 
                       class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" 
                       :class="(clientErrors.requester_name || form.errors.requester_name) ? 'border-rose-400 bg-rose-50/20' : 'border-gray-200 dark:border-zinc-700'"
@@ -160,6 +161,7 @@
                     <input 
                       v-model="form.requester_email" 
                       type="email" 
+                      @input="e => form.requester_email = e.target.value.replace(/\s+/g, '')"
                       placeholder="nama@email.com" 
                       class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800/80 border rounded-xl text-xs text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-primary-500 outline-none" 
                       :class="(clientErrors.requester_email || form.errors.requester_email) ? 'border-rose-400 bg-rose-50/20' : 'border-gray-200 dark:border-zinc-700'"
