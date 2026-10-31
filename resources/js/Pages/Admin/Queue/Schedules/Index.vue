@@ -71,7 +71,7 @@
                     {{ formatDate(item.schedule_date) }}
                   </div>
                   <div class="text-[10px] text-slate-400 font-mono mt-0.5">
-                    {{ item.schedule_date }}
+                    {{ formatRawDate(item.schedule_date) }}
                   </div>
                 </td>
 
@@ -441,14 +441,48 @@ const getServiceName = (serviceTypeId) => {
   return props.services.find(s => s.id === serviceTypeId)?.name || 'Layanan'
 }
 
+const parseDateSafe = (dateString) => {
+  if (!dateString) return null
+  // If ISO 8601 string containing 'T' (e.g. 2026-11-01T16:00:00.000000Z)
+  if (typeof dateString === 'string' && dateString.includes('T')) {
+    const d = new Date(dateString)
+    if (!isNaN(d.getTime())) return d
+  }
+  // If YYYY-MM-DD
+  const clean = typeof dateString === 'string' ? dateString.split('T')[0].trim() : String(dateString)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+    const [y, m, day] = clean.split('-').map(Number)
+    return new Date(y, m - 1, day)
+  }
+  const fallback = new Date(dateString)
+  return isNaN(fallback.getTime()) ? null : fallback
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return '-'
-  const d = new Date(dateString + 'T00:00:00')
-  return d.toLocaleDateString('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
+  try {
+    const d = parseDateSafe(dateString)
+    if (!d) return String(dateString)
+    return d.toLocaleDateString('id-ID', {
+      timeZone: 'Asia/Makassar',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
+  } catch (e) {
+    return String(dateString)
+  }
+}
+
+const formatRawDate = (dateString) => {
+  if (!dateString) return '-'
+  try {
+    const d = parseDateSafe(dateString)
+    if (!d) return String(dateString).substring(0, 10)
+    return d.toLocaleDateString('en-CA', { timeZone: 'Asia/Makassar' }) // returns YYYY-MM-DD in local timezone
+  } catch (e) {
+    return String(dateString).substring(0, 10)
+  }
 }
 </script>

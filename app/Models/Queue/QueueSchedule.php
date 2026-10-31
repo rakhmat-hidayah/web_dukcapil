@@ -19,7 +19,7 @@ class QueueSchedule extends Model
     ];
 
     protected $casts = [
-        'schedule_date' => 'date',
+        'schedule_date' => 'date:Y-m-d',
         'is_holiday' => 'boolean',
         'is_open' => 'boolean',
         'total_quota' => 'integer',

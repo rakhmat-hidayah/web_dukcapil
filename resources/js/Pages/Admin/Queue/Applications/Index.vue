@@ -303,12 +303,39 @@ const formatDate = (dateString) => {
 
 const formatScheduleDate = (dateString) => {
   if (!dateString) return '-'
-  const d = new Date(dateString + 'T00:00:00')
-  return d.toLocaleDateString('id-ID', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
+  try {
+    if (typeof dateString === 'string' && dateString.includes('T')) {
+      const d = new Date(dateString)
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString('id-ID', {
+          timeZone: 'Asia/Makassar',
+          weekday: 'short',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        })
+      }
+    }
+    const clean = typeof dateString === 'string' ? dateString.split('T')[0].trim() : String(dateString)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+      const [y, m, day] = clean.split('-').map(Number)
+      return new Date(y, m - 1, day).toLocaleDateString('id-ID', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    }
+    const fallback = new Date(dateString)
+    return isNaN(fallback.getTime()) ? String(dateString) : fallback.toLocaleDateString('id-ID', {
+      timeZone: 'Asia/Makassar',
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
+  } catch (e) {
+    return String(dateString)
+  }
 }
 </script>
