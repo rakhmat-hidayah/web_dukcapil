@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Queue\ApplicationDocument;
 use App\Models\Queue\QueueApplication;
 use App\Models\Queue\QueueSlot;
+use App\Models\Queue\ServiceDocument;
 use App\Models\Queue\ServiceType;
 use App\Services\Queue\QueueApplicationService;
 use App\Services\Queue\QueueDocumentStorage;
@@ -38,6 +39,8 @@ class QueueApplicationController extends Controller
             } catch (\Throwable $e) {
                 \Log::warning('Queue auto-seed error: ' . $e->getMessage());
             }
+        } else {
+            $this->ensureMandatoryDocumentsExist();
         }
 
         $serviceSlug = $request->query('layanan');
@@ -146,6 +149,8 @@ class QueueApplicationController extends Controller
      */
     public function showDocuments(string $regNumber): Response|RedirectResponse
     {
+        $this->ensureMandatoryDocumentsExist();
+
         $application = QueueApplication::where('reg_number', $regNumber)
             ->with([
                 'serviceType.documents' => fn($q) => $q->orderBy('sort_order'),
@@ -262,5 +267,70 @@ class QueueApplicationController extends Controller
             ->firstOrFail();
 
         return QueueDocumentStorage::serve($doc, true);
+    }
+
+    /**
+     * Ensure mandatory Formulir F-1.02 and F-1.07 Surat Kuasa are present on all active service types.
+     */
+    protected function ensureMandatoryDocumentsExist(): void
+    {
+        try {
+            $downloadUrl = 'https://dukcapil.dompukab.go.id/downloads';
+            $f102Label = 'Formulir F-1.02 (Pendaftaran Peristiwa Kependudukan)';
+            $f107Label = 'Formulir F-1.07 / F.017 (Surat Kuasa dalam Pelayanan Administrasi Kependudukan)';
+
+            $services = ServiceType::all();
+            foreach ($services as $service) {
+                // 1. Ensure Formulir F-1.02 exists as mandatory for all services
+                $f102Doc = ServiceDocument::where('service_type_id', $service->id)
+                    ->where(function ($q) {
+                        $q->where('label', 'like', '%F-1.02%')
+                          ->orWhere('label', 'like', '%F1.02%')
+                          ->orWhere('label', 'like', '%Pendaftaran Peristiwa%');
+                    })
+                    ->first();
+
+                if (!$f102Doc) {
+                    ServiceDocument::create([
+                        'service_type_id'  => $service->id,
+                        'label'            => $f102Label,
+                        'description'      => 'Formulir resmi permohonan pendaftaran peristiwa kependudukan yang telah diisi lengkap dan ditandatangani. Blanko formulir dapat diunduh pada link di bawah.',
+                        'is_required'      => true,
+                        'applicable_to'    => 'all',
+                        'accepted_formats' => 'jpg,jpeg,png,pdf',
+                        'max_size_kb'      => 5120,
+                        'capture_hint'     => 'Foto seluruh lembar Formulir F-1.02 yang telah diisi dan ditandatangani. Pastikan tulisan terbaca jelas dan tidak terpotong.',
+                        'capture_mode'     => 'environment',
+                        'template_url'     => $downloadUrl,
+                        'sort_order'       => 1,
+                    ]);
+                } else {
+                    $f102Doc->update([
+                        'label'        => $f102Label,
+                        'is_required'  => true,
+                        'template_url' => $downloadUrl,
+                    ]);
+                }
+
+                // 2. Update or ensure Surat Kuasa F-1.07 exists for representative if applicable
+                $suratKuasaDoc = ServiceDocument::where('service_type_id', $service->id)
+                    ->where(function ($q) {
+                        $q->where('label', 'like', '%Kuasa%')
+                          ->orWhere('label', 'like', '%F-1.07%')
+                          ->orWhere('label', 'like', '%F.017%');
+                    })
+                    ->first();
+
+                if ($suratKuasaDoc) {
+                    $suratKuasaDoc->update([
+                        'label'        => $f107Label,
+                        'description'  => 'Wajib jika permohonan diwakilkan. Surat Kuasa bermeterai Rp 10.000 yang ditandatangani oleh pemberi dan penerima kuasa. Blanko formulir dapat diunduh pada link di bawah.',
+                        'template_url' => $downloadUrl,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('ensureMandatoryDocumentsExist warning: ' . $e->getMessage());
+        }
     }
 }

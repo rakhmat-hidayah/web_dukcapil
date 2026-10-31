@@ -66,6 +66,24 @@
         <p class="leading-relaxed">{{ uploadedDoc.reviewer_note }}</p>
       </div>
 
+      <!-- Download Template Link if available (Formulir F-1.02 & F-1.07 Surat Kuasa) -->
+      <div v-if="downloadUrl" class="mt-3.5">
+        <a
+          :href="downloadUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-300 dark:hover:border-amber-700 transition shadow-sm group"
+        >
+          <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 group-hover:translate-y-0.5 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          <span>Unduh Blanko {{ downloadFormLabel }}</span>
+          <svg class="w-3.5 h-3.5 text-amber-600/70 dark:text-amber-400/70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </a>
+      </div>
+
       <!-- Capture Hint -->
       <p
         v-if="requirement.capture_hint"
@@ -170,4 +188,29 @@ defineEmits(['open-camera', 'preview', 'delete']);
 
 const isUploaded = computed(() => !!props.uploadedDoc);
 const isRevision = computed(() => props.uploadedDoc && (props.uploadedDoc.status === 'REVISION_REQUIRED' || props.uploadedDoc.status === 'REJECTED'));
+
+const downloadUrl = computed(() => {
+  if (props.requirement.template_url) {
+    return props.requirement.template_url;
+  }
+  const label = (props.requirement.label || '').toLowerCase();
+  if (label.includes('f-1.02') || label.includes('f1.02') || label.includes('pendaftaran peristiwa')) {
+    return 'https://dukcapil.dompukab.go.id/downloads';
+  }
+  if (label.includes('kuasa') || label.includes('f-1.07') || label.includes('f.017')) {
+    return 'https://dukcapil.dompukab.go.id/downloads';
+  }
+  return null;
+});
+
+const downloadFormLabel = computed(() => {
+  const label = (props.requirement.label || '').toLowerCase();
+  if (label.includes('f-1.02') || label.includes('f1.02') || label.includes('pendaftaran peristiwa')) {
+    return 'Formulir F-1.02';
+  }
+  if (label.includes('kuasa') || label.includes('f-1.07') || label.includes('f.017')) {
+    return 'Formulir Surat Kuasa F-1.07';
+  }
+  return 'Formulir Resmi';
+});
 </script>

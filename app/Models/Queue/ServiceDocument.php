@@ -18,6 +18,7 @@ class ServiceDocument extends Model
         'capture_hint',
         'capture_mode',
         'applicable_to',
+        'template_url',
         'sort_order',
     ];
 
@@ -27,7 +28,7 @@ class ServiceDocument extends Model
         'sort_order' => 'integer',
     ];
 
-    protected $appends = ['accepted_formats_array', 'max_size_bytes'];
+    protected $appends = ['accepted_formats_array', 'max_size_bytes', 'template_url'];
 
     public function serviceType()
     {
@@ -37,6 +38,23 @@ class ServiceDocument extends Model
     public function applicationDocuments()
     {
         return $this->hasMany(ApplicationDocument::class, 'service_document_id');
+    }
+
+    public function getTemplateUrlAttribute($value): ?string
+    {
+        if (!empty($value)) {
+            return $value;
+        }
+
+        $label = strtolower($this->label ?? '');
+        if (str_contains($label, 'f-1.02') || str_contains($label, 'f1.02') || str_contains($label, 'pendaftaran peristiwa')) {
+            return 'https://dukcapil.dompukab.go.id/downloads';
+        }
+        if (str_contains($label, 'kuasa') || str_contains($label, 'f-1.07') || str_contains($label, 'f.017')) {
+            return 'https://dukcapil.dompukab.go.id/downloads';
+        }
+
+        return null;
     }
 
     public function getAcceptedFormatsArrayAttribute(): array

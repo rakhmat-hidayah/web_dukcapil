@@ -10,6 +10,34 @@ class QueueServiceTypeSeeder extends Seeder
 {
     public function run(): void
     {
+        $downloadUrl = 'https://dukcapil.dompukab.go.id/downloads';
+
+        $f102Doc = [
+            'label' => 'Formulir F-1.02 (Pendaftaran Peristiwa Kependudukan)',
+            'description' => 'Formulir resmi permohonan pendaftaran peristiwa kependudukan yang telah diisi lengkap dan ditandatangani. Blanko formulir dapat diunduh pada link di bawah.',
+            'is_required' => true,
+            'applicable_to' => 'all',
+            'accepted_formats' => 'jpg,jpeg,png,pdf',
+            'max_size_kb' => 5120,
+            'capture_hint' => 'Foto seluruh lembar Formulir F-1.02 yang telah diisi dan ditandatangani. Pastikan tulisan terbaca jelas dan tidak terpotong.',
+            'capture_mode' => 'environment',
+            'template_url' => $downloadUrl,
+            'sort_order' => 1,
+        ];
+
+        $suratKuasaDoc = [
+            'label' => 'Formulir F-1.07 / F.017 (Surat Kuasa dalam Pelayanan Administrasi Kependudukan)',
+            'description' => 'Wajib jika permohonan diwakilkan. Surat Kuasa bermeterai Rp 10.000 yang ditandatangani oleh pemberi dan penerima kuasa. Blanko formulir dapat diunduh pada link di bawah.',
+            'is_required' => false,
+            'applicable_to' => 'representative_only',
+            'accepted_formats' => 'jpg,jpeg,png,pdf',
+            'max_size_kb' => 5120,
+            'capture_hint' => 'Foto Formulir Surat Kuasa F-1.07 yang telah ditandatangani di atas meterai Rp 10.000 secara utuh dan jelas.',
+            'capture_mode' => 'environment',
+            'template_url' => $downloadUrl,
+            'sort_order' => 10,
+        ];
+
         $services = [
             [
                 'name' => 'Cetak KTP-el Karena Hilang',
@@ -33,6 +61,7 @@ class QueueServiceTypeSeeder extends Seeder
                 'sort_order' => 1,
                 'is_active' => true,
                 'documents' => [
+                    $f102Doc,
                     [
                         'label' => 'Surat Keterangan Kehilangan Kepolisian',
                         'description' => 'Surat Tanda Penerimaan Laporan Kehilangan (STPLK) resmi dari Polsek / Polres terdekat yang masih berlaku.',
@@ -42,7 +71,7 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Posisikan surat kehilangan rata pada permukaan datar dan cukup cahaya. Pastikan nomor surat dan stempel kepolisian terbaca jelas.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 1,
+                        'sort_order' => 2,
                     ],
                     [
                         'label' => 'Kartu Keluarga (KK)',
@@ -53,7 +82,7 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Pastikan seluruh 4 sudut lembar Kartu Keluarga masuk dalam bingkai kamera dan NIK pemohon terbaca jelas.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 2,
+                        'sort_order' => 3,
                     ],
                     [
                         'label' => 'Foto Wajah Pemohon (Selfie Verifikasi)',
@@ -64,7 +93,7 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Gunakan kamera depan, tatap lurus ke kamera di tempat terang, tanpa kacamata hitam, masker, atau penutup wajah.',
                         'capture_mode' => 'user',
-                        'sort_order' => 3,
+                        'sort_order' => 4,
                     ],
                     [
                         'label' => 'KTP-el Asli Penerima Kuasa / Perwakilan',
@@ -75,19 +104,9 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Foto KTP-el asli penerima kuasa tampak depan dengan jelas.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 4,
-                    ],
-                    [
-                        'label' => 'Surat Kuasa Bermeterai',
-                        'description' => 'Wajib jika diwakilkan oleh pihak lain / keluarga di luar KK.',
-                        'is_required' => false,
-                        'applicable_to' => 'representative_only',
-                        'accepted_formats' => 'jpg,jpeg,png,pdf',
-                        'max_size_kb' => 5120,
-                        'capture_hint' => 'Foto surat kuasa bertanda tangan pemilik dokumen di atas meterai Rp 10.000.',
-                        'capture_mode' => 'environment',
                         'sort_order' => 5,
                     ],
+                    $suratKuasaDoc,
                 ],
             ],
             [
@@ -103,15 +122,16 @@ class QueueServiceTypeSeeder extends Seeder
                 'requires_face_photo' => true,
                 'allow_self' => true,
                 'allow_family_in_kk' => true,
-                'allow_family_out_kk' => false,
-                'allow_other' => false,
-                'require_power_of_attorney' => false,
+                'allow_family_out_kk' => true,
+                'allow_other' => true,
+                'require_power_of_attorney' => true,
                 'require_absence_reason' => true,
                 'is_biometric_first_recording' => false,
                 'policy_notes' => 'Fisik KTP-el lama yang rusak wajib diserahkan kepada petugas saat verifikasi dokumen fisik di kantor.',
                 'sort_order' => 2,
                 'is_active' => true,
                 'documents' => [
+                    $f102Doc,
                     [
                         'label' => 'Foto Fisik KTP-el Lama yang Rusak',
                         'description' => 'Foto kartu KTP-el yang rusak menampilkan bagian depan (NIK/Nama/Foto) yang masih tersisa.',
@@ -121,7 +141,7 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Posisikan kartu KTP lama di atas meja datar. Pastikan bagian kerusakan dan NIK yang tersisa terlihat jelas.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 1,
+                        'sort_order' => 2,
                     ],
                     [
                         'label' => 'Kartu Keluarga (KK)',
@@ -132,7 +152,7 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Foto seluruh lembar KK dengan pencahayaan merata.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 2,
+                        'sort_order' => 3,
                     ],
                     [
                         'label' => 'Foto Wajah Pemohon (Selfie Verifikasi)',
@@ -143,19 +163,20 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Foto wajah tampak depan tanpa filter di area pencahayaan yang terang.',
                         'capture_mode' => 'user',
-                        'sort_order' => 3,
+                        'sort_order' => 4,
                     ],
                     [
-                        'label' => 'KTP-el Perwakilan (Jika Diwakilkan Keluarga 1 KK)',
-                        'description' => 'Foto KTP-el anggota keluarga yang mewakili dalam satu KK.',
+                        'label' => 'KTP-el Perwakilan (Jika Diwakilkan)',
+                        'description' => 'Foto KTP-el anggota keluarga atau pihak yang mewakili.',
                         'is_required' => false,
                         'applicable_to' => 'representative_only',
                         'accepted_formats' => 'jpg,jpeg,png',
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Foto KTP asli perwakilan tampak depan.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 4,
+                        'sort_order' => 5,
                     ],
+                    $suratKuasaDoc,
                 ],
             ],
             [
@@ -171,15 +192,16 @@ class QueueServiceTypeSeeder extends Seeder
                 'requires_face_photo' => true,
                 'allow_self' => true,
                 'allow_family_in_kk' => true,
-                'allow_family_out_kk' => false,
-                'allow_other' => false,
-                'require_power_of_attorney' => false,
+                'allow_family_out_kk' => true,
+                'allow_other' => true,
+                'require_power_of_attorney' => true,
                 'require_absence_reason' => true,
                 'is_biometric_first_recording' => false,
-                'policy_notes' => 'Dapat diwakilkan oleh anggota keluarga dalam satu Kartu Keluarga.',
+                'policy_notes' => 'Dapat diwakilkan oleh anggota keluarga dalam satu Kartu Keluarga atau pihak lain dengan surat kuasa.',
                 'sort_order' => 3,
                 'is_active' => true,
                 'documents' => [
+                    $f102Doc,
                     [
                         'label' => 'KTP-el Lama Asli',
                         'description' => 'Foto fisik KTP-el sebelum perubahan data.',
@@ -189,7 +211,7 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Foto kartu KTP-el lama secara utuh dan jelas.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 1,
+                        'sort_order' => 2,
                     ],
                     [
                         'label' => 'Kartu Keluarga (KK) Terbaru',
@@ -200,7 +222,7 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Pastikan data terbaru pada KK terlihat jelas dan tidak blur.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 2,
+                        'sort_order' => 3,
                     ],
                     [
                         'label' => 'Dokumen Bukti Peristiwa Pendukung',
@@ -211,7 +233,7 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Foto dokumen pendukung asli yang menjadi dasar perubahan data.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 3,
+                        'sort_order' => 4,
                     ],
                     [
                         'label' => 'Foto Wajah Pemohon (Selfie Verifikasi)',
@@ -222,19 +244,20 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Foto wajah tampak depan tanpa kacamata di ruangan terang.',
                         'capture_mode' => 'user',
-                        'sort_order' => 4,
+                        'sort_order' => 5,
                     ],
                     [
-                        'label' => 'KTP-el Perwakilan (Jika Diwakilkan Keluarga 1 KK)',
-                        'description' => 'Foto KTP-el anggota keluarga yang mewakili dalam satu KK.',
+                        'label' => 'KTP-el Perwakilan (Jika Diwakilkan)',
+                        'description' => 'Foto KTP-el anggota keluarga atau pihak yang mewakili.',
                         'is_required' => false,
                         'applicable_to' => 'representative_only',
                         'accepted_formats' => 'jpg,jpeg,png',
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Foto KTP asli perwakilan tampak depan.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 5,
+                        'sort_order' => 6,
                     ],
+                    $suratKuasaDoc,
                 ],
             ],
             [
@@ -259,6 +282,7 @@ class QueueServiceTypeSeeder extends Seeder
                 'sort_order' => 4,
                 'is_active' => true,
                 'documents' => [
+                    $f102Doc,
                     [
                         'label' => 'Kartu Keluarga (KK)',
                         'description' => 'Kartu Keluarga di mana pemohon terdaftar sebagai anggota keluarga.',
@@ -268,7 +292,7 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Foto seluruh halaman KK, pastikan NIK pemohon dan nama orang tua terbaca jelas.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 1,
+                        'sort_order' => 2,
                     ],
                     [
                         'label' => 'Akta Kelahiran / Surat Keterangan Lahir / Ijazah',
@@ -279,7 +303,7 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Foto Akta Kelahiran atau Ijazah terakhir secara tegak lurus dan jelas.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 2,
+                        'sort_order' => 3,
                     ],
                     [
                         'label' => 'Surat Keterangan Belum Pernah Rekam (Opsional)',
@@ -290,7 +314,7 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Opsional: Lampirkan surat pengantar jika diminta pihak desa/sekolah.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 3,
+                        'sort_order' => 4,
                     ],
                 ],
             ],
