@@ -475,7 +475,7 @@
             <div class="flex-1 text-xs">
               <div class="flex items-center justify-between gap-2">
                 <StatusBadge :status="hist.to_status" size="sm" />
-                <span class="text-[11px] text-slate-400 font-mono">{{ formatDate(hist.created_at) }}</span>
+                <span class="text-[11px] text-slate-400 font-mono">{{ hist.created_at_formatted || formatDate(hist.created_at) }}</span>
               </div>
               <p class="text-slate-700 dark:text-slate-300 mt-1 leading-relaxed font-medium">
                 {{ hist.notes || 'Status diperbarui.' }}
@@ -661,15 +661,23 @@ function formatDate(isoStr) {
   if (!isoStr) return '-';
   try {
     const d = new Date(isoStr);
-    if (isNaN(d.getTime())) return '-';
-    return d.toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    if (isNaN(d.getTime())) return String(isoStr);
+    return d.toLocaleString('id-ID', {
+      timeZone: 'Asia/Makassar',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }) + ' WITA';
   } catch (e) {
-    return '-';
+    return String(isoStr);
   }
 }
 
 const printTimestamp = computed(() => {
   return new Date().toLocaleString('id-ID', {
+    timeZone: 'Asia/Makassar',
     weekday: 'long',
     day: 'numeric',
     month: 'long',

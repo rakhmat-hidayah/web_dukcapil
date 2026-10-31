@@ -429,7 +429,7 @@
                       {{ log.action_title || formatStatusName(log.to_status) }}
                     </span>
                     <span class="text-[10px] text-slate-400 font-mono">
-                      {{ formatDate(log.created_at) }}
+                      {{ log.created_at_formatted || formatDate(log.created_at) }}
                     </span>
                   </div>
                   <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -926,14 +926,20 @@ const cleanPhone = (phone) => {
 
 const formatDate = (dateString) => {
   if (!dateString) return '-'
-  const d = new Date(dateString)
-  return d.toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  try {
+    const d = new Date(dateString)
+    if (isNaN(d.getTime())) return String(dateString)
+    return d.toLocaleString('id-ID', {
+      timeZone: 'Asia/Makassar',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }) + ' WITA'
+  } catch (e) {
+    return String(dateString)
+  }
 }
 
 const formatScheduleDate = (dateString) => {

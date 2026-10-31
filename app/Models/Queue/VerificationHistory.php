@@ -26,7 +26,15 @@ class VerificationHistory extends Model
         'from_status_label',
         'to_status_label',
         'action_title',
+        'created_at_formatted',
     ];
+
+    public function getCreatedAtFormattedAttribute(): string
+    {
+        return $this->created_at 
+            ? $this->created_at->timezone('Asia/Makassar')->translatedFormat('d M Y, H:i') . ' WITA'
+            : '-';
+    }
 
     public static function statusLabel(?string $status): string
     {
