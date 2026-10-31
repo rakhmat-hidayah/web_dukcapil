@@ -364,18 +364,15 @@ async function takeSnapshot() {
 
   stopCamera();
 
-  canvas.toBlob(async (blob) => {
+  canvas.toBlob((blob) => {
     if (!blob) return;
 
     const rawFile = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
 
-    // Run automatic client compression
-    const result = await compressImage(rawFile);
-
-    capturedBlob.value = result.file;
-    previewUrl.value = URL.createObjectURL(result.file);
-    compressionStats.value = result;
-  }, 'image/jpeg', 0.92);
+    // Store in memory directly without waiting for compression
+    capturedBlob.value = rawFile;
+    previewUrl.value = URL.createObjectURL(rawFile);
+  }, 'image/jpeg', 0.95);
 }
 
 function retakePhoto() {
@@ -394,22 +391,15 @@ function triggerNativeCameraInput() {
   }
 }
 
-async function handleNativeFilePicked(e) {
+function handleNativeFilePicked(e) {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
 
   stopCamera();
 
-  try {
-    // Compress if image
-    const result = await compressImage(file);
-
-    capturedBlob.value = result.file;
-    previewUrl.value = URL.createObjectURL(result.file);
-    compressionStats.value = result;
-  } catch (err) {
-    alert(err.message || 'Gagal memproses file.');
-  }
+  // Store in memory directly without waiting for compression
+  capturedBlob.value = file;
+  previewUrl.value = URL.createObjectURL(file);
 }
 
 function confirmPhoto() {

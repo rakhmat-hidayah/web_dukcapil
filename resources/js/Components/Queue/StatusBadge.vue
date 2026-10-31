@@ -42,6 +42,11 @@ const sizeClasses = computed(() => {
 
 const statusMap = {
   // Application statuses
+  STAGED: {
+    label: 'Tersimpan di Memori (Siap Kirim)',
+    badge: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700',
+    dot: 'bg-emerald-500 animate-pulse',
+  },
   DRAFT: {
     label: 'Draft',
     badge: 'bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700',

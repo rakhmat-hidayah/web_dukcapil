@@ -178,6 +178,48 @@
       :mime-type="activePreviewDoc.mime_type"
       @close="activePreviewDoc = null"
     />
+
+    <!-- Batch Compression & Upload Progress Modal -->
+    <div
+      v-if="uploadProgress.active"
+      class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4"
+    >
+      <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 text-center space-y-5">
+        <div class="w-16 h-16 mx-auto rounded-3xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center relative">
+          <svg class="w-8 h-8 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+
+        <div>
+          <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+            {{ uploadProgress.step === 'compressing' ? 'Mengompresi Berkas Dokumen...' : (uploadProgress.step === 'uploading' ? 'Mengunggah ke Server...' : 'Memproses Pra-Verifikasi...') }}
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+            {{ uploadProgress.label }}
+          </p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="space-y-2">
+          <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700">
+            <div
+              class="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-300"
+              :style="{ width: `${uploadProgress.percent}%` }"
+            ></div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+            <span>{{ uploadProgress.step === 'compressing' ? 'Tahap 1: Kompresi Gambar' : (uploadProgress.step === 'uploading' ? 'Tahap 2: Pengiriman Berkas' : 'Tahap 3: Finalisasi') }}</span>
+            <span class="font-mono">{{ uploadProgress.percent }}%</span>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-400 dark:text-slate-500 italic">
+          Mohon jangan menutup halaman ini selama proses kompresi dan pengiriman berlangsung.
+        </p>
+      </div>
+    </div>
   </PublicLayout>
 </template>
 
@@ -190,6 +232,7 @@ import ProgressWizard from '@/Components/Queue/ProgressWizard.vue';
 import DocumentUploadCard from '@/Components/Queue/DocumentUploadCard.vue';
 import CameraCapture from '@/Components/Queue/CameraCapture.vue';
 import DocumentViewerModal from '@/Components/Queue/DocumentViewerModal.vue';
+import { compressImage, formatFileSize } from '@/Components/Queue/ImageCompressor';
 
 const props = defineProps({
   application: {
@@ -211,18 +254,33 @@ const props = defineProps({
 });
 
 const docs = ref([...props.uploadedDocs]);
+const stagedFiles = ref({});
 const statementAgreed = ref(false);
 const activeCameraReq = ref(null);
 const activePreviewDoc = ref(null);
 const errorMessage = ref(null);
 const isSubmitting = ref(false);
+const uploadProgress = ref({
+  active: false,
+  step: 'compressing',
+  current: 0,
+  total: 0,
+  label: '',
+  percent: 0,
+});
 
-const uploadedCount = computed(() => docs.value.length);
+const uploadedCount = computed(() => {
+  const ids = new Set();
+  docs.value.forEach((d) => ids.add(d.service_document_id));
+  Object.keys(stagedFiles.value).forEach((id) => ids.add(Number(id)));
+  return ids.size;
+});
 
 const allRequiredUploaded = computed(() => {
   const required = props.requirements.filter((r) => r.is_required);
-  const uploadedReqIds = docs.value.map((d) => d.service_document_id);
-  return required.every((r) => uploadedReqIds.includes(r.id));
+  const serverIds = new Set(docs.value.map((d) => d.service_document_id));
+  const stagedIds = new Set(Object.keys(stagedFiles.value).map(Number));
+  return required.every((r) => serverIds.has(r.id) || stagedIds.has(r.id));
 });
 
 const canSubmit = computed(() => {
@@ -240,6 +298,11 @@ const attendanceLabel = computed(() => {
 });
 
 function getUploadedDoc(serviceDocId) {
+  // If staged in memory, return staged object for instant UI feedback
+  if (stagedFiles.value[serviceDocId]) {
+    return stagedFiles.value[serviceDocId];
+  }
+  // Otherwise check if persisted on server
   return docs.value.find((d) => d.service_document_id === serviceDocId) || null;
 }
 
@@ -248,42 +311,41 @@ function openCameraModal(req) {
   activeCameraReq.value = req;
 }
 
-async function handleCameraPhotoCaptured(file) {
+function handleCameraPhotoCaptured(rawFile) {
   if (!activeCameraReq.value) return;
   const req = activeCameraReq.value;
   activeCameraReq.value = null;
 
-  await uploadFileToServer(req.id, file);
-}
-
-async function uploadFileToServer(serviceDocumentId, file) {
-  errorMessage.value = null;
-
-  const formData = new FormData();
-  formData.append('service_document_id', serviceDocumentId);
-  formData.append('file', file);
-
-  try {
-    const res = await axios.post(
-      route('queue.apply.upload-doc', { regNumber: props.application.reg_number }),
-      formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
-    );
-
-    if (res.data && res.data.document) {
-      docs.value = docs.value.filter((d) => d.service_document_id !== serviceDocumentId);
-      docs.value.push(res.data.document);
-    }
-  } catch (err) {
-    if (err.response && err.response.data && err.response.data.message) {
-      errorMessage.value = err.response.data.message;
-    } else {
-      errorMessage.value = 'Gagal mengunggah dokumen ke server. Pastikan jaringan internet Anda stabil.';
-    }
+  // Revoke previous object URL if any
+  if (stagedFiles.value[req.id]?.preview_url) {
+    URL.revokeObjectURL(stagedFiles.value[req.id].preview_url);
   }
+
+  const previewUrl = URL.createObjectURL(rawFile);
+  stagedFiles.value[req.id] = {
+    id: 'staged_' + req.id,
+    service_document_id: req.id,
+    original_filename: rawFile.name || `foto-${req.label.toLowerCase().replace(/[^a-z0-9]/g, '_')}.jpg`,
+    formatted_size: formatFileSize(rawFile.size),
+    is_image: rawFile.type ? rawFile.type.startsWith('image/') : true,
+    preview_url: previewUrl,
+    status: 'STAGED',
+    is_staged: true,
+    file: rawFile,
+  };
 }
 
 async function handleDeleteDocument(doc) {
+  // If staged in memory, delete directly from memory
+  if (doc.is_staged) {
+    if (doc.preview_url) {
+      URL.revokeObjectURL(doc.preview_url);
+    }
+    delete stagedFiles.value[doc.service_document_id];
+    return;
+  }
+
+  // If already on server
   if (!confirm(`Hapus dokumen "${doc.original_filename}"?`)) return;
 
   try {
@@ -301,6 +363,15 @@ async function handleDeleteDocument(doc) {
 }
 
 function openPreviewModal(doc) {
+  if (doc.is_staged) {
+    activePreviewDoc.value = {
+      preview_url: doc.preview_url,
+      original_filename: doc.original_filename,
+      mime_type: doc.file?.type || 'image/jpeg',
+    };
+    return;
+  }
+
   activePreviewDoc.value = {
     ...doc,
     preview_url: route('queue.apply.preview-doc', {
@@ -310,7 +381,7 @@ function openPreviewModal(doc) {
   };
 }
 
-function handleSubmitApplication() {
+async function handleSubmitApplication() {
   if (!allRequiredUploaded.value) {
     errorMessage.value = 'Harap lengkapi semua dokumen bertanda Wajib sebelum mengirimkan pendaftaran.';
     return;
@@ -321,14 +392,130 @@ function handleSubmitApplication() {
     return;
   }
 
+  const stagedEntries = Object.entries(stagedFiles.value);
+  const totalStaged = stagedEntries.length;
+
   isSubmitting.value = true;
-  router.post(route('queue.apply.submit', { regNumber: props.application.reg_number }), {
-    statement_agreed: true,
-  }, {
-    onError: (errors) => {
-      isSubmitting.value = false;
-      errorMessage.value = errors.statement_agreed || Object.values(errors)[0] || 'Terjadi kesalahan saat mengirim pendaftaran.';
-    },
-  });
+  errorMessage.value = null;
+
+  if (totalStaged > 0) {
+    uploadProgress.value = {
+      active: true,
+      step: 'compressing',
+      current: 0,
+      total: totalStaged,
+      label: 'Mempersiapkan kompresi dokumen di memori...',
+      percent: 5,
+    };
+
+    const compressedItems = [];
+
+    // 1. Batch Compression in memory
+    for (let i = 0; i < totalStaged; i++) {
+      const [reqIdStr, staged] = stagedEntries[i];
+      const reqId = Number(reqIdStr);
+      const req = props.requirements.find((r) => r.id === reqId);
+      const label = req ? req.label : `Dokumen #${i + 1}`;
+
+      uploadProgress.value = {
+        active: true,
+        step: 'compressing',
+        current: i + 1,
+        total: totalStaged,
+        label: `Mengompresi berkas ${i + 1} dari ${totalStaged}: ${label}`,
+        percent: Math.round(5 + ((i + 1) / totalStaged) * 45), // 5% -> 50%
+      };
+
+      try {
+        const result = await compressImage(staged.file);
+        compressedItems.push({
+          service_document_id: reqId,
+          file: result.file,
+          label,
+        });
+      } catch (compErr) {
+        console.warn('Compress fallback to original file:', compErr);
+        compressedItems.push({
+          service_document_id: reqId,
+          file: staged.file,
+          label,
+        });
+      }
+    }
+
+    // 2. Batch Upload to server
+    uploadProgress.value = {
+      active: true,
+      step: 'uploading',
+      current: 0,
+      total: totalStaged,
+      label: 'Mengunggah seluruh berkas ke server Disdukcapil...',
+      percent: 52,
+    };
+
+    for (let i = 0; i < compressedItems.length; i++) {
+      const item = compressedItems[i];
+
+      uploadProgress.value = {
+        active: true,
+        step: 'uploading',
+        current: i + 1,
+        total: totalStaged,
+        label: `Mengunggah berkas ${i + 1} dari ${totalStaged}: ${item.label}`,
+        percent: Math.round(52 + ((i + 1) / totalStaged) * 44), // 52% -> 96%
+      };
+
+      const formData = new FormData();
+      formData.append('service_document_id', item.service_document_id);
+      formData.append('file', item.file);
+
+      try {
+        const res = await axios.post(
+          route('queue.apply.upload-doc', { regNumber: props.application.reg_number }),
+          formData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+
+        if (res.data && res.data.document) {
+          docs.value = docs.value.filter((d) => d.service_document_id !== item.service_document_id);
+          docs.value.push(res.data.document);
+        }
+      } catch (uploadErr) {
+        isSubmitting.value = false;
+        uploadProgress.value.active = false;
+        errorMessage.value =
+          uploadErr.response?.data?.message ||
+          `Gagal mengunggah berkas "${item.label}". Pastikan koneksi internet stabil dan coba lagi.`;
+        return;
+      }
+    }
+  }
+
+  // 3. Final submission
+  uploadProgress.value = {
+    active: true,
+    step: 'submitting',
+    current: totalStaged,
+    total: totalStaged,
+    label: 'Memfinalisasi pendaftaran antrean Anda...',
+    percent: 98,
+  };
+
+  router.post(
+    route('queue.apply.submit', { regNumber: props.application.reg_number }),
+    { statement_agreed: true },
+    {
+      onFinish: () => {
+        isSubmitting.value = false;
+        uploadProgress.value.active = false;
+      },
+      onError: (errors) => {
+        isSubmitting.value = false;
+        uploadProgress.value.active = false;
+        errorMessage.value =
+          errors.statement_agreed || Object.values(errors)[0] || 'Terjadi kesalahan saat mengirim pendaftaran.';
+      },
+    }
+  );
 }
 </script>
