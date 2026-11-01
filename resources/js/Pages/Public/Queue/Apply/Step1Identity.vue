@@ -94,19 +94,33 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- NIK -->
               <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                  NIK Pemilik Dokumen (16 Digit) <span class="text-rose-500">*</span>
-                </label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                    NIK Pemilik Dokumen (16 Digit) <span class="text-rose-500">*</span>
+                  </label>
+                  <span class="text-[10px] font-mono" :class="form.applicant_nik.length === 16 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
+                    {{ form.applicant_nik.length }}/16 Digit
+                  </span>
+                </div>
                 <input
-                  v-model="form.applicant_nik"
+                  :value="form.applicant_nik"
+                  @input="onNikInput"
+                  @keypress="filterNikKeypress"
                   type="text"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
                   maxlength="16"
+                  autocomplete="off"
                   placeholder="5205xxxxxxxxxxxx"
                   class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
+                  :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.applicant_nik}"
                   required
                 />
                 <p v-if="form.errors.applicant_nik" class="text-xs text-rose-500 font-medium mt-1">
                   {{ form.errors.applicant_nik }}
+                </p>
+                <p v-else-if="form.applicant_nik.length > 0 && form.applicant_nik.length < 16" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                  Kurang {{ 16 - form.applicant_nik.length }} digit lagi. NIK wajib 16 digit angka.
                 </p>
               </div>
 
@@ -146,15 +160,40 @@
 
               <!-- Tanggal Lahir -->
               <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                  Tanggal Lahir <span class="text-rose-500">*</span>
-                </label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                    Tanggal Lahir <span class="text-rose-500">*</span>
+                  </label>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" :class="isBiometric ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300'">
+                    Min. {{ minRequiredAge }} Tahun ({{ isBiometric ? 'Perekaman' : 'Pencetakan' }})
+                  </span>
+                </div>
                 <input
                   v-model="form.applicant_birth_date"
                   type="date"
+                  :max="maxBirthDate"
+                  :min="minBirthDate"
                   class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  :class="{'border-rose-500 ring-1 ring-rose-500': ageErrorMessage || form.errors.applicant_birth_date}"
                   required
                 />
+
+                <!-- Usia info badge -->
+                <div v-if="applicantAge !== null" class="mt-1.5 flex items-center justify-between text-xs">
+                  <span class="text-slate-500 text-[11px]">
+                    Usia Pemohon: <strong :class="ageErrorMessage ? 'text-rose-600 font-bold' : 'text-emerald-600 dark:text-emerald-400 font-bold'">{{ applicantAge }} Tahun</strong>
+                  </span>
+                  <span v-if="!ageErrorMessage" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                    ✓ Memenuhi Syarat Usia
+                  </span>
+                </div>
+
+                <!-- Usia error warning -->
+                <div v-if="ageErrorMessage" class="mt-2 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2">
+                  <svg class="w-4 h-4 shrink-0 mt-0.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <span>{{ ageErrorMessage }}</span>
+                </div>
+
                 <p v-if="form.errors.applicant_birth_date" class="text-xs text-rose-500 font-medium mt-1">
                   {{ form.errors.applicant_birth_date }}
                 </p>
@@ -451,19 +490,33 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- NIK Perwakilan -->
                 <div>
-                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-                    NIK Perwakilan (16 Digit) <span class="text-rose-500">*</span>
-                  </label>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      NIK Perwakilan (16 Digit) <span class="text-rose-500">*</span>
+                    </label>
+                    <span class="text-[10px] font-mono" :class="form.representative_nik.length === 16 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
+                      {{ form.representative_nik.length }}/16 Digit
+                    </span>
+                  </div>
                   <input
-                    v-model="form.representative_nik"
+                    :value="form.representative_nik"
+                    @input="onRepresentativeNikInput"
+                    @keypress="filterNikKeypress"
                     type="text"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     maxlength="16"
+                    autocomplete="off"
                     placeholder="5205xxxxxxxxxxxx"
                     class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
+                    :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.representative_nik}"
                     required
                   />
                   <p v-if="form.errors.representative_nik" class="text-xs text-rose-500 font-medium mt-1">
                     {{ form.errors.representative_nik }}
+                  </p>
+                  <p v-else-if="form.representative_nik.length > 0 && form.representative_nik.length < 16" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                    Kurang {{ 16 - form.representative_nik.length }} digit lagi. NIK wajib 16 digit angka.
                   </p>
                 </div>
 
@@ -697,6 +750,80 @@ const selectedServiceObj = computed(() => {
   return props.services.find(s => s.id == form.service_type_id) || null;
 });
 
+// NIK Keypress filter (only numbers 0-9)
+function filterNikKeypress(e) {
+  if (!/[0-9]/.test(e.key)) {
+    e.preventDefault();
+  }
+}
+
+// NIK Input Sanitizer (strips anything non-digit and caps at 16)
+function onNikInput(e) {
+  const digits = (e.target.value || '').replace(/\D/g, '').slice(0, 16);
+  form.applicant_nik = digits;
+  e.target.value = digits;
+  if (form.errors.applicant_nik && digits.length === 16) {
+    delete form.errors.applicant_nik;
+  }
+}
+
+function onRepresentativeNikInput(e) {
+  const digits = (e.target.value || '').replace(/\D/g, '').slice(0, 16);
+  form.representative_nik = digits;
+  e.target.value = digits;
+  if (form.errors.representative_nik && digits.length === 16) {
+    delete form.errors.representative_nik;
+  }
+}
+
+// Age & Birth Date Validation
+const isBiometric = computed(() => !!selectedServiceObj.value?.is_biometric_first_recording);
+const minRequiredAge = computed(() => isBiometric.value ? 16 : 17);
+
+const maxBirthDate = computed(() => {
+  const today = new Date();
+  const age = minRequiredAge.value;
+  const cutoff = new Date(today.getFullYear() - age, today.getMonth(), today.getDate());
+  const y = cutoff.getFullYear();
+  const m = String(cutoff.getMonth() + 1).padStart(2, '0');
+  const d = String(cutoff.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+});
+
+const minBirthDate = computed(() => {
+  const today = new Date();
+  return `${today.getFullYear() - 120}-01-01`;
+});
+
+const applicantAge = computed(() => {
+  if (!form.applicant_birth_date) return null;
+  const parts = form.applicant_birth_date.split('-');
+  if (parts.length !== 3) return null;
+  const birthYear = parseInt(parts[0], 10);
+  const birthMonth = parseInt(parts[1], 10) - 1;
+  const birthDay = parseInt(parts[2], 10);
+
+  const today = new Date();
+  let age = today.getFullYear() - birthYear;
+  const m = today.getMonth() - birthMonth;
+  if (m < 0 || (m === 0 && today.getDate() < birthDay)) {
+    age--;
+  }
+  return age >= 0 ? age : 0;
+});
+
+const ageErrorMessage = computed(() => {
+  if (applicantAge.value === null) return null;
+  if (applicantAge.value < minRequiredAge.value) {
+    if (isBiometric.value) {
+      return `Usia pemohon saat ini ${applicantAge.value} tahun. Perekaman KTP-el Baru diperuntukkan bagi penduduk pemula minimal usia 16 tahun.`;
+    } else {
+      return `Usia pemohon saat ini ${applicantAge.value} tahun. Layanan pencetakan/penggantian KTP-el diperuntukkan bagi warga minimal usia 17 tahun. Bagi pemula usia 16 tahun silakan pilih layanan "Perekaman KTP-el Baru".`;
+    }
+  }
+  return null;
+});
+
 function handleServiceChanged(service) {
   if (service.is_biometric_first_recording) {
     form.attendance_type = 'self';
@@ -709,6 +836,18 @@ function handleServiceChanged(service) {
 }
 
 function submitStep1() {
+  if (form.applicant_nik.length !== 16) {
+    form.errors.applicant_nik = 'NIK harus berjumlah tepat 16 digit angka.';
+    return;
+  }
+  if (ageErrorMessage.value) {
+    form.errors.applicant_birth_date = ageErrorMessage.value;
+    return;
+  }
+  if (form.attendance_type !== 'self' && form.representative_nik && form.representative_nik.length !== 16) {
+    form.errors.representative_nik = 'NIK perwakilan harus berjumlah tepat 16 digit angka.';
+    return;
+  }
   form.post(route('queue.apply.store'));
 }
 </script>

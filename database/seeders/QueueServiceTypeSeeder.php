@@ -261,10 +261,10 @@ class QueueServiceTypeSeeder extends Seeder
                 ],
             ],
             [
-                'name' => 'Perekaman KTP-el Baru (Pemula / Usia 17 Tahun)',
+                'name' => 'Perekaman KTP-el Baru (Pemula / Usia 16-17 Tahun)',
                 'slug' => 'perekaman-ktp-el-baru',
-                'short_description' => 'Pelayanan penjadwalan perekaman biometrik (sidik jari, iris mata, foto) bagi penduduk pemula.',
-                'long_description' => 'Layanan pra-pendaftaran perekaman biometrik KTP elektronik bagi warga yang telah berusia 17 tahun atau sudah/pernah menikah dan belum pernah melakukan perekaman KTP-el di manapun. Pemohon WAJIB hadir sendiri.',
+                'short_description' => 'Pelayanan penjadwalan perekaman biometrik (sidik jari, iris mata, foto) bagi penduduk pemula usia minimal 16 tahun.',
+                'long_description' => 'Layanan pra-pendaftaran perekaman biometrik KTP elektronik bagi warga yang telah berusia minimal 16 tahun dan belum pernah melakukan perekaman KTP-el di manapun. Pemohon WAJIB hadir sendiri.',
                 'icon' => 'Fingerprint',
                 'color' => '#16a34a',
                 'quota_per_day' => 25,

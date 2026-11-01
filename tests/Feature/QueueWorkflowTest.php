@@ -313,4 +313,101 @@ class QueueWorkflowTest extends TestCase
         $this->expectException(QuotaExceededException::class);
         $slotService->bookSlot($slot->id, $dummyApp);
     }
+
+    public function test_nik_must_be_strictly_16_digits_and_numeric()
+    {
+        $service = ServiceType::first();
+
+        // 1. Letters in NIK must be rejected
+        $response = $this->post(route('queue.apply.store'), [
+            'service_type_id' => $service->id,
+            'applicant_name' => 'Testing NIK Letters',
+            'applicant_nik' => '52051234567890AB',
+            'applicant_birth_place' => 'Dompu',
+            'applicant_birth_date' => now()->subYears(20)->format('Y-m-d'),
+            'applicant_phone' => '081234567890',
+            'applicant_address' => 'Dompu Kota',
+            'attendance_type' => 'self',
+        ]);
+        $response->assertSessionHasErrors('applicant_nik');
+
+        // 2. Less than 16 digits must be rejected
+        $response2 = $this->post(route('queue.apply.store'), [
+            'service_type_id' => $service->id,
+            'applicant_name' => 'Testing Short NIK',
+            'applicant_nik' => '52051234567',
+            'applicant_birth_place' => 'Dompu',
+            'applicant_birth_date' => now()->subYears(20)->format('Y-m-d'),
+            'applicant_phone' => '081234567890',
+            'applicant_address' => 'Dompu Kota',
+            'attendance_type' => 'self',
+        ]);
+        $response2->assertSessionHasErrors('applicant_nik');
+    }
+
+    public function test_minimum_age_16_years_for_perekaman_pemula()
+    {
+        $perekamanService = ServiceType::where('is_biometric_first_recording', true)->first();
+        $this->assertNotNull($perekamanService);
+
+        // 15-year-old must be rejected for Perekaman
+        $responseUnder16 = $this->post(route('queue.apply.store'), [
+            'service_type_id' => $perekamanService->id,
+            'applicant_name' => 'Anak Usia 15',
+            'applicant_nik' => '5205999988887777',
+            'applicant_birth_place' => 'Dompu',
+            'applicant_birth_date' => now()->subYears(15)->format('Y-m-d'),
+            'applicant_phone' => '081234567890',
+            'applicant_address' => 'Dompu Kota',
+            'attendance_type' => 'self',
+        ]);
+        $responseUnder16->assertSessionHasErrors('applicant_birth_date');
+
+        // 16-year-old must pass for Perekaman
+        $nik16 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $response16 = $this->post(route('queue.apply.store'), [
+            'service_type_id' => $perekamanService->id,
+            'applicant_name' => 'Remaja Usia 16',
+            'applicant_nik' => $nik16,
+            'applicant_birth_place' => 'Dompu',
+            'applicant_birth_date' => now()->subYears(16)->format('Y-m-d'),
+            'applicant_phone' => '081234567890',
+            'applicant_address' => 'Dompu Kota',
+            'attendance_type' => 'self',
+        ]);
+        $response16->assertSessionHasNoErrors();
+    }
+
+    public function test_minimum_age_17_years_for_pencetakan()
+    {
+        $cetakService = ServiceType::where('is_biometric_first_recording', false)->first();
+        $this->assertNotNull($cetakService);
+
+        // 16-year-old must be rejected for Cetak KTP
+        $response16ForCetak = $this->post(route('queue.apply.store'), [
+            'service_type_id' => $cetakService->id,
+            'applicant_name' => 'Remaja 16 Cetak',
+            'applicant_nik' => '5205888877776666',
+            'applicant_birth_place' => 'Dompu',
+            'applicant_birth_date' => now()->subYears(16)->format('Y-m-d'),
+            'applicant_phone' => '081234567890',
+            'applicant_address' => 'Dompu Kota',
+            'attendance_type' => 'self',
+        ]);
+        $response16ForCetak->assertSessionHasErrors('applicant_birth_date');
+
+        // 17-year-old must pass for Cetak KTP
+        $nik17 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $response17 = $this->post(route('queue.apply.store'), [
+            'service_type_id' => $cetakService->id,
+            'applicant_name' => 'Dewasa 17 Cetak',
+            'applicant_nik' => $nik17,
+            'applicant_birth_place' => 'Dompu',
+            'applicant_birth_date' => now()->subYears(17)->format('Y-m-d'),
+            'applicant_phone' => '081234567890',
+            'applicant_address' => 'Dompu Kota',
+            'attendance_type' => 'self',
+        ]);
+        $response17->assertSessionHasNoErrors();
+    }
 }

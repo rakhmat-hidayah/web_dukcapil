@@ -98,19 +98,33 @@ class QueueApplicationController extends Controller
      */
     public function storeDraft(Request $request): RedirectResponse
     {
+        $service = ServiceType::find($request->service_type_id);
+        $isBiometric = $service ? (bool) $service->is_biometric_first_recording : false;
+        $minAge = $isBiometric ? 16 : 17;
+        $maxBirthDate = now()->subYears($minAge)->format('Y-m-d');
+
         $validated = $request->validate([
             'service_type_id'              => 'required|exists:queue_service_types,id',
             'applicant_name'               => 'required|string|min:3|max:100',
-            'applicant_nik'                => 'required|digits:16',
+            'applicant_nik'                => ['required', 'string', 'regex:/^[0-9]{16}$/'],
             'applicant_birth_place'        => 'required|string|min:2|max:100',
-            'applicant_birth_date'         => 'required|date|before:tomorrow',
+            'applicant_birth_date'         => [
+                'required',
+                'date',
+                'before_or_equal:' . $maxBirthDate,
+                'after:' . now()->subYears(120)->format('Y-m-d'),
+            ],
             'applicant_phone'              => 'required|string|min:10|max:16',
             'applicant_email'              => 'nullable|email|max:100',
             'applicant_address'            => 'required|string|min:3|max:300',
             'applicant_village'            => 'nullable|string|max:100',
             'applicant_district'           => 'nullable|string|max:100',
             'attendance_type'              => 'required|in:self,family_in_kk,family_out_kk,other',
-            'representative_nik'           => 'nullable|required_if:attendance_type,family_in_kk,family_out_kk,other|digits:16',
+            'representative_nik'           => [
+                'nullable',
+                'required_if:attendance_type,family_in_kk,family_out_kk,other',
+                'regex:/^[0-9]{16}$/',
+            ],
             'representative_name'          => 'nullable|required_if:attendance_type,family_in_kk,family_out_kk,other|string|min:3|max:100',
             'representative_phone'         => 'nullable|required_if:attendance_type,family_in_kk,family_out_kk,other|string|min:10|max:16',
             'representative_relationship'  => 'nullable|required_if:attendance_type,family_in_kk,family_out_kk,other|string|max:100',
@@ -122,9 +136,14 @@ class QueueApplicationController extends Controller
             'applicant_name.required'                 => 'Nama lengkap pemohon wajib diisi sesuai KTP/KK.',
             'applicant_name.min'                      => 'Nama pemohon minimal 3 karakter.',
             'applicant_nik.required'                  => 'Nomor Induk Kependudukan (NIK) wajib diisi.',
-            'applicant_nik.digits'                    => 'NIK harus berjumlah tepat 16 digit angka.',
+            'applicant_nik.regex'                     => 'NIK pemilik dokumen harus tepat 16 digit angka (hanya boleh angka, tanpa spasi/huruf).',
             'applicant_birth_place.required'          => 'Tempat lahir pemohon wajib diisi.',
             'applicant_birth_date.required'           => 'Tanggal lahir pemohon wajib diisi.',
+            'applicant_birth_date.date'               => 'Format tanggal lahir tidak valid.',
+            'applicant_birth_date.before_or_equal'    => $isBiometric
+                ? 'Usia pemohon untuk layanan perekaman KTP-el pemula minimal 16 tahun (tanggal lahir maksimal ' . now()->subYears(16)->translatedFormat('d F Y') . ').'
+                : 'Usia pemohon untuk layanan pencetakan/penggantian KTP-el minimal 17 tahun (tanggal lahir maksimal ' . now()->subYears(17)->translatedFormat('d F Y') . '). Khusus warga usia 16 tahun, silakan pilih layanan "Perekaman KTP-el Baru".',
+            'applicant_birth_date.after'              => 'Tanggal lahir tidak valid (melebihi batas wajar).',
             'applicant_phone.required'                => 'Nomor WhatsApp / HP aktif wajib diisi untuk konfirmasi antrean.',
             'applicant_phone.min'                     => 'Nomor WhatsApp / HP minimal 10 digit.',
             'applicant_phone.max'                     => 'Nomor WhatsApp / HP maksimal 16 digit.',
@@ -133,12 +152,18 @@ class QueueApplicationController extends Controller
             'applicant_address.min'                   => 'Alamat tempat tinggal minimal 3 karakter.',
             'attendance_type.required'                => 'Pilih status kehadiran: datang sendiri atau diwakilkan.',
             'representative_nik.required_if'          => 'NIK orang yang mewakili wajib diisi (16 digit angka).',
-            'representative_nik.digits'               => 'NIK orang yang mewakili harus tepat 16 digit angka.',
+            'representative_nik.regex'                => 'NIK orang yang mewakili harus tepat 16 digit angka (hanya boleh angka, tanpa spasi/huruf).',
             'representative_name.required_if'         => 'Nama orang yang mewakili wajib diisi.',
             'representative_phone.required_if'        => 'Nomor kontak orang yang mewakili wajib diisi.',
             'representative_relationship.required_if' => 'Hubungan orang yang mewakili dengan pemilik dokumen wajib dipilih.',
             'absence_reason.required_if'              => 'Alasan pemilik dokumen tidak dapat hadir langsung wajib dijelaskan.',
         ]);
+
+        if ($isBiometric && $validated['attendance_type'] !== 'self') {
+            return back()->withErrors([
+                'attendance_type' => 'Pelayanan perekaman KTP-el baru wajib dihadiri langsung oleh pemohon (tidak dapat diwakilkan).',
+            ])->withInput();
+        }
 
         // Check if there is already an active (uncompleted) application for this NIK and service
         $existing = QueueApplication::where('applicant_nik', $validated['applicant_nik'])
