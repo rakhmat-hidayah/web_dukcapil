@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -9,7 +10,14 @@ class AutoMediaSync
 {
     public static function sync(): void
     {
+        // Avoid heavy recursive disk scan on every web request
+        if (Cache::has('auto_media_sync_v2_done')) {
+            return;
+        }
+
         try {
+            Cache::put('auto_media_sync_v2_done', true, now()->addHours(24));
+
             $publicUploads = public_path('uploads');
             $storageAppPublic = storage_path('app/public');
 

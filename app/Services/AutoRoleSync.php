@@ -46,17 +46,24 @@ class AutoRoleSync
      */
     public static function sync(): void
     {
+        // Avoid running 30+ DB queries and clearing Spatie cache on every web request
+        if (Cache::has('auto_role_sync_v4_done')) {
+            return;
+        }
+
+        Cache::put('auto_role_sync_v4_done', true, now()->addHours(24));
+
         // 1. Run pending migrations safely if not yet cached as completed
         try {
-            if (!Cache::has('db_auto_migrations_v7')) {
+            if (!Cache::has('db_auto_migrations_v8')) {
                 Artisan::call('migrate', ['--force' => true]);
-                Cache::put('db_auto_migrations_v7', true, now()->addDays(3));
+                Cache::put('db_auto_migrations_v8', true, now()->addDays(7));
             }
         } catch (\Throwable $e) {
             Log::warning('AutoRoleSync migration warning: ' . $e->getMessage());
         }
 
-        // 2. Always ensure Indonesian roles and Supervisor Layanan KTP-el exist
+        // 2. Ensure Indonesian roles and Supervisor Layanan KTP-el exist
         try {
             self::ensureIndonesianRoles();
         } catch (\Throwable $e) {

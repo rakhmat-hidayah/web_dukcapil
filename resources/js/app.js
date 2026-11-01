@@ -17,6 +17,15 @@ createInertiaApp({
             .use(ZiggyVue)
             .use(pinia)
             .mount(el);
+
+        // Smoothly dismiss the initial first-paint brand preloader
+        const preloader = document.getElementById('initial-page-preloader');
+        if (preloader) {
+            preloader.style.opacity = '0';
+            setTimeout(() => {
+                preloader.remove();
+            }, 350);
+        }
     },
     progress: {
         color: 'var(--primary-500, #0e91eb)',
