@@ -1,8 +1,8 @@
 <template>
   <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[94vh]">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[95vh]">
       <!-- Header -->
-      <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+      <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <div>
           <h3 class="font-bold text-slate-900 dark:text-white text-base">
             {{ headerTitle }}
@@ -20,9 +20,9 @@
       </div>
 
       <!-- Main Body -->
-      <div class="p-3.5 sm:p-5 flex-1 overflow-y-auto flex flex-col items-center">
+      <div class="p-3 sm:p-4 flex-1 overflow-y-auto flex flex-col items-center">
         <!-- Capture Viewfinder / Preview Container -->
-        <div class="w-full relative rounded-2xl overflow-hidden bg-black h-[60vh] max-h-[540px] min-h-[400px] sm:h-[490px] flex items-center justify-center shadow-inner">
+        <div class="w-full relative rounded-2xl overflow-hidden bg-black h-[63vh] max-h-[580px] min-h-[420px] sm:h-[510px] flex items-center justify-center shadow-inner">
           <!-- 1. LIVE CAMERA STREAM (Always kept in DOM for smooth hardware stream) -->
           <video
             ref="videoRef"
@@ -31,10 +31,11 @@
             webkit-playsinline
             muted
             :class="[
-              'w-full h-full object-cover transition-opacity duration-300',
+              'w-full h-full object-cover transition-all duration-300',
               isCameraActive && !capturedBlob ? 'opacity-100 block' : 'opacity-0 hidden',
               (frameMode === 'selfie' || isSelfie) && currentFacingMode === 'user' ? '-scale-x-100' : ''
             ]"
+            :style="!supportedZoom && currentZoom > 1 ? { transform: `scale(${currentZoom})` } : {}"
           ></video>
 
           <!-- Loading Indicator when starting camera -->
@@ -50,20 +51,12 @@
           <!-- Guideline Overlay on Live Camera -->
           <div
             v-if="isCameraActive && !capturedBlob"
-            class="absolute inset-0 pointer-events-none flex flex-col items-center justify-between p-2.5 sm:p-3.5 overflow-hidden z-10"
+            class="absolute inset-0 pointer-events-none flex flex-col items-center justify-between p-2 sm:p-2.5 overflow-hidden z-10"
           >
-            <!-- Top Section: Mode Indicator & Interactive Document Size Selector -->
+            <!-- Top Controls: Document Mode Pills & Zoom Toggles -->
             <div class="w-full flex flex-col items-center gap-1.5 z-20 pointer-events-none">
-              <!-- Top Guide Badge -->
-              <div class="bg-slate-950/85 backdrop-blur-md px-3.5 py-1 rounded-full border border-white/20 shadow-lg text-center max-w-[94%]">
-                <p class="text-xs font-semibold text-white flex items-center justify-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span>{{ guideTitle }}</span>
-                </p>
-              </div>
-
               <!-- Interactive Document Frame Selector Pills -->
-              <div class="flex items-center justify-center gap-1 bg-slate-950/90 backdrop-blur-md p-1 rounded-2xl border border-white/20 shadow-xl max-w-[98%] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
+              <div class="flex items-center justify-center gap-1 bg-slate-950/85 backdrop-blur-md p-1 rounded-2xl border border-white/20 shadow-xl max-w-[98%] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
                 <!-- 1. Kertas F4 / A4 (Tegak) -->
                 <button
                   type="button"
@@ -140,21 +133,52 @@
                   <span>👤</span> Wajah
                 </button>
               </div>
+
+              <!-- Top Auxiliary Bar: Guide Badge & Zoom Buttons -->
+              <div class="flex items-center justify-between w-full px-2 max-w-[96%] pointer-events-auto">
+                <!-- Status Guide Badge -->
+                <div class="bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 shadow text-center">
+                  <p class="text-[11px] font-semibold text-white flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>{{ guideTitle }}</span>
+                  </p>
+                </div>
+
+                <!-- Zoom Level Toggle (1.0x, 1.4x, 2.0x) -->
+                <div class="flex items-center gap-1 bg-slate-950/85 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/20 shadow">
+                  <span class="text-[10px] text-slate-400 font-mono font-bold mr-0.5">Zoom</span>
+                  <button
+                    v-for="z in [1.0, 1.4, 2.0]"
+                    :key="z"
+                    type="button"
+                    @click="setZoom(z)"
+                    :class="[
+                      'px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer',
+                      currentZoom === z
+                        ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                        : 'text-slate-300 hover:text-white hover:bg-white/10'
+                    ]"
+                  >
+                    {{ z }}x
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <!-- Center Cutout Frame (Garis Hijau Menyesuaikan Jenis Dokumen) -->
+            <!-- Center Cutout Frame (Garis Hijau Menyesuaikan Ukuran Dokumen) -->
             <div class="w-full flex-1 flex items-center justify-center relative my-1 overflow-hidden">
-              <!-- A. KERTAS F4 / A4 TEGAK (Surat Kehilangan, Formulir F-1.02, Surat Kuasa, dll) -->
+              <!-- A. KERTAS F4 / A4 TEGAK (Besar, Proporsional & Siap Auto-Crop) -->
               <div
                 v-if="frameMode === 'f4_a4'"
-                class="relative h-[82%] sm:h-[84%] max-w-[84%] border-2 sm:border-[3px] border-emerald-400 rounded-xl sm:rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex flex-col items-center justify-between p-2 sm:p-2.5 transition-all duration-300"
+                ref="guideFrameRef"
+                class="relative h-[92%] sm:h-[94%] max-w-[92%] border-2 sm:border-[3px] border-emerald-400 rounded-xl sm:rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex flex-col items-center justify-between p-2 sm:p-2.5 transition-all duration-300"
                 style="aspect-ratio: 210 / 297;"
               >
                 <!-- 4 Corner White Accents -->
-                <div class="absolute -top-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
-                <div class="absolute -top-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
-                <div class="absolute -bottom-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
-                <div class="absolute -bottom-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-r-4 border-white rounded-br"></div>
+                <div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
+                <div class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
+                <div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
+                <div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-white rounded-br"></div>
 
                 <!-- Top Guide: Kop Surat -->
                 <div class="w-full border-b border-dashed border-emerald-400/50 pb-1 flex items-center justify-between text-emerald-300/90 text-[9px] font-mono font-bold tracking-wider">
@@ -162,16 +186,10 @@
                   <span class="text-[8px] bg-emerald-950/70 px-1.5 py-0.5 rounded text-emerald-300 border border-emerald-500/40 font-mono">F4 / A4 TEGAK</span>
                 </div>
 
-                <!-- Center Guidance Text -->
-                <div class="text-center p-1.5 text-white drop-shadow max-w-[210px]">
-                  <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 mx-auto mb-1 flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                  </div>
-                  <p class="text-[11px] font-bold leading-tight text-white drop-shadow">
-                    Posisikan 4 sudut lembar kertas F4/A4 di dalam kotak hijau
-                  </p>
-                  <p class="text-[9px] text-emerald-200/90 mt-0.5">
-                    Pastikan tulisan & stempel terbaca tajam
+                <!-- Center Guidance Prompt (Minimal watermark, text is clean) -->
+                <div class="pointer-events-none text-center p-1 text-white drop-shadow">
+                  <p class="text-[10px] sm:text-[11px] font-bold text-white/95 drop-shadow leading-tight bg-slate-950/60 px-3 py-0.5 rounded-full inline-block">
+                    Paskan 4 sudut lembar di bingkai hijau
                   </p>
                 </div>
 
@@ -182,17 +200,18 @@
                 </div>
               </div>
 
-              <!-- B. UKURAN FISIK KTP (CR80 Standard: 85.6 x 54 mm) -->
+              <!-- B. UKURAN FISIK KTP (CR80 Standard: 85.6 x 54 mm, Lebar & Dekat) -->
               <div
                 v-else-if="frameMode === 'ktp'"
-                class="relative w-[92%] sm:w-[86%] max-w-[420px] border-2 sm:border-[3px] border-emerald-400 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex items-center justify-between p-2.5 transition-all duration-300"
+                ref="guideFrameRef"
+                class="relative w-[96%] sm:w-[92%] max-w-[460px] border-2 sm:border-[3px] border-emerald-400 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex items-center justify-between p-2.5 transition-all duration-300"
                 style="aspect-ratio: 85.6 / 54;"
               >
                 <!-- 4 Corner White Accents -->
-                <div class="absolute -top-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
-                <div class="absolute -top-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
-                <div class="absolute -bottom-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
-                <div class="absolute -bottom-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-r-4 border-white rounded-br"></div>
+                <div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
+                <div class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
+                <div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
+                <div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-white rounded-br"></div>
 
                 <!-- Left: Area NIK & Data KTP -->
                 <div class="h-full flex-1 mr-2 rounded-xl border border-dashed border-emerald-400/50 p-2 sm:p-2.5 flex flex-col justify-between text-emerald-300 bg-emerald-950/30">
@@ -201,7 +220,7 @@
                     AREA NIK & IDENTITAS
                   </div>
                   <div class="text-[9px] sm:text-[10px] text-emerald-100/90 leading-tight">
-                    Posisikan teks KTP agar terlihat tajam dan tidak silau
+                    Dekatkan kamera agar NIK terlihat tajam dan tidak silau
                   </div>
                   <div class="text-[8px] font-mono text-emerald-300/70">
                     UKURAN KTP (85.6 × 54 mm)
@@ -217,7 +236,7 @@
                     PASFOTO KTP
                   </span>
                   <span class="text-[8px] text-emerald-300/80 mt-0.5 leading-tight">
-                    Paskan foto di sini
+                    Paskan di sini
                   </span>
                 </div>
               </div>
@@ -225,14 +244,15 @@
               <!-- C. KARTU KELUARGA / LANDSCAPE -->
               <div
                 v-else-if="frameMode === 'kk_landscape'"
-                class="relative w-[94%] sm:w-[90%] max-w-[460px] border-2 sm:border-[3px] border-emerald-400 rounded-xl sm:rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex flex-col items-center justify-between p-2.5 transition-all duration-300"
+                ref="guideFrameRef"
+                class="relative w-[96%] sm:w-[94%] max-w-[480px] border-2 sm:border-[3px] border-emerald-400 rounded-xl sm:rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex flex-col items-center justify-between p-2.5 transition-all duration-300"
                 style="aspect-ratio: 297 / 210;"
               >
                 <!-- 4 Corner White Accents -->
-                <div class="absolute -top-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
-                <div class="absolute -top-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
-                <div class="absolute -bottom-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
-                <div class="absolute -bottom-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-r-4 border-white rounded-br"></div>
+                <div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
+                <div class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
+                <div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
+                <div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-white rounded-br"></div>
 
                 <!-- Header -->
                 <div class="w-full border-b border-dashed border-emerald-400/50 pb-1 flex items-center justify-between text-emerald-300/90 text-[9px] font-mono font-bold tracking-wider">
@@ -241,12 +261,9 @@
                 </div>
 
                 <!-- Center Guidance -->
-                <div class="text-center p-2 text-white drop-shadow max-w-[280px]">
-                  <p class="text-[11px] font-bold leading-tight text-white drop-shadow">
-                    Posisikan lembar Kartu Keluarga mendatar di dalam kotak hijau
-                  </p>
-                  <p class="text-[9px] text-emerald-200/90 mt-0.5">
-                    Pastikan tabel anggota keluarga & barcode TTE tampak jelas
+                <div class="pointer-events-none text-center p-1 text-white drop-shadow">
+                  <p class="text-[10px] sm:text-[11px] font-bold text-white/95 drop-shadow leading-tight bg-slate-950/60 px-3 py-0.5 rounded-full inline-block">
+                    Posisikan lembar KK mendatar pas di kotak hijau
                   </p>
                 </div>
 
@@ -260,7 +277,8 @@
               <!-- D. SELFIE / FOTO WAJAH (Oval) -->
               <div
                 v-else-if="frameMode === 'selfie'"
-                class="relative w-48 h-64 sm:w-56 sm:h-72 border-2 sm:border-[3px] border-dashed border-white rounded-[50%] shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex flex-col items-center justify-center transition-all duration-300"
+                ref="guideFrameRef"
+                class="relative w-52 h-68 sm:w-60 sm:h-76 border-2 sm:border-[3px] border-dashed border-white rounded-[50%] shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex flex-col items-center justify-center transition-all duration-300"
               >
                 <!-- Eye-level line -->
                 <div class="w-2/3 border-b border-white/40 mb-6 relative">
@@ -273,28 +291,27 @@
               <!-- E. BEBAS / PENUH (Full Viewfinder Area) -->
               <div
                 v-else
-                class="relative w-[92%] sm:w-[88%] h-[88%] sm:h-[84%] border-2 sm:border-[3px] border-emerald-400 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex items-center justify-center p-3 transition-all duration-300"
+                ref="guideFrameRef"
+                class="relative w-[95%] sm:w-[92%] h-[92%] sm:h-[90%] border-2 sm:border-[3px] border-emerald-400 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex items-center justify-center p-3 transition-all duration-300"
               >
                 <!-- 4 Corner White Accents -->
-                <div class="absolute -top-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
-                <div class="absolute -top-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
-                <div class="absolute -bottom-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
-                <div class="absolute -bottom-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-r-4 border-white rounded-br"></div>
+                <div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
+                <div class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
+                <div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
+                <div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-white rounded-br"></div>
 
-                <div class="text-center p-3 text-white max-w-xs drop-shadow">
-                  <p class="text-[11px] font-bold leading-relaxed">
+                <div class="text-center p-2 text-white drop-shadow">
+                  <p class="text-[11px] font-bold leading-relaxed bg-slate-950/60 px-3 py-1 rounded-full inline-block">
                     Posisikan seluruh lembar dokumen berada di dalam kotak hijau
-                  </p>
-                  <p class="text-[9px] text-emerald-200/90 mt-0.5">
-                    Bingkai bebas untuk berbagai bentuk dokumen
                   </p>
                 </div>
               </div>
             </div>
 
-            <!-- Bottom Hint Badge -->
-            <div class="z-10 bg-slate-950/75 backdrop-blur-sm px-3 py-1 rounded-full text-[11px] text-white/90 text-center max-w-[94%] shadow">
-              {{ guideHint }}
+            <!-- Bottom Auto-Crop Indicator Pill -->
+            <div class="z-10 bg-slate-950/85 backdrop-blur-md px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-emerald-300 border border-emerald-500/30 text-center max-w-[94%] shadow flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <span>Foto otomatis dipotong pas di dalam bingkai hijau agar hasil dokumen tajam & dekat</span>
             </div>
           </div>
 
@@ -352,10 +369,10 @@
         </div>
 
         <!-- Guidance Banner -->
-        <div class="w-full mt-3 px-3 py-2 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-100 dark:border-blue-900/40 flex items-start gap-2.5">
+        <div class="w-full mt-2.5 px-3 py-2 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-100 dark:border-blue-900/40 flex items-start gap-2.5">
           <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-            <span class="font-semibold">Petunjuk:</span> {{ captureHint || 'Pastikan dokumen berada di tempat terang, tidak buram, dan teks dapat terbaca jelas.' }}
+            <span class="font-semibold">Petunjuk:</span> {{ captureHint || 'Dekatkan kamera ke dokumen agar tulisan terbaca jelas. Sistem akan memotong foto otomatis mengikuti bingkai hijau.' }}
           </p>
         </div>
 
@@ -374,7 +391,7 @@
       </div>
 
       <!-- Action Footer -->
-      <div class="px-5 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between gap-3">
+      <div class="px-5 py-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between gap-3">
         <!-- Left: Switch Camera (Front / Back) -->
         <div>
           <button
@@ -456,6 +473,7 @@ const emit = defineEmits(['close', 'captured']);
 const videoRef = ref(null);
 const canvasRef = ref(null);
 const nativeCameraInputRef = ref(null);
+const guideFrameRef = ref(null);
 
 const isStartingCamera = ref(false);
 const isCameraActive = ref(false);
@@ -464,6 +482,10 @@ const mediaStream = ref(null);
 const cameraError = ref(null);
 const capturedBlob = ref(null);
 const previewUrl = ref(null);
+
+// Zoom states
+const currentZoom = ref(1.0);
+const supportedZoom = ref(false);
 
 // Determine default mode based on document label & capture mode
 function getDefaultFrameMode() {
@@ -507,20 +529,11 @@ const headerTitle = computed(() => {
 });
 
 const guideTitle = computed(() => {
-  if (frameMode.value === 'selfie') return 'Posisikan Wajah Tepat di Dalam Garis Oval';
-  if (frameMode.value === 'ktp') return 'Posisikan KTP & Pasfoto Pas Pada Kotak Hijau';
-  if (frameMode.value === 'f4_a4') return 'Posisikan Lembar Kertas F4 / A4 Dalam Kotak Hijau';
-  if (frameMode.value === 'kk_landscape') return 'Posisikan Lembar KK Dalam Kotak Hijau Mendatar';
-  return 'Posisikan Seluruh Dokumen Dalam Kotak Hijau';
-});
-
-const guideHint = computed(() => {
-  if (props.captureHint) return props.captureHint;
-  if (frameMode.value === 'selfie') return 'Hadapkan wajah lurus ke kamera dengan pencahayaan yang cukup';
-  if (frameMode.value === 'ktp') return 'Sejajarkan fisik KTP ke bingkai hijau dan paskan foto wajah di kotak kanan';
-  if (frameMode.value === 'f4_a4') return 'Sejajarkan 4 sudut kertas F4/A4 dengan bingkai hijau tegak';
-  if (frameMode.value === 'kk_landscape') return 'Sejajarkan lembar Kartu Keluarga secara mendatar ke dalam bingkai hijau';
-  return 'Pastikan dokumen tidak miring, tidak terpotong, dan tulisan terbaca jelas';
+  if (frameMode.value === 'selfie') return 'Posisikan Wajah di Garis Oval';
+  if (frameMode.value === 'ktp') return 'Dekatkan KTP Pas di Kotak Hijau';
+  if (frameMode.value === 'f4_a4') return 'Paskan Kertas F4 / A4 di Kotak Hijau';
+  if (frameMode.value === 'kk_landscape') return 'Paskan Lembar KK Mendatar';
+  return 'Posisikan Dokumen Dalam Kotak Hijau';
 });
 
 let permissionStatusObj = null;
@@ -556,6 +569,22 @@ onBeforeUnmount(() => {
   }
 });
 
+async function setZoom(val) {
+  currentZoom.value = val;
+  if (mediaStream.value) {
+    try {
+      const [track] = mediaStream.value.getVideoTracks();
+      if (track && track.applyConstraints) {
+        await track.applyConstraints({
+          advanced: [{ zoom: val }],
+        });
+      }
+    } catch (e) {
+      // Fallback handled via CSS transform / canvas crop
+    }
+  }
+}
+
 async function startCamera() {
   stopCamera();
   cameraError.value = null;
@@ -571,7 +600,7 @@ async function startCamera() {
   const preferredFacing = currentFacingMode.value || (frameMode.value === 'selfie' || isSelfie.value ? 'user' : 'environment');
   let stream = null;
 
-  // Waterfall 1: Try with ideal facingMode
+  // Waterfall 1: Try with ideal facingMode & high resolution
   try {
     stream = await navigator.mediaDevices.getUserMedia({
       video: {
@@ -616,6 +645,18 @@ async function startCamera() {
 
   mediaStream.value = stream;
 
+  // Check hardware zoom capability
+  try {
+    const [track] = stream.getVideoTracks();
+    if (track && track.getCapabilities) {
+      const caps = track.getCapabilities();
+      supportedZoom.value = !!caps.zoom;
+      if (caps.zoom && currentZoom.value > 1) {
+        track.applyConstraints({ advanced: [{ zoom: currentZoom.value }] }).catch(() => {});
+      }
+    }
+  } catch (e) {}
+
   await nextTick();
 
   if (videoRef.value) {
@@ -653,17 +694,78 @@ async function takeSnapshot() {
   const video = videoRef.value;
   const canvas = canvasRef.value;
 
-  canvas.width = video.videoWidth || 1280;
-  canvas.height = video.videoHeight || 720;
+  const vw = video.videoWidth || 1280;
+  const vh = video.videoHeight || 720;
+
+  let sx = 0;
+  let sy = 0;
+  let sw = vw;
+  let sh = vh;
+
+  // Auto-Crop tightly to the green guide frame
+  if (guideFrameRef.value) {
+    try {
+      const videoRect = video.getBoundingClientRect();
+      const guideRect = guideFrameRef.value.getBoundingClientRect();
+
+      if (videoRect.width > 0 && videoRect.height > 0) {
+        // Calculate the CSS object-cover scale
+        const scale = Math.max(videoRect.width / vw, videoRect.height / vh);
+        const renderedW = vw * scale;
+        const renderedH = vh * scale;
+
+        // Offset of the rendered video within video container
+        const offsetX = (videoRect.width - renderedW) / 2;
+        const offsetY = (videoRect.height - renderedH) / 2;
+
+        // Guide box coordinates relative to rendered video stream
+        const guideXInVideo = guideRect.left - videoRect.left - offsetX;
+        const guideYInVideo = guideRect.top - videoRect.top - offsetY;
+
+        // Map to intrinsic video coordinates
+        let rawCropX = guideXInVideo / scale;
+        let rawCropY = guideYInVideo / scale;
+        let rawCropW = guideRect.width / scale;
+        let rawCropH = guideRect.height / scale;
+
+        // Add 2% safety margin around the border so document edges are preserved
+        const marginX = rawCropW * 0.02;
+        const marginY = rawCropH * 0.02;
+
+        sx = Math.max(0, Math.floor(rawCropX - marginX));
+        sy = Math.max(0, Math.floor(rawCropY - marginY));
+        sw = Math.min(vw - sx, Math.ceil(rawCropW + marginX * 2));
+        sh = Math.min(vh - sy, Math.ceil(rawCropH + marginY * 2));
+      }
+    } catch (cropErr) {
+      console.warn('Auto-crop calculation fallback to full sensor:', cropErr);
+      sx = 0;
+      sy = 0;
+      sw = vw;
+      sh = vh;
+    }
+  }
+
+  // Safety fallback if calculated crop is invalid
+  if (sw <= 100 || sh <= 100) {
+    sx = 0;
+    sy = 0;
+    sw = vw;
+    sh = vh;
+  }
+
+  canvas.width = sw;
+  canvas.height = sh;
 
   const ctx = canvas.getContext('2d');
 
   if ((frameMode.value === 'selfie' || isSelfie.value) && currentFacingMode.value === 'user') {
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+  } else {
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
   }
-
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
   stopCamera();
 
@@ -672,10 +774,10 @@ async function takeSnapshot() {
 
     const rawFile = new File([blob], `capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
 
-    // Store directly in memory, 0 delay
+    // Store in memory for instant high-res preview
     capturedBlob.value = rawFile;
     previewUrl.value = URL.createObjectURL(rawFile);
-  }, 'image/jpeg', 0.92);
+  }, 'image/jpeg', 0.94);
 }
 
 function retakePhoto() {
@@ -699,7 +801,6 @@ function handleNativeFilePicked(e) {
 
   stopCamera();
 
-  // Instant in-memory storage, 0 compression delay
   capturedBlob.value = file;
   previewUrl.value = URL.createObjectURL(file);
 }
