@@ -412,7 +412,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // Online Queue Management & Pre-Verification (Admin CMS)
         // -------------------------------------------------------------
-        Route::middleware('role_or_permission:Super Administrator|Website Administrator|Queue Officer|Queue Verifier|manage_online_queue|manage_queue_verification|view_queue_reports')
+        Route::middleware('role_or_permission:Super Administrator|Website Administrator|Petugas Verifikasi / Registrasi KTP-el|Queue Officer|Queue Verifier|manage_online_queue|manage_queue_verification|view_queue_reports')
             ->prefix('queue')->name('queue.')->group(function () {
 
             Route::get('/dashboard', [\App\Http\Controllers\Admin\Queue\QueueDashboardController::class, 'index'])->name('dashboard');
@@ -469,7 +469,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // Serah Terima KTP-el (Standalone Module)
         // -------------------------------------------------------------
-        Route::middleware('role_or_permission:Super Administrator|Website Administrator|petugas_pengambilan_ktpel|handover.dashboard.view')
+        Route::middleware('role_or_permission:Super Administrator|Website Administrator|Petugas Pengambilan KTP-el|petugas_pengambilan_ktpel|handover.dashboard.view')
             ->prefix('handover')->name('handover.')->group(function () {
 
             Route::get('/dashboard', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'dashboard'])->name('dashboard');
@@ -489,7 +489,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // Pengarsipan Permohonan Online (Standalone Archive Module)
         // -------------------------------------------------------------
-        Route::middleware('role_or_permission:Super Administrator|Website Administrator|operator_arsip|archive.dashboard.view')
+        Route::middleware('role_or_permission:Super Administrator|Website Administrator|Petugas Pengarsipan|operator_arsip|archive.dashboard.view')
             ->prefix('archive')->name('archive.')->group(function () {
 
             // 1. Dashboard Pengarsipan

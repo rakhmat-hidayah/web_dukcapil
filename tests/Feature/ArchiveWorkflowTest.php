@@ -54,7 +54,7 @@ class ArchiveWorkflowTest extends TestCase
             ['email' => 'operator_archive_test@dukcapil.dompukab.go.id'],
             ['name' => 'Operator Arsip Test', 'username' => 'operator_archive_test', 'password' => bcrypt('password')]
         );
-        $this->archiveOperatorUser->syncRoles(['operator_arsip']);
+        $this->archiveOperatorUser->syncRoles(['Petugas Pengarsipan']);
 
         // 3. Unauthorized User
         $this->unauthorizedUser = User::firstOrCreate(

@@ -441,10 +441,10 @@ const isWebsiteAdmin = computed(() => userRoles.value.includes('Website Administ
 const isContentEditor = computed(() => userRoles.value.includes('Content Editor'));
 const isComplaintOfficer = computed(() => userRoles.value.includes('Complaint Officer'));
 const isPpidAdmin = computed(() => userRoles.value.includes('PPID Admin'));
-const isQueueOfficer = computed(() => userRoles.value.includes('Queue Officer'));
-const isQueueVerifier = computed(() => userRoles.value.includes('Queue Verifier'));
-const isHandoverOfficer = computed(() => userRoles.value.includes('petugas_pengambilan_ktpel'));
-const isArchiveOperator = computed(() => userRoles.value.includes('operator_arsip'));
+const isQueueOfficer = computed(() => userRoles.value.includes('Queue Officer') || userRoles.value.includes('Petugas Verifikasi / Registrasi KTP-el'));
+const isQueueVerifier = computed(() => userRoles.value.includes('Queue Verifier') || userRoles.value.includes('Petugas Verifikasi / Registrasi KTP-el'));
+const isHandoverOfficer = computed(() => userRoles.value.includes('petugas_pengambilan_ktpel') || userRoles.value.includes('Petugas Pengambilan KTP-el'));
+const isArchiveOperator = computed(() => userRoles.value.includes('operator_arsip') || userRoles.value.includes('Petugas Pengarsipan'));
 const userPermissions = computed(() => page.props.auth?.permissions || []);
 
 const filteredMenuGroups = computed(() => {

@@ -361,6 +361,12 @@ const getRoleClass = (role) => {
       return 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30';
     case 'PPID Admin':
       return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30';
+    case 'Petugas Verifikasi / Registrasi KTP-el':
+      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30';
+    case 'Petugas Pengambilan KTP-el':
+      return 'bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-400 border border-teal-100 dark:border-teal-900/30';
+    case 'Petugas Pengarsipan':
+      return 'bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-400 border border-cyan-100 dark:border-cyan-900/30';
     default:
       return 'bg-zinc-50 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700';
   }
@@ -378,6 +384,12 @@ const getRoleDescription = (role) => {
       return 'Mengelola Layanan Pengaduan Masyarakat & Survei Kepuasan (IKM).';
     case 'PPID Admin':
       return 'Mengelola Keterbukaan Informasi Publik PPID & Dokumen Publik.';
+    case 'Petugas Verifikasi / Registrasi KTP-el':
+      return 'Memverifikasi berkas pendaftaran online, pemeriksaan fisik dokumen asli di loket, dan penerbitan jadwal/antrean KTP-el.';
+    case 'Petugas Pengambilan KTP-el':
+      return 'Pemeriksaan kesiapan fisik kartu, verifikasi identitas penerima KTP-el, foto bukti penyerahan dengan kamera, dan penanganan kendala pengambilan.';
+    case 'Petugas Pengarsipan':
+      return 'Mengelola arsip berkas permohonan selesai, pembuatan paket ZIP dengan verifikasi SHA-256, unduh arsip, dan konfirmasi penyimpanan permanen.';
     default:
       return 'Akses operator standar sistem.';
   }
