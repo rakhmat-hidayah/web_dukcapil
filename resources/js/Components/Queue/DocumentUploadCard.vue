@@ -194,6 +194,9 @@ const downloadUrl = computed(() => {
     return props.requirement.template_url;
   }
   const label = (props.requirement.label || '').toLowerCase();
+  if (label.includes('f-1.06') || label.includes('f1.06') || label.includes('perubahan elemen')) {
+    return 'https://dukcapil.dompukab.go.id/downloads';
+  }
   if (label.includes('f-1.02') || label.includes('f1.02') || label.includes('pendaftaran peristiwa')) {
     return 'https://dukcapil.dompukab.go.id/downloads';
   }
@@ -205,6 +208,9 @@ const downloadUrl = computed(() => {
 
 const downloadFormLabel = computed(() => {
   const label = (props.requirement.label || '').toLowerCase();
+  if (label.includes('f-1.06') || label.includes('f1.06') || label.includes('perubahan elemen')) {
+    return 'Formulir F-1.06';
+  }
   if (label.includes('f-1.02') || label.includes('f1.02') || label.includes('pendaftaran peristiwa')) {
     return 'Formulir F-1.02';
   }

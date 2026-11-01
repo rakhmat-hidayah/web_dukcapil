@@ -161,11 +161,12 @@ class QueueWorkflowTest extends TestCase
             [
                 'open_time' => '08:00:00',
                 'close_time' => '15:30:00',
-                'total_quota' => 50,
+                'total_quota' => 500,
                 'is_holiday' => false,
                 'is_open' => true,
             ]
         );
+        $schedule->update(['total_quota' => 500, 'is_holiday' => false, 'is_open' => true]);
         $slot = QueueSlot::firstOrCreate(
             [
                 'schedule_id' => $schedule->id,
@@ -175,10 +176,11 @@ class QueueWorkflowTest extends TestCase
                 'name' => 'Sesi 1 Pagi (08:00 - 11:30)',
                 'start_time' => '08:00:00',
                 'end_time' => '11:30:00',
-                'quota' => 20,
+                'quota' => 100,
                 'booked_count' => 0,
             ]
         );
+        $slot->increment('quota', 50);
 
         $verifierService->bookQueueSlot($submittedApp, $slot->id);
         $bookedApp = $submittedApp->fresh();
@@ -577,6 +579,56 @@ class QueueWorkflowTest extends TestCase
             $this->assertNotNull($kuasaDoc);
             $this->assertTrue((bool) $kuasaDoc['is_required'], "F-1.07 Surat Kuasa must be marked as required (Wajib)");
         }
+    }
+
+    public function test_f106_document_is_present_and_required_specifically_for_perubahan_elemen_data(): void
+    {
+        $perubahanService = ServiceType::where('slug', 'perubahan-elemen-data')->first();
+        $hilangService = ServiceType::where('slug', 'cetak-ktp-hilang')->first();
+        $this->assertNotNull($perubahanService);
+        $this->assertNotNull($hilangService);
+        $appService = app(QueueApplicationService::class);
+
+        // 1. Service Perubahan Elemen Data MUST have F-1.06 as required
+        $uniqueNikPerubahan = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $appPerubahan = $appService->createDraft([
+            'applicant_nik' => $uniqueNikPerubahan,
+            'applicant_name' => 'Warga Ubah Data',
+            'applicant_phone' => '081234567890',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $perubahanService->id);
+
+        $responsePerubahan = $this->get(route('queue.apply.documents', ['regNumber' => $appPerubahan->reg_number]));
+        $responsePerubahan->assertOk();
+        $requirementsPerubahan = $responsePerubahan->viewData('page')['props']['requirements'];
+
+        $f106Doc = collect($requirementsPerubahan)->first(fn($d) => str_contains($d['label'], 'F-1.06') || str_contains($d['label'], 'F1.06'));
+        $this->assertNotNull($f106Doc, "Formulir F-1.06 MUST be present for Perubahan Elemen Data KTP-el");
+        $this->assertTrue((bool) $f106Doc['is_required'], "Formulir F-1.06 must be mandatory (Wajib)");
+        $this->assertNotEmpty($f106Doc['template_url'], "Formulir F-1.06 must have a template download URL");
+        $this->assertStringContainsString('download', strtolower($f106Doc['template_url']));
+
+        // 2. Other services (like Cetak Hilang) must NOT have F-1.06
+        $uniqueNikHilang = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $appHilang = $appService->createDraft([
+            'applicant_nik' => $uniqueNikHilang,
+            'applicant_name' => 'Warga Hilang KTP',
+            'applicant_phone' => '081234567891',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $hilangService->id);
+
+        $responseHilang = $this->get(route('queue.apply.documents', ['regNumber' => $appHilang->reg_number]));
+        $responseHilang->assertOk();
+        $requirementsHilang = $responseHilang->viewData('page')['props']['requirements'];
+
+        $hasF106InHilang = collect($requirementsHilang)->contains(fn($d) => str_contains($d['label'], 'F-1.06') || str_contains($d['label'], 'F1.06'));
+        $this->assertFalse($hasF106InHilang, "Formulir F-1.06 should NOT be present on other services");
+
+        // Clean up test drafts
+        $appService->deleteDraft($appPerubahan);
+        $appService->deleteDraft($appHilang);
     }
 
     public function test_draft_older_than_24_hours_is_automatically_purged_and_storage_cleaned(): void

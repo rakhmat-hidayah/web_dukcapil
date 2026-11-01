@@ -47,6 +47,10 @@ class ServiceDocument extends Model
         }
 
         $label = strtolower($this->label ?? '');
+        if (str_contains($label, 'f-1.06') || str_contains($label, 'f1.06') || str_contains($label, 'perubahan elemen')) {
+            $download = \App\Models\Download::where('title', 'like', '%F1.06%')->orWhere('title', 'like', '%F-1.06%')->first();
+            return $download ? url("/downloads/stream/{$download->id}") : 'https://dukcapil.dompukab.go.id/downloads';
+        }
         if (str_contains($label, 'f-1.02') || str_contains($label, 'f1.02') || str_contains($label, 'pendaftaran peristiwa')) {
             return 'https://dukcapil.dompukab.go.id/downloads';
         }

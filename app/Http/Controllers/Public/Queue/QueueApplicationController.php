@@ -504,6 +504,47 @@ class QueueApplicationController extends Controller
                         ServiceDocument::create($kuasaPayload);
                     }
                 }
+
+                // 3. Specifically for Perubahan Elemen Data KTP-el: ensure Formulir F-1.06 exists as mandatory
+                if ($service->slug === 'perubahan-elemen-data') {
+                    $f106Doc = ServiceDocument::where('service_type_id', $service->id)
+                        ->where(function ($q) {
+                            $q->where('label', 'like', '%F-1.06%')
+                              ->orWhere('label', 'like', '%F1.06%')
+                              ->orWhere('label', 'like', '%Perubahan Elemen Data%');
+                        })
+                        ->first();
+
+                    $f106Download = \App\Models\Download::where(function ($q) {
+                        $q->where('title', 'like', '%F1.06%')
+                          ->orWhere('title', 'like', '%F-1.06%')
+                          ->orWhere('title', 'like', '%Perubahan Elemen Data%');
+                    })->first();
+
+                    $f106DownloadUrl = $f106Download ? url("/downloads/stream/{$f106Download->id}") : 'https://dukcapil.dompukab.go.id/downloads';
+
+                    $f106Payload = [
+                        'service_type_id'  => $service->id,
+                        'label'            => 'Formulir F-1.06 (Surat Pernyataan Perubahan Elemen Data Kependudukan)',
+                        'description'      => 'Formulir resmi surat pernyataan perubahan elemen data kependudukan yang telah diisi lengkap dan ditandatangani. Blanko formulir dapat diunduh pada link di bawah.',
+                        'is_required'      => true,
+                        'applicable_to'    => 'all',
+                        'accepted_formats' => 'jpg,jpeg,png,pdf',
+                        'max_size_kb'      => 5120,
+                        'capture_hint'     => 'Foto atau scan seluruh lembar Formulir F-1.06 yang telah diisi dan ditandatangani secara jelas dan tidak terpotong.',
+                        'capture_mode'     => 'environment',
+                        'sort_order'       => 2,
+                    ];
+                    if ($hasTemplateUrlColumn) {
+                        $f106Payload['template_url'] = $f106DownloadUrl;
+                    }
+
+                    if ($f106Doc) {
+                        $f106Doc->update($f106Payload);
+                    } else {
+                        ServiceDocument::create($f106Payload);
+                    }
+                }
             }
         } catch (\Throwable $e) {
             \Log::warning('ensureMandatoryDocumentsExist warning: ' . $e->getMessage());
