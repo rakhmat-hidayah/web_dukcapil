@@ -1,11 +1,11 @@
 <template>
   <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[92vh]">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[94vh]">
       <!-- Header -->
       <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <div>
           <h3 class="font-bold text-slate-900 dark:text-white text-base">
-            {{ isSelfie ? 'Foto Wajah Pemohon' : (isKtp ? 'Foto KTP-el' : 'Foto Dokumen Persyaratan') }}
+            {{ headerTitle }}
           </h3>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
             {{ documentLabel }}
@@ -13,16 +13,16 @@
         </div>
         <button
           @click="closeModal"
-          class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+          class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
       <!-- Main Body -->
-      <div class="p-4 sm:p-5 flex-1 overflow-y-auto flex flex-col items-center">
+      <div class="p-3.5 sm:p-5 flex-1 overflow-y-auto flex flex-col items-center">
         <!-- Capture Viewfinder / Preview Container -->
-        <div class="w-full relative rounded-2xl overflow-hidden bg-black h-[58vh] max-h-[520px] min-h-[380px] sm:h-[480px] flex items-center justify-center shadow-inner">
+        <div class="w-full relative rounded-2xl overflow-hidden bg-black h-[60vh] max-h-[540px] min-h-[400px] sm:h-[490px] flex items-center justify-center shadow-inner">
           <!-- 1. LIVE CAMERA STREAM (Always kept in DOM for smooth hardware stream) -->
           <video
             ref="videoRef"
@@ -33,7 +33,7 @@
             :class="[
               'w-full h-full object-cover transition-opacity duration-300',
               isCameraActive && !capturedBlob ? 'opacity-100 block' : 'opacity-0 hidden',
-              isSelfie && currentFacingMode === 'user' ? '-scale-x-100' : ''
+              (frameMode === 'selfie' || isSelfie) && currentFacingMode === 'user' ? '-scale-x-100' : ''
             ]"
           ></video>
 
@@ -50,39 +50,167 @@
           <!-- Guideline Overlay on Live Camera -->
           <div
             v-if="isCameraActive && !capturedBlob"
-            class="absolute inset-0 pointer-events-none flex flex-col items-center justify-between p-3.5 sm:p-4 overflow-hidden z-10"
+            class="absolute inset-0 pointer-events-none flex flex-col items-center justify-between p-2.5 sm:p-3.5 overflow-hidden z-10"
           >
-            <!-- Top Guide Badge -->
-            <div class="z-10 bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-lg text-center max-w-[92%]">
-              <p class="text-xs font-semibold text-white flex items-center justify-center gap-1.5">
-                <span v-if="isKtp" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span v-else-if="isSelfie" class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-                <span v-else class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>{{ guideTitle }}</span>
-              </p>
+            <!-- Top Section: Mode Indicator & Interactive Document Size Selector -->
+            <div class="w-full flex flex-col items-center gap-1.5 z-20 pointer-events-none">
+              <!-- Top Guide Badge -->
+              <div class="bg-slate-950/85 backdrop-blur-md px-3.5 py-1 rounded-full border border-white/20 shadow-lg text-center max-w-[94%]">
+                <p class="text-xs font-semibold text-white flex items-center justify-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>{{ guideTitle }}</span>
+                </p>
+              </div>
+
+              <!-- Interactive Document Frame Selector Pills -->
+              <div class="flex items-center justify-center gap-1 bg-slate-950/90 backdrop-blur-md p-1 rounded-2xl border border-white/20 shadow-xl max-w-[98%] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
+                <!-- 1. Kertas F4 / A4 (Tegak) -->
+                <button
+                  type="button"
+                  @click="frameMode = 'f4_a4'"
+                  :class="[
+                    'px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap',
+                    frameMode === 'f4_a4'
+                      ? 'bg-emerald-500 text-slate-950 shadow-md font-black scale-[1.02]'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  ]"
+                  title="Sesuaikan garis hijau ke ukuran kertas F4 / A4 (Tegak)"
+                >
+                  <span>📄</span> Kertas F4 / A4
+                </button>
+
+                <!-- 2. Ukuran KTP / KIA (Kartu) -->
+                <button
+                  type="button"
+                  @click="frameMode = 'ktp'"
+                  :class="[
+                    'px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap',
+                    frameMode === 'ktp'
+                      ? 'bg-emerald-500 text-slate-950 shadow-md font-black scale-[1.02]'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  ]"
+                  title="Sesuaikan garis hijau ke ukuran kartu fisik KTP-el / KIA"
+                >
+                  <span>🪪</span> Ukuran KTP
+                </button>
+
+                <!-- 3. Kartu Keluarga / Dokumen Landscape -->
+                <button
+                  type="button"
+                  @click="frameMode = 'kk_landscape'"
+                  :class="[
+                    'px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap',
+                    frameMode === 'kk_landscape'
+                      ? 'bg-emerald-500 text-slate-950 shadow-md font-black scale-[1.02]'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  ]"
+                  title="Sesuaikan garis hijau ke ukuran Kartu Keluarga (Landscape)"
+                >
+                  <span>📋</span> Lembar KK
+                </button>
+
+                <!-- 4. Bebas / Penuh -->
+                <button
+                  type="button"
+                  @click="frameMode = 'full'"
+                  :class="[
+                    'px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap',
+                    frameMode === 'full'
+                      ? 'bg-emerald-500 text-slate-950 shadow-md font-black scale-[1.02]'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  ]"
+                  title="Garis hijau layar penuh / bebas"
+                >
+                  <span>📐</span> Bebas
+                </button>
+
+                <!-- 5. Foto Wajah (jika relevan) -->
+                <button
+                  v-if="isSelfieModeAvailable"
+                  type="button"
+                  @click="frameMode = 'selfie'"
+                  :class="[
+                    'px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap',
+                    frameMode === 'selfie'
+                      ? 'bg-emerald-500 text-slate-950 shadow-md font-black scale-[1.02]'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  ]"
+                  title="Garis oval foto wajah"
+                >
+                  <span>👤</span> Wajah
+                </button>
+              </div>
             </div>
 
-            <!-- Center Cutout Frame -->
-            <div class="w-full flex-1 flex items-center justify-center relative my-1">
-              <!-- 1. KTP GUIDELINE (Green card outline + Pasfoto box on right) -->
+            <!-- Center Cutout Frame (Garis Hijau Menyesuaikan Jenis Dokumen) -->
+            <div class="w-full flex-1 flex items-center justify-center relative my-1 overflow-hidden">
+              <!-- A. KERTAS F4 / A4 TEGAK (Surat Kehilangan, Formulir F-1.02, Surat Kuasa, dll) -->
               <div
-                v-if="isKtp"
-                class="relative w-[94%] sm:w-[86%] max-w-[460px] aspect-[1.58/1] rounded-2xl border-2 sm:border-[3px] border-emerald-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] flex items-center"
+                v-if="frameMode === 'f4_a4'"
+                class="relative h-[82%] sm:h-[84%] max-w-[84%] border-2 sm:border-[3px] border-emerald-400 rounded-xl sm:rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex flex-col items-center justify-between p-2 sm:p-2.5 transition-all duration-300"
+                style="aspect-ratio: 210 / 297;"
               >
-                <!-- Left: Area NIK & Identitas -->
-                <div class="absolute left-2.5 sm:left-3.5 top-2.5 sm:top-3.5 bottom-2.5 sm:bottom-3.5 right-[34%] rounded-xl border border-dashed border-emerald-400/50 p-2 sm:p-2.5 flex flex-col justify-between text-emerald-300">
+                <!-- 4 Corner White Accents -->
+                <div class="absolute -top-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
+                <div class="absolute -top-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
+                <div class="absolute -bottom-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
+                <div class="absolute -bottom-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-r-4 border-white rounded-br"></div>
+
+                <!-- Top Guide: Kop Surat -->
+                <div class="w-full border-b border-dashed border-emerald-400/50 pb-1 flex items-center justify-between text-emerald-300/90 text-[9px] font-mono font-bold tracking-wider">
+                  <span>KOP / JUDUL SURAT</span>
+                  <span class="text-[8px] bg-emerald-950/70 px-1.5 py-0.5 rounded text-emerald-300 border border-emerald-500/40 font-mono">F4 / A4 TEGAK</span>
+                </div>
+
+                <!-- Center Guidance Text -->
+                <div class="text-center p-1.5 text-white drop-shadow max-w-[210px]">
+                  <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 mx-auto mb-1 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  </div>
+                  <p class="text-[11px] font-bold leading-tight text-white drop-shadow">
+                    Posisikan 4 sudut lembar kertas F4/A4 di dalam kotak hijau
+                  </p>
+                  <p class="text-[9px] text-emerald-200/90 mt-0.5">
+                    Pastikan tulisan & stempel terbaca tajam
+                  </p>
+                </div>
+
+                <!-- Bottom Guide: Tanda Tangan -->
+                <div class="w-full border-t border-dashed border-emerald-400/50 pt-1 flex items-center justify-between text-emerald-300/90 text-[9px] font-mono">
+                  <span>TANDA TANGAN & STEMPEL</span>
+                  <span class="text-[8px] text-emerald-300/70">210×297 mm</span>
+                </div>
+              </div>
+
+              <!-- B. UKURAN FISIK KTP (CR80 Standard: 85.6 x 54 mm) -->
+              <div
+                v-else-if="frameMode === 'ktp'"
+                class="relative w-[92%] sm:w-[86%] max-w-[420px] border-2 sm:border-[3px] border-emerald-400 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex items-center justify-between p-2.5 transition-all duration-300"
+                style="aspect-ratio: 85.6 / 54;"
+              >
+                <!-- 4 Corner White Accents -->
+                <div class="absolute -top-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
+                <div class="absolute -top-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
+                <div class="absolute -bottom-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
+                <div class="absolute -bottom-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-r-4 border-white rounded-br"></div>
+
+                <!-- Left: Area NIK & Data KTP -->
+                <div class="h-full flex-1 mr-2 rounded-xl border border-dashed border-emerald-400/50 p-2 sm:p-2.5 flex flex-col justify-between text-emerald-300 bg-emerald-950/30">
                   <div class="flex items-center gap-1.5 font-mono font-bold tracking-wider text-[10px] sm:text-[11px]">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-ping"></span>
                     AREA NIK & IDENTITAS
                   </div>
-                  <div class="text-[9px] sm:text-[10px] text-emerald-100/80 leading-tight">
+                  <div class="text-[9px] sm:text-[10px] text-emerald-100/90 leading-tight">
                     Posisikan teks KTP agar terlihat tajam dan tidak silau
+                  </div>
+                  <div class="text-[8px] font-mono text-emerald-300/70">
+                    UKURAN KTP (85.6 × 54 mm)
                   </div>
                 </div>
 
-                <!-- Right: Pasfoto Box (Dedicated matching user's image) -->
-                <div class="absolute right-2.5 sm:right-3.5 top-2.5 sm:top-3.5 bottom-2.5 sm:bottom-3.5 w-[30%] rounded-xl border-2 sm:border-[3px] border-emerald-400 bg-emerald-400/10 flex flex-col items-center justify-center p-1 text-center shadow-sm">
-                  <svg class="w-6 h-6 sm:w-8 sm:h-8 text-emerald-300 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- Right: Pasfoto KTP Box -->
+                <div class="h-full w-[30%] rounded-xl border-2 sm:border-[3px] border-emerald-400 bg-emerald-400/15 flex flex-col items-center justify-center p-1 text-center shadow-sm">
+                  <svg class="w-6 h-6 sm:w-7 sm:h-7 text-emerald-300 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                   </svg>
                   <span class="text-[9px] sm:text-[10px] font-bold text-emerald-200 mt-1 leading-tight tracking-wide">
@@ -94,10 +222,45 @@
                 </div>
               </div>
 
-              <!-- 2. SELFIE GUIDELINE (White dashed oval for face) -->
+              <!-- C. KARTU KELUARGA / LANDSCAPE -->
               <div
-                v-else-if="isSelfie"
-                class="relative w-48 h-64 sm:w-56 sm:h-72 border-2 sm:border-[3px] border-dashed border-white rounded-[50%] shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex flex-col items-center justify-center"
+                v-else-if="frameMode === 'kk_landscape'"
+                class="relative w-[94%] sm:w-[90%] max-w-[460px] border-2 sm:border-[3px] border-emerald-400 rounded-xl sm:rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex flex-col items-center justify-between p-2.5 transition-all duration-300"
+                style="aspect-ratio: 297 / 210;"
+              >
+                <!-- 4 Corner White Accents -->
+                <div class="absolute -top-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
+                <div class="absolute -top-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
+                <div class="absolute -bottom-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
+                <div class="absolute -bottom-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-r-4 border-white rounded-br"></div>
+
+                <!-- Header -->
+                <div class="w-full border-b border-dashed border-emerald-400/50 pb-1 flex items-center justify-between text-emerald-300/90 text-[9px] font-mono font-bold tracking-wider">
+                  <span>KOP KARTU KELUARGA (KK)</span>
+                  <span class="text-[8px] bg-emerald-950/70 px-1.5 py-0.5 rounded text-emerald-300 border border-emerald-500/40 font-mono">LANDSCAPE</span>
+                </div>
+
+                <!-- Center Guidance -->
+                <div class="text-center p-2 text-white drop-shadow max-w-[280px]">
+                  <p class="text-[11px] font-bold leading-tight text-white drop-shadow">
+                    Posisikan lembar Kartu Keluarga mendatar di dalam kotak hijau
+                  </p>
+                  <p class="text-[9px] text-emerald-200/90 mt-0.5">
+                    Pastikan tabel anggota keluarga & barcode TTE tampak jelas
+                  </p>
+                </div>
+
+                <!-- Footer -->
+                <div class="w-full border-t border-dashed border-emerald-400/50 pt-1 flex items-center justify-between text-emerald-300/90 text-[9px] font-mono">
+                  <span>BARCODE TTE / TTD KEPALA DINAS</span>
+                  <span class="text-[8px] text-emerald-300/70">A4 / F4 Mendatar</span>
+                </div>
+              </div>
+
+              <!-- D. SELFIE / FOTO WAJAH (Oval) -->
+              <div
+                v-else-if="frameMode === 'selfie'"
+                class="relative w-48 h-64 sm:w-56 sm:h-72 border-2 sm:border-[3px] border-dashed border-white rounded-[50%] shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex flex-col items-center justify-center transition-all duration-300"
               >
                 <!-- Eye-level line -->
                 <div class="w-2/3 border-b border-white/40 mb-6 relative">
@@ -107,28 +270,30 @@
                 </div>
               </div>
 
-              <!-- 3. GENERAL DOCUMENT GUIDELINE (KK, Surat, Akta, dll) -->
+              <!-- E. BEBAS / PENUH (Full Viewfinder Area) -->
               <div
                 v-else
-                class="relative w-[92%] sm:w-[88%] h-[88%] sm:h-[84%] border-2 sm:border-[3px] border-emerald-400 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] flex items-center justify-center"
+                class="relative w-[92%] sm:w-[88%] h-[88%] sm:h-[84%] border-2 sm:border-[3px] border-emerald-400 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] flex items-center justify-center p-3 transition-all duration-300"
               >
-                <!-- 4 Corner Bracket Accents -->
-                <div class="absolute top-2 left-2 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
-                <div class="absolute top-2 right-2 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
-                <div class="absolute bottom-2 left-2 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
-                <div class="absolute bottom-2 right-2 w-6 h-6 border-b-4 border-r-4 border-white rounded-br"></div>
+                <!-- 4 Corner White Accents -->
+                <div class="absolute -top-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-l-4 border-white rounded-tl"></div>
+                <div class="absolute -top-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-t-4 border-r-4 border-white rounded-tr"></div>
+                <div class="absolute -bottom-1 -left-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-l-4 border-white rounded-bl"></div>
+                <div class="absolute -bottom-1 -right-1 w-5 sm:w-6 h-5 sm:h-6 border-b-4 border-r-4 border-white rounded-br"></div>
 
-                <!-- Center guidance hint -->
-                <div class="text-center p-3 text-white/85 max-w-xs drop-shadow">
-                  <p class="text-[11px] font-semibold leading-relaxed">
-                    Pastikan 4 sudut lembar dokumen berada di dalam kotak hijau
+                <div class="text-center p-3 text-white max-w-xs drop-shadow">
+                  <p class="text-[11px] font-bold leading-relaxed">
+                    Posisikan seluruh lembar dokumen berada di dalam kotak hijau
+                  </p>
+                  <p class="text-[9px] text-emerald-200/90 mt-0.5">
+                    Bingkai bebas untuk berbagai bentuk dokumen
                   </p>
                 </div>
               </div>
             </div>
 
             <!-- Bottom Hint Badge -->
-            <div class="z-10 bg-slate-950/70 backdrop-blur-sm px-3 py-1 rounded-full text-[11px] text-white/90 text-center max-w-[92%]">
+            <div class="z-10 bg-slate-950/75 backdrop-blur-sm px-3 py-1 rounded-full text-[11px] text-white/90 text-center max-w-[94%] shadow">
               {{ guideHint }}
             </div>
           </div>
@@ -202,7 +367,7 @@
           ref="nativeCameraInputRef"
           type="file"
           accept="image/*"
-          :capture="isSelfie ? 'user' : 'environment'"
+          :capture="frameMode === 'selfie' || isSelfie ? 'user' : 'environment'"
           class="hidden"
           @change="handleNativeFilePicked"
         />
@@ -265,7 +430,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 
 const props = defineProps({
   documentLabel: {
@@ -297,9 +462,31 @@ const isCameraActive = ref(false);
 const currentFacingMode = ref(props.captureMode === 'user' ? 'user' : 'environment');
 const mediaStream = ref(null);
 const cameraError = ref(null);
-
 const capturedBlob = ref(null);
 const previewUrl = ref(null);
+
+// Determine default mode based on document label & capture mode
+function getDefaultFrameMode() {
+  if (props.captureMode === 'user') return 'selfie';
+  const label = (props.documentLabel || '').toLowerCase();
+  if (label.includes('selfie') || label.includes('wajah') || label.includes('face')) {
+    return 'selfie';
+  }
+  if (label.includes('ktp') || label.includes('e-ktp') || label.includes('kia') || label.includes('identitas') || label.includes('id card')) {
+    return 'ktp';
+  }
+  if (label.includes('keluarga') || label.includes('kk')) {
+    return 'kk_landscape';
+  }
+  // Default for documents (Surat Kehilangan, Formulir F-1.02, Surat Kuasa, dll)
+  return 'f4_a4';
+}
+
+const frameMode = ref(getDefaultFrameMode());
+
+watch(() => props.documentLabel, () => {
+  frameMode.value = getDefaultFrameMode();
+});
 
 const isSelfie = computed(() => {
   if (props.captureMode === 'user') return true;
@@ -307,22 +494,32 @@ const isSelfie = computed(() => {
   return label.includes('selfie') || label.includes('wajah') || label.includes('face');
 });
 
-const isKtp = computed(() => {
-  if (isSelfie.value) return false;
-  const label = (props.documentLabel || '').toLowerCase();
-  return label.includes('ktp') || label.includes('e-ktp') || label.includes('identitas');
+const isSelfieModeAvailable = computed(() => {
+  return isSelfie.value || currentFacingMode.value === 'user';
+});
+
+const headerTitle = computed(() => {
+  if (frameMode.value === 'selfie') return 'Foto Wajah Pemohon';
+  if (frameMode.value === 'ktp') return 'Foto Dokumen Ukuran KTP';
+  if (frameMode.value === 'f4_a4') return 'Foto Dokumen Kertas F4 / A4';
+  if (frameMode.value === 'kk_landscape') return 'Foto Kartu Keluarga (Landscape)';
+  return 'Foto Dokumen Persyaratan';
 });
 
 const guideTitle = computed(() => {
-  if (isSelfie.value) return 'Posisikan Wajah Tepat di Dalam Garis Oval';
-  if (isKtp.value) return 'Posisikan KTP & Pasfoto Pas Pada Kotak Hijau';
+  if (frameMode.value === 'selfie') return 'Posisikan Wajah Tepat di Dalam Garis Oval';
+  if (frameMode.value === 'ktp') return 'Posisikan KTP & Pasfoto Pas Pada Kotak Hijau';
+  if (frameMode.value === 'f4_a4') return 'Posisikan Lembar Kertas F4 / A4 Dalam Kotak Hijau';
+  if (frameMode.value === 'kk_landscape') return 'Posisikan Lembar KK Dalam Kotak Hijau Mendatar';
   return 'Posisikan Seluruh Dokumen Dalam Kotak Hijau';
 });
 
 const guideHint = computed(() => {
   if (props.captureHint) return props.captureHint;
-  if (isSelfie.value) return 'Hadapkan wajah lurus ke kamera dengan pencahayaan yang cukup';
-  if (isKtp.value) return 'Sejajarkan fisik KTP ke bingkai hijau dan paskan foto wajah di kotak kanan';
+  if (frameMode.value === 'selfie') return 'Hadapkan wajah lurus ke kamera dengan pencahayaan yang cukup';
+  if (frameMode.value === 'ktp') return 'Sejajarkan fisik KTP ke bingkai hijau dan paskan foto wajah di kotak kanan';
+  if (frameMode.value === 'f4_a4') return 'Sejajarkan 4 sudut kertas F4/A4 dengan bingkai hijau tegak';
+  if (frameMode.value === 'kk_landscape') return 'Sejajarkan lembar Kartu Keluarga secara mendatar ke dalam bingkai hijau';
   return 'Pastikan dokumen tidak miring, tidak terpotong, dan tulisan terbaca jelas';
 });
 
@@ -371,7 +568,7 @@ async function startCamera() {
     return;
   }
 
-  const preferredFacing = currentFacingMode.value || (isSelfie.value ? 'user' : 'environment');
+  const preferredFacing = currentFacingMode.value || (frameMode.value === 'selfie' || isSelfie.value ? 'user' : 'environment');
   let stream = null;
 
   // Waterfall 1: Try with ideal facingMode
@@ -379,6 +576,8 @@ async function startCamera() {
     stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: preferredFacing },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
       },
       audio: false,
     });
@@ -459,7 +658,7 @@ async function takeSnapshot() {
 
   const ctx = canvas.getContext('2d');
 
-  if (isSelfie.value && currentFacingMode.value === 'user') {
+  if ((frameMode.value === 'selfie' || isSelfie.value) && currentFacingMode.value === 'user') {
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
   }
