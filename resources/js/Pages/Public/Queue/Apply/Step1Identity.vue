@@ -192,28 +192,109 @@
 
               <!-- Kecamatan -->
               <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                  Kecamatan
-                </label>
-                <input
-                  v-model="form.applicant_district"
-                  type="text"
-                  placeholder="Contoh: Dompu / Woja / Hu'u..."
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                    Kecamatan <span class="text-rose-500">*</span>
+                  </label>
+                  <span v-if="selectedDistrictMode && selectedDistrictMode !== '__OTHER__'" class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">
+                    {{ availableVillages.length }} Desa/Kelurahan
+                  </span>
+                </div>
+                <select
+                  v-model="selectedDistrictMode"
+                  @change="handleDistrictChange"
+                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                  required
+                >
+                  <option value="" disabled>-- Pilih Kecamatan di Kab. Dompu --</option>
+                  <option
+                    v-for="dist in districts"
+                    :key="dist.id"
+                    :value="dist.name"
+                  >
+                    Kecamatan {{ dist.name }}
+                  </option>
+                  <option value="__OTHER__">&bull; Lainnya (Luar Kab. Dompu)</option>
+                </select>
+
+                <!-- Input Manual jika Luar Dompu -->
+                <div v-if="selectedDistrictMode === '__OTHER__'" class="mt-2">
+                  <input
+                    v-model="customDistrict"
+                    @input="handleCustomDistrictInput"
+                    type="text"
+                    placeholder="Tuliskan nama kecamatan Anda..."
+                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
+                    required
+                  />
+                </div>
+                <p v-if="form.errors.applicant_district" class="text-xs text-rose-500 font-medium mt-1">
+                  {{ form.errors.applicant_district }}
+                </p>
               </div>
 
               <!-- Desa / Kelurahan -->
               <div>
                 <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                  Kelurahan / Desa
+                  Kelurahan / Desa <span class="text-rose-500">*</span>
                 </label>
-                <input
-                  v-model="form.applicant_village"
-                  type="text"
-                  placeholder="Contoh: Bada / Dorotangga / Bali..."
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                />
+
+                <!-- Dropdown Desa jika Kecamatan Dompu dipilih -->
+                <div v-if="selectedDistrictMode && selectedDistrictMode !== '__OTHER__'">
+                  <select
+                    v-model="selectedVillageMode"
+                    @change="handleVillageChange"
+                    class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    required
+                  >
+                    <option value="" disabled>-- Pilih Kelurahan / Desa --</option>
+                    <option
+                      v-for="vil in availableVillages"
+                      :key="vil.id"
+                      :value="vil.name"
+                    >
+                      {{ vil.type === 'kelurahan' ? 'Kel. ' : 'Desa ' }}{{ vil.name }}
+                    </option>
+                    <option value="__OTHER__">&bull; Lainnya (Tulis Manual)</option>
+                  </select>
+
+                  <div v-if="selectedVillageMode === '__OTHER__'" class="mt-2">
+                    <input
+                      v-model="customVillage"
+                      @input="handleCustomVillageInput"
+                      type="text"
+                      placeholder="Tuliskan nama desa / kelurahan..."
+                      class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <!-- Input Manual jika Luar Dompu -->
+                <div v-else-if="selectedDistrictMode === '__OTHER__'">
+                  <input
+                    v-model="customVillage"
+                    @input="handleCustomVillageInput"
+                    type="text"
+                    placeholder="Tuliskan nama kelurahan / desa..."
+                    class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
+                    required
+                  />
+                </div>
+
+                <!-- Belum Pilih Kecamatan -->
+                <div v-else>
+                  <select
+                    disabled
+                    class="w-full px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-sm text-slate-400 dark:text-slate-500 cursor-not-allowed"
+                  >
+                    <option value="">-- Pilih Kecamatan Terlebih Dahulu --</option>
+                  </select>
+                </div>
+
+                <p v-if="form.errors.applicant_village" class="text-xs text-rose-500 font-medium mt-1">
+                  {{ form.errors.applicant_village }}
+                </p>
               </div>
 
               <!-- Alamat Lengkap -->
@@ -501,7 +582,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import ProgressWizard from '@/Components/Queue/ProgressWizard.vue';
@@ -514,6 +595,10 @@ const props = defineProps({
   selectedService: {
     type: Object,
     default: null,
+  },
+  districts: {
+    type: Array,
+    default: () => [],
   },
 });
 
@@ -535,6 +620,77 @@ const form = useForm({
   representative_relationship: '',
   representative_kk_status: '',
   absence_reason: '',
+});
+
+const selectedDistrictMode = ref('');
+const selectedVillageMode = ref('');
+const customDistrict = ref('');
+const customVillage = ref('');
+
+const availableVillages = computed(() => {
+  if (!selectedDistrictMode.value || selectedDistrictMode.value === '__OTHER__') {
+    return [];
+  }
+  const found = props.districts.find(d => d.name === selectedDistrictMode.value);
+  return found ? (found.villages || []) : [];
+});
+
+function handleDistrictChange() {
+  if (selectedDistrictMode.value === '__OTHER__') {
+    form.applicant_district = customDistrict.value ? customDistrict.value.trim().toUpperCase() : '';
+    form.applicant_village = customVillage.value ? customVillage.value.trim().toUpperCase() : '';
+    selectedVillageMode.value = '';
+  } else {
+    form.applicant_district = selectedDistrictMode.value;
+    form.applicant_village = '';
+    selectedVillageMode.value = '';
+    customVillage.value = '';
+  }
+}
+
+function handleCustomDistrictInput() {
+  form.applicant_district = customDistrict.value.trim().toUpperCase();
+}
+
+function handleVillageChange() {
+  if (selectedVillageMode.value === '__OTHER__') {
+    form.applicant_village = customVillage.value ? customVillage.value.trim().toUpperCase() : '';
+  } else {
+    form.applicant_village = selectedVillageMode.value;
+    customVillage.value = '';
+  }
+}
+
+function handleCustomVillageInput() {
+  form.applicant_village = customVillage.value.trim().toUpperCase();
+}
+
+onMounted(() => {
+  if (form.applicant_district) {
+    const matchKec = props.districts.find(
+      d => d.name.toUpperCase() === form.applicant_district.trim().toUpperCase()
+    );
+    if (matchKec) {
+      selectedDistrictMode.value = matchKec.name;
+      form.applicant_district = matchKec.name;
+      if (form.applicant_village) {
+        const matchVil = (matchKec.villages || []).find(
+          v => v.name.toUpperCase() === form.applicant_village.trim().toUpperCase()
+        );
+        if (matchVil) {
+          selectedVillageMode.value = matchVil.name;
+          form.applicant_village = matchVil.name;
+        } else {
+          selectedVillageMode.value = '__OTHER__';
+          customVillage.value = form.applicant_village;
+        }
+      }
+    } else {
+      selectedDistrictMode.value = '__OTHER__';
+      customDistrict.value = form.applicant_district;
+      customVillage.value = form.applicant_village;
+    }
+  }
 });
 
 const selectedServiceObj = computed(() => {

@@ -13,6 +13,7 @@ class ReferenceSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            DompuWilayahSeeder::class,
             DemographicSeeder::class,
             ComplaintCategorySeeder::class,
             ServiceRequirementSeeder::class,

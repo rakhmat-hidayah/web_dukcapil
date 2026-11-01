@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Public\Queue;
 
 use App\Http\Controllers\Controller;
+use App\Models\Desa;
+use App\Models\Kecamatan;
 use App\Models\Queue\ApplicationDocument;
 use App\Models\Queue\QueueApplication;
 use App\Models\Queue\QueueSlot;
@@ -59,9 +61,35 @@ class QueueApplicationController extends Controller
             ->with(['documents' => fn($q) => $q->orderBy('sort_order')])
             ->get();
 
+        // Ensure Dompu Kecamatan and Desa are seeded
+        if (Kecamatan::count() === 0 || Desa::count() === 0) {
+            try {
+                (new \Database\Seeders\DompuWilayahSeeder())->run();
+            } catch (\Throwable $e) {
+                \Log::warning('DompuWilayahSeeder auto-seed: ' . $e->getMessage());
+            }
+        }
+
+        $districts = Kecamatan::with(['desas' => fn($q) => $q->orderBy('sort_order')->orderBy('name')])
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'code'])
+            ->map(fn($k) => [
+                'id'       => $k->id,
+                'name'     => $k->name,
+                'code'     => $k->code,
+                'villages' => $k->desas->map(fn($d) => [
+                    'id'         => $d->id,
+                    'name'       => $d->name,
+                    'code'       => $d->code,
+                    'type'       => $d->type,
+                    'type_label' => ucfirst($d->type),
+                ])->values(),
+            ]);
+
         return Inertia::render('Public/Queue/Apply/Step1Identity', [
-            'services' => $services,
+            'services'        => $services,
             'selectedService' => $selectedService,
+            'districts'       => $districts,
         ]);
     }
 
