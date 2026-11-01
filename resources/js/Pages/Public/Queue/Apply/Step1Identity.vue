@@ -20,7 +20,7 @@
           </p>
         </div>
 
-        <form @submit.prevent="submitStep1" class="space-y-8">
+        <form @submit.prevent="submitStep1" novalidate class="space-y-8">
           <!-- TAHAP 1: PILIH JENIS PELAYANAN -->
           <div class="space-y-3">
             <div class="flex items-center justify-between">
@@ -30,7 +30,7 @@
               <span class="text-[11px] text-slate-400">Pilih salah satu layanan</span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div id="field_service_type_id" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label
                 v-for="service in services"
                 :key="service.id"
@@ -103,6 +103,7 @@
                   </span>
                 </div>
                 <input
+                  id="field_applicant_nik"
                   :value="form.applicant_nik"
                   @input="onNikInput"
                   @keypress="filterNikKeypress"
@@ -130,6 +131,7 @@
                   Nama Lengkap Sesuai KK <span class="text-rose-500">*</span>
                 </label>
                 <input
+                  id="field_applicant_name"
                   v-model="form.applicant_name"
                   type="text"
                   placeholder="Nama lengkap pemilik dokumen..."
@@ -147,6 +149,7 @@
                   Tempat Lahir <span class="text-rose-500">*</span>
                 </label>
                 <input
+                  id="field_applicant_birth_place"
                   v-model="form.applicant_birth_place"
                   type="text"
                   placeholder="Contoh: Dompu"
@@ -169,6 +172,7 @@
                   </span>
                 </div>
                 <input
+                  id="field_applicant_birth_date"
                   v-model="form.applicant_birth_date"
                   type="date"
                   :max="maxBirthDate"
@@ -205,6 +209,7 @@
                   Nomor WhatsApp / HP Pemohon <span class="text-rose-500">*</span>
                 </label>
                 <input
+                  id="field_applicant_phone"
                   v-model="form.applicant_phone"
                   type="tel"
                   placeholder="Contoh: 0823xxxxxxxx"
@@ -240,6 +245,7 @@
                   </span>
                 </div>
                 <select
+                  id="field_applicant_district"
                   v-model="selectedDistrictMode"
                   @change="handleDistrictChange"
                   class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
@@ -273,7 +279,7 @@
               </div>
 
               <!-- Desa / Kelurahan -->
-              <div>
+              <div id="field_applicant_village">
                 <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
                   Kelurahan / Desa <span class="text-rose-500">*</span>
                 </label>
@@ -342,6 +348,7 @@
                   Alamat Tempat Tinggal Lengkap <span class="text-rose-500">*</span>
                 </label>
                 <textarea
+                  id="field_applicant_address"
                   v-model="form.applicant_address"
                   rows="2"
                   placeholder="Nama jalan, RT/RW, Dusun, atau patokan tempat tinggal..."
@@ -381,7 +388,7 @@
             </div>
 
             <!-- Attendance Radio Selection -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div id="field_attendance_type" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <!-- Option 1: Datang Sendiri -->
               <label
                 :class="[
@@ -499,6 +506,7 @@
                     </span>
                   </div>
                   <input
+                    id="field_representative_nik"
                     :value="form.representative_nik"
                     @input="onRepresentativeNikInput"
                     @keypress="filterNikKeypress"
@@ -526,6 +534,7 @@
                     Nama Lengkap Perwakilan <span class="text-rose-500">*</span>
                   </label>
                   <input
+                    id="field_representative_name"
                     v-model="form.representative_name"
                     type="text"
                     placeholder="Nama orang yang mewakili..."
@@ -543,6 +552,7 @@
                     Nomor WhatsApp / HP Perwakilan <span class="text-rose-500">*</span>
                   </label>
                   <input
+                    id="field_representative_phone"
                     v-model="form.representative_phone"
                     type="tel"
                     placeholder="0823xxxxxxxx"
@@ -560,6 +570,7 @@
                     Hubungan dengan Pemilik Dokumen <span class="text-rose-500">*</span>
                   </label>
                   <select
+                    id="field_representative_relationship"
                     v-model="form.representative_relationship"
                     class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
                     required
@@ -583,6 +594,7 @@
                     Alasan Pemilik Dokumen Berhalangan Hadir <span class="text-rose-500">*</span>
                   </label>
                   <textarea
+                    id="field_absence_reason"
                     v-model="form.absence_reason"
                     rows="2"
                     placeholder="Jelaskan alasan mengapa pemilik dokumen tidak dapat hadir sendiri (contoh: sakit, disabilitas, lansia, sedang di luar kota)..."
@@ -629,6 +641,85 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Popup Notifikasi Kolom Belum Lengkap -->
+    <div
+      v-if="showIncompleteModal"
+      class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4"
+    >
+      <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl border border-rose-200 dark:border-rose-900/50 overflow-hidden flex flex-col max-h-[90vh]">
+        <!-- Modal Header -->
+        <div class="p-5 sm:p-6 bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-transparent border-b border-rose-100 dark:border-rose-900/40 flex items-start gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-rose-500/30">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+              Kolom Formulir Belum Lengkap!
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+              Terdapat <strong class="text-rose-600 dark:text-rose-400 font-bold">{{ incompleteErrors.length }} kolom</strong> yang belum terisi atau belum sesuai ketentuan. Mohon periksa daftar berikut:
+            </p>
+          </div>
+          <button
+            type="button"
+            @click="showIncompleteModal = false"
+            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Modal Body: Error List -->
+        <div class="p-4 sm:p-6 overflow-y-auto space-y-2.5 max-h-[52vh]">
+          <div
+            v-for="(err, idx) in incompleteErrors"
+            :key="idx"
+            @click="scrollToError(err.elementId)"
+            class="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 hover:bg-rose-100/90 dark:hover:bg-rose-950/60 cursor-pointer transition flex items-start gap-3 group shadow-xs"
+          >
+            <span class="w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+              {{ idx + 1 }}
+            </span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition truncate">
+                  {{ err.label }}
+                </h4>
+                <span class="text-[10px] text-rose-600 dark:text-rose-400 font-bold group-hover:underline flex items-center gap-0.5 shrink-0">
+                  Isi Sekarang &rarr;
+                </span>
+              </div>
+              <p class="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5 leading-snug">
+                {{ err.message }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            @click="showIncompleteModal = false"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
+          >
+            Tutup
+          </button>
+
+          <button
+            type="button"
+            @click="scrollToError(incompleteErrors[0]?.elementId)"
+            class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>Lengkapi Kolom Sekarang</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
       </div>
     </div>
   </PublicLayout>
@@ -835,19 +926,258 @@ function handleServiceChanged(service) {
   }
 }
 
-function submitStep1() {
-  if (form.applicant_nik.length !== 16) {
-    form.errors.applicant_nik = 'NIK harus berjumlah tepat 16 digit angka.';
-    return;
+const showIncompleteModal = ref(false);
+const incompleteErrors = ref([]);
+
+function validateForm() {
+  const errors = [];
+  form.clearErrors();
+
+  // 1. Service Type
+  if (!form.service_type_id) {
+    const msg = 'Pilih salah satu jenis pelayanan KTP-el.';
+    form.errors.service_type_id = msg;
+    errors.push({
+      field: 'service_type_id',
+      elementId: 'field_service_type_id',
+      label: 'Jenis Pelayanan KTP-el',
+      message: msg,
+    });
   }
-  if (ageErrorMessage.value) {
+
+  // 2. NIK Pemilik Dokumen
+  if (!form.applicant_nik) {
+    const msg = 'NIK pemilik dokumen wajib diisi.';
+    form.errors.applicant_nik = msg;
+    errors.push({
+      field: 'applicant_nik',
+      elementId: 'field_applicant_nik',
+      label: 'NIK Pemilik Dokumen (16 Digit)',
+      message: msg,
+    });
+  } else if (form.applicant_nik.length !== 16) {
+    const msg = `NIK harus tepat 16 digit angka (saat ini ${form.applicant_nik.length} digit).`;
+    form.errors.applicant_nik = msg;
+    errors.push({
+      field: 'applicant_nik',
+      elementId: 'field_applicant_nik',
+      label: 'NIK Pemilik Dokumen (16 Digit)',
+      message: msg,
+    });
+  }
+
+  // 3. Nama Lengkap
+  if (!form.applicant_name || !form.applicant_name.trim()) {
+    const msg = 'Nama lengkap sesuai Kartu Keluarga (KK) wajib diisi.';
+    form.errors.applicant_name = msg;
+    errors.push({
+      field: 'applicant_name',
+      elementId: 'field_applicant_name',
+      label: 'Nama Lengkap Sesuai KK',
+      message: msg,
+    });
+  }
+
+  // 4. Tempat Lahir
+  if (!form.applicant_birth_place || !form.applicant_birth_place.trim()) {
+    const msg = 'Tempat lahir pemilik dokumen wajib diisi.';
+    form.errors.applicant_birth_place = msg;
+    errors.push({
+      field: 'applicant_birth_place',
+      elementId: 'field_applicant_birth_place',
+      label: 'Tempat Lahir',
+      message: msg,
+    });
+  }
+
+  // 5. Tanggal Lahir & Validasi Usia
+  if (!form.applicant_birth_date) {
+    const msg = 'Tanggal lahir pemilik dokumen wajib diisi.';
+    form.errors.applicant_birth_date = msg;
+    errors.push({
+      field: 'applicant_birth_date',
+      elementId: 'field_applicant_birth_date',
+      label: 'Tanggal Lahir',
+      message: msg,
+    });
+  } else if (ageErrorMessage.value) {
     form.errors.applicant_birth_date = ageErrorMessage.value;
+    errors.push({
+      field: 'applicant_birth_date',
+      elementId: 'field_applicant_birth_date',
+      label: 'Syarat Usia Pemohon',
+      message: ageErrorMessage.value,
+    });
+  }
+
+  // 6. Nomor HP / WhatsApp
+  if (!form.applicant_phone || !form.applicant_phone.trim()) {
+    const msg = 'Nomor WhatsApp / HP aktif wajib diisi.';
+    form.errors.applicant_phone = msg;
+    errors.push({
+      field: 'applicant_phone',
+      elementId: 'field_applicant_phone',
+      label: 'Nomor WhatsApp / HP',
+      message: msg,
+    });
+  } else if (form.applicant_phone.replace(/\D/g, '').length < 9) {
+    const msg = 'Nomor HP minimal 9 digit angka.';
+    form.errors.applicant_phone = msg;
+    errors.push({
+      field: 'applicant_phone',
+      elementId: 'field_applicant_phone',
+      label: 'Nomor WhatsApp / HP',
+      message: msg,
+    });
+  }
+
+  // 7. Kecamatan
+  if (!form.applicant_district || !form.applicant_district.trim()) {
+    const msg = 'Kecamatan tempat tinggal wajib dipilih.';
+    form.errors.applicant_district = msg;
+    errors.push({
+      field: 'applicant_district',
+      elementId: 'field_applicant_district',
+      label: 'Kecamatan Domisili',
+      message: msg,
+    });
+  }
+
+  // 8. Kelurahan / Desa
+  if (!form.applicant_village || !form.applicant_village.trim()) {
+    const msg = 'Kelurahan / Desa tempat tinggal wajib dipilih atau diisi.';
+    form.errors.applicant_village = msg;
+    errors.push({
+      field: 'applicant_village',
+      elementId: 'field_applicant_village',
+      label: 'Kelurahan / Desa Domisili',
+      message: msg,
+    });
+  }
+
+  // 9. Alamat Lengkap
+  if (!form.applicant_address || !form.applicant_address.trim()) {
+    const msg = 'Alamat tempat tinggal lengkap (jalan, RT/RW, Dusun) wajib diisi.';
+    form.errors.applicant_address = msg;
+    errors.push({
+      field: 'applicant_address',
+      elementId: 'field_applicant_address',
+      label: 'Alamat Tempat Tinggal Lengkap',
+      message: msg,
+    });
+  }
+
+  // 10. Data Perwakilan (jika diwakilkan)
+  if (form.attendance_type !== 'self') {
+    if (!form.representative_nik) {
+      const msg = 'NIK orang yang mewakili wajib diisi.';
+      form.errors.representative_nik = msg;
+      errors.push({
+        field: 'representative_nik',
+        elementId: 'field_representative_nik',
+        label: 'NIK Perwakilan (16 Digit)',
+        message: msg,
+      });
+    } else if (form.representative_nik.length !== 16) {
+      const msg = `NIK perwakilan harus tepat 16 digit angka (saat ini ${form.representative_nik.length} digit).`;
+      form.errors.representative_nik = msg;
+      errors.push({
+        field: 'representative_nik',
+        elementId: 'field_representative_nik',
+        label: 'NIK Perwakilan (16 Digit)',
+        message: msg,
+      });
+    }
+
+    if (!form.representative_name || !form.representative_name.trim()) {
+      const msg = 'Nama lengkap perwakilan sesuai KTP wajib diisi.';
+      form.errors.representative_name = msg;
+      errors.push({
+        field: 'representative_name',
+        elementId: 'field_representative_name',
+        label: 'Nama Lengkap Perwakilan',
+        message: msg,
+      });
+    }
+
+    if (!form.representative_phone || !form.representative_phone.trim()) {
+      const msg = 'Nomor HP / WhatsApp perwakilan wajib diisi.';
+      form.errors.representative_phone = msg;
+      errors.push({
+        field: 'representative_phone',
+        elementId: 'field_representative_phone',
+        label: 'Nomor HP Perwakilan',
+        message: msg,
+      });
+    }
+
+    if (!form.representative_relationship || !form.representative_relationship.trim()) {
+      const msg = 'Hubungan perwakilan dengan pemilik dokumen wajib dipilih.';
+      form.errors.representative_relationship = msg;
+      errors.push({
+        field: 'representative_relationship',
+        elementId: 'field_representative_relationship',
+        label: 'Hubungan Perwakilan',
+        message: msg,
+      });
+    }
+
+    if (!form.absence_reason || !form.absence_reason.trim()) {
+      const msg = 'Alasan pemilik dokumen tidak dapat hadir sendiri wajib dijelaskan.';
+      form.errors.absence_reason = msg;
+      errors.push({
+        field: 'absence_reason',
+        elementId: 'field_absence_reason',
+        label: 'Alasan Berhalangan Hadir',
+        message: msg,
+      });
+    }
+  }
+
+  return errors;
+}
+
+function scrollToError(elementId) {
+  showIncompleteModal.value = false;
+  setTimeout(() => {
+    const el = document.getElementById(elementId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('ring-4', 'ring-rose-500/60', 'border-rose-500', 'transition-all');
+      if (typeof el.focus === 'function') {
+        el.focus();
+      }
+      setTimeout(() => {
+        el.classList.remove('ring-4', 'ring-rose-500/60');
+      }, 3000);
+    }
+  }, 150);
+}
+
+function submitStep1() {
+  const errors = validateForm();
+  if (errors.length > 0) {
+    incompleteErrors.value = errors;
+    showIncompleteModal.value = true;
     return;
   }
-  if (form.attendance_type !== 'self' && form.representative_nik && form.representative_nik.length !== 16) {
-    form.errors.representative_nik = 'NIK perwakilan harus berjumlah tepat 16 digit angka.';
-    return;
-  }
-  form.post(route('queue.apply.store'));
+
+  form.post(route('queue.apply.store'), {
+    onError: (serverErrors) => {
+      const serverList = [];
+      for (const [key, val] of Object.entries(serverErrors)) {
+        serverList.push({
+          field: key,
+          elementId: `field_${key}`,
+          label: key.replace(/_/g, ' ').toUpperCase(),
+          message: Array.isArray(val) ? val[0] : val,
+        });
+      }
+      if (serverList.length > 0) {
+        incompleteErrors.value = serverList;
+        showIncompleteModal.value = true;
+      }
+    }
+  });
 }
 </script>

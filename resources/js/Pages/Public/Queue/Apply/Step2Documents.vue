@@ -51,16 +51,21 @@
 
           <!-- Document Cards Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <DocumentUploadCard
+            <div
               v-for="req in requirements"
               :key="req.id"
-              :requirement="req"
-              :uploaded-doc="getUploadedDoc(req.id)"
-              :can-edit="true"
-              @open-camera="openCameraModal(req)"
-              @preview="openPreviewModal"
-              @delete="handleDeleteDocument"
-            />
+              :id="'doc_card_' + req.id"
+              class="transition-all rounded-3xl"
+            >
+              <DocumentUploadCard
+                :requirement="req"
+                :uploaded-doc="getUploadedDoc(req.id)"
+                :can-edit="true"
+                @open-camera="openCameraModal(req)"
+                @preview="openPreviewModal"
+                @delete="handleDeleteDocument"
+              />
+            </div>
           </div>
         </div>
 
@@ -144,16 +149,95 @@
           <button
             type="button"
             @click="handleSubmitApplication"
-            :disabled="!canSubmit || isSubmitting"
+            :disabled="isSubmitting"
             :class="[
-              'w-full sm:w-auto px-8 py-3.5 rounded-2xl text-xs font-bold transition shadow-lg flex items-center justify-center gap-2',
+              'w-full sm:w-auto px-8 py-3.5 rounded-2xl text-xs font-bold transition shadow-lg flex items-center justify-center gap-2 cursor-pointer',
               canSubmit && !isSubmitting
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30 cursor-pointer hover:scale-[1.02]'
-                : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30 hover:scale-[1.02]'
+                : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30'
             ]"
           >
             <span>{{ isSubmitting ? 'Mengirim Pendaftaran...' : 'Kirim Berkas untuk Pra-Verifikasi' }}</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup Notifikasi Dokumen Belum Lengkap -->
+    <div
+      v-if="showIncompleteDocsModal"
+      class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4"
+    >
+      <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl border border-rose-200 dark:border-rose-900/50 overflow-hidden flex flex-col max-h-[90vh]">
+        <!-- Modal Header -->
+        <div class="p-5 sm:p-6 bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-transparent border-b border-rose-100 dark:border-rose-900/40 flex items-start gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-rose-500/30">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+              Dokumen Persyaratan Belum Lengkap!
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+              Anda belum dapat mengirimkan pendaftaran karena masih ada persyaratan wajib yang belum diunggah atau belum dicentang:
+            </p>
+          </div>
+          <button
+            type="button"
+            @click="showIncompleteDocsModal = false"
+            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Modal Body: Missing Items List -->
+        <div class="p-4 sm:p-6 overflow-y-auto space-y-2.5 max-h-[52vh]">
+          <div
+            v-for="(item, idx) in missingDocsList"
+            :key="idx"
+            @click="scrollToDoc(item.elementId)"
+            class="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 hover:bg-rose-100/90 dark:hover:bg-rose-950/60 cursor-pointer transition flex items-start gap-3 group shadow-xs"
+          >
+            <span class="w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+              {{ idx + 1 }}
+            </span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition truncate">
+                  {{ item.label }}
+                </h4>
+                <span class="text-[10px] text-rose-600 dark:text-rose-400 font-bold group-hover:underline flex items-center gap-0.5 shrink-0">
+                  Foto / Unggah &rarr;
+                </span>
+              </div>
+              <p class="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5 leading-snug">
+                {{ item.message }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            @click="showIncompleteDocsModal = false"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
+          >
+            Tutup
+          </button>
+
+          <button
+            type="button"
+            @click="scrollToDoc(missingDocsList[0]?.elementId)"
+            class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>Lengkapi Berkas Sekarang</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </button>
         </div>
       </div>
@@ -381,14 +465,56 @@ function openPreviewModal(doc) {
   };
 }
 
-async function handleSubmitApplication() {
-  if (!allRequiredUploaded.value) {
-    errorMessage.value = 'Harap lengkapi semua dokumen bertanda Wajib sebelum mengirimkan pendaftaran.';
-    return;
-  }
+const showIncompleteDocsModal = ref(false);
+
+const missingDocsList = computed(() => {
+  const list = [];
+  const required = props.requirements.filter((r) => r.is_required);
+  const serverIds = new Set(docs.value.map((d) => d.service_document_id));
+  const stagedIds = new Set(Object.keys(stagedFiles.value).map(Number));
+
+  required.forEach((r) => {
+    if (!serverIds.has(r.id) && !stagedIds.has(r.id)) {
+      list.push({
+        label: r.label,
+        message: 'Dokumen wajib ini belum difoto / diunggah.',
+        elementId: 'doc_card_' + r.id,
+      });
+    }
+  });
 
   if (!statementAgreed.value) {
-    errorMessage.value = 'Anda wajib mencentang persetujuan pernyataan pemohon sebelum mengirimkan berkas.';
+    list.push({
+      label: 'Pernyataan Keabsahan Dokumen',
+      message: 'Anda belum mencentang kotak persetujuan pernyataan keabsahan di bawah formulir.',
+      elementId: 'statement_checkbox',
+    });
+  }
+
+  return list;
+});
+
+function scrollToDoc(elementId) {
+  showIncompleteDocsModal.value = false;
+  setTimeout(() => {
+    const el = document.getElementById(elementId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('ring-4', 'ring-rose-500/60', 'transition-all');
+      if (typeof el.focus === 'function') {
+        el.focus();
+      }
+      setTimeout(() => {
+        el.classList.remove('ring-4', 'ring-rose-500/60');
+      }, 3000);
+    }
+  }, 150);
+}
+
+async function handleSubmitApplication() {
+  if (missingDocsList.value.length > 0) {
+    errorMessage.value = 'Harap lengkapi semua dokumen bertanda Wajib dan centang pernyataan sebelum mengirimkan pendaftaran.';
+    showIncompleteDocsModal.value = true;
     return;
   }
 
