@@ -48,6 +48,21 @@
             </div>
           </div>
 
+          <!-- QR Code Badge on Banner -->
+          <div
+            v-if="handover.application?.qr_code_svg"
+            class="hidden md:flex flex-col items-center bg-white p-2 rounded-2xl shadow-md border border-white/30 text-center shrink-0"
+            title="QR Code Referensi Dokumen"
+          >
+            <div
+              v-html="handover.application.qr_code_svg"
+              class="w-16 h-16 [&>svg]:w-full [&>svg]:h-full [&>svg]:block"
+            ></div>
+            <span class="text-[9px] font-mono font-bold text-slate-800 mt-1">
+              {{ handover.application.reg_number }}
+            </span>
+          </div>
+
           <!-- Status Specific Quick Action on Banner -->
           <div v-if="handover.status === 'MENUNGGU_KETERSEDIAAN'">
             <button

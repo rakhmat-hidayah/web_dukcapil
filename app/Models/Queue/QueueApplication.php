@@ -5,6 +5,10 @@ namespace App\Models\Queue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 
 class QueueApplication extends Model
 {
@@ -136,6 +140,8 @@ class QueueApplication extends Model
         'applicant_birth_date_formatted',
         'selfie_document',
         'selfie_url',
+        'tracking_url',
+        'qr_code_svg',
     ];
 
     protected static function booted(): void
@@ -328,5 +334,35 @@ class QueueApplication extends Model
             return null;
         }
         return route('admin.queue.documents.serve', ['documentId' => $selfie->id]);
+    }
+
+    public function getTrackingUrlAttribute(): string
+    {
+        return !empty($this->reg_number) ? url('/lacak/' . $this->reg_number) : '';
+    }
+
+    public function getQrCodeSvgAttribute(): string
+    {
+        if (empty($this->reg_number)) {
+            return '';
+        }
+
+        try {
+            $renderer = new ImageRenderer(
+                new RendererStyle(220, 1),
+                new SvgImageBackEnd()
+            );
+            $writer = new Writer($renderer);
+            $targetUrl = $this->tracking_url ?: url('/lacak/' . $this->reg_number);
+            $svg = $writer->writeString($targetUrl);
+
+            // Make SVG responsive so it fits nicely inside any container
+            $svg = preg_replace('/width="[^"]*"/i', 'width="100%"', $svg);
+            $svg = preg_replace('/height="[^"]*"/i', 'height="100%"', $svg);
+
+            return $svg;
+        } catch (\Throwable $e) {
+            return '';
+        }
     }
 }

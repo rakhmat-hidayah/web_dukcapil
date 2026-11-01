@@ -39,6 +39,45 @@
         </div>
       </div>
 
+      <!-- Quick Barcode / QR Code Scanner Bar for Counter Officer -->
+      <div class="bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 rounded-3xl p-5 text-white shadow-lg border border-blue-800/60">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-300 border border-blue-400/30 flex items-center justify-center shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="flex h-2 w-2 relative">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <h3 class="font-bold text-white text-sm">Pindai QR Code Bukti Pendaftaran Pemohon</h3>
+              </div>
+              <p class="text-xs text-blue-200 mt-0.5">Arahkan scanner ke QR Code pemohon untuk langsung membuka transaksi serah terima KTP-el</p>
+            </div>
+          </div>
+
+          <form @submit.prevent="handleQuickScan" class="w-full md:w-auto flex items-center gap-2">
+            <div class="relative w-full md:w-80">
+              <input
+                v-model="scanInput"
+                type="text"
+                placeholder="Scan QR atau ketik REG-..."
+                class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-blue-300/60 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <svg class="w-4 h-4 text-blue-300 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <button
+              type="submit"
+              class="px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-md shadow-blue-600/30 shrink-0 cursor-pointer"
+            >
+              Scan & Buka &rarr;
+            </button>
+          </form>
+        </div>
+      </div>
+
       <!-- 5 Metric Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <!-- 1. Menunggu Ketersediaan -->
@@ -264,8 +303,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
 const props = defineProps({
@@ -273,6 +312,59 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+});
+
+const scanInput = ref('');
+
+function extractRegCode(str) {
+  if (!str) return '';
+  const match = str.match(/REG-[A-Za-z0-9-]+/i);
+  return match ? match[0].toUpperCase() : str.trim();
+}
+
+function handleQuickScan() {
+  const code = extractRegCode(scanInput.value);
+  if (!code) return;
+  router.get(route('admin.handover.scan'), { code });
+}
+
+// Global Hardware Barcode / QR Scanner Keydown Buffer
+let barcodeBuffer = '';
+let lastKeyTime = Date.now();
+
+function handleGlobalKeydown(e) {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'textarea') return;
+
+  const now = Date.now();
+  if (now - lastKeyTime > 90) {
+    barcodeBuffer = '';
+  }
+  lastKeyTime = now;
+
+  if (e.key === 'Enter') {
+    if (barcodeBuffer.length >= 6) {
+      const clean = extractRegCode(barcodeBuffer);
+      if (clean && clean.startsWith('REG-')) {
+        e.preventDefault();
+        scanInput.value = clean;
+        router.get(route('admin.handover.scan'), { code: clean });
+        barcodeBuffer = '';
+        return;
+      }
+    }
+    barcodeBuffer = '';
+  } else if (e.key && e.key.length === 1) {
+    barcodeBuffer += e.key;
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleGlobalKeydown);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown);
 });
 
 const todayDateString = computed(() => {

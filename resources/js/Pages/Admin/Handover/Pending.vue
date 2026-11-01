@@ -26,29 +26,43 @@
         </Link>
       </div>
 
-      <!-- Search & Filters -->
-      <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
+      <!-- Quick Search & Barcode/QR Scanner Bar -->
+      <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+        <div class="flex items-center justify-between gap-3 text-[11px] pb-1 border-b border-slate-100 dark:border-slate-700">
+          <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+            <span class="flex h-2.5 w-2.5 relative">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+            </span>
+            <span class="font-bold text-slate-800 dark:text-slate-200">Scanner QR Code Siap</span>
+            <span class="text-slate-400">· Arahkan perangkat scanner langsung ke QR Code pada bukti pendaftaran pemohon</span>
+          </div>
+          <span class="text-slate-400 font-mono text-[10px] hidden sm:inline">Auto-Direct Scan ON</span>
+        </div>
+
         <form @submit.prevent="handleSearch" class="flex flex-col sm:flex-row items-center gap-3">
           <div class="relative flex-1 w-full">
             <input
+              ref="searchInputRef"
               v-model="searchQuery"
               type="text"
-              placeholder="Cari berdasarkan No. Referensi / Nama Pemilik / NIK..."
-              class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              placeholder="Scan QR Code dengan perangkat scanner atau ketik No. Registrasi / Nama / NIK..."
+              class="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner font-mono"
             />
-            <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
           </div>
           <button
             type="submit"
-            class="w-full sm:w-auto px-6 py-2.5 rounded-2xl bg-slate-900 dark:bg-slate-700 text-white font-bold text-xs hover:bg-slate-800 transition"
+            class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-md shadow-amber-600/20 flex items-center justify-center gap-2 cursor-pointer"
           >
-            Cari
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <span>Cari / Scan</span>
           </button>
           <button
             v-if="filters.search"
             type="button"
             @click="resetSearch"
-            class="w-full sm:w-auto px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs hover:bg-slate-200 transition"
+            class="w-full sm:w-auto px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs hover:bg-slate-200 transition cursor-pointer"
           >
             Reset
           </button>
@@ -219,7 +233,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
@@ -235,11 +249,24 @@ const props = defineProps({
 });
 
 const searchQuery = ref(props.filters.search || '');
+const searchInputRef = ref(null);
 const activeModalItem = ref(null);
 const readyNotes = ref('');
 const isSubmitting = ref(false);
 
+function extractRegCode(str) {
+  if (!str) return '';
+  const match = str.match(/REG-[A-Za-z0-9-]+/i);
+  return match ? match[0].toUpperCase() : str.trim();
+}
+
 function handleSearch() {
+  const clean = extractRegCode(searchQuery.value);
+  if (clean && clean.startsWith('REG-')) {
+    // Hardware scanner or direct reg number -> Direct fast lookup
+    router.get(route('admin.handover.scan'), { code: clean });
+    return;
+  }
   router.get(route('admin.handover.pending'), { search: searchQuery.value }, { preserveState: true, replace: true });
 }
 
@@ -247,6 +274,45 @@ function resetSearch() {
   searchQuery.value = '';
   router.get(route('admin.handover.pending'), {}, { preserveState: true, replace: true });
 }
+
+// Global Hardware Barcode / QR Scanner Keydown Buffer
+let barcodeBuffer = '';
+let lastKeyTime = Date.now();
+
+function handleGlobalKeydown(e) {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'textarea') return;
+
+  const now = Date.now();
+  if (now - lastKeyTime > 90) {
+    barcodeBuffer = '';
+  }
+  lastKeyTime = now;
+
+  if (e.key === 'Enter') {
+    if (barcodeBuffer.length >= 6) {
+      const clean = extractRegCode(barcodeBuffer);
+      if (clean && clean.startsWith('REG-')) {
+        e.preventDefault();
+        searchQuery.value = clean;
+        router.get(route('admin.handover.scan'), { code: clean });
+        barcodeBuffer = '';
+        return;
+      }
+    }
+    barcodeBuffer = '';
+  } else if (e.key && e.key.length === 1) {
+    barcodeBuffer += e.key;
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleGlobalKeydown);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown);
+});
 
 function openMarkReadyModal(item) {
   activeModalItem.value = item;

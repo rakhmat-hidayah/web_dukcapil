@@ -30,6 +30,9 @@ class ApplicationVerificationController extends Controller
         $status = $request->query('status');
         $serviceId = $request->query('service_id');
         $search = $request->query('search');
+        if ($search && preg_match('/(REG-[A-Za-z0-9-]+)/i', $search, $matches)) {
+            $search = strtoupper($matches[1]);
+        }
 
         $query = QueueApplication::with(['serviceType', 'slot.schedule'])
             ->latest('submitted_at');

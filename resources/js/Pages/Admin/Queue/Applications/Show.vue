@@ -33,6 +33,18 @@
 
         <!-- Quick Status Control -->
         <div class="flex items-center gap-2">
+          <!-- QR Code Badge -->
+          <div
+            v-if="application.qr_code_svg"
+            class="hidden sm:flex flex-col items-center bg-white p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm shrink-0"
+            title="QR Code Registrasi & Pengambilan"
+          >
+            <div
+              v-html="application.qr_code_svg"
+              class="w-12 h-12 [&>svg]:w-full [&>svg]:h-full [&>svg]:block"
+            ></div>
+          </div>
+
           <!-- Check-In Button for physical arrival -->
           <button
             v-if="['APPROVED', 'SCHEDULED'].includes(application.status)"

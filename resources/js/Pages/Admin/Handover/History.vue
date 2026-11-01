@@ -247,7 +247,17 @@ const searchQuery = ref(props.filters.search || '');
 const dateQuery = ref(props.filters.date || '');
 const activePhotoItem = ref(null);
 
+function extractRegCode(str) {
+  if (!str) return '';
+  const match = str.match(/REG-[A-Za-z0-9-]+/i);
+  return match ? match[0].toUpperCase() : str.trim();
+}
+
 function handleSearch() {
+  const clean = extractRegCode(searchQuery.value);
+  if (clean && clean.startsWith('REG-')) {
+    searchQuery.value = clean;
+  }
   router.get(
     route('admin.handover.history'),
     { search: searchQuery.value, date: dateQuery.value },

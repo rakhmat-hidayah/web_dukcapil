@@ -35,6 +35,16 @@
         <div class="flex items-center gap-2.5 self-start md:self-center shrink-0 flex-wrap">
           <button
             type="button"
+            @click="showQrModal = true"
+            class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95"
+            title="Tampilkan QR Code untuk di-scan petugas loket"
+          >
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+            <span>Scan QR Petugas</span>
+          </button>
+
+          <button
+            type="button"
             @click="windowPrint"
             class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95"
             title="Cetak Tanda Terima atau Simpan PDF"
@@ -350,31 +360,86 @@
           </div>
         </div>
 
-        <div class="py-8 text-center bg-slate-50 dark:bg-slate-900/60 rounded-2xl my-6 border border-slate-200/50 dark:border-slate-800">
-          <template v-if="application.queue_number">
-            <p class="text-xs uppercase font-bold tracking-widest text-slate-400">Nomor Antrean Resmi Anda</p>
-            <p class="text-5xl sm:text-6xl font-black font-mono tracking-tight text-blue-600 dark:text-blue-400 mt-2">
-              {{ application.queue_number }}
-            </p>
-            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-2">
-              {{ application.service_type?.name }}
-            </p>
-            <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
-              Sesi: {{ application.slot?.name || 'Sesi Pelayanan' }} ({{ scheduleTimeFormatted }})
+        <!-- Main Ticket Card: Number Info + Official QR Code -->
+        <div class="p-6 sm:p-8 bg-slate-50 dark:bg-slate-900/60 rounded-2xl my-6 border border-slate-200/70 dark:border-slate-800">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            <!-- Left Side: Registration / Queue Number Details -->
+            <div class="flex-1 text-center md:text-left space-y-2">
+              <template v-if="application.queue_number">
+                <span class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                  Nomor Antrean Resmi Anda
+                </span>
+                <p class="text-5xl sm:text-6xl font-black font-mono tracking-tight text-blue-600 dark:text-blue-400">
+                  {{ application.queue_number }}
+                </p>
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-200">
+                  {{ application.service_type?.name }}
+                </p>
+                <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
+                  <span class="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200">
+                    Sesi: {{ application.slot?.name || 'Sesi Pelayanan' }} ({{ scheduleTimeFormatted }})
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-mono font-bold bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    Reg: {{ application.reg_number }}
+                  </span>
+                </div>
+              </template>
+              <template v-else>
+                <span class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                  Nomor Registrasi Pendaftaran
+                </span>
+                <p class="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight text-slate-900 dark:text-slate-100">
+                  {{ application.reg_number }}
+                </p>
+                <p class="text-sm font-bold text-slate-700 dark:text-slate-300">
+                  {{ application.service_type?.name }}
+                </p>
+                <div class="pt-1">
+                  <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300">
+                    Tahap: Pra-Verifikasi Dokumen Online (Nomor Antrean Diterbitkan Setelah Lolos Verifikasi)
+                  </div>
+                </div>
+              </template>
             </div>
-          </template>
-          <template v-else>
-            <p class="text-xs uppercase font-bold tracking-widest text-slate-400">Nomor Registrasi Pendaftaran</p>
-            <p class="text-3xl sm:text-4xl font-black font-mono tracking-tight text-slate-800 dark:text-slate-100 mt-2">
-              {{ application.reg_number }}
-            </p>
-            <p class="text-sm font-bold text-slate-700 dark:text-slate-300 mt-2">
-              {{ application.service_type?.name }}
-            </p>
-            <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300">
-              Tahap: Pra-Verifikasi Dokumen Online (Nomor Antrean Diterbitkan Setelah Lolos Verifikasi)
+
+            <!-- Right Side: Official QR Code Box for Scanner Device & Phone -->
+            <div class="shrink-0 flex flex-col items-center text-center">
+              <div
+                @click="showQrModal = true"
+                class="w-36 h-36 sm:w-40 sm:h-40 p-2.5 bg-white rounded-2xl border-2 border-slate-300 dark:border-slate-600 shadow-md flex items-center justify-center cursor-pointer hover:scale-105 transition group relative"
+                title="Klik untuk memperbesar QR Code"
+              >
+                <!-- SVG QR Code rendered crisp and clean -->
+                <div v-if="application.qr_code_svg" v-html="application.qr_code_svg" class="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:block"></div>
+                <div v-else class="text-slate-400 text-xs">Memuat QR Code...</div>
+
+                <!-- Hover hint for desktop -->
+                <div class="absolute inset-0 bg-blue-900/10 rounded-2xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center print:hidden">
+                  <span class="px-2 py-1 rounded-lg bg-black/75 text-white text-[10px] font-bold">Perbesar</span>
+                </div>
+              </div>
+
+              <!-- QR Code Subtext & Scanner Guidance -->
+              <div class="mt-2 space-y-0.5">
+                <p class="text-[11px] font-mono font-bold text-slate-800 dark:text-slate-200 tracking-wider">
+                  {{ application.reg_number }}
+                </p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
+                  <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                  Scan QR Pengambilan & Loket
+                </p>
+                <button
+                  type="button"
+                  @click="showQrModal = true"
+                  class="text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:underline print:hidden cursor-pointer"
+                >
+                  Tampilkan Layar Penuh &rarr;
+                </button>
+              </div>
             </div>
-          </template>
+
+          </div>
         </div>
 
         <!-- Schedule & Location Details -->
@@ -612,6 +677,71 @@
       @captured="handleRevisionPhotoCaptured"
     />
 
+    <!-- Fullscreen / High-Res QR Code Modal (Optimized for Loket Scanner Gun & Phone Display) -->
+    <div
+      v-if="showQrModal"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm print:hidden animate-in fade-in duration-150"
+      @click.self="showQrModal = false"
+    >
+      <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl relative space-y-4">
+        <!-- Close Button -->
+        <button
+          type="button"
+          @click="showQrModal = false"
+          class="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+
+        <!-- Dukcapil Header in Modal -->
+        <div>
+          <p class="text-[10px] font-black uppercase tracking-widest text-blue-600">
+            DISDUKCAPIL KABUPATEN DOMPU
+          </p>
+          <h3 class="text-base font-black text-slate-900 mt-0.5">
+            QR Code Pelacakan & Pengambilan
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">
+            {{ application.service_type?.name }}
+          </p>
+        </div>
+
+        <!-- High Contrast QR Box -->
+        <div class="p-4 bg-white rounded-2xl border-2 border-slate-200 shadow-inner flex items-center justify-center">
+          <div
+            v-if="application.qr_code_svg"
+            v-html="application.qr_code_svg"
+            class="w-64 h-64 [&>svg]:w-full [&>svg]:h-full [&>svg]:block"
+          ></div>
+        </div>
+
+        <!-- Details below QR -->
+        <div class="space-y-1">
+          <p class="text-lg font-black font-mono tracking-tight text-slate-900">
+            {{ application.reg_number }}
+          </p>
+          <p class="text-xs font-semibold text-slate-700">
+            {{ application.applicant_name }}
+          </p>
+          <div class="pt-2 text-[11px] text-slate-500 leading-relaxed bg-blue-50/70 p-3 rounded-xl border border-blue-100 flex items-start gap-2 text-left">
+            <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Tunjukkan layar ini kepada petugas di loket pelayanan atau pengambilan KTP-el untuk di-scan menggunakan scanner QR / barcode.</span>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="pt-2">
+          <button
+            type="button"
+            @click="showQrModal = false"
+            class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Copy Toast Notification -->
     <transition
       enter-active-class="transition duration-200 ease-out"
@@ -660,6 +790,7 @@ const activeRevisionCameraDoc = ref(null);
 const revisionFiles = ref({});
 const revisionForm = useForm({});
 const toastMessage = ref('');
+const showQrModal = ref(false);
 let toastTimer = null;
 
 function copyText(text, label) {

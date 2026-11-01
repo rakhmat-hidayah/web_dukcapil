@@ -36,6 +36,9 @@ class KtpHandoverController extends Controller
     public function pending(Request $request): Response
     {
         $search = $request->query('search');
+        if ($search && preg_match('/(REG-[A-Za-z0-9-]+)/i', $search, $matches)) {
+            $search = strtoupper($matches[1]);
+        }
 
         $query = KtpHandover::pending()
             ->with(['application.serviceType'])
@@ -67,6 +70,9 @@ class KtpHandoverController extends Controller
     public function ready(Request $request): Response
     {
         $search = $request->query('search');
+        if ($search && preg_match('/(REG-[A-Za-z0-9-]+)/i', $search, $matches)) {
+            $search = strtoupper($matches[1]);
+        }
 
         $query = KtpHandover::ready()
             ->with(['application.serviceType', 'readyMarkedUser'])
@@ -98,6 +104,9 @@ class KtpHandoverController extends Controller
     public function history(Request $request): Response
     {
         $search = $request->query('search');
+        if ($search && preg_match('/(REG-[A-Za-z0-9-]+)/i', $search, $matches)) {
+            $search = strtoupper($matches[1]);
+        }
         $date = $request->query('date');
 
         $query = KtpHandover::handedOver()
@@ -137,6 +146,9 @@ class KtpHandoverController extends Controller
     public function exceptions(Request $request): Response
     {
         $search = $request->query('search');
+        if ($search && preg_match('/(REG-[A-Za-z0-9-]+)/i', $search, $matches)) {
+            $search = strtoupper($matches[1]);
+        }
 
         $query = KtpHandover::exception()
             ->with(['application.serviceType', 'exceptionReportedUser'])
@@ -158,6 +170,43 @@ class KtpHandoverController extends Controller
                 'search' => $search,
             ],
         ]);
+    }
+
+    /**
+     * Dedicated hardware barcode / QR code scanner fast lookup endpoint.
+     */
+    public function scan(Request $request): RedirectResponse
+    {
+        $code = trim($request->query('code', $request->query('q', '')));
+
+        if (!$code) {
+            return redirect()->route('admin.handover.ready')->with('error', 'Silakan arahkan scanner ke QR Code atau masukkan nomor registrasi.');
+        }
+
+        // Sanitize scanned text (e.g. if scanner emitted full URL: https://.../lacak/REG-...)
+        if (preg_match('/(REG-[A-Za-z0-9-]+)/i', $code, $matches)) {
+            $code = strtoupper($matches[1]);
+        }
+
+        // 1. Direct match on KtpHandover
+        $handover = KtpHandover::whereHas('application', function ($q) use ($code) {
+            $q->where('reg_number', $code);
+        })->first();
+
+        if ($handover) {
+            return redirect()->route('admin.handover.show', $handover->id)
+                ->with('success', "Dokumen [{$code}] berhasil ditemukan melalui scanner QR.");
+        }
+
+        // 2. Check if application exists in queue (not yet in physical handover stage)
+        $app = \App\Models\Queue\QueueApplication::where('reg_number', $code)->first();
+        if ($app) {
+            return redirect()->route('admin.queue.applications.show', $app->id)
+                ->with('info', "Dokumen [{$code}] ditemukan pada antrean online (status: {$app->status_label}), belum masuk tahap serah terima fisik.");
+        }
+
+        return redirect()->route('admin.handover.ready', ['search' => $code])
+            ->with('error', "Dokumen dengan nomor registrasi [{$code}] tidak ditemukan.");
     }
 
     /**

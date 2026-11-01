@@ -105,7 +105,13 @@ Route::prefix('layanan/antrian')->name('queue.')->group(function () {
     Route::get('/riwayat', [\App\Http\Controllers\Public\Queue\ApplicantHistoryController::class, 'index'])->name('history');
     Route::post('/riwayat/verifikasi', [\App\Http\Controllers\Public\Queue\ApplicantHistoryController::class, 'verify'])->name('history.verify');
     Route::post('/riwayat/keluar', [\App\Http\Controllers\Public\Queue\ApplicantHistoryController::class, 'forget'])->name('history.forget');
+
+    // Quick Tracking & QR Code Scan resolver (prefixed)
+    Route::get('/lacak/{code}', [\App\Http\Controllers\Public\Queue\QueueTrackController::class, 'track'])->where('code', '.*')->name('track');
 });
+
+// Universal Direct QR Code / Barcode Tracking URL (Root-level for short, crisp QR codes)
+Route::get('/lacak/{code}', [\App\Http\Controllers\Public\Queue\QueueTrackController::class, 'track'])->where('code', '.*')->name('queue.direct-track');
 
 Route::get('/layanan', [\App\Http\Controllers\Public\ServiceRequirementController::class, 'index'])->name('public.services.index');
 Route::get('/layanan/survei', [\App\Http\Controllers\Public\PublicSurveyController::class, 'index'])->name('public.survey.index');
@@ -464,6 +470,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/ready', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'ready'])->name('ready');
             Route::get('/history', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'history'])->name('history');
             Route::get('/exceptions', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'exceptions'])->name('exceptions');
+            Route::get('/scan', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'scan'])->name('scan');
             Route::get('/{id}', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'show'])->name('show');
             Route::post('/{id}/mark-ready', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'markReady'])->name('mark-ready');
             Route::post('/{id}/report-exception', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'reportException'])->name('report-exception');
