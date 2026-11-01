@@ -58,7 +58,7 @@
           </div>
 
           <Link
-            v-if="$page.props.auth?.permissions?.includes('archive.settings.manage') || $page.props.auth?.roles?.includes('Super Administrator')"
+            v-if="$page.props.auth?.permissions?.includes('archive.settings.manage') || $page.props.auth?.roles?.includes('Super Administrator') || $page.props.auth?.roles?.includes('Administrator Utama')"
             :href="route('admin.archive.settings.index')"
             class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 text-xs font-bold text-slate-700 dark:text-slate-200 transition text-center"
           >
@@ -140,7 +140,7 @@
                 </td>
                 <td class="py-3 px-4 text-right font-sans">
                   <button
-                    v-if="isConfigured && ($page.props.auth?.permissions?.includes('archive.transfer.execute') || $page.props.auth?.roles?.includes('Super Administrator'))"
+                    v-if="isConfigured && ($page.props.auth?.permissions?.includes('archive.transfer.execute') || $page.props.auth?.roles?.includes('Super Administrator') || $page.props.auth?.roles?.includes('Administrator Utama'))"
                     @click="executeTransfer(pkg.id)"
                     class="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer"
                   >

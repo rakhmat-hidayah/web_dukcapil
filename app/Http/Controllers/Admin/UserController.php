@@ -40,7 +40,7 @@ class UserController extends Controller
                 'email'              => $user->email,
                 'is_active'          => $user->is_active,
                 'two_factor_enabled' => $user->hasTwoFactorEnabled(),
-                'role'               => $user->roles->first()?->name ?? 'Content Editor',
+                'role'               => $user->roles->first()?->name ?? 'Editor Konten',
                 'roles'      => $user->roles->pluck('name'),
                 'last_login_at' => $user->last_login_at?->format('d M Y H:i') ?? '—',
                 'created_at' => $user->created_at->format('d M Y'),

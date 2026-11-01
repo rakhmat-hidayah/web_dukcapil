@@ -47,7 +47,7 @@ class ArchiveWorkflowTest extends TestCase
             ['email' => 'admin_archive_test@dukcapil.dompukab.go.id'],
             ['name' => 'Admin Test', 'username' => 'admin_archive_test', 'password' => bcrypt('password')]
         );
-        $this->adminUser->syncRoles(['Super Administrator']);
+        $this->adminUser->syncRoles(['Administrator Utama']);
 
         // 2. Archive Operator User
         $this->archiveOperatorUser = User::firstOrCreate(

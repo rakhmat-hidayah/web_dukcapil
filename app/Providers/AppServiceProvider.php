@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Super Administrator has implicit full permissions override
         Gate::before(function ($user, $ability) {
-            return $user->hasRole('Super Administrator') ? true : null;
+            return ($user->hasRole('Super Administrator') || $user->hasRole('Administrator Utama')) ? true : null;
         });
         // Define standard API Rate Limiter resolving limits dynamically
         RateLimiter::for('api', function (Request $request) {

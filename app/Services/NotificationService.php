@@ -35,7 +35,7 @@ class NotificationService
         $url = "/admin/complaints/{$complaint->id}";
         
         self::sendToRoles(
-            ['Super Administrator', 'Website Administrator', 'Complaint Officer'],
+            ['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website', 'Complaint Officer', 'Petugas Pengaduan'],
             $title,
             $message,
             $url,
@@ -60,7 +60,7 @@ class NotificationService
         $url = "/admin/news/{$news->id}/edit";
 
         self::sendToRoles(
-            ['Super Administrator', 'Website Administrator', 'Content Editor'],
+            ['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website', 'Content Editor', 'Editor Konten'],
             $title,
             $message,
             $url,
@@ -79,7 +79,7 @@ class NotificationService
         $url = '/admin/downloads';
 
         self::sendToRoles(
-            ['Super Administrator', 'Website Administrator', 'Publication Operator'],
+            ['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website', 'Publication Operator', 'Operator Publikasi'],
             $title,
             $message,
             $url,
@@ -98,7 +98,7 @@ class NotificationService
         $url = '/admin/audit-logs';
 
         self::sendToRoles(
-            ['Super Administrator', 'Website Administrator'],
+            ['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website'],
             $title,
             $message,
             $url,
@@ -117,7 +117,7 @@ class NotificationService
         $url = "/admin/comments";
 
         self::sendToRoles(
-            ['Super Administrator', 'Website Administrator', 'Content Editor'],
+            ['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website', 'Content Editor', 'Editor Konten'],
             $title,
             $message,
             $url,

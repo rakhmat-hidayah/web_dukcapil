@@ -41,9 +41,9 @@ class NotificationSettingController extends Controller
         ];
 
         $permissions = [
-            'can_manage' => $user->hasAnyRole(['Super Administrator', 'Website Administrator']) || $user->hasPermissionTo('notifications.manage'),
-            'can_test'   => $user->hasAnyRole(['Super Administrator', 'Website Administrator']) || $user->hasPermissionTo('notifications.test'),
-            'can_logs'   => $user->hasAnyRole(['Super Administrator', 'Website Administrator']) || $user->hasPermissionTo('notifications.logs'),
+            'can_manage' => $user->hasAnyRole(['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website']) || $user->hasPermissionTo('notifications.manage'),
+            'can_test'   => $user->hasAnyRole(['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website']) || $user->hasPermissionTo('notifications.test'),
+            'can_logs'   => $user->hasAnyRole(['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website']) || $user->hasPermissionTo('notifications.logs'),
         ];
 
         return Inertia::render('Admin/NotificationSettings/Index', [
@@ -60,7 +60,7 @@ class NotificationSettingController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $user = $request->user();
-        if (!$user->hasAnyRole(['Super Administrator', 'Website Administrator']) && !$user->hasPermissionTo('notifications.manage')) {
+        if (!$user->hasAnyRole(['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website']) && !$user->hasPermissionTo('notifications.manage')) {
             abort(403, 'Anda tidak memiliki hak akses untuk mengelola pengaturan notifikasi.');
         }
 
@@ -96,7 +96,7 @@ class NotificationSettingController extends Controller
     public function sendTestEmail(Request $request): RedirectResponse
     {
         $user = $request->user();
-        if (!$user->hasAnyRole(['Super Administrator', 'Website Administrator']) && !$user->hasPermissionTo('notifications.test')) {
+        if (!$user->hasAnyRole(['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website']) && !$user->hasPermissionTo('notifications.test')) {
             abort(403, 'Anda tidak memiliki hak akses untuk menguji notifikasi email.');
         }
 

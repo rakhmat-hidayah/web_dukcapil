@@ -436,11 +436,14 @@ const menuGroups = [
 ];
 
 const userRoles = computed(() => page.props.auth?.roles || []);
-const isSuperAdmin = computed(() => userRoles.value.includes('Super Administrator'));
-const isWebsiteAdmin = computed(() => userRoles.value.includes('Website Administrator'));
-const isContentEditor = computed(() => userRoles.value.includes('Content Editor'));
-const isComplaintOfficer = computed(() => userRoles.value.includes('Complaint Officer'));
-const isPpidAdmin = computed(() => userRoles.value.includes('PPID Admin'));
+const isSuperAdmin = computed(() => userRoles.value.includes('Super Administrator') || userRoles.value.includes('Administrator Utama'));
+const isWebsiteAdmin = computed(() => userRoles.value.includes('Website Administrator') || userRoles.value.includes('Administrator Website'));
+const isContentEditor = computed(() => userRoles.value.includes('Content Editor') || userRoles.value.includes('Editor Konten'));
+const isNewsOperator = computed(() => userRoles.value.includes('News Operator') || userRoles.value.includes('Operator Berita'));
+const isPubOperator = computed(() => userRoles.value.includes('Publication Operator') || userRoles.value.includes('Operator Publikasi'));
+const isMediaManager = computed(() => userRoles.value.includes('Media Manager') || userRoles.value.includes('Pengelola Media'));
+const isComplaintOfficer = computed(() => userRoles.value.includes('Complaint Officer') || userRoles.value.includes('Petugas Pengaduan'));
+const isPpidAdmin = computed(() => userRoles.value.includes('PPID Admin') || userRoles.value.includes('Admin PPID'));
 const isQueueOfficer = computed(() => userRoles.value.includes('Queue Officer') || userRoles.value.includes('Petugas Verifikasi / Registrasi KTP-el'));
 const isQueueVerifier = computed(() => userRoles.value.includes('Queue Verifier') || userRoles.value.includes('Petugas Verifikasi / Registrasi KTP-el'));
 const isHandoverOfficer = computed(() => userRoles.value.includes('petugas_pengambilan_ktpel') || userRoles.value.includes('Petugas Pengambilan KTP-el'));
@@ -481,6 +484,27 @@ const filteredMenuGroups = computed(() => {
           'admin.downloads.index',
           'admin.faqs.index',
         ].includes(r)) {
+          return true;
+        }
+      }
+
+      // News Operator allowed items
+      if (isNewsOperator.value) {
+        if (['admin.files.index', 'admin.news.index'].includes(r)) {
+          return true;
+        }
+      }
+
+      // Media Manager allowed items
+      if (isMediaManager.value) {
+        if (['admin.files.index'].includes(r)) {
+          return true;
+        }
+      }
+
+      // Publication Operator allowed items
+      if (isPubOperator.value) {
+        if (['admin.files.index', 'admin.downloads.index'].includes(r)) {
           return true;
         }
       }

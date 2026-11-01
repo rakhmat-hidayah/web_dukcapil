@@ -33,7 +33,7 @@ class ArchiveHistoryController extends Controller
 
         $actions = ArchiveAuditLog::select('action')->distinct()->pluck('action');
         $users = User::whereHas('roles', function ($q) {
-            $q->whereIn('name', ['operator_arsip', 'Super Administrator', 'Website Administrator']);
+            $q->whereIn('name', ['Petugas Pengarsipan', 'operator_arsip', 'Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website']);
         })->select('id', 'name')->get();
 
         return Inertia::render('Admin/Archive/History', [

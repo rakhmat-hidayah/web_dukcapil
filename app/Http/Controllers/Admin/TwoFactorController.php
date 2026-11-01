@@ -37,7 +37,7 @@ class TwoFactorController extends Controller
             'twoFactorLastUsedAt'    => $user->two_factor_last_used_at?->format('d M Y H:i') ?? '—',
             'requiresTwoFactor'      => $user->requiresTwoFactorByRole(),
             'recoveryCodesRemaining' => $recoveryCodesRemaining,
-            'userRole'               => $user->roles->first()?->name ?? 'Content Editor',
+            'userRole'               => $user->roles->first()?->name ?? 'Editor Konten',
             'issuer'                 => config('two-factor.issuer', 'Disdukcapil Kabupaten Dompu'),
         ]);
     }

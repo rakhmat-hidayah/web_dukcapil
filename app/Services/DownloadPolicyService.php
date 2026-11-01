@@ -129,11 +129,13 @@ class DownloadPolicyService
 
         // 2. User Authorization & Availability Status Check
         $isAdmin = $user && (
-            $user->hasRole('Super Administrator') ||
-            $user->hasRole('Website Administrator') ||
-            $user->hasRole('Publication Operator') ||
-            $user->hasRole('Content Editor') ||
-            $user->hasRole('PPID Admin')
+            $user->hasAnyRole([
+                'Super Administrator', 'Administrator Utama',
+                'Website Administrator', 'Administrator Website',
+                'Publication Operator', 'Operator Publikasi',
+                'Content Editor', 'Editor Konten',
+                'PPID Admin', 'Admin PPID',
+            ])
         );
 
         if (!$isAdmin && $doc->status !== 'published') {

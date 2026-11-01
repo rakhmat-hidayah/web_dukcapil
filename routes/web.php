@@ -200,7 +200,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // Super Administrator Only Routes
         // -------------------------------------------------------------
-        Route::middleware('role:Super Administrator')->group(function () {
+        Route::middleware('role:Super Administrator|Administrator Utama')->group(function () {
             // User Management CMS
             Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
             Route::post('/users', [\App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
@@ -244,7 +244,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         // Visitor Analytics Module (Super Administrator & Website Administrator)
-        Route::middleware('role:Super Administrator|Website Administrator')->group(function () {
+        Route::middleware('role:Super Administrator|Administrator Utama|Website Administrator|Administrator Website')->group(function () {
             Route::get('/visitor-analytics', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'index'])->name('visitor-analytics.index');
             Route::get('/visitor-analytics/export', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'export'])->name('visitor-analytics.export');
             Route::get('/visitor-analytics/{id}', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'show'])->name('visitor-analytics.show');
@@ -260,7 +260,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // Content & Media, Profile, Services, Demographics Route Group
         // -------------------------------------------------------------
-        Route::middleware('role:Super Administrator|Website Administrator|Publication Operator|Content Editor|PPID Admin')->group(function () {
+        Route::middleware('role:Super Administrator|Administrator Utama|Website Administrator|Administrator Website|Publication Operator|Operator Publikasi|Content Editor|Editor Konten|PPID Admin|Admin PPID')->group(function () {
             // Enterprise Profile Module CMS
             Route::prefix('profile')->name('profile.')->group(function () {
                 Route::get('/dashboard', [\App\Http\Controllers\Admin\Profile\ProfileDashboardController::class, 'index'])->name('dashboard');
@@ -347,7 +347,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // Complaint Officer, Website Administrator & Super Admin Routes
         // -------------------------------------------------------------
-        Route::middleware('role:Super Administrator|Website Administrator|Complaint Officer')->group(function () {
+        Route::middleware('role:Super Administrator|Administrator Utama|Website Administrator|Administrator Website|Complaint Officer|Petugas Pengaduan')->group(function () {
             Route::get('/complaints', [\App\Http\Controllers\Admin\ComplaintController::class, 'index'])->name('complaints.index');
             Route::get('/complaints/categories', [\App\Http\Controllers\Admin\ComplaintController::class, 'categories'])->name('complaints.categories');
             Route::post('/complaints/categories', [\App\Http\Controllers\Admin\ComplaintController::class, 'storeCategory'])->name('complaints.categories.store');
@@ -380,7 +380,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // Downloads Management (Super Admin, Website Admin, Publication Operator, Content Editor & PPID Admin)
         // -------------------------------------------------------------
-        Route::middleware('role:Super Administrator|Website Administrator|Publication Operator|Content Editor|PPID Admin')->group(function () {
+        Route::middleware('role:Super Administrator|Administrator Utama|Website Administrator|Administrator Website|Publication Operator|Operator Publikasi|Content Editor|Editor Konten|PPID Admin|Admin PPID')->group(function () {
             Route::get('/downloads/{id}/check', [\App\Http\Controllers\Admin\DownloadController::class, 'check'])->name('downloads.check');
             Route::get('/downloads/{id}/download', [\App\Http\Controllers\Admin\DownloadController::class, 'download'])->name('downloads.download');
             Route::post('/downloads/categories', [\App\Http\Controllers\Admin\DownloadController::class, 'storeCategory'])->name('downloads.categories.store');
@@ -390,7 +390,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // PPID Management (Super Administrator, Website Administrator & PPID Admin)
         // -------------------------------------------------------------
-        Route::middleware('role:Super Administrator|Website Administrator|PPID Admin')->group(function () {
+        Route::middleware('role:Super Administrator|Administrator Utama|Website Administrator|Administrator Website|PPID Admin|Admin PPID')->group(function () {
             // PPID Management
             Route::prefix('ppid')->name('ppid.')->group(function () {
                 Route::get('/pages', [\App\Http\Controllers\Admin\PpidController::class, 'pagesIndex'])->name('pages.index');
@@ -412,7 +412,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // Online Queue Management & Pre-Verification (Admin CMS)
         // -------------------------------------------------------------
-        Route::middleware('role_or_permission:Super Administrator|Website Administrator|Petugas Verifikasi / Registrasi KTP-el|Queue Officer|Queue Verifier|manage_online_queue|manage_queue_verification|view_queue_reports')
+        Route::middleware('role_or_permission:Super Administrator|Administrator Utama|Website Administrator|Administrator Website|Petugas Verifikasi / Registrasi KTP-el|Queue Officer|Queue Verifier|manage_online_queue|manage_queue_verification|view_queue_reports')
             ->prefix('queue')->name('queue.')->group(function () {
 
             Route::get('/dashboard', [\App\Http\Controllers\Admin\Queue\QueueDashboardController::class, 'index'])->name('dashboard');
@@ -469,7 +469,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // Serah Terima KTP-el (Standalone Module)
         // -------------------------------------------------------------
-        Route::middleware('role_or_permission:Super Administrator|Website Administrator|Petugas Pengambilan KTP-el|petugas_pengambilan_ktpel|handover.dashboard.view')
+        Route::middleware('role_or_permission:Super Administrator|Administrator Utama|Website Administrator|Administrator Website|Petugas Pengambilan KTP-el|petugas_pengambilan_ktpel|handover.dashboard.view')
             ->prefix('handover')->name('handover.')->group(function () {
 
             Route::get('/dashboard', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'dashboard'])->name('dashboard');
@@ -489,7 +489,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // Pengarsipan Permohonan Online (Standalone Archive Module)
         // -------------------------------------------------------------
-        Route::middleware('role_or_permission:Super Administrator|Website Administrator|Petugas Pengarsipan|operator_arsip|archive.dashboard.view')
+        Route::middleware('role_or_permission:Super Administrator|Administrator Utama|Website Administrator|Administrator Website|Petugas Pengarsipan|operator_arsip|archive.dashboard.view')
             ->prefix('archive')->name('archive.')->group(function () {
 
             // 1. Dashboard Pengarsipan

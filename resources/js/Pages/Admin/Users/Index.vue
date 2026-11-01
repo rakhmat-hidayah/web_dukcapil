@@ -345,20 +345,34 @@ const form = useForm({
   name:      '',
   email:     '',
   password:  '',
-  role:      'Content Editor',
+  role:      'Editor Konten',
   is_active: true,
 });
 
 const getRoleClass = (role) => {
   switch (role) {
+    case 'Administrator Utama':
     case 'Super Administrator':
       return 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-100 dark:border-red-900/30';
+    case 'Administrator Website':
     case 'Website Administrator':
       return 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30';
+    case 'Editor Konten':
     case 'Content Editor':
       return 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30';
+    case 'Operator Berita':
+    case 'News Operator':
+      return 'bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30';
+    case 'Pengelola Media':
+    case 'Media Manager':
+      return 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400 border border-violet-100 dark:border-violet-900/30';
+    case 'Operator Publikasi':
+    case 'Publication Operator':
+      return 'bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 border border-sky-100 dark:border-sky-900/30';
+    case 'Petugas Pengaduan':
     case 'Complaint Officer':
       return 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30';
+    case 'Admin PPID':
     case 'PPID Admin':
       return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30';
     case 'Petugas Verifikasi / Registrasi KTP-el':
@@ -374,16 +388,30 @@ const getRoleClass = (role) => {
 
 const getRoleDescription = (role) => {
   switch (role) {
+    case 'Administrator Utama':
     case 'Super Administrator':
-      return 'Akses penuh tanpa batas ke seluruh modul CMS, Manajemen User, dan Pengaturan Sistem.';
+      return 'Akses penuh tanpa batas ke seluruh modul CMS, Manajemen Pengguna, dan Pengaturan Sistem.';
+    case 'Administrator Website':
     case 'Website Administrator':
-      return 'Akses operasional penuh ke seluruh modul CMS (Konten, Layanan, Pengaduan, PPID, Demografi), kecuali Pengaturan Sistem & User.';
+      return 'Akses operasional penuh ke seluruh modul CMS (Konten, Layanan, Pengaduan, PPID, Demografi), kecuali Manajemen Pengguna.';
+    case 'Editor Konten':
     case 'Content Editor':
-      return 'Mengelola Berita, Artikel, Galeri Album, Pengumuman, Banner Slider, dan File Manager.';
+      return 'Mengelola Berita, Artikel, Galeri Album, Pengumuman, Banner Slider, Halaman Dinamis, dan File Manager.';
+    case 'Operator Berita':
+    case 'News Operator':
+      return 'Mengelola pembuatan, penyuntingan, dan publikasi Berita & Artikel resmi instansi.';
+    case 'Pengelola Media':
+    case 'Media Manager':
+      return 'Mengelola penyimpanan berkas, foto, dan media digital pada Media & File Manager.';
+    case 'Operator Publikasi':
+    case 'Publication Operator':
+      return 'Mengelola berkas publikasi, dokumen resmi, dan dokumen di Download Center.';
+    case 'Petugas Pengaduan':
     case 'Complaint Officer':
-      return 'Mengelola Layanan Pengaduan Masyarakat & Survei Kepuasan (IKM).';
+      return 'Mengelola Layanan Pengaduan Masyarakat, tindak lanjut aspirasi, dan Survei Kepuasan (IKM).';
+    case 'Admin PPID':
     case 'PPID Admin':
-      return 'Mengelola Keterbukaan Informasi Publik PPID & Dokumen Publik.';
+      return 'Mengelola Layanan Keterbukaan Informasi Publik PPID, permohonan informasi, dan dokumen informasi berkala.';
     case 'Petugas Verifikasi / Registrasi KTP-el':
       return 'Memverifikasi berkas pendaftaran online, pemeriksaan fisik dokumen asli di loket, dan penerbitan jadwal/antrean KTP-el.';
     case 'Petugas Pengambilan KTP-el':
@@ -398,7 +426,7 @@ const getRoleDescription = (role) => {
 const openCreateModal = () => {
   editingUser.value = null;
   form.reset();
-  form.role      = 'Content Editor';
+  form.role      = 'Editor Konten';
   form.is_active = true;
   form.clearErrors();
   showPassword.value = false;
@@ -411,7 +439,7 @@ const openEditModal = (user) => {
   form.name      = user.name;
   form.email     = user.email;
   form.password  = '';
-  form.role      = user.role || 'Content Editor';
+  form.role      = user.role || 'Editor Konten';
   form.is_active = user.is_active;
   form.clearErrors();
   showPassword.value = false;

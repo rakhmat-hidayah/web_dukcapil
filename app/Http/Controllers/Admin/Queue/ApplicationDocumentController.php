@@ -28,7 +28,7 @@ class ApplicationDocumentController extends Controller
         $user = Auth::user();
 
         // Strict role/permission check
-        if (!$user || (!$user->hasRole('Super Administrator') && !$user->hasRole('Website Administrator') && !$user->can('manage_queue_verification'))) {
+        if (!$user || (!$user->hasAnyRole(['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website']) && !$user->can('manage_queue_verification'))) {
             abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk melihat dokumen kependudukan ini.');
         }
 
