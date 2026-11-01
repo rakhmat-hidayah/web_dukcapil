@@ -167,7 +167,7 @@ Route::get('/login', function () {
 // Admin Portal Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
-        return redirect()->route('admin.dashboard');
+        return redirect(\App\Services\RoleRedirectService::getHomeUrl(\Illuminate\Support\Facades\Auth::user()));
     });
 
     // Guest Admin

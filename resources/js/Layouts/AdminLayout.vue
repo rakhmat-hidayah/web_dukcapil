@@ -467,9 +467,14 @@ const filteredMenuGroups = computed(() => {
     const items = group.items.filter(item => {
       const r = item.route;
 
-      // Always allow main Overview Dashboard & Security page to all authenticated operators
-      if (r === 'admin.dashboard' || r === 'admin.security.index') {
+      // Always allow Account Security (2FA) page to all authenticated operators
+      if (r === 'admin.security.index') {
         return true;
+      }
+
+      // Overview system dashboard is ONLY visible to Super Administrator and Website Administrator
+      if (r === 'admin.dashboard') {
+        return isSuperAdmin.value || isWebsiteAdmin.value;
       }
 
       // Content Editor allowed items
@@ -568,6 +573,12 @@ const filteredMenuGroups = computed(() => {
 const activePageName = computed(() => {
   const currentRouteName = route().current();
   if (currentRouteName === 'admin.dashboard') return 'Overview';
+  if (currentRouteName?.startsWith('admin.handover.')) return 'Serah Terima KTP-el';
+  if (currentRouteName?.startsWith('admin.queue.')) return 'Antrian Online KTP-el';
+  if (currentRouteName?.startsWith('admin.archive.')) return 'Pengarsipan Permohonan';
+  if (currentRouteName?.startsWith('admin.complaints.')) return 'Layanan Pengaduan';
+  if (currentRouteName?.startsWith('admin.ppid.')) return 'Layanan PPID';
+  if (currentRouteName?.startsWith('admin.news.')) return 'Berita & Artikel';
   return 'Admin';
 });
 

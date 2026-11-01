@@ -28,10 +28,10 @@ class AuthController extends Controller
     /**
      * Show the login view.
      */
-    public function showLogin(): InertiaResponse
+    public function showLogin(): mixed
     {
         if (Auth::check()) {
-            return redirect()->intended('/admin/dashboard');
+            return redirect(\App\Services\RoleRedirectService::getHomeUrl(Auth::user()));
         }
 
         return Inertia::render('Admin/Auth/Login', [
@@ -169,7 +169,7 @@ class AuthController extends Controller
             'email'    => $user->email,
         ]);
 
-        return redirect()->intended('/admin/dashboard');
+        return redirect()->intended(\App\Services\RoleRedirectService::getHomeUrl($user));
     }
 
     /**
@@ -278,7 +278,7 @@ class AuthController extends Controller
             'method_used' => $methodUsed,
         ]);
 
-        return redirect()->intended('/admin/dashboard');
+        return redirect()->intended(\App\Services\RoleRedirectService::getHomeUrl($user));
     }
 
     /**

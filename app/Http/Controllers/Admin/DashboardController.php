@@ -14,9 +14,18 @@ class DashboardController extends Controller
 {
     /**
      * Display the Enterprise Executive Control Center dashboard.
+     * Redirects non-system-administrators directly to their respective role dashboards.
      */
-    public function index(Request $request): InertiaResponse
+    public function index(Request $request): mixed
     {
+        $user = $request->user();
+        if ($user && !$user->hasAnyRole(['Administrator Utama', 'Super Administrator', 'Administrator Website', 'Website Administrator'])) {
+            $landingUrl = \App\Services\RoleRedirectService::getHomeUrl($user);
+            if ($landingUrl !== route('admin.dashboard')) {
+                return redirect($landingUrl);
+            }
+        }
+
         $period = $request->query('period', 'today'); // today, 7days, 30days
         $today = date('Y-m-d');
         $thisMonthStart = date('Y-m-01');
