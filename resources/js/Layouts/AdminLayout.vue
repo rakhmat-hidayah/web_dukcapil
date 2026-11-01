@@ -448,6 +448,7 @@ const isQueueOfficer = computed(() => userRoles.value.includes('Queue Officer') 
 const isQueueVerifier = computed(() => userRoles.value.includes('Queue Verifier') || userRoles.value.includes('Petugas Verifikasi / Registrasi KTP-el'));
 const isHandoverOfficer = computed(() => userRoles.value.includes('petugas_pengambilan_ktpel') || userRoles.value.includes('Petugas Pengambilan KTP-el'));
 const isArchiveOperator = computed(() => userRoles.value.includes('operator_arsip') || userRoles.value.includes('Petugas Pengarsipan'));
+const isKtpSupervisor = computed(() => userRoles.value.includes('Supervisor Layanan KTP-el') || userRoles.value.includes('supervisor_layanan_ktpel'));
 const userPermissions = computed(() => page.props.auth?.permissions || []);
 
 const filteredMenuGroups = computed(() => {
@@ -528,6 +529,13 @@ const filteredMenuGroups = computed(() => {
       // PPID Admin allowed items
       if (isPpidAdmin.value) {
         if (r && (r.startsWith('admin.ppid.') || r === 'admin.downloads.index')) {
+          return true;
+        }
+      }
+
+      // Supervisor Layanan KTP-el allowed items (All KTP-el modules active: Antrian, Serah Terima, Pengarsipan)
+      if (isKtpSupervisor.value) {
+        if (r && (r.startsWith('admin.queue.') || r.startsWith('admin.handover.') || r.startsWith('admin.archive.'))) {
           return true;
         }
       }

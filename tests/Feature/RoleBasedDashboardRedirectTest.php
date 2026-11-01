@@ -76,6 +76,40 @@ class RoleBasedDashboardRedirectTest extends TestCase
         $response->assertRedirect(route('admin.archive.dashboard'));
     }
 
+    public function test_supervisor_layanan_ktpel_redirected_to_queue_dashboard(): void
+    {
+        $user = User::firstOrCreate(
+            ['email' => 'supervisor_ktp_test@dukcapil.dompukab.go.id'],
+            ['name' => 'Supervisor KTP Test', 'username' => 'supervisor_ktp_test', 'password' => bcrypt('password')]
+        );
+        $user->syncRoles(['Supervisor Layanan KTP-el']);
+
+        $response = $this->actingAs($user)->get(route('admin.dashboard'));
+
+        $response->assertRedirect(route('admin.queue.dashboard'));
+    }
+
+    public function test_supervisor_layanan_ktpel_can_access_all_three_ktp_modules(): void
+    {
+        $user = User::firstOrCreate(
+            ['email' => 'supervisor_ktp_full@dukcapil.dompukab.go.id'],
+            ['name' => 'Supervisor KTP Full', 'username' => 'supervisor_ktp_full', 'password' => bcrypt('password')]
+        );
+        $user->syncRoles(['Supervisor Layanan KTP-el']);
+
+        // 1. Antrian Online KTP-el
+        $queueResponse = $this->actingAs($user)->get(route('admin.queue.dashboard'));
+        $queueResponse->assertOk();
+
+        // 2. Serah Terima KTP-el
+        $handoverResponse = $this->actingAs($user)->get(route('admin.handover.dashboard'));
+        $handoverResponse->assertOk();
+
+        // 3. Pengarsipan Permohonan KTP-el
+        $archiveResponse = $this->actingAs($user)->get(route('admin.archive.dashboard'));
+        $archiveResponse->assertOk();
+    }
+
     public function test_auto_role_sync_heals_legacy_roles(): void
     {
         // Simulate legacy role existing in database

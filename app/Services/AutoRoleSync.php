@@ -25,6 +25,7 @@ class AutoRoleSync
         'Queue Verifier'        => 'Petugas Verifikasi / Registrasi KTP-el',
         'petugas_pengambilan_ktpel' => 'Petugas Pengambilan KTP-el',
         'operator_arsip'        => 'Petugas Pengarsipan',
+        'supervisor_layanan_ktpel' => 'Supervisor Layanan KTP-el',
     ];
 
     /**
@@ -47,9 +48,9 @@ class AutoRoleSync
     {
         try {
             // 1. Run pending migrations safely if not yet cached as completed
-            if (!Cache::has('db_auto_migrations_v5')) {
+            if (!Cache::has('db_auto_migrations_v6')) {
                 Artisan::call('migrate', ['--force' => true]);
-                Cache::put('db_auto_migrations_v5', true, now()->addDays(3));
+                Cache::put('db_auto_migrations_v6', true, now()->addDays(3));
             }
 
             // 2. Check if legacy English roles still exist in DB or Indonesian roles are missing
@@ -61,7 +62,8 @@ class AutoRoleSync
                 'Petugas Verifikasi / Registrasi KTP-el',
                 'Petugas Pengambilan KTP-el',
                 'Petugas Pengarsipan',
-            ])->count() < 6;
+                'Supervisor Layanan KTP-el',
+            ])->count() < 7;
 
             if ($hasLegacyRoles || $missingIndonesianRoles) {
                 self::performSync();
@@ -103,6 +105,41 @@ class AutoRoleSync
             if ($adminPpid) {
                 $adminPpid->givePermissionTo(['manage_ppid', 'manage_downloads']);
             }
+
+            // Ensure Supervisor Layanan KTP-el has all KTP-el module permissions
+            $supervisorKtp = Role::firstOrCreate(['name' => 'Supervisor Layanan KTP-el', 'guard_name' => 'web']);
+            $ktpPerms = [
+                'manage_online_queue',
+                'manage_queue_verification',
+                'view_queue_reports',
+                'manage_queue_schedule',
+                'notifications.view',
+                'notifications.logs',
+                'handover.dashboard.view',
+                'handover.ready.view',
+                'handover.ready.update',
+                'handover.pending.view',
+                'handover.history.view',
+                'handover.exceptions.view',
+                'handover.exception.view',
+                'handover.exception.update',
+                'handover.process',
+                'handover.photo.view',
+                'archive.dashboard.view',
+                'archive.applications.view',
+                'archive.package.create',
+                'archive.package.view',
+                'archive.package.download',
+                'archive.package.confirm',
+                'archive.history.view',
+                'archive.storage.view',
+                'archive.settings.manage',
+                'archive.transfer.execute',
+            ];
+            foreach ($ktpPerms as $perm) {
+                Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
+            }
+            $supervisorKtp->syncPermissions($ktpPerms);
 
             // Migrate all users having legacy roles
             $users = User::with('roles')->get();

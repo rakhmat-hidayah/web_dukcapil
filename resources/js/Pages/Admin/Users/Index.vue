@@ -364,12 +364,15 @@ const getRoleTitle = (role) => {
     'Queue Verifier': 'Petugas Verifikasi / Registrasi KTP-el',
     'petugas_pengambilan_ktpel': 'Petugas Pengambilan KTP-el',
     'operator_arsip': 'Petugas Pengarsipan',
+    'supervisor_layanan_ktpel': 'Supervisor Layanan KTP-el',
   };
   return map[role] || role;
 };
 
 const getRoleClass = (role) => {
   switch (role) {
+    case 'Supervisor Layanan KTP-el':
+      return 'bg-blue-50 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800/40 font-bold';
     case 'Administrator Utama':
     case 'Super Administrator':
       return 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-100 dark:border-red-900/30';
@@ -437,6 +440,8 @@ const getRoleDescription = (role) => {
       return 'Pemeriksaan kesiapan fisik kartu, verifikasi identitas penerima KTP-el, foto bukti penyerahan dengan kamera, dan penanganan kendala pengambilan.';
     case 'Petugas Pengarsipan':
       return 'Mengelola arsip berkas permohonan selesai, pembuatan paket ZIP dengan verifikasi SHA-256, unduh arsip, dan konfirmasi penyimpanan permanen.';
+    case 'Supervisor Layanan KTP-el':
+      return 'Akses pengawasan menyeluruh ke semua modul KTP-el (Antrian & Verifikasi Dokumen, Serah Terima Fisik Kartu, dan Pengarsipan Permohonan ZIP).';
     default:
       return 'Akses operator standar sistem.';
   }

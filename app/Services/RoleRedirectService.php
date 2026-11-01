@@ -20,6 +20,11 @@ class RoleRedirectService
             return route('admin.dashboard');
         }
 
+        // 0. Supervisor Layanan KTP-el (Semua modul KTP-el aktif, mendarat di Dashboard Antrian KTP-el)
+        if ($user->hasRole('Supervisor Layanan KTP-el') || $user->hasRole('supervisor_layanan_ktpel')) {
+            return route('admin.queue.dashboard');
+        }
+
         // 1. Petugas Pengambilan KTP-el
         if ($user->hasRole('Petugas Pengambilan KTP-el') || $user->hasRole('petugas_pengambilan_ktpel')) {
             return route('admin.handover.dashboard');
