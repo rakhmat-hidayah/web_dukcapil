@@ -68,7 +68,7 @@
                     class="px-3 py-1 rounded-lg font-bold text-[11px] tracking-wide inline-block"
                     :class="getRoleClass(user.role)"
                   >
-                    {{ user.role }}
+                    {{ getRoleTitle(user.role) }}
                   </span>
                 </td>
 
@@ -231,7 +231,7 @@
                     v-for="role in roles"
                     :key="role"
                     class="flex items-start gap-3 p-2.5 hover:bg-gray-100 dark:hover:bg-zinc-800/60 rounded-xl cursor-pointer text-xs transition border border-transparent hover:border-gray-200 dark:hover:border-zinc-700"
-                    :class="{ 'bg-primary-50/50 dark:bg-primary-950/20 border-primary-200 dark:border-primary-800/40': form.role === role }"
+                    :class="{ 'bg-primary-50/50 dark:bg-primary-950/20 border-primary-200 dark:border-primary-800/40': form.role === role || getRoleTitle(form.role) === getRoleTitle(role) }"
                   >
                     <input
                       type="radio"
@@ -241,7 +241,7 @@
                       class="accent-primary-500 mt-0.5 h-4 w-4 shrink-0 cursor-pointer"
                     />
                     <div class="flex-1">
-                      <div class="font-bold text-gray-800 dark:text-zinc-200">{{ role }}</div>
+                      <div class="font-bold text-gray-800 dark:text-zinc-200">{{ getRoleTitle(role) }}</div>
                       <div class="text-[10px] text-gray-400 dark:text-zinc-500 mt-0.5">
                         {{ getRoleDescription(role) }}
                       </div>
@@ -349,6 +349,25 @@ const form = useForm({
   is_active: true,
 });
 
+const getRoleTitle = (role) => {
+  if (!role) return '';
+  const map = {
+    'Super Administrator': 'Administrator Utama',
+    'Website Administrator': 'Administrator Website',
+    'Content Editor': 'Editor Konten',
+    'News Operator': 'Operator Berita',
+    'Publication Operator': 'Operator Publikasi',
+    'Complaint Officer': 'Petugas Pengaduan',
+    'Media Manager': 'Pengelola Media',
+    'PPID Admin': 'Admin PPID',
+    'Queue Officer': 'Petugas Verifikasi / Registrasi KTP-el',
+    'Queue Verifier': 'Petugas Verifikasi / Registrasi KTP-el',
+    'petugas_pengambilan_ktpel': 'Petugas Pengambilan KTP-el',
+    'operator_arsip': 'Petugas Pengarsipan',
+  };
+  return map[role] || role;
+};
+
 const getRoleClass = (role) => {
   switch (role) {
     case 'Administrator Utama':
@@ -426,7 +445,7 @@ const getRoleDescription = (role) => {
 const openCreateModal = () => {
   editingUser.value = null;
   form.reset();
-  form.role      = 'Editor Konten';
+  form.role      = props.roles?.includes('Editor Konten') ? 'Editor Konten' : (props.roles?.[0] || 'Editor Konten');
   form.is_active = true;
   form.clearErrors();
   showPassword.value = false;

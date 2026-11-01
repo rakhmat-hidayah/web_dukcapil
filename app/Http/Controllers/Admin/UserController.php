@@ -20,6 +20,9 @@ class UserController extends Controller
      */
     public function index(Request $request): InertiaResponse
     {
+        // Auto-synchronize roles if missing or unmigrated
+        \App\Services\AutoRoleSync::sync();
+
         $search = $request->get('search', '');
 
         $query = User::with('roles')->orderBy('name');
@@ -47,7 +50,7 @@ class UserController extends Controller
             ];
         });
 
-        $roles = Role::orderBy('name')->pluck('name');
+        $roles = Role::orderBy('name')->pluck('name')->map(fn($r) => \App\Services\AutoRoleSync::resolveRoleName($r))->unique()->values();
 
         return Inertia::render('Admin/Users/Index', [
             'users'  => $users,
@@ -61,6 +64,8 @@ class UserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        \App\Services\AutoRoleSync::sync();
+
         $request->validate([
             'username' => [
                 'required',
@@ -73,7 +78,7 @@ class UserController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
-            'role'     => 'required|string|exists:roles,name',
+            'role'     => 'required|string',
         ], [
             'username.required' => 'Username wajib diisi.',
             'username.unique'   => 'Username sudah digunakan.',
@@ -89,7 +94,8 @@ class UserController extends Controller
             'is_active' => true,
         ]);
 
-        $user->syncRoles([$request->role]);
+        $canonicalRole = \App\Services\AutoRoleSync::resolveRoleName($request->role);
+        $user->syncRoles([$canonicalRole]);
         app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         ActivityLogger::log(
@@ -133,7 +139,7 @@ class UserController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
             'password'  => 'nullable|string|min:8',
-            'role'      => 'required|string|exists:roles,name',
+            'role'      => 'required|string',
             'is_active' => 'boolean',
         ], [
             'username.required' => 'Username wajib diisi.',
@@ -152,7 +158,8 @@ class UserController extends Controller
 
         $user->save();
 
-        $user->syncRoles([$request->role]);
+        $canonicalRole = \App\Services\AutoRoleSync::resolveRoleName($request->role);
+        $user->syncRoles([$canonicalRole]);
         app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         ActivityLogger::log(
