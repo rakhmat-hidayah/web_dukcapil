@@ -46,30 +46,85 @@ class AutoRoleSync
      */
     public static function sync(): void
     {
+        // 1. Run pending migrations safely if not yet cached as completed
         try {
-            // 1. Run pending migrations safely if not yet cached as completed
-            if (!Cache::has('db_auto_migrations_v6')) {
+            if (!Cache::has('db_auto_migrations_v7')) {
                 Artisan::call('migrate', ['--force' => true]);
-                Cache::put('db_auto_migrations_v6', true, now()->addDays(3));
-            }
-
-            // 2. Check if legacy English roles still exist in DB or Indonesian roles are missing
-            $hasLegacyRoles = Role::whereIn('name', array_keys(self::$roleMap))->exists();
-            $missingIndonesianRoles = Role::whereIn('name', [
-                'Administrator Utama',
-                'Administrator Website',
-                'Editor Konten',
-                'Petugas Verifikasi / Registrasi KTP-el',
-                'Petugas Pengambilan KTP-el',
-                'Petugas Pengarsipan',
-                'Supervisor Layanan KTP-el',
-            ])->count() < 7;
-
-            if ($hasLegacyRoles || $missingIndonesianRoles) {
-                self::performSync();
+                Cache::put('db_auto_migrations_v7', true, now()->addDays(3));
             }
         } catch (\Throwable $e) {
-            Log::warning('AutoRoleSync warning: ' . $e->getMessage());
+            Log::warning('AutoRoleSync migration warning: ' . $e->getMessage());
+        }
+
+        // 2. Always ensure Indonesian roles and Supervisor Layanan KTP-el exist
+        try {
+            self::ensureIndonesianRoles();
+        } catch (\Throwable $e) {
+            Log::warning('AutoRoleSync ensureIndonesianRoles warning: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Ensure all canonical Indonesian roles exist and Supervisor Layanan KTP-el has all permissions.
+     */
+    public static function ensureIndonesianRoles(): void
+    {
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // 1. Explicitly guarantee Supervisor Layanan KTP-el is active
+        $supervisorRole = Role::firstOrCreate(['name' => 'Supervisor Layanan KTP-el', 'guard_name' => 'web']);
+        $ktpPerms = [
+            'manage_online_queue',
+            'manage_queue_verification',
+            'view_queue_reports',
+            'manage_queue_schedule',
+            'notifications.view',
+            'notifications.logs',
+            'handover.dashboard.view',
+            'handover.ready.view',
+            'handover.ready.update',
+            'handover.pending.view',
+            'handover.history.view',
+            'handover.exceptions.view',
+            'handover.exception.view',
+            'handover.exception.update',
+            'handover.process',
+            'handover.photo.view',
+            'archive.dashboard.view',
+            'archive.applications.view',
+            'archive.package.create',
+            'archive.package.view',
+            'archive.package.download',
+            'archive.package.confirm',
+            'archive.history.view',
+            'archive.storage.view',
+            'archive.settings.manage',
+            'archive.transfer.execute',
+        ];
+        foreach ($ktpPerms as $perm) {
+            Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
+        }
+        $supervisorRole->syncPermissions($ktpPerms);
+
+        // 2. Check if legacy English roles still exist in DB or other Indonesian roles are missing
+        $hasLegacyRoles = Role::whereIn('name', array_keys(self::$roleMap))->exists();
+        $missingRoles = Role::whereIn('name', [
+            'Administrator Utama',
+            'Administrator Website',
+            'Editor Konten',
+            'Operator Berita',
+            'Operator Publikasi',
+            'Pengelola Media',
+            'Petugas Pengaduan',
+            'Admin PPID',
+            'Petugas Verifikasi / Registrasi KTP-el',
+            'Petugas Pengambilan KTP-el',
+            'Petugas Pengarsipan',
+            'Supervisor Layanan KTP-el',
+        ])->count() < 12;
+
+        if ($hasLegacyRoles || $missingRoles) {
+            self::performSync();
         }
     }
 

@@ -228,7 +228,7 @@
                 <label class="block text-xs font-semibold text-gray-500 mb-2">Pilih Peran &amp; Hak Akses (Single Role)</label>
                 <div class="grid grid-cols-1 gap-2 max-h-52 overflow-y-auto p-2 bg-gray-50 dark:bg-zinc-800/30 rounded-2xl border border-gray-100 dark:border-zinc-800 scrollbar-thin">
                   <label
-                    v-for="role in roles"
+                    v-for="role in availableRoles"
                     :key="role"
                     class="flex items-start gap-3 p-2.5 hover:bg-gray-100 dark:hover:bg-zinc-800/60 rounded-xl cursor-pointer text-xs transition border border-transparent hover:border-gray-200 dark:hover:border-zinc-700"
                     :class="{ 'bg-primary-50/50 dark:bg-primary-950/20 border-primary-200 dark:border-primary-800/40': form.role === role || getRoleTitle(form.role) === getRoleTitle(role) }"
@@ -447,10 +447,18 @@ const getRoleDescription = (role) => {
   }
 };
 
+const availableRoles = computed(() => {
+  const list = [...(props.roles || [])];
+  if (!list.includes('Supervisor Layanan KTP-el') && !list.includes('supervisor_layanan_ktpel')) {
+    list.push('Supervisor Layanan KTP-el');
+  }
+  return [...new Set(list.map((r) => getRoleTitle(r)))].sort((a, b) => a.localeCompare(b, 'id'));
+});
+
 const openCreateModal = () => {
   editingUser.value = null;
   form.reset();
-  form.role      = props.roles?.includes('Editor Konten') ? 'Editor Konten' : (props.roles?.[0] || 'Editor Konten');
+  form.role      = availableRoles.value.includes('Editor Konten') ? 'Editor Konten' : (availableRoles.value[0] || 'Editor Konten');
   form.is_active = true;
   form.clearErrors();
   showPassword.value = false;

@@ -52,6 +52,12 @@ class UserController extends Controller
 
         $roles = Role::orderBy('name')->pluck('name')->map(fn($r) => \App\Services\AutoRoleSync::resolveRoleName($r))->unique()->values();
 
+        // Always guarantee Supervisor Layanan KTP-el is in the list
+        if (!$roles->contains('Supervisor Layanan KTP-el')) {
+            $roles->push('Supervisor Layanan KTP-el');
+            $roles = $roles->sort()->values();
+        }
+
         return Inertia::render('Admin/Users/Index', [
             'users'  => $users,
             'roles'  => $roles,
@@ -95,6 +101,7 @@ class UserController extends Controller
         ]);
 
         $canonicalRole = \App\Services\AutoRoleSync::resolveRoleName($request->role);
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => $canonicalRole, 'guard_name' => 'web']);
         $user->syncRoles([$canonicalRole]);
         app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
@@ -159,6 +166,7 @@ class UserController extends Controller
         $user->save();
 
         $canonicalRole = \App\Services\AutoRoleSync::resolveRoleName($request->role);
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => $canonicalRole, 'guard_name' => 'web']);
         $user->syncRoles([$canonicalRole]);
         app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
