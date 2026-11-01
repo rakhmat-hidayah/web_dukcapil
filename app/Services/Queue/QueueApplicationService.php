@@ -9,6 +9,8 @@ use App\Models\Queue\ServiceType;
 use App\Models\Queue\VerificationHistory;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class QueueApplicationService
@@ -337,5 +339,79 @@ class QueueApplicationService
             'to_status'      => QueueApplication::STATUS_CANCELLED,
             'notes'          => $reason,
         ]);
+    }
+
+    /**
+     * Delete a single draft application, its physical uploaded files, and all related records.
+     */
+    public function deleteDraft(QueueApplication $draft): bool
+    {
+        if ($draft->status !== QueueApplication::STATUS_DRAFT) {
+            throw new \InvalidArgumentException("Hanya permohonan berstatus DRAFT yang dapat dihapus otomatis.");
+        }
+
+        // Release queue slot if any booked
+        if ($draft->queue_slot_id) {
+            try {
+                $this->slotService->releaseSlot($draft);
+            } catch (\Throwable $e) {
+                Log::warning("Draft slot release error: " . $e->getMessage());
+            }
+        }
+
+        // Delete all physical files and their database records
+        foreach ($draft->documents as $doc) {
+            QueueDocumentStorage::delete($doc);
+            $doc->forceDelete();
+        }
+
+        // Delete the application directory from storage if present
+        $year = $draft->created_at ? $draft->created_at->format('Y') : date('Y');
+        $month = $draft->created_at ? $draft->created_at->format('m') : date('m');
+        $dirPath = QueueDocumentStorage::BASE_PATH . "/{$year}/{$month}/{$draft->id}";
+        try {
+            Storage::disk(QueueDocumentStorage::DISK)->deleteDirectory($dirPath);
+        } catch (\Throwable $e) {
+            Log::warning("Draft directory deletion error: " . $e->getMessage());
+        }
+
+        // Delete any related logs
+        $draft->verificationHistory()->delete();
+        $draft->notificationLogs()->delete();
+
+        return (bool) $draft->forceDelete();
+    }
+
+    /**
+     * Purge all draft applications older than 24 hours from creation.
+     *
+     * @param int $hours Maximum age in hours (default: 24)
+     * @return int Number of purged drafts
+     */
+    public function purgeExpiredDrafts(int $hours = 24): int
+    {
+        $cutoff = now()->subHours($hours);
+
+        $expiredDrafts = QueueApplication::where('status', QueueApplication::STATUS_DRAFT)
+            ->where('created_at', '<=', $cutoff)
+            ->with('documents')
+            ->get();
+
+        $count = 0;
+
+        foreach ($expiredDrafts as $draft) {
+            try {
+                $this->deleteDraft($draft);
+                $count++;
+            } catch (\Throwable $e) {
+                Log::error("Failed to delete expired draft #{$draft->id} ({$draft->reg_number}): " . $e->getMessage());
+            }
+        }
+
+        if ($count > 0) {
+            Log::info("Purged {$count} expired draft application(s) older than {$hours} hours.");
+        }
+
+        return $count;
     }
 }

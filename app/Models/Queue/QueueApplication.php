@@ -191,6 +191,15 @@ class QueueApplication extends Model
         return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_REVISION_REQUIRED]);
     }
 
+    public function isExpiredDraft(int $hours = 24): bool
+    {
+        if ($this->status !== self::STATUS_DRAFT) {
+            return false;
+        }
+
+        return $this->created_at ? $this->created_at->lt(now()->subHours($hours)) : false;
+    }
+
     public function getMaskedNikAttribute(): string
     {
         $nik = (string) $this->applicant_nik;

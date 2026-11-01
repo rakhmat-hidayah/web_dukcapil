@@ -26,6 +26,10 @@
             <span v-if="application.attendance_type !== 'self'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/20 text-amber-200 border border-amber-400/30">
               Perwakilan: {{ application.representative_name }} ({{ application.representative_relationship }})
             </span>
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-400/20 text-amber-200 border border-amber-400/30" title="Draft yang tidak diselesaikan dalam 1x24 jam sejak dibuat akan dihapus otomatis">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Batas Sesi: 1x24 Jam
+            </span>
           </div>
         </div>
 
@@ -442,6 +446,11 @@ async function handleDeleteDocument(doc) {
 
     docs.value = docs.value.filter((d) => d.id !== doc.id);
   } catch (err) {
+    if (err.response?.status === 419 || err.response?.data?.session_expired) {
+      alert('Sesi draft permohonan telah kedaluwarsa (1x24 jam). Sesi telah ditutup otomatis.');
+      window.location.href = route('queue.apply.create');
+      return;
+    }
     alert('Gagal menghapus dokumen.');
   }
 }
@@ -609,6 +618,11 @@ async function handleSubmitApplication() {
       } catch (uploadErr) {
         isSubmitting.value = false;
         uploadProgress.value.active = false;
+        if (uploadErr.response?.status === 419 || uploadErr.response?.data?.session_expired) {
+          alert('Sesi draft permohonan telah kedaluwarsa (1x24 jam) dan dihapus otomatis. Sesi telah ditutup.');
+          window.location.href = route('queue.apply.create');
+          return;
+        }
         errorMessage.value =
           uploadErr.response?.data?.message ||
           `Gagal mengunggah berkas "${item.label}". Pastikan koneksi internet stabil dan coba lagi.`;

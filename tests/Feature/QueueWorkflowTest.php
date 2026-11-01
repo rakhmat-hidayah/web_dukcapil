@@ -578,4 +578,103 @@ class QueueWorkflowTest extends TestCase
             $this->assertTrue((bool) $kuasaDoc['is_required'], "F-1.07 Surat Kuasa must be marked as required (Wajib)");
         }
     }
+
+    public function test_draft_older_than_24_hours_is_automatically_purged_and_storage_cleaned(): void
+    {
+        $service = ServiceType::first();
+        $this->assertNotNull($service);
+        $appService = app(QueueApplicationService::class);
+
+        $uniqueNikExpired = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $uniqueNikActive = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+
+        // 1. Create an expired draft (e.g., 25 hours old)
+        $expiredDraft = $appService->createDraft([
+            'applicant_nik' => $uniqueNikExpired,
+            'applicant_name' => 'Warga Draft Kedaluwarsa',
+            'applicant_phone' => '081234567801',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+
+        // Backdate created_at to 26 hours ago
+        DB::table('queue_applications')
+            ->where('id', $expiredDraft->id)
+            ->update(['created_at' => now()->subHours(26)]);
+        $expiredDraft->refresh();
+
+        $this->assertTrue($expiredDraft->isExpiredDraft(24));
+
+        // 2. Create an active draft (e.g. 1 hour old)
+        $activeDraft = $appService->createDraft([
+            'applicant_nik' => $uniqueNikActive,
+            'applicant_name' => 'Warga Draft Aktif',
+            'applicant_phone' => '081234567802',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+
+        $this->assertFalse($activeDraft->isExpiredDraft(24));
+
+        // Run purge
+        $purgedCount = $appService->purgeExpiredDrafts(24);
+        $this->assertGreaterThanOrEqual(1, $purgedCount);
+
+        // Assert expired draft was deleted from DB
+        $this->assertDatabaseMissing('queue_applications', ['id' => $expiredDraft->id]);
+
+        // Assert active draft remains untouched
+        $this->assertDatabaseHas('queue_applications', ['id' => $activeDraft->id]);
+
+        // Cleanup active draft
+        $appService->deleteDraft($activeDraft);
+    }
+
+    public function test_visiting_expired_draft_session_purges_application_and_clears_session(): void
+    {
+        $service = ServiceType::first();
+        $this->assertNotNull($service);
+        $appService = app(QueueApplicationService::class);
+
+        $uniqueNik = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+
+        $draft = $appService->createDraft([
+            'applicant_nik' => $uniqueNik,
+            'applicant_name' => 'Warga Uji Sesi Kedaluwarsa',
+            'applicant_phone' => '081234567803',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+
+        // Backdate created_at to 25 hours ago
+        DB::table('queue_applications')
+            ->where('id', $draft->id)
+            ->update(['created_at' => now()->subHours(25)]);
+        $draft->refresh();
+
+        // Simulate applicant visiting Step 2 with verified session
+        $response = $this->withSession([
+            'applicant_verified_nik' => $uniqueNik,
+            'applicant_verified_at' => now()->toIso8601String(),
+        ])->get(route('queue.apply.documents', ['regNumber' => $draft->reg_number]));
+
+        // Should redirect back to queue.apply.create with error notice
+        $response->assertRedirect(route('queue.apply.create'));
+        $response->assertSessionHas('error');
+        $this->assertNull(session('applicant_verified_nik'));
+
+        // Assert draft was purged from database
+        $this->assertDatabaseMissing('queue_applications', ['id' => $draft->id]);
+    }
+
+    public function test_artisan_purge_expired_drafts_command_runs_successfully(): void
+    {
+        $command = app(\App\Console\Commands\PurgeExpiredDraftApplicationsCommand::class);
+        $command->setLaravel($this->app);
+        $exitCode = $command->run(
+            new \Symfony\Component\Console\Input\ArrayInput([]),
+            new \Symfony\Component\Console\Output\NullOutput()
+        );
+        $this->assertEquals(0, $exitCode);
+    }
 }

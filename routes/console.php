@@ -15,3 +15,11 @@ Artisan::command('inspire', function () {
 Schedule::command('visitor:cleanup', ['--triggered-by' => 'scheduler'])
     ->dailyAt('02:00')
     ->withoutOverlapping(30);
+
+/**
+ * Purge Expired Online Registration Drafts (> 1x24 Jam)
+ * Runs hourly to clean up abandoned drafts, delete physical files, and expire user sessions
+ */
+Schedule::command('queue:purge-expired-drafts')
+    ->hourly()
+    ->withoutOverlapping(15);

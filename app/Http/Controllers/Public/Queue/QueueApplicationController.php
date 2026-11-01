@@ -185,6 +185,14 @@ class QueueApplicationController extends Controller
             ->first();
 
         if ($existing) {
+            // Check if existing application is an expired draft (>24 hours)
+            if ($existing->status === QueueApplication::STATUS_DRAFT && $existing->isExpiredDraft(24)) {
+                $this->applicationService->deleteDraft($existing);
+                $existing = null;
+            }
+        }
+
+        if ($existing) {
             // Register verified session for applicant's NIK
             session([
                 'applicant_verified_nik' => $existing->applicant_nik,
@@ -223,7 +231,22 @@ class QueueApplicationController extends Controller
                 'serviceType.documents' => fn($q) => $q->orderBy('sort_order'),
                 'documents.serviceDocument',
             ])
-            ->firstOrFail();
+            ->first();
+
+        if (!$application) {
+            session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
+            return redirect()->route('queue.apply.create')
+                ->with('error', 'Permohonan draft tidak ditemukan atau telah kedaluwarsa dan dihapus otomatis (batas waktu 1x24 jam). Sesi Anda telah ditutup.');
+        }
+
+        // Check if draft has expired (older than 24 hours from creation)
+        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft(24)) {
+            $this->applicationService->deleteDraft($application);
+            session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
+
+            return redirect()->route('queue.apply.create')
+                ->with('error', 'Sesi permohonan draft Anda telah kedaluwarsa karena telah melewati batas waktu 1x24 jam sejak dibuat. Sesi telah ditutup otomatis. Silakan lakukan pendaftaran baru.');
+        }
 
         if (!$application->isEditable()) {
             return redirect()->route('queue.status', ['token' => $application->access_token]);
@@ -254,7 +277,18 @@ class QueueApplicationController extends Controller
      */
     public function uploadDocument(Request $request, string $regNumber): JsonResponse|RedirectResponse
     {
-        $application = QueueApplication::where('reg_number', $regNumber)->firstOrFail();
+        $application = QueueApplication::where('reg_number', $regNumber)->first();
+
+        if (!$application) {
+            session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
+            return response()->json(['success' => false, 'session_expired' => true, 'message' => 'Sesi permohonan draft telah kedaluwarsa atau tidak ditemukan.'], 404);
+        }
+
+        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft(24)) {
+            $this->applicationService->deleteDraft($application);
+            session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
+            return response()->json(['success' => false, 'session_expired' => true, 'message' => 'Sesi permohonan draft Anda telah kedaluwarsa (1x24 jam). Sesi ditutup otomatis.'], 419);
+        }
 
         $request->validate([
             'service_document_id' => 'required|exists:queue_service_documents,id',
@@ -288,7 +322,19 @@ class QueueApplicationController extends Controller
      */
     public function removeDocument(Request $request, string $regNumber, int $documentId): JsonResponse|RedirectResponse
     {
-        $application = QueueApplication::where('reg_number', $regNumber)->firstOrFail();
+        $application = QueueApplication::where('reg_number', $regNumber)->first();
+
+        if (!$application) {
+            session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
+            return response()->json(['success' => false, 'session_expired' => true, 'message' => 'Sesi permohonan draft telah kedaluwarsa atau tidak ditemukan.'], 404);
+        }
+
+        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft(24)) {
+            $this->applicationService->deleteDraft($application);
+            session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
+            return response()->json(['success' => false, 'session_expired' => true, 'message' => 'Sesi permohonan draft Anda telah kedaluwarsa (1x24 jam). Sesi ditutup otomatis.'], 419);
+        }
+
         $this->applicationService->removeDocument($application, $documentId);
 
         if ($request->wantsJson()) {
@@ -308,7 +354,21 @@ class QueueApplicationController extends Controller
     {
         $application = QueueApplication::where('reg_number', $regNumber)
             ->with(['serviceType.documents', 'documents'])
-            ->firstOrFail();
+            ->first();
+
+        if (!$application) {
+            session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
+            return redirect()->route('queue.apply.create')
+                ->with('error', 'Permohonan draft tidak ditemukan atau telah kedaluwarsa (batas waktu 1x24 jam). Sesi Anda telah ditutup.');
+        }
+
+        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft(24)) {
+            $this->applicationService->deleteDraft($application);
+            session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
+
+            return redirect()->route('queue.apply.create')
+                ->with('error', 'Sesi permohonan draft Anda telah kedaluwarsa karena telah melewati batas waktu 1x24 jam. Sesi telah ditutup otomatis. Silakan lakukan pendaftaran baru.');
+        }
 
         $request->validate([
             'statement_agreed' => 'required|accepted',

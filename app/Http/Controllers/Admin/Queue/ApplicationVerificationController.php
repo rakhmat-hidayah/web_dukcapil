@@ -27,6 +27,13 @@ class ApplicationVerificationController extends Controller
      */
     public function index(Request $request): Response
     {
+        // Automatically purge any abandoned drafts older than 24 hours so CMS table stays clean
+        try {
+            app(\App\Services\Queue\QueueApplicationService::class)->purgeExpiredDrafts(24);
+        } catch (\Throwable $e) {
+            \Log::warning('Auto purge expired drafts warning: ' . $e->getMessage());
+        }
+
         $status = $request->query('status');
         $serviceId = $request->query('service_id');
         $search = $request->query('search');
