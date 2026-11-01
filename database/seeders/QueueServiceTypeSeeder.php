@@ -28,7 +28,7 @@ class QueueServiceTypeSeeder extends Seeder
         $suratKuasaDoc = [
             'label' => 'Formulir F-1.07 / F.017 (Surat Kuasa dalam Pelayanan Administrasi Kependudukan)',
             'description' => 'Wajib jika permohonan diwakilkan. Surat Kuasa bermeterai Rp 10.000 yang ditandatangani oleh pemberi dan penerima kuasa. Blanko formulir dapat diunduh pada link di bawah.',
-            'is_required' => false,
+            'is_required' => true,
             'applicable_to' => 'representative_only',
             'accepted_formats' => 'jpg,jpeg,png,pdf',
             'max_size_kb' => 5120,
@@ -98,7 +98,7 @@ class QueueServiceTypeSeeder extends Seeder
                     [
                         'label' => 'KTP-el Asli Penerima Kuasa / Perwakilan',
                         'description' => 'Wajib jika permohonan diwakilkan oleh keluarga atau orang lain.',
-                        'is_required' => false,
+                        'is_required' => true,
                         'applicable_to' => 'representative_only',
                         'accepted_formats' => 'jpg,jpeg,png',
                         'max_size_kb' => 5120,
@@ -168,7 +168,7 @@ class QueueServiceTypeSeeder extends Seeder
                     [
                         'label' => 'KTP-el Perwakilan (Jika Diwakilkan)',
                         'description' => 'Foto KTP-el anggota keluarga atau pihak yang mewakili.',
-                        'is_required' => false,
+                        'is_required' => true,
                         'applicable_to' => 'representative_only',
                         'accepted_formats' => 'jpg,jpeg,png',
                         'max_size_kb' => 5120,
@@ -249,7 +249,7 @@ class QueueServiceTypeSeeder extends Seeder
                     [
                         'label' => 'KTP-el Perwakilan (Jika Diwakilkan)',
                         'description' => 'Foto KTP-el anggota keluarga atau pihak yang mewakili.',
-                        'is_required' => false,
+                        'is_required' => true,
                         'applicable_to' => 'representative_only',
                         'accepted_formats' => 'jpg,jpeg,png',
                         'max_size_kb' => 5120,

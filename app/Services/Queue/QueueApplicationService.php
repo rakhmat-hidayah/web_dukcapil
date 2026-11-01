@@ -212,8 +212,14 @@ class QueueApplicationService
 
             // If representative requires power of attorney specifically
             if ($doc->applicable_to === 'representative_only' && $isRepresented) {
+                $docLabelLower = strtolower($doc->label);
+                $isKuasaDoc = str_contains($docLabelLower, 'kuasa')
+                    || str_contains($docLabelLower, 'f-1.07')
+                    || str_contains($docLabelLower, 'f1.07')
+                    || str_contains($docLabelLower, 'f.017');
+
                 // If service requires power of attorney and attendance is other or family
-                if ($application->serviceType->require_power_of_attorney && str_contains(strtolower($doc->label), 'surat kuasa')) {
+                if ($application->serviceType->require_power_of_attorney && $isKuasaDoc) {
                     if (!in_array($doc->id, $uploadedDocIds)) {
                         $missing[] = $doc->label;
                     }

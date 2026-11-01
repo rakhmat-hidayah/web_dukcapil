@@ -405,23 +405,44 @@ class QueueApplicationController extends Controller
                 }
 
                 // 2. Update or ensure Surat Kuasa F-1.07 exists for representative if applicable
-                $suratKuasaDoc = ServiceDocument::where('service_type_id', $service->id)
-                    ->where(function ($q) {
-                        $q->where('label', 'like', '%Kuasa%')
-                          ->orWhere('label', 'like', '%F-1.07%')
-                          ->orWhere('label', 'like', '%F.017%');
-                    })
-                    ->first();
+                $allowsRepresentation = (bool) (
+                    $service->allow_family_in_kk
+                    || $service->allow_family_out_kk
+                    || $service->allow_other
+                    || $service->require_power_of_attorney
+                );
 
-                if ($suratKuasaDoc) {
+                if ($allowsRepresentation) {
+                    $suratKuasaDoc = ServiceDocument::where('service_type_id', $service->id)
+                        ->where(function ($q) {
+                            $q->where('label', 'like', '%Kuasa%')
+                              ->orWhere('label', 'like', '%F-1.07%')
+                              ->orWhere('label', 'like', '%F1.07%')
+                              ->orWhere('label', 'like', '%F.017%');
+                        })
+                        ->first();
+
                     $kuasaPayload = [
-                        'label'        => $f107Label,
-                        'description'  => 'Wajib jika permohonan diwakilkan. Surat Kuasa bermeterai Rp 10.000 yang ditandatangani oleh pemberi dan penerima kuasa. Blanko formulir dapat diunduh pada link di bawah.',
+                        'service_type_id'  => $service->id,
+                        'label'            => $f107Label,
+                        'description'      => 'Wajib jika permohonan diwakilkan. Surat Kuasa bermeterai Rp 10.000 yang ditandatangani oleh pemberi dan penerima kuasa. Blanko formulir dapat diunduh pada link di bawah.',
+                        'is_required'      => true,
+                        'applicable_to'    => 'representative_only',
+                        'accepted_formats' => 'jpg,jpeg,png,pdf',
+                        'max_size_kb'      => 5120,
+                        'capture_hint'     => 'Foto Formulir Surat Kuasa F-1.07 yang telah ditandatangani di atas meterai Rp 10.000 secara utuh dan jelas.',
+                        'capture_mode'     => 'environment',
+                        'sort_order'       => 10,
                     ];
                     if ($hasTemplateUrlColumn) {
                         $kuasaPayload['template_url'] = $downloadUrl;
                     }
-                    $suratKuasaDoc->update($kuasaPayload);
+
+                    if ($suratKuasaDoc) {
+                        $suratKuasaDoc->update($kuasaPayload);
+                    } else {
+                        ServiceDocument::create($kuasaPayload);
+                    }
                 }
             }
         } catch (\Throwable $e) {

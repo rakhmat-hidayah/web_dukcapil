@@ -47,9 +47,9 @@ class AutoRoleSync
     {
         try {
             // 1. Run pending migrations safely if not yet cached as completed
-            if (!Cache::has('db_auto_migrations_v4')) {
+            if (!Cache::has('db_auto_migrations_v5')) {
                 Artisan::call('migrate', ['--force' => true]);
-                Cache::put('db_auto_migrations_v4', true, now()->addDays(3));
+                Cache::put('db_auto_migrations_v5', true, now()->addDays(3));
             }
 
             // 2. Check if legacy English roles still exist in DB or Indonesian roles are missing

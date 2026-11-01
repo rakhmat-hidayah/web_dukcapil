@@ -519,4 +519,63 @@ class QueueWorkflowTest extends TestCase
             'id' => $doc->id,
         ]);
     }
+
+    public function test_f107_proxy_document_present_and_required_when_represented_in_rusak_and_perubahan_data(): void
+    {
+        $rusakService = ServiceType::where('slug', 'cetak-ktp-rusak')->first();
+        $perubahanService = ServiceType::where('slug', 'perubahan-elemen-data')->first();
+        $appService = app(QueueApplicationService::class);
+
+        foreach ([$rusakService, $perubahanService] as $service) {
+            $this->assertNotNull($service, "Service {$service->name} should exist");
+
+            $uniqueNikSelf = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+            $uniqueNikProxy = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+            $uniqueRepNik = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+
+            // 1. Test Self: F-1.07 should NOT be shown
+            $appSelf = $appService->createDraft([
+                'applicant_nik' => $uniqueNikSelf,
+                'applicant_name' => 'Warga Uji Sendiri',
+                'applicant_phone' => '081234567890',
+                'applicant_address' => 'Dompu',
+                'attendance_type' => 'self',
+            ], $service->id);
+
+            $responseSelf = $this->get(route('queue.apply.documents', ['regNumber' => $appSelf->reg_number]));
+            $responseSelf->assertOk();
+            $requirementsSelf = $responseSelf->viewData('page')['props']['requirements'];
+            $selfDocLabels = collect($requirementsSelf)->pluck('label')->toArray();
+
+            $hasKuasaInSelf = collect($selfDocLabels)->contains(fn($l) => str_contains($l, 'F-1.07') || str_contains($l, 'Kuasa'));
+            $this->assertFalse($hasKuasaInSelf, "F-1.07 Surat Kuasa should NOT be required or shown when applying for self");
+
+            // 2. Test Diwakilkan (family_in_kk): F-1.07 MUST be shown and required
+            $appProxy = $appService->createDraft([
+                'applicant_nik' => $uniqueNikProxy,
+                'applicant_name' => 'Warga Yang Diwakilkan',
+                'applicant_phone' => '081234567891',
+                'applicant_address' => 'Dompu',
+                'attendance_type' => 'family_in_kk',
+                'representative_name' => 'Keluarga Penerima Kuasa',
+                'representative_nik' => $uniqueRepNik,
+                'representative_relationship' => 'Orang Tua',
+                'representative_phone' => '081234567892',
+                'representative_reason' => 'Sedang bekerja',
+            ], $service->id);
+
+            $responseProxy = $this->get(route('queue.apply.documents', ['regNumber' => $appProxy->reg_number]));
+            $responseProxy->assertOk();
+            $requirementsProxy = $responseProxy->viewData('page')['props']['requirements'];
+            $proxyDocLabels = collect($requirementsProxy)->pluck('label')->toArray();
+
+            $hasKuasaInProxy = collect($proxyDocLabels)->contains(fn($l) => str_contains($l, 'F-1.07') || str_contains($l, 'Kuasa'));
+            $this->assertTrue($hasKuasaInProxy, "F-1.07 Surat Kuasa MUST be shown when applying as representative for {$service->name}");
+
+            // Verify that F-1.07 is marked as required (is_required = true)
+            $kuasaDoc = collect($requirementsProxy)->first(fn($d) => str_contains($d['label'], 'F-1.07') || str_contains($d['label'], 'Kuasa'));
+            $this->assertNotNull($kuasaDoc);
+            $this->assertTrue((bool) $kuasaDoc['is_required'], "F-1.07 Surat Kuasa must be marked as required (Wajib)");
+        }
+    }
 }
