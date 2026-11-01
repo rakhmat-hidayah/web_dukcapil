@@ -229,7 +229,8 @@ import {
   FolderLock, Image, LibraryBig, Milestone, ShieldAlert, Globe, MapPin,
   Settings, UsersRound, Users, Network, Palette, BarChart3, Radio, Activity, Sliders,
   Map, BarChart2, DatabaseZap, MessageSquareWarning, ShieldCheck, ArrowDownUp, HelpCircle, Bell,
-  FileCheck, CalendarDays, UserCheck, Clock, CheckCircle2, History, AlertTriangle, PackageCheck
+  FileCheck, CalendarDays, UserCheck, Clock, CheckCircle2, History, AlertTriangle, PackageCheck,
+  FolderArchive, HardDrive, FileArchive
 } from '@lucide/vue';
 
 const page = usePage();
@@ -379,6 +380,17 @@ const menuGroups = [
     ]
   },
   {
+    title: 'Pengarsipan',
+    items: [
+      { label: 'Dashboard Pengarsipan', route: 'admin.archive.dashboard', icon: LayoutDashboard },
+      { label: 'Permohonan Siap Diarsipkan', route: 'admin.archive.ready-applications', icon: FileCheck },
+      { label: 'Paket Arsip ZIP', route: 'admin.archive.packages.index', icon: FolderArchive },
+      { label: 'Riwayat Pengarsipan', route: 'admin.archive.history', icon: History },
+      { label: 'Status Penyimpanan Permanen', route: 'admin.archive.permanent-storage', icon: HardDrive },
+      { label: 'Pengaturan Pengarsipan', route: 'admin.archive.settings.index', icon: Settings },
+    ]
+  },
+  {
     title: 'Layanan PPID',
     items: [
       { label: 'Halaman Statis PPID', route: 'admin.ppid.pages.index', icon: FileText },
@@ -432,6 +444,7 @@ const isPpidAdmin = computed(() => userRoles.value.includes('PPID Admin'));
 const isQueueOfficer = computed(() => userRoles.value.includes('Queue Officer'));
 const isQueueVerifier = computed(() => userRoles.value.includes('Queue Verifier'));
 const isHandoverOfficer = computed(() => userRoles.value.includes('petugas_pengambilan_ktpel'));
+const isArchiveOperator = computed(() => userRoles.value.includes('operator_arsip'));
 const userPermissions = computed(() => page.props.auth?.permissions || []);
 
 const filteredMenuGroups = computed(() => {
@@ -507,6 +520,16 @@ const filteredMenuGroups = computed(() => {
       // Serah Terima KTP-el allowed items
       if (isHandoverOfficer.value || isQueueOfficer.value || userPermissions.value.some(p => p.startsWith('handover.'))) {
         if (r && r.startsWith('admin.handover.')) {
+          return true;
+        }
+      }
+
+      // Pengarsipan Permohonan Online allowed items
+      if (isArchiveOperator.value || isQueueOfficer.value || userPermissions.value.some(p => p.startsWith('archive.'))) {
+        if (r && r.startsWith('admin.archive.')) {
+          if (r === 'admin.archive.settings.index') {
+            return isSuperAdmin.value || isWebsiteAdmin.value || userPermissions.value.includes('archive.settings.manage');
+          }
           return true;
         }
       }

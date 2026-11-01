@@ -485,6 +485,46 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{id}/complete', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'complete'])->name('complete');
             Route::get('/{id}/photo', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'photo'])->name('photo');
         });
+
+        // -------------------------------------------------------------
+        // Pengarsipan Permohonan Online (Standalone Archive Module)
+        // -------------------------------------------------------------
+        Route::middleware('role_or_permission:Super Administrator|Website Administrator|operator_arsip|archive.dashboard.view')
+            ->prefix('archive')->name('archive.')->group(function () {
+
+            // 1. Dashboard Pengarsipan
+            Route::get('/dashboard', [\App\Http\Controllers\Admin\Archive\ArchiveDashboardController::class, 'index'])->name('dashboard');
+
+            // 2. Permohonan Siap Diarsipkan
+            Route::get('/ready-applications', [\App\Http\Controllers\Admin\Archive\ArchiveApplicationController::class, 'index'])->name('ready-applications');
+
+            // 3. Paket Arsip ZIP
+            Route::get('/packages', [\App\Http\Controllers\Admin\Archive\ArchivePackageController::class, 'index'])->name('packages.index');
+            Route::post('/packages', [\App\Http\Controllers\Admin\Archive\ArchivePackageController::class, 'store'])->name('packages.store');
+            Route::get('/packages/{id}', [\App\Http\Controllers\Admin\Archive\ArchivePackageController::class, 'show'])->name('packages.show');
+            Route::get('/packages/{id}/download', [\App\Http\Controllers\Admin\Archive\ArchivePackageController::class, 'download'])->name('packages.download');
+            Route::post('/packages/{id}/confirm', [\App\Http\Controllers\Admin\Archive\ArchivePackageController::class, 'confirm'])->name('packages.confirm');
+            Route::post('/packages/{id}/verify-integrity', [\App\Http\Controllers\Admin\Archive\ArchivePackageController::class, 'verifyIntegrity'])->name('packages.verify-integrity');
+
+            // 4. Riwayat Pengarsipan
+            Route::get('/history', [\App\Http\Controllers\Admin\Archive\ArchiveHistoryController::class, 'index'])->name('history');
+
+            // 5. Status Penyimpanan Permanen
+            Route::get('/permanent-storage', [\App\Http\Controllers\Admin\Archive\ArchivePermanentStorageController::class, 'index'])->name('permanent-storage');
+            Route::post('/permanent-storage/test', [\App\Http\Controllers\Admin\Archive\ArchivePermanentStorageController::class, 'testConnection'])->name('permanent-storage.test');
+            Route::post('/permanent-storage/{packageId}/transfer', [\App\Http\Controllers\Admin\Archive\ArchivePermanentStorageController::class, 'transfer'])
+                ->middleware('permission:archive.transfer.execute')
+                ->name('permanent-storage.transfer');
+            Route::post('/permanent-storage/{packageId}/verify', [\App\Http\Controllers\Admin\Archive\ArchivePermanentStorageController::class, 'verify'])
+                ->middleware('permission:archive.transfer.execute')
+                ->name('permanent-storage.verify');
+
+            // 6. Pengaturan Pengarsipan (Administrator berwenang)
+            Route::middleware('permission:archive.settings.manage')->group(function () {
+                Route::get('/settings', [\App\Http\Controllers\Admin\Archive\ArchiveSettingsController::class, 'index'])->name('settings.index');
+                Route::post('/settings', [\App\Http\Controllers\Admin\Archive\ArchiveSettingsController::class, 'update'])->name('settings.update');
+            });
+        });
     });
 });
 

@@ -71,6 +71,11 @@ class ServiceType extends Model
         return $this->hasMany(ServiceDocument::class, 'service_type_id')->orderBy('sort_order');
     }
 
+    public function serviceDocuments()
+    {
+        return $this->documents();
+    }
+
     public function requiredDocuments()
     {
         return $this->documents()->where('is_required', true);
