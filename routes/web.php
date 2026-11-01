@@ -443,10 +443,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Service Types & Requirement Documents
             Route::resource('/service-types', \App\Http\Controllers\Admin\Queue\ServiceTypeController::class)->except(['show']);
             Route::post('/service-types/{id}/toggle', [\App\Http\Controllers\Admin\Queue\ServiceTypeController::class, 'toggleActive'])->name('service-types.toggle');
+
+            // Requirement Documents (Canonical)
             Route::post('/service-types/{serviceTypeId}/documents', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'store'])->name('service-documents.store');
             Route::put('/service-types/{serviceTypeId}/documents/{documentId}', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'update'])->name('service-documents.update');
             Route::delete('/service-types/{serviceTypeId}/documents/{documentId}', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'destroy'])->name('service-documents.destroy');
             Route::post('/service-types/{serviceTypeId}/documents/reorder', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'reorder'])->name('service-documents.reorder');
+
+            // Requirement Documents (Aliases for nested service-types.documents.* convention)
+            Route::post('/service-types/{serviceTypeId}/docs/store', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'store'])->name('service-types.documents.store');
+            Route::put('/service-types/{serviceTypeId}/docs/{documentId}/update', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'update'])->name('service-types.documents.update');
+            Route::delete('/service-types/{serviceTypeId}/docs/{documentId}/destroy', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'destroy'])->name('service-types.documents.destroy');
 
             // Schedules & Daily Quotas
             Route::get('/schedules', [\App\Http\Controllers\Admin\Queue\QueueScheduleController::class, 'index'])->name('schedules.index');

@@ -410,4 +410,113 @@ class QueueWorkflowTest extends TestCase
         ]);
         $response17->assertSessionHasNoErrors();
     }
+
+    public function test_admin_can_update_service_type()
+    {
+        $admin = User::first();
+        $this->assertNotNull($admin, 'Admin user must exist');
+
+        $service = ServiceType::first();
+        $this->assertNotNull($service, 'Service type must exist');
+
+        $response = $this->actingAs($admin)->put(route('admin.queue.service-types.update', $service->id), [
+            'name' => $service->name,
+            'slug' => $service->slug,
+            'description' => 'Keterangan diuji via automated test',
+            'color' => '#0284c7',
+            'quota_per_day' => 25,
+            'processing_days_label' => '1 Hari Kerja',
+            'cost_label' => 'GRATIS (Rp 0)',
+            'requires_face_photo' => true,
+            'allow_self' => true,
+            'allow_family_in_kk' => true,
+            'allow_family_out_kk' => false,
+            'allow_other' => false,
+            'require_power_of_attorney' => false,
+            'require_absence_reason' => false,
+            'is_biometric_first_recording' => false,
+            'policy_notes' => 'Catatan kebijakan tes',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('queue_service_types', [
+            'id' => $service->id,
+            'quota_per_day' => 25,
+            'color' => '#0284c7',
+        ]);
+    }
+
+    public function test_admin_can_manage_document_requirements_via_canonical_and_alias_routes()
+    {
+        $admin = User::first();
+        $this->assertNotNull($admin, 'Admin user must exist');
+
+        $service = ServiceType::first();
+        $this->assertNotNull($service, 'Service type must exist');
+
+        // 1. Add requirement document via canonical route
+        $createResponse = $this->actingAs($admin)->post(route('admin.queue.service-documents.store', [
+            'serviceTypeId' => $service->id,
+        ]), [
+            'label' => 'Surat Keterangan Uji Otomatis',
+            'description' => 'Dokumen uji coba untuk validasi',
+            'accepted_formats' => 'jpg,jpeg,png,pdf',
+            'max_size_kb' => 5120,
+            'is_required' => false,
+            'capture_mode' => 'environment',
+            'applicable_to' => 'all',
+            'capture_hint' => 'Pastikan dokumen jelas',
+            'sort_order' => 99,
+        ]);
+
+        $createResponse->assertRedirect();
+        $createResponse->assertSessionHasNoErrors();
+
+        $doc = ServiceDocument::where('service_type_id', $service->id)
+            ->where('label', 'Surat Keterangan Uji Otomatis')
+            ->first();
+        $this->assertNotNull($doc, 'Document requirement must be stored');
+
+        // 2. Update requirement document via alias route (service-types.documents.update)
+        $updateResponse = $this->actingAs($admin)->put(route('admin.queue.service-types.documents.update', [
+            'serviceTypeId' => $service->id,
+            'documentId' => $doc->id,
+        ]), [
+            'label' => 'Surat Keterangan Uji Otomatis (Updated)',
+            'description' => 'Diperbarui via alias route',
+            'accepted_formats' => 'pdf',
+            'max_size_kb' => 2048,
+            'is_required' => true,
+            'capture_mode' => 'environment',
+            'applicable_to' => 'all',
+            'capture_hint' => 'Format PDF saja',
+            'sort_order' => 99,
+        ]);
+
+        $updateResponse->assertRedirect();
+        $updateResponse->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('queue_service_documents', [
+            'id' => $doc->id,
+            'label' => 'Surat Keterangan Uji Otomatis (Updated)',
+            'accepted_formats' => 'pdf',
+        ]);
+
+        // 3. Delete requirement document via canonical route
+        $deleteResponse = $this->actingAs($admin)->delete(route('admin.queue.service-documents.destroy', [
+            'serviceTypeId' => $service->id,
+            'documentId' => $doc->id,
+        ]));
+
+        $deleteResponse->assertRedirect();
+        $deleteResponse->assertSessionHasNoErrors();
+
+        $this->assertDatabaseMissing('queue_service_documents', [
+            'id' => $doc->id,
+        ]);
+    }
 }

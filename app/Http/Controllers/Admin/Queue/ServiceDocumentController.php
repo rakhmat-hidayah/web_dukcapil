@@ -27,10 +27,13 @@ class ServiceDocumentController extends Controller
             'capture_hint'     => 'nullable|string|max:300',
             'capture_mode'     => 'required|in:environment,user,any',
             'applicable_to'    => 'nullable|in:all,self_only,representative_only',
+            'template_url'     => 'nullable|string|max:500',
             'sort_order'       => 'nullable|integer',
         ], [
             'label.required' => 'Nama / label dokumen persyaratan wajib diisi.',
             'accepted_formats.required' => 'Format file yang diterima wajib ditentukan (contoh: jpg,jpeg,png,pdf).',
+            'max_size_kb.required' => 'Ukuran maksimal file wajib ditentukan.',
+            'capture_mode.required' => 'Mode kamera wajib dipilih.',
         ]);
 
         if (empty($validated['sort_order'])) {
@@ -68,7 +71,13 @@ class ServiceDocumentController extends Controller
             'capture_hint'     => 'nullable|string|max:300',
             'capture_mode'     => 'required|in:environment,user,any',
             'applicable_to'    => 'nullable|in:all,self_only,representative_only',
+            'template_url'     => 'nullable|string|max:500',
             'sort_order'       => 'nullable|integer',
+        ], [
+            'label.required' => 'Nama / label dokumen persyaratan wajib diisi.',
+            'accepted_formats.required' => 'Format file yang diterima wajib ditentukan (contoh: jpg,jpeg,png,pdf).',
+            'max_size_kb.required' => 'Ukuran maksimal file wajib ditentukan.',
+            'capture_mode.required' => 'Mode kamera wajib dipilih.',
         ]);
 
         $document->update($validated);
