@@ -56,7 +56,7 @@
           >
             <div
               v-html="handover.application.qr_code_svg"
-              class="w-16 h-16 [&>svg]:w-full [&>svg]:h-full [&>svg]:block"
+              class="w-16 h-16 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:block"
             ></div>
             <span class="text-[9px] font-mono font-bold text-slate-800 mt-1">
               {{ handover.application.reg_number }}

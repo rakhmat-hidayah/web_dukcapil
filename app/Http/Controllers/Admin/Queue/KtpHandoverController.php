@@ -198,9 +198,27 @@ class KtpHandoverController extends Controller
                 ->with('success', "Dokumen [{$code}] berhasil ditemukan melalui scanner QR.");
         }
 
-        // 2. Check if application exists in queue (not yet in physical handover stage)
+        // 2. Check if application exists in queue (auto-link handover if in valid state)
         $app = \App\Models\Queue\QueueApplication::where('reg_number', $code)->first();
         if ($app) {
+            if (in_array($app->status, [
+                \App\Models\Queue\QueueApplication::STATUS_PRE_VERIFIED,
+                \App\Models\Queue\QueueApplication::STATUS_QUEUE_BOOKED,
+                \App\Models\Queue\QueueApplication::STATUS_ARRIVED,
+                \App\Models\Queue\QueueApplication::STATUS_PHYSICAL_VERIFICATION,
+                \App\Models\Queue\QueueApplication::STATUS_APPROVED_FOR_SERVICE,
+                \App\Models\Queue\QueueApplication::STATUS_PROCESSING,
+                \App\Models\Queue\QueueApplication::STATUS_READY_FOR_PICKUP,
+                \App\Models\Queue\QueueApplication::STATUS_COMPLETED,
+            ])) {
+                $handover = KtpHandover::firstOrCreate(
+                    ['queue_application_id' => $app->id],
+                    ['status' => KtpHandover::STATUS_PENDING]
+                );
+                return redirect()->route('admin.handover.show', $handover->id)
+                    ->with('success', "Dokumen [{$code}] berhasil ditemukan melalui scanner QR.");
+            }
+
             return redirect()->route('admin.queue.applications.show', $app->id)
                 ->with('info', "Dokumen [{$code}] ditemukan pada antrean online (status: {$app->status_label}), belum masuk tahap serah terima fisik.");
         }

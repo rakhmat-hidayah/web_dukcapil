@@ -78,10 +78,10 @@
                   </div>
                   <div>
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white">
-                      {{ formatFullDate(sched.schedule_date) }}
+                      {{ sched.schedule_date_formatted || formatFullDate(sched.schedule_date) }}
                     </h3>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                      Jam Operasional: {{ formatTime(sched.open_time) }} - {{ formatTime(sched.close_time) }} WITA
+                      Jam Operasional: {{ sched.operational_hours_formatted || (formatTime(sched.open_time) + ' - ' + formatTime(sched.close_time) + ' WITA') }}
                     </p>
                   </div>
                 </div>
@@ -244,26 +244,52 @@ function handleConfirmBooking() {
   );
 }
 
+const MONTH_NAMES_ID = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+const DAY_NAMES_ID = [
+  'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'
+];
+
+function parseDateSafe(dateString) {
+  if (!dateString) return null;
+  if (typeof dateString === 'string' && dateString.includes('T')) {
+    const cleanDate = dateString.split('T')[0];
+    const [y, m, day] = cleanDate.split('-').map(Number);
+    return new Date(y, m - 1, day);
+  }
+  const clean = typeof dateString === 'string' ? dateString.split(' ')[0].trim() : String(dateString);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+    const [y, m, day] = clean.split('-').map(Number);
+    return new Date(y, m - 1, day);
+  }
+  const fallback = new Date(dateString);
+  return isNaN(fallback.getTime()) ? null : fallback;
+}
+
 function formatFullDate(dateStr) {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('id-ID', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const d = parseDateSafe(dateStr);
+  if (!d) return String(dateStr);
+  const dayName = DAY_NAMES_ID[d.getDay()];
+  const dayNum = String(d.getDate()).padStart(2, '0');
+  const monthName = MONTH_NAMES_ID[d.getMonth()];
+  const year = d.getFullYear();
+  return `${dayName}, ${dayNum} ${monthName} ${year}`;
 }
 
 function getDayName(dateStr) {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('id-ID', { weekday: 'short' });
+  const d = parseDateSafe(dateStr);
+  if (!d) return '';
+  return DAY_NAMES_ID[d.getDay()].substring(0, 3);
 }
 
 function getDayNumber(dateStr) {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+  const d = parseDateSafe(dateStr);
+  if (!d) return '';
   return d.getDate();
 }
 

@@ -41,7 +41,7 @@
           >
             <div
               v-html="application.qr_code_svg"
-              class="w-12 h-12 [&>svg]:w-full [&>svg]:h-full [&>svg]:block"
+              class="w-12 h-12 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:block"
             ></div>
           </div>
 

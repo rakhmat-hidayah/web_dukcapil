@@ -284,7 +284,7 @@ function handleGlobalKeydown(e) {
   if (tag === 'textarea') return;
 
   const now = Date.now();
-  if (now - lastKeyTime > 90) {
+  if (now - lastKeyTime > 250) {
     barcodeBuffer = '';
   }
   lastKeyTime = now;

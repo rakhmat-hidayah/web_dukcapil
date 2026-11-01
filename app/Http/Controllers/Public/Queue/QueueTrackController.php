@@ -35,8 +35,20 @@ class QueueTrackController extends Controller
 
         // If the scanner/device is operated by an authenticated officer/admin:
         if (Auth::check()) {
-            $handover = KtpHandover::where('queue_application_id', $application->id)->first();
-            if ($handover) {
+            if (in_array($application->status, [
+                QueueApplication::STATUS_PRE_VERIFIED,
+                QueueApplication::STATUS_QUEUE_BOOKED,
+                QueueApplication::STATUS_ARRIVED,
+                QueueApplication::STATUS_PHYSICAL_VERIFICATION,
+                QueueApplication::STATUS_APPROVED_FOR_SERVICE,
+                QueueApplication::STATUS_PROCESSING,
+                QueueApplication::STATUS_READY_FOR_PICKUP,
+                QueueApplication::STATUS_COMPLETED,
+            ])) {
+                $handover = KtpHandover::firstOrCreate(
+                    ['queue_application_id' => $application->id],
+                    ['status' => KtpHandover::STATUS_PENDING]
+                );
                 return redirect()->route('admin.handover.show', $handover->id)
                     ->with('success', "Dokumen KTP-el berhasil ditemukan melalui pemindaian QR Code.");
             }

@@ -280,8 +280,8 @@ function handleGlobalKeydown(e) {
   }
 
   const now = Date.now();
-  // Hardware scanners type extremely fast (< 60ms between characters)
-  if (now - lastKeyTime > 90) {
+  // Hardware scanners type fast (< 250ms between characters)
+  if (now - lastKeyTime > 250) {
     barcodeBuffer = '';
   }
   lastKeyTime = now;

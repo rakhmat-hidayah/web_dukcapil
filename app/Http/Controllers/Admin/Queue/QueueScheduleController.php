@@ -32,8 +32,8 @@ class QueueScheduleController extends Controller
         $services = ServiceType::active()->orderBy('sort_order')->get();
 
         return Inertia::render('Admin/Queue/Schedules/Index', [
-            'schedules' => $schedules,
-            'services' => $services,
+            'schedules'    => $schedules,
+            'services'     => $services,
             'currentMonth' => $month,
         ]);
     }
@@ -43,6 +43,16 @@ class QueueScheduleController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $normalizedDate = $this->normalizeDateInput($request->input('schedule_date'));
+        $openTime = $this->normalizeTimeInput($request->input('open_time'), '08:00');
+        $closeTime = $this->normalizeTimeInput($request->input('close_time'), '15:30');
+
+        $request->merge([
+            'schedule_date' => $normalizedDate,
+            'open_time'     => $openTime,
+            'close_time'    => $closeTime,
+        ]);
+
         $validated = $request->validate([
             'schedule_date' => 'required|date',
             'open_time'     => 'required|date_format:H:i',
@@ -60,6 +70,8 @@ class QueueScheduleController extends Controller
 
         $totalQuota = collect($slotsData)->sum('quota');
         $validated['total_quota'] = $totalQuota;
+        $validated['open_time'] = $openTime . ':00';
+        $validated['close_time'] = $closeTime . ':00';
 
         $schedule = QueueSchedule::updateOrCreate(
             ['schedule_date' => $validated['schedule_date']],
@@ -78,7 +90,8 @@ class QueueScheduleController extends Controller
             );
         }
 
-        return back()->with('success', "Jadwal dan kuota tanggal {$schedule->schedule_date->format('d/m/Y')} berhasil disimpan.");
+        $dateDisplay = $schedule->schedule_date_indonesia ?? Carbon::parse($schedule->schedule_date)->format('d/m/Y');
+        return back()->with('success', "Jadwal dan kuota tanggal {$dateDisplay} berhasil disimpan.");
     }
 
     /**
@@ -86,6 +99,18 @@ class QueueScheduleController extends Controller
      */
     public function bulkCreate(Request $request): RedirectResponse
     {
+        $startDate = $this->normalizeDateInput($request->input('start_date'));
+        $endDate = $this->normalizeDateInput($request->input('end_date'));
+        $openTime = $this->normalizeTimeInput($request->input('open_time'), '08:00');
+        $closeTime = $this->normalizeTimeInput($request->input('close_time'), '15:30');
+
+        $request->merge([
+            'start_date' => $startDate,
+            'end_date'   => $endDate,
+            'open_time'  => $openTime,
+            'close_time' => $closeTime,
+        ]);
+
         $request->validate([
             'start_date' => 'required|date',
             'end_date'   => 'required|date|after_or_equal:start_date',
@@ -94,11 +119,11 @@ class QueueScheduleController extends Controller
             'skip_weekends' => 'boolean',
         ]);
 
-        $start = Carbon::parse($request->input('start_date'));
-        $end = Carbon::parse($request->input('end_date'));
+        $start = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
         $skipWeekends = $request->boolean('skip_weekends', true);
-        $openTime = $request->input('open_time') . ':00';
-        $closeTime = $request->input('close_time') . ':00';
+        $openTimeDb = $openTime . ':00';
+        $closeTimeDb = $closeTime . ':00';
 
         $services = ServiceType::active()->get();
         $totalDailyQuota = $services->sum('quota_per_day');
@@ -114,26 +139,24 @@ class QueueScheduleController extends Controller
 
             $dateStr = $current->format('Y-m-d');
 
-            $schedule = QueueSchedule::firstOrCreate(
+            $schedule = QueueSchedule::updateOrCreate(
                 ['schedule_date' => $dateStr],
                 [
-                    'open_time' => $openTime,
-                    'close_time' => $closeTime,
+                    'open_time'   => $openTimeDb,
+                    'close_time'  => $closeTimeDb,
                     'total_quota' => $totalDailyQuota,
-                    'is_holiday' => false,
-                    'is_open' => true,
+                    'is_open'     => true,
                 ]
             );
 
             foreach ($services as $service) {
-                QueueSlot::firstOrCreate(
+                QueueSlot::updateOrCreate(
                     [
-                        'schedule_id' => $schedule->id,
+                        'schedule_id'     => $schedule->id,
                         'service_type_id' => $service->id,
                     ],
                     [
                         'quota' => $service->quota_per_day,
-                        'booked_count' => 0,
                     ]
                 );
             }
@@ -142,7 +165,7 @@ class QueueScheduleController extends Controller
             $current->addDay();
         }
 
-        return back()->with('success', "Berhasil menjadwalkan {$createdCount} hari operasional pelayanan.");
+        return back()->with('success', "Berhasil menyimpan jadwal untuk {$createdCount} hari operasional pelayanan.");
     }
 
     /**
@@ -153,13 +176,54 @@ class QueueScheduleController extends Controller
         $schedule = QueueSchedule::with('slots.applications')->findOrFail($id);
 
         $hasBooked = $schedule->slots->sum('booked_count') > 0;
+        $dateStr = $schedule->schedule_date_indonesia ?? Carbon::parse($schedule->schedule_date)->format('d/m/Y');
+
         if ($hasBooked) {
-            return back()->with('error', "Jadwal tanggal {$schedule->schedule_date->format('d/m/Y')} tidak dapat dihapus karena sudah ada pemohon yang memiliki nomor antrian. Anda dapat menandainya sebagai Hari Libur atau Menutupnya.");
+            return back()->with('error', "Jadwal tanggal {$dateStr} tidak dapat dihapus karena sudah ada pemohon yang memiliki nomor antrian. Anda dapat menandainya sebagai Hari Libur atau Menutupnya.");
         }
 
-        $dateStr = $schedule->schedule_date->format('d/m/Y');
         $schedule->delete();
 
         return back()->with('success', "Jadwal tanggal {$dateStr} berhasil dihapus.");
+    }
+
+    /**
+     * Normalize date inputs from various formats (e.g. DD/MM/YYYY or YYYY-MM-DD or ISO string).
+     */
+    protected function normalizeDateInput(?string $value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+        $value = trim($value);
+
+        // DD/MM/YYYY format
+        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $value, $m)) {
+            return sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1]);
+        }
+
+        // ISO format containing 'T'
+        if (str_contains($value, 'T')) {
+            return substr($value, 0, 10);
+        }
+
+        try {
+            return Carbon::parse($value)->format('Y-m-d');
+        } catch (\Throwable $e) {
+            return $value;
+        }
+    }
+
+    /**
+     * Normalize time input to strict HH:MM format.
+     */
+    protected function normalizeTimeInput(?string $value, string $default = '08:00'): string
+    {
+        if (!$value) {
+            return $default;
+        }
+        $value = trim($value);
+        $value = str_replace('.', ':', $value);
+        return substr($value, 0, 5);
     }
 }

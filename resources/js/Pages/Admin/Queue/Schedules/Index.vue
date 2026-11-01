@@ -68,17 +68,17 @@
                 <!-- Date -->
                 <td class="px-5 py-4 whitespace-nowrap">
                   <div class="font-bold text-slate-900 dark:text-white text-sm">
-                    {{ formatDate(item.schedule_date) }}
+                    {{ item.schedule_date_formatted || formatDate(item.schedule_date) }}
                   </div>
                   <div class="text-[10px] text-slate-400 font-mono mt-0.5">
-                    {{ formatRawDate(item.schedule_date) }}
+                    {{ item.schedule_date_indonesia || formatRawDate(item.schedule_date) }}
                   </div>
                 </td>
 
                 <!-- Hours -->
                 <td class="px-5 py-4 whitespace-nowrap font-mono text-[11px] text-slate-600 dark:text-slate-300">
                   <span v-if="!item.is_holiday">
-                    {{ item.open_time?.substring(0, 5) }} - {{ item.close_time?.substring(0, 5) }} WITA
+                    {{ item.operational_hours_formatted || (item.open_time?.substring(0, 5) + ' - ' + item.close_time?.substring(0, 5) + ' WITA') }}
                   </span>
                   <span v-else class="text-rose-500 font-bold">
                     TUTUP
@@ -160,8 +160,8 @@
     <!-- EDIT SINGLE DATE MODAL -->
     <div v-if="editModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
-        <h3 class="text-lg font-black text-slate-900 dark:text-white">
-          Ubah Jadwal & Kuota Tanggal {{ editForm.schedule_date }}
+        <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+          Ubah Jadwal & Kuota — {{ formatDate(editForm.schedule_date) }}
         </h3>
 
         <form @submit.prevent="saveSingleSchedule" class="space-y-4">
@@ -374,10 +374,14 @@ const editForm = ref({
 })
 
 const openEditModal = (schedule) => {
+  let cleanDate = schedule.schedule_date || ''
+  if (typeof cleanDate === 'string' && cleanDate.includes('T')) {
+    cleanDate = cleanDate.split('T')[0]
+  }
   editForm.value = {
-    schedule_date: schedule.schedule_date,
+    schedule_date: cleanDate,
     open_time: schedule.open_time?.substring(0, 5) || '08:00',
-    close_time: schedule.close_time?.substring(0, 5) || '15:00',
+    close_time: schedule.close_time?.substring(0, 5) || '15:30',
     is_holiday: !!schedule.is_holiday,
     holiday_note: schedule.holiday_note || '',
     is_open: !!schedule.is_open,
@@ -403,9 +407,18 @@ const saveSingleSchedule = () => {
 }
 
 const deleteSchedule = (schedule) => {
-  if (confirm(`Hapus jadwal untuk tanggal ${schedule.schedule_date}?`)) {
+  const label = schedule.schedule_date_formatted || formatDate(schedule.schedule_date)
+  if (confirm(`Hapus jadwal untuk tanggal ${label}?`)) {
     router.delete(route('admin.queue.schedules.destroy', schedule.id))
   }
+}
+
+// Helper: Format Date object to YYYY-MM-DD in local browser time (prevents UTC day shifts)
+const toLocalDateInputString = (d) => {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 // Bulk Generate Modal
@@ -415,15 +428,18 @@ const bulkForm = ref({
   start_date: '',
   end_date: '',
   open_time: '08:00',
-  close_time: '15:00',
+  close_time: '15:30',
   skip_weekends: true,
 })
 
 const openBulkModal = () => {
   const today = new Date()
-  const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-  bulkForm.value.start_date = today.toISOString().split('T')[0]
-  bulkForm.value.end_date = nextMonth.toISOString().split('T')[0]
+  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+  bulkForm.value.start_date = toLocalDateInputString(today)
+  bulkForm.value.end_date = toLocalDateInputString(endOfMonth)
+  bulkForm.value.open_time = '08:00'
+  bulkForm.value.close_time = '15:30'
+  bulkForm.value.skip_weekends = true
   bulkModalOpen.value = true
 }
 
@@ -441,48 +457,54 @@ const getServiceName = (serviceTypeId) => {
   return props.services.find(s => s.id === serviceTypeId)?.name || 'Layanan'
 }
 
+const MONTH_NAMES_ID = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+]
+const DAY_NAMES_ID = [
+  'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'
+]
+
 const parseDateSafe = (dateString) => {
   if (!dateString) return null
-  // If ISO 8601 string containing 'T' (e.g. 2026-11-01T16:00:00.000000Z)
   if (typeof dateString === 'string' && dateString.includes('T')) {
-    const d = new Date(dateString)
-    if (!isNaN(d.getTime())) return d
+    const cleanDate = dateString.split('T')[0]
+    const [y, m, day] = cleanDate.split('-').map(Number)
+    return new Date(y, m - 1, day)
   }
-  // If YYYY-MM-DD
-  const clean = typeof dateString === 'string' ? dateString.split('T')[0].trim() : String(dateString)
+  const clean = typeof dateString === 'string' ? dateString.split(' ')[0].trim() : String(dateString)
   if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
     const [y, m, day] = clean.split('-').map(Number)
     return new Date(y, m - 1, day)
+  }
+  if (/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/.test(clean)) {
+    const parts = clean.split(/[\/\-]/).map(Number)
+    return new Date(parts[2], parts[1] - 1, parts[0])
   }
   const fallback = new Date(dateString)
   return isNaN(fallback.getTime()) ? null : fallback
 }
 
+// "Senin, 02 November 2026"
 const formatDate = (dateString) => {
   if (!dateString) return '-'
-  try {
-    const d = parseDateSafe(dateString)
-    if (!d) return String(dateString)
-    return d.toLocaleDateString('id-ID', {
-      timeZone: 'Asia/Makassar',
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    })
-  } catch (e) {
-    return String(dateString)
-  }
+  const d = parseDateSafe(dateString)
+  if (!d) return String(dateString)
+  const dayName = DAY_NAMES_ID[d.getDay()]
+  const dayNum = String(d.getDate()).padStart(2, '0')
+  const monthName = MONTH_NAMES_ID[d.getMonth()]
+  const year = d.getFullYear()
+  return `${dayName}, ${dayNum} ${monthName} ${year}`
 }
 
+// "02/11/2026" (Indonesian date format)
 const formatRawDate = (dateString) => {
   if (!dateString) return '-'
-  try {
-    const d = parseDateSafe(dateString)
-    if (!d) return String(dateString).substring(0, 10)
-    return d.toLocaleDateString('en-CA', { timeZone: 'Asia/Makassar' }) // returns YYYY-MM-DD in local timezone
-  } catch (e) {
-    return String(dateString).substring(0, 10)
-  }
+  const d = parseDateSafe(dateString)
+  if (!d) return String(dateString).substring(0, 10)
+  const dayNum = String(d.getDate()).padStart(2, '0')
+  const monthNum = String(d.getMonth() + 1).padStart(2, '0')
+  const year = d.getFullYear()
+  return `${dayNum}/${monthNum}/${year}`
 }
 </script>

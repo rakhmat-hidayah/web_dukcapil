@@ -5,10 +5,8 @@ namespace App\Models\Queue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
+use BaconQrCode\Common\ErrorCorrectionLevel;
+use BaconQrCode\Encoder\Encoder;
 
 class QueueApplication extends Model
 {
@@ -348,19 +346,35 @@ class QueueApplication extends Model
         }
 
         try {
-            $renderer = new ImageRenderer(
-                new RendererStyle(220, 1),
-                new SvgImageBackEnd()
-            );
-            $writer = new Writer($renderer);
             $targetUrl = $this->tracking_url ?: url('/lacak/' . $this->reg_number);
-            $svg = $writer->writeString($targetUrl);
+            $qr = Encoder::encode($targetUrl, ErrorCorrectionLevel::M());
+            $matrix = $qr->getMatrix();
+            $width = $matrix->getWidth();
+            $height = $matrix->getHeight();
+            $margin = 2;
+            $totalWidth = $width + ($margin * 2);
+            $totalHeight = $height + ($margin * 2);
 
-            // Make SVG responsive so it fits nicely inside any container
-            $svg = preg_replace('/width="[^"]*"/i', 'width="100%"', $svg);
-            $svg = preg_replace('/height="[^"]*"/i', 'height="100%"', $svg);
+            $path = '';
+            for ($y = 0; $y < $height; $y++) {
+                for ($x = 0; $x < $width; $x++) {
+                    if ($matrix->get($x, $y) === 1) {
+                        $posX = $x + $margin;
+                        $posY = $y + $margin;
+                        $path .= "M{$posX},{$posY}h1v1h-1z ";
+                    }
+                }
+            }
 
-            return $svg;
+            return sprintf(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" width="100%%" height="100%%" shape-rendering="crispEdges">' .
+                '<rect width="100%%" height="100%%" fill="#ffffff"/>' .
+                '<path d="%s" fill="#000000"/>' .
+                '</svg>',
+                $totalWidth,
+                $totalHeight,
+                trim($path)
+            );
         } catch (\Throwable $e) {
             return '';
         }

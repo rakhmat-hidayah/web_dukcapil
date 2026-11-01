@@ -411,7 +411,11 @@
                 title="Klik untuk memperbesar QR Code"
               >
                 <!-- SVG QR Code rendered crisp and clean -->
-                <div v-if="application.qr_code_svg" v-html="application.qr_code_svg" class="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:block"></div>
+                <div
+                  v-if="application.qr_code_svg"
+                  v-html="application.qr_code_svg"
+                  class="w-full h-full flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:block [&_svg]:max-w-full [&_svg]:max-h-full"
+                ></div>
                 <div v-else class="text-slate-400 text-xs">Memuat QR Code...</div>
 
                 <!-- Hover hint for desktop -->
@@ -707,11 +711,11 @@
         </div>
 
         <!-- High Contrast QR Box -->
-        <div class="p-4 bg-white rounded-2xl border-2 border-slate-200 shadow-inner flex items-center justify-center">
+        <div class="p-4 sm:p-6 bg-white rounded-2xl border-2 border-slate-200 shadow-inner flex items-center justify-center aspect-square w-64 h-64 sm:w-72 sm:h-72 mx-auto">
           <div
             v-if="application.qr_code_svg"
             v-html="application.qr_code_svg"
-            class="w-64 h-64 [&>svg]:w-full [&>svg]:h-full [&>svg]:block"
+            class="w-full h-full flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:block [&_svg]:max-w-full [&_svg]:max-h-full"
           ></div>
         </div>
 
@@ -835,8 +839,17 @@ const attendanceLabel = computed(() => {
 const scheduleDateFormatted = computed(() => {
   const slot = props.application.slot;
   if (!slot || !slot.schedule) return '-';
-  const d = new Date(slot.schedule.schedule_date);
-  return d.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  if (slot.schedule.schedule_date_formatted) {
+    return slot.schedule.schedule_date_formatted;
+  }
+  const dateStr = slot.schedule.schedule_date;
+  if (typeof dateStr === 'string' && dateStr.includes('T')) {
+    const clean = dateStr.split('T')[0];
+    const [y, m, day] = clean.split('-').map(Number);
+    return new Date(y, m - 1, day).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? String(dateStr) : d.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 });
 
 const scheduleTimeFormatted = computed(() => {

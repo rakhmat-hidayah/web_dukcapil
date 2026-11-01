@@ -94,7 +94,8 @@ class ApplicantDashboardController extends Controller
                 ->with('info', 'Pemesanan jadwal antrean hanya dapat dilakukan setelah dokumen dinyatakan lolos pra-verifikasi (PRE_VERIFIED).');
         }
 
-        $availableSchedules = QueueSchedule::where('is_closed', false)
+        $availableSchedules = QueueSchedule::where('is_open', true)
+            ->where('is_holiday', false)
             ->where('schedule_date', '>=', now()->toDateString())
             ->whereHas('slots', function ($q) use ($application) {
                 $q->where('service_type_id', $application->service_type_id)
