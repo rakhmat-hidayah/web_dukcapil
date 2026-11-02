@@ -581,54 +581,59 @@ class QueueWorkflowTest extends TestCase
         }
     }
 
-    public function test_f106_document_is_present_and_required_specifically_for_perubahan_elemen_data(): void
+    public function test_requirements_dynamically_add_and_remove_according_to_admin_settings(): void
     {
         $perubahanService = ServiceType::where('slug', 'perubahan-elemen-data')->first();
-        $hilangService = ServiceType::where('slug', 'cetak-ktp-hilang')->first();
         $this->assertNotNull($perubahanService);
-        $this->assertNotNull($hilangService);
         $appService = app(QueueApplicationService::class);
 
-        // 1. Service Perubahan Elemen Data MUST have F-1.06 as required
-        $uniqueNikPerubahan = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
-        $appPerubahan = $appService->createDraft([
-            'applicant_nik' => $uniqueNikPerubahan,
-            'applicant_name' => 'Warga Ubah Data',
+        // 1. Initial draft without F-1.06 (since it was deleted by admin)
+        $uniqueNik = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $app = $appService->createDraft([
+            'applicant_nik' => $uniqueNik,
+            'applicant_name' => 'Warga Ubah Data Dinamis',
             'applicant_phone' => '081234567890',
             'applicant_address' => 'Dompu',
             'attendance_type' => 'self',
         ], $perubahanService->id);
 
-        $responsePerubahan = $this->get(route('queue.apply.documents', ['regNumber' => $appPerubahan->reg_number]));
-        $responsePerubahan->assertOk();
-        $requirementsPerubahan = $responsePerubahan->viewData('page')['props']['requirements'];
+        $response = $this->get(route('queue.apply.documents', ['regNumber' => $app->reg_number]));
+        $response->assertOk();
+        $requirements = $response->viewData('page')['props']['requirements'];
 
-        $f106Doc = collect($requirementsPerubahan)->first(fn($d) => str_contains($d['label'], 'F-1.06') || str_contains($d['label'], 'F1.06'));
-        $this->assertNotNull($f106Doc, "Formulir F-1.06 MUST be present for Perubahan Elemen Data KTP-el");
-        $this->assertTrue((bool) $f106Doc['is_required'], "Formulir F-1.06 must be mandatory (Wajib)");
-        $this->assertNotEmpty($f106Doc['template_url'], "Formulir F-1.06 must have a template download URL");
-        $this->assertStringContainsString('download', strtolower($f106Doc['template_url']));
+        // Ensure deleted document does not reappear automatically
+        $hasF106 = collect($requirements)->contains(fn($d) => str_contains($d['label'], 'F-1.06') || str_contains($d['label'], 'F1.06'));
+        $this->assertFalse($hasF106, "Deleted F-1.06 must NOT reappear automatically on applicant form");
 
-        // 2. Other services (like Cetak Hilang) must NOT have F-1.06
-        $uniqueNikHilang = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
-        $appHilang = $appService->createDraft([
-            'applicant_nik' => $uniqueNikHilang,
-            'applicant_name' => 'Warga Hilang KTP',
-            'applicant_phone' => '081234567891',
-            'applicant_address' => 'Dompu',
-            'attendance_type' => 'self',
-        ], $hilangService->id);
+        // 2. Dynamically add a new requirement via admin and verify it appears immediately
+        $customDoc = $perubahanService->documents()->create([
+            'label' => 'Surat Pengantar RT/RW Dinamis',
+            'description' => 'Surat pengantar resmi dari RT/RW domisili.',
+            'accepted_formats' => 'jpg,jpeg,png,pdf',
+            'max_size_kb' => 5120,
+            'is_required' => true,
+            'capture_mode' => 'environment',
+            'applicable_to' => 'all',
+            'sort_order' => 10,
+        ]);
 
-        $responseHilang = $this->get(route('queue.apply.documents', ['regNumber' => $appHilang->reg_number]));
-        $responseHilang->assertOk();
-        $requirementsHilang = $responseHilang->viewData('page')['props']['requirements'];
+        $responseAfterAdd = $this->get(route('queue.apply.documents', ['regNumber' => $app->reg_number]));
+        $responseAfterAdd->assertOk();
+        $requirementsAfterAdd = $responseAfterAdd->viewData('page')['props']['requirements'];
+        $hasCustomDoc = collect($requirementsAfterAdd)->contains(fn($d) => $d['id'] === $customDoc->id);
+        $this->assertTrue($hasCustomDoc, "Newly added document must immediately appear in applicant form");
 
-        $hasF106InHilang = collect($requirementsHilang)->contains(fn($d) => str_contains($d['label'], 'F-1.06') || str_contains($d['label'], 'F1.06'));
-        $this->assertFalse($hasF106InHilang, "Formulir F-1.06 should NOT be present on other services");
+        // 3. Dynamically delete the requirement via admin and verify it disappears immediately
+        $customDoc->delete();
 
-        // Clean up test drafts
-        $appService->deleteDraft($appPerubahan);
-        $appService->deleteDraft($appHilang);
+        $responseAfterDelete = $this->get(route('queue.apply.documents', ['regNumber' => $app->reg_number]));
+        $responseAfterDelete->assertOk();
+        $requirementsAfterDelete = $responseAfterDelete->viewData('page')['props']['requirements'];
+        $hasCustomDocAfterDelete = collect($requirementsAfterDelete)->contains(fn($d) => $d['id'] === $customDoc->id);
+        $this->assertFalse($hasCustomDocAfterDelete, "Deleted document must immediately disappear from applicant form");
+
+        // Clean up test draft
+        $appService->deleteDraft($app);
     }
 
     public function test_draft_older_than_24_hours_is_automatically_purged_and_storage_cleaned(): void

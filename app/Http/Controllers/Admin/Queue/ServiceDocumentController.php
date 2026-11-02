@@ -103,6 +103,7 @@ class ServiceDocumentController extends Controller
             ->firstOrFail();
 
         $label = $document->label;
+        $document->applicationDocuments()->delete();
         $document->delete();
 
         if ($request->wantsJson()) {
