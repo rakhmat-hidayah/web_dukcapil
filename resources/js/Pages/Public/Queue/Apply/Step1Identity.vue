@@ -75,6 +75,84 @@
                 </div>
               </label>
             </div>
+
+            <!-- Persyaratan & Formulir Layanan Terpilih -->
+            <div
+              v-if="selectedServiceObj && selectedServiceObj.documents && selectedServiceObj.documents.length"
+              class="bg-blue-50/50 dark:bg-blue-950/30 rounded-2xl p-4 sm:p-5 border border-blue-200/80 dark:border-blue-900/50 space-y-3"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900 dark:text-white">
+                      Berkas & Formulir Layanan Terpilih ({{ selectedServiceObj.documents.length }} Persyaratan):
+                    </h4>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                      Disiapkan dan diunggah pada Langkah 2 berikutnya (bisa langsung difoto melalui kamera HP).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                <div
+                  v-for="(doc, dIdx) in selectedServiceObj.documents"
+                  :key="doc.id"
+                  class="bg-white dark:bg-slate-900/80 rounded-xl p-3 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between"
+                >
+                  <div class="flex items-start gap-2">
+                    <span class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      {{ doc.sort_order || (dIdx + 1) }}
+                    </span>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">
+                        {{ doc.label }}
+                      </p>
+                      <p v-if="doc.description" class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                        {{ doc.description }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span
+                        v-if="doc.is_required"
+                        class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
+                      >
+                        Wajib
+                      </span>
+                      <span
+                        v-else
+                        class="px-2 py-0.5 rounded-full text-[9px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                      >
+                        Opsional
+                      </span>
+                      <span
+                        v-if="doc.applicable_to === 'representative_only'"
+                        class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-400"
+                      >
+                        Khusus Diwakilkan
+                      </span>
+                    </div>
+
+                    <a
+                      v-if="doc.template_url"
+                      :href="doc.template_url"
+                      target="_blank"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold shadow-sm transition shrink-0"
+                    >
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                      <span>Unduh Blanko</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <p v-if="form.errors.service_type_id" class="text-xs text-rose-500 font-medium">
               {{ form.errors.service_type_id }}
             </p>

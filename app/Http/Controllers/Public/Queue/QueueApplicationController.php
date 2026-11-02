@@ -405,7 +405,7 @@ class QueueApplicationController extends Controller
     /**
      * Ensure mandatory Formulir F-1.02 and F-1.07 Surat Kuasa are present on all active service types.
      */
-    protected function ensureMandatoryDocumentsExist(): void
+    public function ensureMandatoryDocumentsExist(): void
     {
         try {
             // Auto-run pending migration if template_url column is not yet present on production
@@ -418,50 +418,69 @@ class QueueApplicationController extends Controller
             }
 
             $hasTemplateUrlColumn = Schema::hasColumn('queue_service_documents', 'template_url');
-            $downloadUrl = 'https://dukcapil.dompukab.go.id/downloads';
+            $f102Download = \App\Models\Download::where(fn($q) => $q->where('title', 'like', '%F1.02%')->orWhere('title', 'like', '%F-1.02%'))->first();
+            $f106Download = \App\Models\Download::where(fn($q) => $q->where('title', 'like', '%F1.06%')->orWhere('title', 'like', '%F-1.06%'))->first();
+            $f107Download = \App\Models\Download::where(fn($q) => $q->where('title', 'like', '%F1.07%')->orWhere('title', 'like', '%F-1.07%'))->first();
+
+            $f102Url = $f102Download ? url("/downloads/stream/{$f102Download->id}") : 'https://dukcapil.dompukab.go.id/downloads';
+            $f106Url = $f106Download ? url("/downloads/stream/{$f106Download->id}") : 'https://dukcapil.dompukab.go.id/downloads';
+            $f107Url = $f107Download ? url("/downloads/stream/{$f107Download->id}") : 'https://dukcapil.dompukab.go.id/downloads';
+
             $f102Label = 'Formulir F-1.02 (Pendaftaran Peristiwa Kependudukan)';
-            $f107Label = 'Formulir F-1.07 / F.017 (Surat Kuasa dalam Pelayanan Administrasi Kependudukan)';
+            $f107Label = 'Formulir F-1.07 Surat Kuasa dalam Pelayanan Administrasi Kependudukan (Jika Dikuasakan)';
 
             $services = ServiceType::all();
             foreach ($services as $service) {
-                // 1. Ensure Formulir F-1.02 exists as mandatory for all services
-                $f102Doc = ServiceDocument::where('service_type_id', $service->id)
-                    ->where(function ($q) {
-                        $q->where('label', 'like', '%F-1.02%')
-                          ->orWhere('label', 'like', '%F1.02%')
-                          ->orWhere('label', 'like', '%Pendaftaran Peristiwa%');
-                    })
-                    ->first();
-
-                $f102Data = [
-                    'service_type_id'  => $service->id,
-                    'label'            => $f102Label,
-                    'description'      => 'Formulir resmi permohonan pendaftaran peristiwa kependudukan yang telah diisi lengkap dan ditandatangani. Blanko formulir dapat diunduh pada link di bawah.',
-                    'is_required'      => true,
-                    'applicable_to'    => 'all',
-                    'accepted_formats' => 'jpg,jpeg,png,pdf',
-                    'max_size_kb'      => 5120,
-                    'capture_hint'     => 'Foto seluruh lembar Formulir F-1.02 yang telah diisi dan ditandatangani. Pastikan tulisan terbaca jelas dan tidak terpotong.',
-                    'capture_mode'     => 'environment',
-                    'sort_order'       => 1,
-                ];
-
-                if ($hasTemplateUrlColumn) {
-                    $f102Data['template_url'] = $downloadUrl;
-                }
-
-                if (!$f102Doc) {
-                    ServiceDocument::create($f102Data);
+                // If Perubahan Elemen Data, delete F-1.02 (it strictly uses F-1.06)
+                if ($service->slug === 'perubahan-elemen-data') {
+                    ServiceDocument::where('service_type_id', $service->id)
+                        ->where(function ($q) {
+                            $q->where('label', 'like', '%F-1.02%')
+                              ->orWhere('label', 'like', '%F1.02%')
+                              ->orWhere('label', 'like', '%Pendaftaran Peristiwa%');
+                        })
+                        ->delete();
                 } else {
-                    $updatePayload = [
-                        'label'        => $f102Label,
-                        'is_required'  => true,
-                        'applicable_to'=> 'all',
+                    // 1. Ensure Formulir F-1.02 exists as mandatory with proper sort order (2)
+                    $f102Doc = ServiceDocument::where('service_type_id', $service->id)
+                        ->where(function ($q) {
+                            $q->where('label', 'like', '%F-1.02%')
+                              ->orWhere('label', 'like', '%F1.02%')
+                              ->orWhere('label', 'like', '%Pendaftaran Peristiwa%');
+                        })
+                        ->first();
+
+                    $f102Data = [
+                        'service_type_id'  => $service->id,
+                        'label'            => $f102Label,
+                        'description'      => 'Formulir resmi permohonan pendaftaran peristiwa kependudukan yang telah diisi lengkap dan ditandatangani. Blanko formulir dapat diunduh pada tautan di bawah.',
+                        'is_required'      => true,
+                        'applicable_to'    => 'all',
+                        'accepted_formats' => 'jpg,jpeg,png,pdf',
+                        'max_size_kb'      => 5120,
+                        'capture_hint'     => 'Foto seluruh lembar Formulir F-1.02 yang telah diisi dan ditandatangani. Pastikan tulisan terbaca jelas dan tidak terpotong.',
+                        'capture_mode'     => 'environment',
+                        'sort_order'       => 2,
                     ];
+
                     if ($hasTemplateUrlColumn) {
-                        $updatePayload['template_url'] = $downloadUrl;
+                        $f102Data['template_url'] = $f102Url;
                     }
-                    $f102Doc->update($updatePayload);
+
+                    if (!$f102Doc) {
+                        ServiceDocument::create($f102Data);
+                    } else {
+                        $updatePayload = [
+                            'label'        => $f102Label,
+                            'is_required'  => true,
+                            'applicable_to'=> 'all',
+                            'sort_order'   => 2,
+                        ];
+                        if ($hasTemplateUrlColumn) {
+                            $updatePayload['template_url'] = $f102Url;
+                        }
+                        $f102Doc->update($updatePayload);
+                    }
                 }
 
                 // 2. Update or ensure Surat Kuasa F-1.07 exists for representative if applicable
@@ -482,20 +501,21 @@ class QueueApplicationController extends Controller
                         })
                         ->first();
 
+                    $kuasaSortOrder = ($service->slug === 'perubahan-elemen-data') ? 7 : 6;
                     $kuasaPayload = [
                         'service_type_id'  => $service->id,
                         'label'            => $f107Label,
-                        'description'      => 'Wajib jika permohonan diwakilkan. Surat Kuasa bermeterai Rp 10.000 yang ditandatangani oleh pemberi dan penerima kuasa. Blanko formulir dapat diunduh pada link di bawah.',
+                        'description'      => 'Wajib jika permohonan dikuasakan ke pihak lain. Surat Kuasa bermeterai Rp 10.000 yang ditandatangani oleh pemberi dan penerima kuasa. Blanko formulir dapat diunduh pada tautan di bawah.',
                         'is_required'      => true,
                         'applicable_to'    => 'representative_only',
                         'accepted_formats' => 'jpg,jpeg,png,pdf',
                         'max_size_kb'      => 5120,
                         'capture_hint'     => 'Foto Formulir Surat Kuasa F-1.07 yang telah ditandatangani di atas meterai Rp 10.000 secara utuh dan jelas.',
                         'capture_mode'     => 'environment',
-                        'sort_order'       => 10,
+                        'sort_order'       => $kuasaSortOrder,
                     ];
                     if ($hasTemplateUrlColumn) {
-                        $kuasaPayload['template_url'] = $downloadUrl;
+                        $kuasaPayload['template_url'] = $f107Url;
                     }
 
                     if ($suratKuasaDoc) {
@@ -515,18 +535,10 @@ class QueueApplicationController extends Controller
                         })
                         ->first();
 
-                    $f106Download = \App\Models\Download::where(function ($q) {
-                        $q->where('title', 'like', '%F1.06%')
-                          ->orWhere('title', 'like', '%F-1.06%')
-                          ->orWhere('title', 'like', '%Perubahan Elemen Data%');
-                    })->first();
-
-                    $f106DownloadUrl = $f106Download ? url("/downloads/stream/{$f106Download->id}") : 'https://dukcapil.dompukab.go.id/downloads';
-
                     $f106Payload = [
                         'service_type_id'  => $service->id,
                         'label'            => 'Formulir F-1.06 (Surat Pernyataan Perubahan Elemen Data Kependudukan)',
-                        'description'      => 'Formulir resmi surat pernyataan perubahan elemen data kependudukan yang telah diisi lengkap dan ditandatangani. Blanko formulir dapat diunduh pada link di bawah.',
+                        'description'      => 'Formulir resmi surat pernyataan perubahan elemen data kependudukan yang telah diisi lengkap dan ditandatangani. Blanko formulir dapat diunduh pada tautan di bawah.',
                         'is_required'      => true,
                         'applicable_to'    => 'all',
                         'accepted_formats' => 'jpg,jpeg,png,pdf',
@@ -536,7 +548,7 @@ class QueueApplicationController extends Controller
                         'sort_order'       => 2,
                     ];
                     if ($hasTemplateUrlColumn) {
-                        $f106Payload['template_url'] = $f106DownloadUrl;
+                        $f106Payload['template_url'] = $f106Url;
                     }
 
                     if ($f106Doc) {

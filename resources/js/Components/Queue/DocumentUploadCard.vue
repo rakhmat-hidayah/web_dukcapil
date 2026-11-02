@@ -27,6 +27,13 @@
           </span>
 
           <span
+            v-if="requirement.applicable_to === 'representative_only'"
+            class="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+          >
+            Khusus Diwakilkan
+          </span>
+
+          <span
             v-if="requirement.capture_mode === 'user'"
             class="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300"
           >

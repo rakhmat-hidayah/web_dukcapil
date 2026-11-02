@@ -329,9 +329,20 @@
                     <td class="px-4 py-3">
                       <p class="font-bold text-slate-900 dark:text-white">{{ doc.label }}</p>
                       <p v-if="doc.description" class="text-[11px] text-slate-400 mt-0.5">{{ doc.description }}</p>
-                      <span v-if="doc.applicable_to && doc.applicable_to !== 'all'" class="inline-block mt-1 text-[10px] font-semibold text-blue-600 dark:text-blue-400">
-                        * {{ doc.applicable_to === 'representative_only' ? 'Khusus Perwakilan' : 'Khusus Pemohon Langsung' }}
-                      </span>
+                      <div class="flex items-center gap-2 mt-1 flex-wrap">
+                        <span v-if="doc.applicable_to && doc.applicable_to !== 'all'" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                          {{ doc.applicable_to === 'representative_only' ? 'Khusus Perwakilan' : 'Khusus Pemohon Langsung' }}
+                        </span>
+                        <a
+                          v-if="doc.template_url"
+                          :href="doc.template_url"
+                          target="_blank"
+                          class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline bg-blue-50 dark:bg-blue-900/40 px-1.5 py-0.5 rounded"
+                        >
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                          <span>Template Blanko</span>
+                        </a>
+                      </div>
                     </td>
                     <td class="px-4 py-3 font-mono text-[11px] text-slate-600 dark:text-slate-300">
                       {{ doc.accepted_formats }} · Max {{ Math.round(doc.max_size_kb / 1024) }} MB

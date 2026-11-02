@@ -150,20 +150,58 @@
               </p>
 
               <!-- Document Requirements Checklist Preview -->
-              <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/60 space-y-2">
-                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Persyaratan Digital:
-                </p>
+              <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/60 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Daftar Persyaratan Berkas ({{ service.documents?.length || 0 }}):
+                  </p>
+                  <span class="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Foto / Scan dari HP</span>
+                </div>
                 <div
-                  v-for="doc in service.documents"
+                  v-for="(doc, dIdx) in service.documents"
                   :key="doc.id"
-                  class="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300"
+                  class="flex items-start justify-between gap-2 text-xs text-slate-700 dark:text-slate-300 p-1.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/40 transition"
                 >
-                  <svg class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                  <span>
-                    {{ doc.label }}
-                    <span v-if="!doc.is_required" class="text-slate-400 font-normal italic">(opsional)</span>
-                  </span>
+                  <div class="flex items-start gap-2 flex-1">
+                    <span class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      {{ doc.sort_order || (dIdx + 1) }}
+                    </span>
+                    <div class="flex-1">
+                      <span class="font-medium leading-tight">
+                        {{ doc.label }}
+                      </span>
+                      <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                        <span
+                          v-if="doc.is_required"
+                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
+                        >
+                          Wajib
+                        </span>
+                        <span
+                          v-else
+                          class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                        >
+                          Opsional
+                        </span>
+                        <span
+                          v-if="doc.applicable_to === 'representative_only'"
+                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
+                        >
+                          Khusus Diwakilkan
+                        </span>
+                        <a
+                          v-if="doc.template_url"
+                          :href="doc.template_url"
+                          target="_blank"
+                          class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-2 py-0.5 rounded transition"
+                          @click.stop
+                        >
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                          <span>Unduh Blanko</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
