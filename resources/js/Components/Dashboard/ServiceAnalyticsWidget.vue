@@ -100,7 +100,7 @@
         <div class="flex items-center justify-between">
           <h4 class="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-zinc-400 flex items-center gap-2">
             <BarChart2 class="w-4 h-4 text-sky-500" />
-            <span>Grafik Aktivitas Unduhan (Vertical Bar Chart)</span>
+            <span>Grafik Aktivitas Unduhan</span>
           </h4>
         </div>
 
@@ -127,7 +127,7 @@
             <Sparkles class="w-4 h-4" />
           </div>
           <div>
-            <h5 class="text-xs font-bold uppercase tracking-wider text-sky-900 dark:text-sky-300">Automated Insight Engine</h5>
+            <h5 class="text-xs font-bold uppercase tracking-wider text-sky-900 dark:text-sky-300">Analisis Insight Otomatis</h5>
             <p class="text-xs text-sky-800 dark:text-sky-200 mt-0.5 leading-relaxed font-medium">
               {{ currentInsight }}
             </p>

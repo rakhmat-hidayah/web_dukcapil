@@ -107,7 +107,7 @@ class DashboardController extends Controller
                 'icon' => 'ShieldCheck',
             ],
             [
-                'name' => 'Dompu Insight Engine',
+                'name' => 'Mesin Dompu Insight',
                 'status' => 'healthy',
                 'response_time' => '23 ms',
                 'last_check' => 'Baru saja',
@@ -199,7 +199,7 @@ class DashboardController extends Controller
         $executiveSummary = [
             [
                 'id' => 'visitors_today',
-                'title' => "VISITOR HARI INI",
+                'title' => "PENGUNJUNG HARI INI",
                 'value' => number_format($visitorsToday, 0, ',', '.'),
                 'unit' => 'hits',
                 'trend' => ($visitorsTodayTrend >= 0 ? '+' : '') . $visitorsTodayTrend . '%',
@@ -210,7 +210,7 @@ class DashboardController extends Controller
             ],
             [
                 'id' => 'visitors_month',
-                'title' => "VISITOR BULAN INI",
+                'title' => "PENGUNJUNG BULAN INI",
                 'value' => number_format($visitorsThisMonth, 0, ',', '.'),
                 'unit' => 'hits',
                 'trend' => 'Akumulasi 30 Hari',
@@ -232,7 +232,7 @@ class DashboardController extends Controller
             ],
             [
                 'id' => 'downloads_total',
-                'title' => 'FILE DOWNLOADS',
+                'title' => 'UNDUHAN BERKAS',
                 'value' => number_format($downloadsCount, 0, ',', '.'),
                 'unit' => 'berkas',
                 'trend' => '22 Form & 17 Dokumen',
@@ -343,7 +343,7 @@ class DashboardController extends Controller
                 'total' => DB::table('gallery_items')->count(),
             ],
             'downloads' => [
-                'title' => 'Download Center',
+                'title' => 'Pusat Unduhan',
                 'route' => 'admin.downloads.index',
                 'published' => DB::table('downloads')->where('status', 'published')->count(),
                 'draft' => DB::table('downloads')->where('status', '!=', 'published')->count(),
@@ -854,11 +854,11 @@ class DashboardController extends Controller
             ['title' => 'Upload Banner Slider', 'route' => 'admin.banners.index', 'icon' => 'Image', 'color' => 'indigo'],
             ['title' => 'Upload Dataset Kependudukan', 'route' => 'admin.demographics.datasets', 'icon' => 'DatabaseZap', 'color' => 'emerald'],
             ['title' => 'Upload Dokumen PPID', 'route' => 'admin.ppid.documents.index', 'icon' => 'FileText', 'color' => 'purple'],
-            ['title' => 'Tambah Berkas Download', 'route' => 'admin.downloads.index', 'icon' => 'Download', 'color' => 'sky'],
+            ['title' => 'Tambah Berkas Unduhan', 'route' => 'admin.downloads.index', 'icon' => 'Download', 'color' => 'sky'],
             ['title' => 'Tambah FAQ', 'route' => 'admin.faqs.index', 'icon' => 'HelpCircle', 'color' => 'amber'],
             ['title' => 'Buat Pengumuman', 'route' => 'admin.announcements.index', 'icon' => 'BellRing', 'color' => 'orange'],
             ['title' => 'Kelola Pengaduan', 'route' => 'admin.complaints.index', 'icon' => 'MessageSquareWarning', 'color' => 'rose'],
-            ['title' => 'Visual Org Chart Builder', 'route' => 'admin.profile.org-chart.index', 'icon' => 'Network', 'color' => 'teal'],
+            ['title' => 'Editor Struktur Organisasi', 'route' => 'admin.profile.org-chart.index', 'icon' => 'Network', 'color' => 'teal'],
             ['title' => 'Manajemen Pengguna & Peran', 'route' => 'admin.users.index', 'icon' => 'Users', 'color' => 'slate'],
         ];
 

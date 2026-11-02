@@ -3,7 +3,7 @@
     <WidgetHeader
       title="Timeline Aktivitas Operator"
       subtitle="Riwayat aksi pengelola & operator (Login, Edit, Upload, Import, Publish)"
-      badge="Activity Log"
+      badge="Log Aktivitas"
       :icon="History"
       :is-collapsed="collapsed"
       @refresh="$emit('refresh')"
@@ -15,7 +15,7 @@
       <!-- Filter Period Buttons -->
       <div class="flex items-center justify-between">
         <span class="text-xs font-extrabold uppercase tracking-wider text-gray-400 dark:text-zinc-500">
-          Filter Periode Activity Log
+          Filter Periode Log Aktivitas
         </span>
         <div class="flex gap-1 text-[10px] font-bold">
           <button 

@@ -115,7 +115,8 @@ class RoleBasedDashboardRedirectTest extends TestCase
         // Simulate legacy role existing in database
         \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Complaint Officer', 'guard_name' => 'web']);
 
-        \App\Services\AutoRoleSync::sync();
+        \Illuminate\Support\Facades\Cache::forget('auto_role_sync_v4_done');
+        \App\Services\AutoRoleSync::sync(true);
 
         $this->assertDatabaseMissing('roles', ['name' => 'Complaint Officer']);
         $this->assertDatabaseHas('roles', ['name' => 'Petugas Pengaduan']);

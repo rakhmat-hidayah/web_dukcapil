@@ -88,7 +88,7 @@
           method="post" 
           as="button"
           class="p-2 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 hover:text-red-600 dark:hover:text-red-400 rounded-xl transition"
-          title="Logout"
+          title="Keluar (Logout)"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
@@ -176,7 +176,7 @@
           <button 
             @click="toggleDark" 
             class="p-2 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 transition"
-            title="Toggle theme"
+            title="Ganti Mode Gelap/Terang"
           >
             <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
@@ -322,22 +322,22 @@ const menuGroups = [
   {
     title: 'Dashboard',
     items: [
-      { label: 'Overview', route: 'admin.dashboard', icon: LayoutDashboard },
+      { label: 'Ikhtisar', route: 'admin.dashboard', icon: LayoutDashboard },
     ]
   },
   {
     title: 'Profil Instansi (CMS)',
     items: [
       { label: 'Dashboard Profil', route: 'admin.profile.dashboard', icon: LayoutDashboard },
-      { label: 'Profile Page Builder', route: 'admin.profile.builder', icon: FileText },
-      { label: 'Master Official Directory', route: 'admin.profile.officials.index', icon: Users },
-      { label: 'Visual Org Chart Editor', route: 'admin.profile.org-chart.index', icon: Network },
+      { label: 'Penyusun Halaman Profil', route: 'admin.profile.builder', icon: FileText },
+      { label: 'Direktori Pejabat & Pegawai', route: 'admin.profile.officials.index', icon: Users },
+      { label: 'Editor Struktur Organisasi', route: 'admin.profile.org-chart.index', icon: Network },
     ]
   },
   {
-    title: 'Content & Media',
+    title: 'Konten & Media',
     items: [
-      { label: 'Media & File Manager', route: 'admin.files.index', icon: FolderLock },
+      { label: 'Manajer Berkas & Media', route: 'admin.files.index', icon: FolderLock },
       { label: 'Menu Navigasi', route: 'admin.menus.index', icon: Radio },
       { label: 'Halaman Dinamis', route: 'admin.pages.index', icon: FileText },
       { label: 'Berita & Artikel', route: 'admin.news.index', icon: LibraryBig },
@@ -347,7 +347,7 @@ const menuGroups = [
     ]
   },
   {
-    title: 'Public Services',
+    title: 'Layanan Publik',
     items: [
       { label: 'Survei Kepuasan (IKM)', route: 'admin.surveys.index', icon: BarChart2 },
       { label: 'Daftar Pengaduan', route: 'admin.complaints.index', icon: MessageSquareWarning },
@@ -355,7 +355,7 @@ const menuGroups = [
       { label: 'Persyaratan Layanan', route: 'admin.service-requirements.index', icon: FileText },
       { label: 'Inovasi Pelayanan', route: 'admin.innovations.index', icon: DatabaseZap },
       { label: 'Informasi Layanan (CMS)', route: 'admin.informasi-layanan.index', icon: HelpCircle },
-      { label: 'Download Center', route: 'admin.downloads.index', icon: Milestone },
+      { label: 'Pusat Unduhan', route: 'admin.downloads.index', icon: Milestone },
       { label: 'Tanya Jawab (FAQ)', route: 'admin.faqs.index', icon: ClipboardList },
     ]
   },
@@ -413,24 +413,24 @@ const menuGroups = [
     ]
   },
   {
-    title: 'Analitik & Visitor',
+    title: 'Analitik & Pengunjung',
     items: [
-      { label: 'Visitor Analytics', route: 'admin.visitor-analytics.index', icon: Activity },
-      { label: 'Retention & Cleanup', route: 'admin.visitor-analytics-retention.index', icon: DatabaseZap },
+      { label: 'Analisis Pengunjung', route: 'admin.visitor-analytics.index', icon: Activity },
+      { label: 'Retensi & Pembersihan Data', route: 'admin.visitor-analytics-retention.index', icon: DatabaseZap },
     ]
   },
   {
-    title: 'System Settings',
+    title: 'Pengaturan Sistem',
     items: [
       { label: 'Notifikasi & Integrasi', route: 'admin.notification-settings.index', icon: Bell },
       { label: 'Kontak & Lokasi Kantor', route: 'admin.office-contact.index', icon: MapPin },
-      { label: 'User & Roles', route: 'admin.users.index', icon: UsersRound },
+      { label: 'Pengguna & Peran', route: 'admin.users.index', icon: UsersRound },
       { label: 'Layanan SANAI (CMS)', route: 'admin.external-services.index', icon: Globe },
-      { label: 'Theme Customizer', route: 'admin.theme.index', icon: Palette },
-      { label: 'API Keys & Akses', route: 'admin.api-keys.index', icon: BarChart3 },
+      { label: 'Kustomisasi Tema', route: 'admin.theme.index', icon: Palette },
+      { label: 'Kunci API & Hak Akses', route: 'admin.api-keys.index', icon: BarChart3 },
       { label: 'Monitor Trafik API', route: 'admin.api-dashboard.index', icon: Activity },
       { label: 'Pengaturan API & Ketentuan', route: 'admin.api-settings.index', icon: Sliders },
-      { label: 'Audit Logs', route: 'admin.audit-logs.index', icon: ShieldAlert },
+      { label: 'Log Audit Aktivitas', route: 'admin.audit-logs.index', icon: ShieldAlert },
     ]
   }
 ];
@@ -580,13 +580,20 @@ const filteredMenuGroups = computed(() => {
 
 const activePageName = computed(() => {
   const currentRouteName = route().current();
-  if (currentRouteName === 'admin.dashboard') return 'Overview';
+  if (currentRouteName === 'admin.dashboard') return 'Ikhtisar';
   if (currentRouteName?.startsWith('admin.handover.')) return 'Serah Terima KTP-el';
   if (currentRouteName?.startsWith('admin.queue.')) return 'Antrian Online KTP-el';
   if (currentRouteName?.startsWith('admin.archive.')) return 'Pengarsipan Permohonan';
   if (currentRouteName?.startsWith('admin.complaints.')) return 'Layanan Pengaduan';
   if (currentRouteName?.startsWith('admin.ppid.')) return 'Layanan PPID';
   if (currentRouteName?.startsWith('admin.news.')) return 'Berita & Artikel';
+  if (currentRouteName?.startsWith('admin.profile.')) return 'Profil Instansi';
+  if (currentRouteName?.startsWith('admin.visitor-analytics')) return 'Analisis Pengunjung';
+  if (currentRouteName?.startsWith('admin.users.')) return 'Pengguna & Peran';
+  if (currentRouteName?.startsWith('admin.theme.')) return 'Kustomisasi Tema';
+  if (currentRouteName?.startsWith('admin.files.')) return 'Manajer Berkas';
+  if (currentRouteName?.startsWith('admin.downloads.')) return 'Pusat Unduhan';
+  if (currentRouteName?.startsWith('admin.audit-logs.')) return 'Log Audit Aktivitas';
   return 'Admin';
 });
 

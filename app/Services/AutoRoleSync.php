@@ -44,10 +44,10 @@ class AutoRoleSync
      * Automatically ensure database migrations and official Indonesian roles are active.
      * Safe to run on every request or boot: checks cache and DB state.
      */
-    public static function sync(): void
+    public static function sync(bool $force = false): void
     {
         // Avoid running 30+ DB queries and clearing Spatie cache on every web request
-        if (Cache::has('auto_role_sync_v4_done')) {
+        if (!$force && Cache::has('auto_role_sync_v4_done')) {
             return;
         }
 

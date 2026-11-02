@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm overflow-hidden transition-all duration-300">
     <WidgetHeader
-      title="Content Management Center"
+      title="Pusat Manajemen Konten"
       subtitle="Ringkasan status & publikasi konten di portal publik"
       badge="8 Modul Konten"
       :icon="FolderLock"

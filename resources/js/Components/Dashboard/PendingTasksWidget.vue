@@ -1,9 +1,9 @@
 <template>
   <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm overflow-hidden transition-all duration-300">
     <WidgetHeader
-      title="Tugas & Tindakan Perlu Perhatian (Pending Tasks)"
+      title="Tugas & Tindakan Perlu Perhatian"
       subtitle="Daftar pekerjaan & peringatan sistem yang membutuhkan respon segera"
-      badge="Action Required"
+      badge="Perlu Respon"
       :icon="AlertTriangle"
       :is-collapsed="collapsed"
       @refresh="$emit('refresh')"

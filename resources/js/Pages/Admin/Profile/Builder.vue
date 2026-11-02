@@ -1,9 +1,9 @@
 <template>
-  <AdminLayout title="Profile Page Builder">
+  <AdminLayout title="Penyusun Halaman Profil">
     <div class="max-w-7xl mx-auto space-y-8">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Profile Page Builder</h1>
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Penyusun Halaman Profil</h1>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Atur urutan, aktifkan/nonaktifkan modul profil, dan kustomisasi tampilan</p>
         </div>
         <button @click="saveOrder" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-blue-600/30 transition">

@@ -1,9 +1,9 @@
 <template>
   <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm overflow-hidden transition-all duration-300">
     <WidgetHeader
-      title="Website & System Health"
+      title="Kesehatan Website & Sistem"
       subtitle="Monitoring status real-time infrastruktur & integrasi modul"
-      badge="11 Services Online"
+      badge="11 Layanan Aktif"
       :icon="Activity"
       :is-collapsed="collapsed"
       @refresh="$emit('refresh')"
@@ -36,7 +36,7 @@
 
           <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-200/50 dark:border-zinc-700/50 text-[10px]">
             <span class="font-bold text-emerald-600 dark:text-emerald-400 capitalize">
-              {{ srv.status === 'healthy' ? 'Healthy' : srv.status }}
+              {{ srv.status === 'healthy' ? 'Sehat' : srv.status }}
             </span>
             <span class="text-gray-400 dark:text-zinc-500 font-mono">
               {{ srv.last_check }}

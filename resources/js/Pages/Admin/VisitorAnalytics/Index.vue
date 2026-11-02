@@ -1,5 +1,5 @@
 <template>
-  <Head title="Visitor Analytics & Intelligence - Dukcapil Dompu" />
+  <Head title="Analisis Pengunjung & Intelligence - Dukcapil Dompu" />
 
   <AdminLayout>
     <div class="space-y-6 text-left pb-12">
@@ -12,12 +12,12 @@
             <div class="flex flex-wrap items-center gap-2 mb-2">
               <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                Enterprise Visitor Intelligence
+                Analisis &amp; Intelijen Pengunjung
               </span>
-              <span class="text-xs text-blue-200/60 font-mono">| Real-time Bot & Security Scanner Detection</span>
+              <span class="text-xs text-blue-200/60 font-mono">| Deteksi Bot &amp; Pemindaian Keamanan Real-Time</span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Human Traffic & Bot Detection
+              Lalu Lintas Pengunjung &amp; Deteksi Bot
             </h1>
             <p class="text-xs text-blue-100/70 mt-1 max-w-2xl leading-relaxed">
               Memisahkan pengunjung manusia asli dari Search Engine Bots, Social Media Crawlers, AI Crawlers, SEO Bots, dan Security Scanners secara otomatis.
@@ -32,7 +32,7 @@
               class="px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white text-xs font-bold rounded-2xl transition flex items-center gap-2 active:scale-95 cursor-pointer"
             >
               <RotateCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
-              <span>Refresh Data</span>
+              <span>Segarkan Data</span>
             </button>
 
             <a 
@@ -41,7 +41,7 @@
               class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-2xl shadow-lg shadow-emerald-600/30 transition flex items-center gap-2 active:scale-95"
             >
               <Download class="w-4 h-4" />
-              <span>Export CSV</span>
+              <span>Ekspor CSV</span>
             </a>
           </div>
         </div>
@@ -52,7 +52,7 @@
         <!-- Card 1: Human Visitors (Isolated) -->
         <div class="p-5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Human Visitors</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Pengunjung Manusia</span>
             <div class="p-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl">
               <UserCheck class="w-4 h-4" />
             </div>
@@ -66,7 +66,7 @@
         <!-- Card 2: Unique Humans -->
         <div class="p-5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Unique Human</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Pengunjung Unik</span>
             <div class="p-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl">
               <Users class="w-4 h-4" />
             </div>
@@ -80,7 +80,7 @@
         <!-- Card 3: Online Visitors (Active Now) -->
         <div class="p-5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Visitor Online</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Pengunjung Aktif</span>
             <div class="p-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl">
               <Radio class="w-4 h-4 text-emerald-500 animate-pulse" />
             </div>
@@ -100,7 +100,7 @@
         <!-- Card 4: Bot Visitors -->
         <div class="p-5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Bot Visitors</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Kunjungan Bot</span>
             <div class="p-2 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl">
               <Bot class="w-4 h-4" />
             </div>
@@ -108,13 +108,13 @@
           <p class="text-2xl font-black text-gray-800 dark:text-zinc-100">
             {{ formatNumber(summary.bot_visitors) }}
           </p>
-          <p class="text-[10px] text-gray-400 font-medium">Search Engine, Social & AI Crawlers</p>
+          <p class="text-[10px] text-gray-400 font-medium">Search Engine, Social &amp; AI Crawlers</p>
         </div>
 
         <!-- Card 5: Security Scans -->
         <div class="p-5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Security Scans</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Pemindaian Keamanan</span>
             <div class="p-2 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 rounded-xl">
               <ShieldAlert class="w-4 h-4" />
             </div>
@@ -148,7 +148,7 @@
           :class="filterForm.traffic_type === 'human' ? 'bg-emerald-600 text-white shadow-md' : 'text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white'"
         >
           <UserCheck class="w-4 h-4" />
-          <span>👤 Human Visitors (Default)</span>
+          <span>👤 Pengunjung Manusia (Default)</span>
         </button>
 
         <button 
@@ -157,7 +157,7 @@
           :class="filterForm.traffic_type === 'bots' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white'"
         >
           <Bot class="w-4 h-4" />
-          <span>🤖 Bots & Crawlers</span>
+          <span>🤖 Bot &amp; Perayap (Crawler)</span>
         </button>
 
         <button 
@@ -166,7 +166,7 @@
           :class="filterForm.traffic_type === 'security' ? 'bg-rose-600 text-white shadow-md' : 'text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white'"
         >
           <ShieldAlert class="w-4 h-4" />
-          <span>🛡️ Security Scans</span>
+          <span>🛡️ Pemindaian Keamanan</span>
         </button>
 
         <button 

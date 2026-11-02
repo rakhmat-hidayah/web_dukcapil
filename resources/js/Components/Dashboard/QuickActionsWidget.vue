@@ -1,9 +1,9 @@
 <template>
   <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm overflow-hidden transition-all duration-300">
     <WidgetHeader
-      title="Quick Actions & Shortcuts"
+      title="Aksi Cepat & Pintasan"
       subtitle="Pintas cepat untuk pembuatan konten, upload dataset, & pengelolaan sistem"
-      badge="Shortcuts"
+      badge="Pintasan"
       :icon="Zap"
       :is-collapsed="collapsed"
       @refresh="$emit('refresh')"

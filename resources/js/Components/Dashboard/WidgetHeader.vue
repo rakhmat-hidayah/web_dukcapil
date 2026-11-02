@@ -23,7 +23,7 @@
         v-if="showRefresh" 
         @click="$emit('refresh')" 
         class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
-        title="Refresh Data"
+        title="Segarkan Data"
       >
         <RotateCw class="w-3.5 h-3.5" />
       </button>
@@ -32,7 +32,7 @@
         v-if="showCollapse" 
         @click="$emit('toggle-collapse')" 
         class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
-        :title="isCollapsed ? 'Expand Widget' : 'Collapse Widget'"
+        :title="isCollapsed ? 'Perluas Widget' : 'Ciutkan Widget'"
       >
         <ChevronDown v-if="isCollapsed" class="w-3.5 h-3.5" />
         <ChevronUp v-else class="w-3.5 h-3.5" />
@@ -42,7 +42,7 @@
         v-if="showFullscreen" 
         @click="$emit('toggle-fullscreen')" 
         class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
-        title="Fullscreen"
+        title="Layar Penuh"
       >
         <Maximize2 class="w-3.5 h-3.5" />
       </button>

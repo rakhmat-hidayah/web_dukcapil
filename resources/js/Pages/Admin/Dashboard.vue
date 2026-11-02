@@ -1,5 +1,5 @@
 <template>
-  <Head title="Enterprise Executive Control Center" />
+  <Head title="Pusat Kendali Eksekutif Portal CMS" />
 
   <AdminLayout>
     <div class="space-y-6 text-left pb-12">
@@ -11,7 +11,7 @@
           <div>
             <div class="flex items-center gap-2 mb-2">
               <span class="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[10px] font-bold uppercase tracking-wider">
-                Enterprise Executive Control Center
+                Pusat Kendali Eksekutif Portal CMS
               </span>
               <span class="text-xs text-blue-200/60 font-mono">| Dukcapil Portal + Dompu Insight</span>
             </div>
@@ -31,7 +31,7 @@
               class="px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white text-xs font-bold rounded-2xl transition flex items-center gap-2 active:scale-95"
             >
               <RotateCw class="w-4 h-4" :class="{ 'animate-spin': refreshing }" />
-              {{ refreshing ? 'Memuat Data...' : 'Refresh Dashboard' }}
+              {{ refreshing ? 'Memuat Data...' : 'Segarkan Data' }}
             </button>
           </div>
         </div>
@@ -45,8 +45,8 @@
               🛡️
             </div>
             <div>
-              <h3 class="text-sm font-black text-gray-900 dark:text-zinc-100 tracking-tight">Configuration &amp; Integrity Health Check</h3>
-              <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-0.5">Audit real-time single source of truth, media assets, URL SEO, dan Production Lock</p>
+              <h3 class="text-sm font-black text-gray-900 dark:text-zinc-100 tracking-tight">Pemeriksaan Integritas &amp; Konfigurasi Sistem</h3>
+              <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-0.5">Audit real-time single source of truth, aset media, URL SEO, dan Kunci Produksi</p>
             </div>
           </div>
 
@@ -55,22 +55,22 @@
               :class="configurationHealth.is_healthy ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'"
               class="px-3 py-1 rounded-xl text-xs font-black border flex items-center gap-1.5"
             >
-              <span>{{ configurationHealth.is_healthy ? '✔ STATUS SEHAT (PASSED)' : '⚠️ ATTENTION REQUIRED' }}</span>
+              <span>{{ configurationHealth.is_healthy ? '✔ STATUS SEHAT (PASSED)' : '⚠️ PERLU PERHATIAN' }}</span>
             </span>
 
             <span 
               :class="configurationHealth.production_lock ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20'"
               class="px-3 py-1 rounded-xl text-xs font-black border flex items-center gap-1.5"
             >
-              🔒 LOCK: {{ configurationHealth.production_lock ? 'ACTIVE (PRODUCTION)' : 'UNLOCKED' }}
+              🔒 KUNCI: {{ configurationHealth.production_lock ? 'AKTIF (PRODUKSI)' : 'TIDAK TERKUNCI' }}
             </span>
           </div>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div class="p-3.5 bg-gray-50 dark:bg-zinc-800/40 rounded-2xl border border-gray-100 dark:border-zinc-800">
-            <span class="text-gray-400 text-[10px] uppercase font-bold block">Total Kunci DB</span>
-            <span class="text-sm font-extrabold text-gray-800 dark:text-zinc-200 mt-0.5 block">{{ configurationHealth.total_keys_count }} Settings</span>
+            <span class="text-gray-400 text-[10px] uppercase font-bold block">Total Kunci Konfigurasi</span>
+            <span class="text-sm font-extrabold text-gray-800 dark:text-zinc-200 mt-0.5 block">{{ configurationHealth.total_keys_count }} Pengaturan</span>
           </div>
           <div class="p-3.5 bg-gray-50 dark:bg-zinc-800/40 rounded-2xl border border-gray-100 dark:border-zinc-800">
             <span class="text-gray-400 text-[10px] uppercase font-bold block">Integritas Media</span>
@@ -86,7 +86,7 @@
           </div>
           <div class="p-3.5 bg-gray-50 dark:bg-zinc-800/40 rounded-2xl border border-gray-100 dark:border-zinc-800">
             <span class="text-gray-400 text-[10px] uppercase font-bold block">Audit Trail Logging</span>
-            <span class="text-sm font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5 block">ActivityLog Active</span>
+            <span class="text-sm font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5 block">Log Aktivitas Aktif</span>
           </div>
         </div>
 
@@ -104,42 +104,42 @@
       <WebsiteHealthWidget 
         :services="healthServices"
         @refresh="refreshDashboard"
-        @toggle-fullscreen="openFullscreen('Website & System Health', 'health')"
+        @toggle-fullscreen="openFullscreen('Kesehatan Website & Sistem', 'health')"
       />
 
       <!-- SECTION 2: EXECUTIVE SUMMARY -->
       <ExecutiveSummaryWidget 
         :summary-items="executiveSummary"
         @refresh="refreshDashboard"
-        @toggle-fullscreen="openFullscreen('Executive Summary', 'summary')"
+        @toggle-fullscreen="openFullscreen('Ringkasan Eksekutif (KPI)', 'summary')"
       />
 
       <!-- SECTION 3: CONTENT MANAGEMENT -->
       <ContentManagementWidget 
         :content-status="contentStatus"
         @refresh="refreshDashboard"
-        @toggle-fullscreen="openFullscreen('Content Management Center', 'content')"
+        @toggle-fullscreen="openFullscreen('Pusat Manajemen Konten', 'content')"
       />
 
       <!-- SECTION 4: DOMPU INSIGHT ENGINE -->
       <DompuInsightWidget 
         :dompu-insight="dompuInsight"
         @refresh="refreshDashboard"
-        @toggle-fullscreen="openFullscreen('Dompu Insight Engine', 'dompu')"
+        @toggle-fullscreen="openFullscreen('Mesin Dompu Insight', 'dompu')"
       />
 
       <!-- SECTION 5: SERVICE ANALYTICS -->
       <ServiceAnalyticsWidget 
         :service-analytics="serviceAnalytics"
         @refresh="refreshDashboard"
-        @toggle-fullscreen="openFullscreen('Service Performance & Analytics', 'service')"
+        @toggle-fullscreen="openFullscreen('Statistik Unduhan Berkas', 'service')"
       />
 
       <!-- SECTION 6: VISITOR ANALYTICS -->
       <VisitorAnalyticsWidget 
         :visitor-analytics="visitorAnalytics"
         @refresh="refreshDashboard"
-        @toggle-fullscreen="openFullscreen('Visitor & Traffic Analytics', 'visitor')"
+        @toggle-fullscreen="openFullscreen('Analisis Pengunjung & Lalu Lintas Web', 'visitor')"
       />
 
       <!-- SECTION 7 & 8 GRID: OPERATOR ACTIVITY & PENDING TASKS -->
@@ -157,7 +157,7 @@
         <PendingTasksWidget 
           :pending-tasks="pendingTasks"
           @refresh="refreshDashboard"
-          @toggle-fullscreen="openFullscreen('Pending Tasks & Alerts', 'pending')"
+          @toggle-fullscreen="openFullscreen('Tugas & Tindakan Perlu Perhatian', 'pending')"
         />
       </div>
 
@@ -165,7 +165,7 @@
       <QuickActionsWidget 
         :quick-actions="quickActions"
         @refresh="refreshDashboard"
-        @toggle-fullscreen="openFullscreen('Quick Actions & Shortcuts', 'quick')"
+        @toggle-fullscreen="openFullscreen('Aksi Cepat & Pintasan', 'quick')"
       />
     </div>
 

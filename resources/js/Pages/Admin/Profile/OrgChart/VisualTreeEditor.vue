@@ -1,10 +1,10 @@
 <template>
-  <AdminLayout title="Visual Tree Editor">
+  <AdminLayout title="Editor Struktur Organisasi">
     <div class="max-w-7xl mx-auto space-y-8">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Visual Tree Editor Org Chart</h1>
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Editor Struktur Organisasi</h1>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Kelola simpul hirarki, relasi atasan-bawahan, dan penugasan pejabat pada bagan organisasi</p>
         </div>
         <button @click="openAddNodeModal(null)" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-blue-600/30 transition">

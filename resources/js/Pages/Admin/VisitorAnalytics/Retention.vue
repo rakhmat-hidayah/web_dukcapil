@@ -1,5 +1,5 @@
 <template>
-  <Head title="Visitor Analytics - Retention & Cleanup Management" />
+  <Head title="Retensi & Pembersihan Data Log Pengunjung - Dukcapil Dompu" />
 
   <AdminLayout>
     <div class="space-y-6 text-left pb-12">
@@ -12,12 +12,12 @@
             <div class="flex items-center gap-2 mb-2">
               <span class="px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-400/30 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <DatabaseZap class="w-3 h-3" />
-                Data Retention Management
+                Manajemen Retensi Data
               </span>
-              <span class="text-xs text-red-200/60 font-mono">| Auto Cleanup Engine v2</span>
+              <span class="text-xs text-red-200/60 font-mono">| Mesin Pembersihan Otomatis v2</span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Visitor Analytics — Retention & Cleanup
+              Retensi &amp; Pembersihan Data Log Pengunjung
             </h1>
             <p class="text-xs text-red-100/70 mt-1 max-w-2xl leading-relaxed">
               Kelola kebijakan retensi data log pengunjung secara otomatis. Proses penghapusan berjalan bertahap (batch/chunk) di background tanpa mengganggu website.
@@ -27,7 +27,7 @@
           <div class="flex items-center gap-3 shrink-0">
             <Link :href="route('admin.visitor-analytics.index')" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white text-xs font-bold rounded-2xl transition flex items-center gap-2">
               <BarChart2 class="w-4 h-4" />
-              Visitor Analytics
+              Analisis Pengunjung
             </Link>
           </div>
         </div>
@@ -109,8 +109,8 @@
               <Sliders class="w-5 h-5" />
             </div>
             <div>
-              <h2 class="font-black text-sm text-gray-800 dark:text-zinc-100">Konfigurasi Visitor Analytics</h2>
-              <p class="text-[10px] text-gray-400">Pengaturan logging, retensi, dan jadwal auto-cleanup</p>
+              <h2 class="font-black text-sm text-gray-800 dark:text-zinc-100">Konfigurasi Analisis Pengunjung</h2>
+              <p class="text-[10px] text-gray-400">Pengaturan pencatatan, retensi, dan jadwal pembersihan otomatis</p>
             </div>
           </div>
 
@@ -118,7 +118,7 @@
             <!-- Enable Visitor Logging -->
             <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/60 rounded-2xl border border-gray-100 dark:border-zinc-800">
               <div>
-                <p class="text-sm font-black text-gray-800 dark:text-zinc-100">Enable Visitor Logging</p>
+                <p class="text-sm font-black text-gray-800 dark:text-zinc-100">Pencatatan Log Pengunjung</p>
                 <p class="text-[11px] text-gray-500 mt-0.5">Aktif/nonaktifkan pencatatan seluruh kunjungan pengunjung website.</p>
               </div>
               <button type="button" @click="form.visitor_logging_enabled = form.visitor_logging_enabled === '1' ? '0' : '1'" class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200" :class="form.visitor_logging_enabled === '1' ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-zinc-600'">
@@ -129,7 +129,7 @@
             <!-- Enable Auto Cleanup -->
             <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/60 rounded-2xl border border-gray-100 dark:border-zinc-800">
               <div>
-                <p class="text-sm font-black text-gray-800 dark:text-zinc-100">Enable Auto Cleanup</p>
+                <p class="text-sm font-black text-gray-800 dark:text-zinc-100">Pembersihan Otomatis</p>
                 <p class="text-[11px] text-gray-500 mt-0.5">Aktifkan penghapusan otomatis log yang melewati masa retensi via Laravel Scheduler.</p>
               </div>
               <button type="button" @click="form.visitor_auto_cleanup_enabled = form.visitor_auto_cleanup_enabled === '1' ? '0' : '1'" class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200" :class="form.visitor_auto_cleanup_enabled === '1' ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-zinc-600'">
@@ -139,7 +139,7 @@
 
             <!-- Retention Period -->
             <div class="space-y-2">
-              <label class="text-xs font-black text-gray-700 dark:text-zinc-200 uppercase tracking-wider">Retention Period (Masa Simpan Log)</label>
+              <label class="text-xs font-black text-gray-700 dark:text-zinc-200 uppercase tracking-wider">Masa Simpan Log (Retensi)</label>
               <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 <button v-for="day in [30, 60, 90, 180, 365]" :key="day" type="button" @click="form.visitor_retention_days = String(day)" class="py-2.5 text-xs font-black rounded-2xl border-2 transition" :class="form.visitor_retention_days === String(day) ? 'bg-primary-600 border-primary-600 text-white shadow-md' : 'bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:border-primary-400'">
                   {{ day }} Hari
@@ -262,7 +262,7 @@
           <!-- System Safety Info -->
           <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm p-5 space-y-3">
             <h3 class="font-black text-xs uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-              <ShieldCheck class="w-4 h-4 text-emerald-500" /> Safety Architecture
+              <ShieldCheck class="w-4 h-4 text-emerald-500" /> Arsitektur Keamanan Sistem
             </h3>
             <ul class="space-y-2 text-[11px] text-gray-600 dark:text-zinc-300">
               <li class="flex items-start gap-2">

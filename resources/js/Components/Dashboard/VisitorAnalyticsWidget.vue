@@ -1,9 +1,9 @@
 <template>
   <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm overflow-hidden transition-all duration-300">
     <WidgetHeader
-      title="Visitor & Traffic Analytics"
-      subtitle="Analisis statistik tren kunjungan, unique visitors, page views, perangkat, & halaman terpopuler"
-      badge="Traffic & OS"
+      title="Analisis Pengunjung & Lalu Lintas Web"
+      subtitle="Analisis statistik tren kunjungan, pengunjung unik, tayangan halaman, perangkat, & halaman terpopuler"
+      badge="Trafik & Sistem"
       :icon="PieChart"
       :is-collapsed="collapsed"
       @refresh="$emit('refresh')"
@@ -15,7 +15,7 @@
       <!-- Top Section: Controls & Last Updated -->
       <div class="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-gray-100 dark:border-zinc-800">
         <div>
-          <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-100">Visitor & Traffic Analytics</h3>
+          <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-100">Analisis Pengunjung &amp; Lalu Lintas Web</h3>
           <p class="text-xs text-gray-400">Monitoring lalu lintas pengunjung & performa portal secara real-time</p>
         </div>
 
@@ -69,7 +69,7 @@
 
         <!-- Unique Visitor -->
         <div class="p-3.5 rounded-2xl border bg-sky-50/40 dark:bg-sky-950/20 border-sky-100 dark:border-sky-900/30 transition hover:shadow-md">
-          <span class="text-[9px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 block truncate">Unique Visitor</span>
+          <span class="text-[9px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 block truncate">Pengunjung Unik</span>
           <p class="text-xl font-black text-gray-900 dark:text-zinc-50 font-mono mt-1">
             {{ kpiData.unique_visitors?.toLocaleString('id-ID') || 0 }}
           </p>
@@ -78,7 +78,7 @@
 
         <!-- Page Views -->
         <div class="p-3.5 rounded-2xl border bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30 transition hover:shadow-md">
-          <span class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block truncate">Page Views</span>
+          <span class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block truncate">Tayangan Halaman</span>
           <p class="text-xl font-black text-gray-900 dark:text-zinc-50 font-mono mt-1">
             {{ kpiData.page_views?.toLocaleString('id-ID') || 0 }}
           </p>
@@ -87,7 +87,7 @@
 
         <!-- Bounce Rate -->
         <div class="p-3.5 rounded-2xl border bg-amber-50/40 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/30 transition hover:shadow-md">
-          <span class="text-[9px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 block truncate">Bounce Rate</span>
+          <span class="text-[9px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 block truncate">Rasio Pantulan</span>
           <p class="text-xl font-black text-gray-900 dark:text-zinc-50 font-mono mt-1">
             {{ kpiData.bounce_rate || '0%' }}
           </p>
@@ -96,7 +96,7 @@
 
         <!-- Avg Session -->
         <div class="p-3.5 rounded-2xl border bg-teal-50/40 dark:bg-teal-950/20 border-teal-100 dark:border-teal-900/30 transition hover:shadow-md">
-          <span class="text-[9px] font-extrabold uppercase tracking-wider text-teal-600 dark:text-teal-400 block truncate">Avg Session</span>
+          <span class="text-[9px] font-extrabold uppercase tracking-wider text-teal-600 dark:text-teal-400 block truncate">Durasi Rata-rata</span>
           <p class="text-base font-black text-gray-900 dark:text-zinc-50 font-mono mt-1">
             {{ kpiData.avg_duration || '2m 15s' }}
           </p>
@@ -118,7 +118,7 @@
         <div class="flex items-center justify-between">
           <h4 class="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-zinc-400 flex items-center gap-2">
             <Activity class="w-4 h-4 text-indigo-500" />
-            <span>Grafik Tren Kunjungan (Area Line Chart)</span>
+            <span>Grafik Tren Kunjungan</span>
           </h4>
 
           <div v-if="compareMode" class="flex items-center gap-4 text-xs font-semibold">
@@ -154,7 +154,7 @@
             <Sparkles class="w-4 h-4" />
           </div>
           <div>
-            <h5 class="text-xs font-bold uppercase tracking-wider text-indigo-900 dark:text-indigo-300">Visitor Insight Engine</h5>
+            <h5 class="text-xs font-bold uppercase tracking-wider text-indigo-900 dark:text-indigo-300">Analisis Insight Pengunjung</h5>
             <p class="text-xs text-indigo-800 dark:text-indigo-200 mt-0.5 leading-relaxed font-medium">
               {{ analyticsData?.insight || 'Memuat analisis lalu lintas otomatis...' }}
             </p>
@@ -194,7 +194,7 @@
               <thead class="bg-gray-50 dark:bg-zinc-800/60 border-b border-gray-100 dark:border-zinc-800 text-gray-400 text-[9px] uppercase font-bold">
                 <tr>
                   <th class="px-3 py-2.5">Judul Halaman</th>
-                  <th class="px-3 py-2.5 text-right">Views</th>
+                  <th class="px-3 py-2.5 text-right">Tayangan</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-50 dark:divide-zinc-800/60">

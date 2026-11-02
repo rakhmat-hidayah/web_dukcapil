@@ -1,9 +1,9 @@
 <template>
   <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm overflow-hidden transition-all duration-300">
     <WidgetHeader
-      title="Executive Summary"
+      title="Ringkasan Eksekutif (KPI)"
       subtitle="Ringkasan indikator kinerja utama (KPI) portal & ekosistem pelayanan"
-      badge="Executive Control"
+      badge="Kendali Eksekutif"
       :icon="LayoutDashboard"
       :is-collapsed="collapsed"
       @refresh="$emit('refresh')"
