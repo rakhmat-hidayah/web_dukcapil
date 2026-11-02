@@ -24,18 +24,32 @@ class QueueSetting extends Model
         });
     }
 
-    public static function set(string $key, mixed $value, string $group = 'general', ?string $description = null): void
+    public static function set(string $key, mixed $value, ?string $group = null, ?string $description = null): void
     {
+        $existing = static::where('key', $key)->first();
+
+        $updateData = ['value' => $value];
+        if ($group !== null) {
+            $updateData['group'] = $group;
+        } elseif (!$existing) {
+            $updateData['group'] = 'general';
+        }
+
+        if ($description !== null) {
+            $updateData['description'] = $description;
+        }
+
         static::updateOrCreate(
             ['key' => $key],
-            [
-                'value' => $value,
-                'group' => $group,
-                'description' => $description,
-            ]
+            $updateData
         );
         Cache::forget("queue_setting_{$key}");
-        Cache::forget("queue_settings_group_{$group}");
+        if ($existing?->group) {
+            Cache::forget("queue_settings_group_{$existing->group}");
+        }
+        if ($group && $group !== $existing?->group) {
+            Cache::forget("queue_settings_group_{$group}");
+        }
     }
 
     public static function getGroup(string $group): array

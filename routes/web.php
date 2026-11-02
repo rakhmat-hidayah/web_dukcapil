@@ -464,7 +464,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Settings
             Route::get('/settings', [\App\Http\Controllers\Admin\Queue\QueueSettingsController::class, 'index'])->name('settings.index');
-            Route::post('/settings', [\App\Http\Controllers\Admin\Queue\QueueSettingsController::class, 'update'])->name('settings.update');
+            Route::match(['post', 'put'], '/settings', [\App\Http\Controllers\Admin\Queue\QueueSettingsController::class, 'update'])->name('settings.update');
         });
 
         // -------------------------------------------------------------

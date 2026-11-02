@@ -24,7 +24,10 @@ class QueueSettingsController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
-        $data = $request->input('settings', []);
+        $data = $request->input('settings');
+        if (!is_array($data)) {
+            $data = $request->except(['_token', '_method']);
+        }
 
         foreach ($data as $key => $value) {
             if (is_bool($value)) {

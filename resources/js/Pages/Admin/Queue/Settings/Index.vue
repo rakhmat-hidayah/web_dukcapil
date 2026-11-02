@@ -229,7 +229,8 @@ const submitting = ref(false)
 
 const submitSettings = () => {
   submitting.value = true
-  router.put(route('admin.queue.settings.update'), { settings: form.value }, {
+  router.post(route('admin.queue.settings.update'), { settings: form.value }, {
+    preserveScroll: true,
     onFinish: () => { submitting.value = false },
   })
 }

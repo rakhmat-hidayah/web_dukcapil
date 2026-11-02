@@ -734,4 +734,44 @@ class QueueWorkflowTest extends TestCase
         );
         $this->assertEquals(0, $exitCode);
     }
+
+    public function test_admin_can_update_queue_settings_via_post_and_put(): void
+    {
+        $admin = User::first();
+        $this->assertNotNull($admin);
+
+        // 1. Test POST update
+        $responsePost = $this->actingAs($admin)->post(route('admin.queue.settings.update'), [
+            'settings' => [
+                'queue.office_address' => 'Jl. Soekarno Hatta No. 9, Dompu Testing POST',
+                'queue.open_time' => '08:15',
+                'queue.notify_on_submit' => true,
+            ]
+        ]);
+        $responsePost->assertRedirect();
+        $responsePost->assertSessionHas('success');
+
+        $this->assertEquals('Jl. Soekarno Hatta No. 9, Dompu Testing POST', \App\Models\Queue\QueueSetting::get('queue.office_address'));
+        $this->assertEquals('08:15', \App\Models\Queue\QueueSetting::get('queue.open_time'));
+        $this->assertEquals('1', \App\Models\Queue\QueueSetting::get('queue.notify_on_submit'));
+
+        // Ensure group preservation
+        $settingModel = \App\Models\Queue\QueueSetting::where('key', 'queue.open_time')->first();
+        $this->assertEquals('schedule', $settingModel->group);
+
+        // 2. Test PUT update
+        $responsePut = $this->actingAs($admin)->put(route('admin.queue.settings.update'), [
+            'settings' => [
+                'queue.office_address' => 'Jl. Soekarno Hatta No. 9, Dompu Testing PUT',
+                'queue.open_time' => '08:30',
+                'queue.notify_on_submit' => false,
+            ]
+        ]);
+        $responsePut->assertRedirect();
+        $responsePut->assertSessionHas('success');
+
+        $this->assertEquals('Jl. Soekarno Hatta No. 9, Dompu Testing PUT', \App\Models\Queue\QueueSetting::get('queue.office_address'));
+        $this->assertEquals('08:30', \App\Models\Queue\QueueSetting::get('queue.open_time'));
+        $this->assertEquals('0', \App\Models\Queue\QueueSetting::get('queue.notify_on_submit'));
+    }
 }
