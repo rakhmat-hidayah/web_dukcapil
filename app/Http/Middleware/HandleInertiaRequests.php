@@ -128,13 +128,17 @@ class HandleInertiaRequests extends Middleware
                 return $result;
             }),
 
-            // Published pages list for dynamic navigation
-            'published_pages' => Cache::remember('published_pages', 300, function () {
-                return Page::where('status', 'published')
-                    ->orderBy('sort_order')
-                    ->orderBy('title')
-                    ->get(['id', 'title', 'slug', 'show_in_menu', 'sort_order']);
-            }),
+            // Published pages list for dynamic navigation - cached as pure array
+            'published_pages' => function () {
+                $pages = Cache::remember('published_pages_v3', 300, function () {
+                    return Page::where('status', 'published')
+                        ->orderBy('sort_order')
+                        ->orderBy('title')
+                        ->get(['id', 'title', 'slug', 'show_in_menu', 'sort_order'])
+                        ->toArray();
+                });
+                return is_array($pages) && !isset($pages['__PHP_Incomplete_Class_Name']) ? $pages : [];
+            },
 
             // Flash messaging
             'flash' => [

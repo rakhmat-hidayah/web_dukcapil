@@ -22,15 +22,23 @@ class HomeController extends Controller
      */
     public function index(): InertiaResponse
     {
-        // 1. Get active banners (Sliders / Campaigns) - Cached 10 mins
-        $banners = Cache::remember('home_banners', 600, function () {
+        // 1. Get active banners (Sliders / Campaigns) - Cached 10 mins as pure array
+        $banners = Cache::remember('home_banners_v3', 600, function () {
             return Banner::where('is_active', true)
                 ->orderBy('sort_order')
-                ->get();
+                ->get()
+                ->toArray();
         });
+        if (!is_array($banners) || isset($banners['__PHP_Incomplete_Class_Name'])) {
+            Cache::forget('home_banners_v3');
+            $banners = Banner::where('is_active', true)
+                ->orderBy('sort_order')
+                ->get()
+                ->toArray();
+        }
 
         // 2. Get active announcements ticker text - Cached 5 mins
-        $tickers = Cache::remember('home_tickers', 300, function () {
+        $tickers = Cache::remember('home_tickers_v3', 300, function () {
             return Announcement::where('status', 'published')
                 ->where('is_ticker', true)
                 ->where(function ($q) {
@@ -46,6 +54,10 @@ class HomeController extends Controller
                 ->values()
                 ->toArray();
         });
+        if (!is_array($tickers) || isset($tickers['__PHP_Incomplete_Class_Name'])) {
+            Cache::forget('home_tickers_v3');
+            $tickers = [];
+        }
 
         // 3. Get active popup warning alert (fresh lookup for urgent announcements)
         $popup = Announcement::where('status', 'published')
@@ -55,10 +67,10 @@ class HomeController extends Controller
                   ->orWhere('expires_at', '>', now());
             })
             ->orderBy('is_pinned', 'desc')
-            ->first();
+            ->first(['id', 'title', 'content']);
 
-        // 4. Get 6 recent news articles (Berita Terkini/Terbaru) - Lean select & Cached 3 mins
-        $recentNews = Cache::remember('home_recent_news', 180, function () {
+        // 4. Get 6 recent news articles (Berita Terkini/Terbaru) - Lean select & Cached 3 mins as pure array
+        $recentNews = Cache::remember('home_recent_news_v3', 180, function () {
             return News::with('category:id,name,slug')
                 ->published()
                 ->select(['id', 'title', 'slug', 'excerpt', 'thumbnail', 'news_category_id', 'published_at', 'view_count'])
@@ -67,31 +79,64 @@ class HomeController extends Controller
                 ->limit(6)
                 ->get()
                 ->map(function ($item) {
-                    if ($item->thumbnail) {
-                        $item->thumbnail = ltrim(str_replace(['/storage/', 'storage/', '/uploads/', 'uploads/'], '', $item->thumbnail), '/');
+                    $thumb = $item->thumbnail;
+                    if ($thumb) {
+                        $thumb = ltrim(str_replace(['/storage/', 'storage/', '/uploads/', 'uploads/'], '', $thumb), '/');
                     }
-                    return $item;
-                });
+                    return [
+                        'id' => $item->id,
+                        'title' => $item->title,
+                        'slug' => $item->slug,
+                        'excerpt' => $item->excerpt,
+                        'thumbnail' => $thumb,
+                        'published_at' => $item->published_at ? $item->published_at->toISOString() : null,
+                        'view_count' => $item->view_count,
+                        'category' => $item->category ? [
+                            'id' => $item->category->id,
+                            'name' => $item->category->name,
+                            'slug' => $item->category->slug,
+                        ] : null,
+                    ];
+                })
+                ->toArray();
         });
+        if (!is_array($recentNews) || isset($recentNews['__PHP_Incomplete_Class_Name'])) {
+            Cache::forget('home_recent_news_v3');
+            $recentNews = [];
+        }
 
-        // 4b. Get active featured innovations - Cached 10 mins
-        $innovations = Cache::remember('home_innovations', 600, function () {
+        // 4b. Get active featured innovations - Cached 10 mins as pure array
+        $innovations = Cache::remember('home_innovations_v3', 600, function () {
             return \App\Models\Innovation::where('is_active', true)
                 ->orderBy('sort_order')
                 ->limit(4)
-                ->get();
+                ->get()
+                ->toArray();
         });
+        if (!is_array($innovations) || isset($innovations['__PHP_Incomplete_Class_Name'])) {
+            Cache::forget('home_innovations_v3');
+            $innovations = \App\Models\Innovation::where('is_active', true)
+                ->orderBy('sort_order')
+                ->limit(4)
+                ->get()
+                ->toArray();
+        }
 
-        // 5. Get top downloads count - Cached 10 mins
-        $downloadShortcuts = Cache::remember('home_download_shortcuts', 600, function () {
+        // 5. Get top downloads count - Cached 10 mins as pure array
+        $downloadShortcuts = Cache::remember('home_download_shortcuts_v3', 600, function () {
             return Download::where('status', 'published')
                 ->orderBy('download_count', 'desc')
                 ->limit(4)
-                ->get(['id', 'title', 'file_type', 'file_size', 'file_path', 'download_count']);
+                ->get(['id', 'title', 'file_type', 'file_size', 'file_path', 'download_count'])
+                ->toArray();
         });
+        if (!is_array($downloadShortcuts) || isset($downloadShortcuts['__PHP_Incomplete_Class_Name'])) {
+            Cache::forget('home_download_shortcuts_v3');
+            $downloadShortcuts = [];
+        }
 
         // 6. Aggregate demographic highlights - Cached 1 hour
-        $demographicSummary = Cache::remember('home_demographic_summary', 3600, function () {
+        $demographicSummary = Cache::remember('home_demographic_summary_v3', 3600, function () {
             $latestDataset = \App\Models\DemographicDataset::published()
                 ->where('region_level', 'regency')
                 ->where('type', 'population')

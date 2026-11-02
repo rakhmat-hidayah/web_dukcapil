@@ -6,14 +6,14 @@
       
       <!-- Running Announcements Ticker -->
       <div 
-        v-if="tickers.length > 0" 
+        v-if="safeTickers.length > 0" 
         class="bg-amber-500 text-white py-2 px-4 rounded-2xl flex items-center overflow-hidden gap-3 font-semibold text-xs shadow-sm shadow-amber-500/10"
       >
         <span class="bg-amber-700 px-2 py-0.5 rounded font-black text-[9px] uppercase tracking-wider shrink-0 animate-pulse">
           Pengumuman
         </span>
         <marquee class="flex-1 select-none" scrollamount="4">
-          <span v-for="(t, idx) in tickers" :key="idx" class="mr-12">{{ stripHtml(t) }}</span>
+          <span v-for="(t, idx) in safeTickers" :key="idx" class="mr-12">{{ stripHtml(t) }}</span>
         </marquee>
       </div>
 
@@ -64,8 +64,8 @@
 
         <!-- Render banners slide -->
         <div 
-          v-for="(banner, idx) in banners" 
-          :key="banner.id"
+          v-for="(banner, idx) in safeBanners" 
+          :key="banner.id || idx"
           v-show="currentSlide === idx"
           class="absolute inset-0 transition duration-500 z-10"
         >
@@ -91,7 +91,7 @@
             <a 
               v-if="banner.url"
               :href="banner.url" 
-              :target="banner.url_target"
+              :target="banner.url_target || '_self'"
               class="px-4 py-2 sm:px-5 sm:py-2.5 bg-amber-500 hover:bg-amber-400 text-gray-900 text-[11px] sm:text-xs font-black rounded-xl w-fit transition shadow-md shadow-amber-500/20 active:scale-95 mt-1"
             >
               {{ banner.button_text || 'Selengkapnya →' }}
@@ -100,9 +100,9 @@
         </div>
 
         <!-- Slider Dots navigation -->
-        <div class="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-30" v-if="banners.length > 1">
+        <div class="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-30" v-if="safeBanners.length > 1">
           <button 
-            v-for="(b, i) in banners" 
+            v-for="(b, i) in safeBanners" 
             :key="i"
             @click="currentSlide = i"
             class="w-2.5 h-2.5 rounded-full transition"
@@ -346,14 +346,14 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-              <div v-if="recentNews.length === 0" class="col-span-3 text-center py-12 text-gray-400 text-xs">
+              <div v-if="safeNews.length === 0" class="col-span-3 text-center py-12 text-gray-400 text-xs">
                 Belum ada berita dipublikasikan.
               </div>
 
               <Link 
-                v-for="item in recentNews" 
+                v-for="item in safeNews" 
                 :key="item.id"
-                :href="route('public.news.show', item.slug)"
+                :href="item && item.slug ? route('public.news.show', item.slug) : route('public.news.index')"
                 class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden flex flex-col group hover:shadow-md hover:-translate-y-0.5 transition duration-200"
               >
                 <div class="h-32 bg-gradient-to-br from-primary-500/10 via-indigo-500/5 to-amber-500/10 dark:bg-zinc-950 overflow-hidden flex items-center justify-center relative">
@@ -396,7 +396,7 @@
           </div>
 
           <!-- Featured Innovations Section (Upgraded Premium Cards) -->
-          <div v-if="innovations && innovations.length > 0" class="space-y-4 pt-2">
+          <div v-if="safeInnovations.length > 0" class="space-y-4 pt-2">
             <div class="flex flex-wrap items-end justify-between gap-2">
               <div>
                 <span class="px-2.5 py-0.5 bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[9px] font-black uppercase rounded-md tracking-wider">
@@ -417,7 +417,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div 
-                v-for="item in innovations" 
+                v-for="item in safeInnovations" 
                 :key="item.id"
                 class="group relative overflow-hidden bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800/80 rounded-3xl p-5 shadow-sm hover:shadow-xl hover:shadow-blue-900/10 dark:hover:shadow-black/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
               >
@@ -511,11 +511,11 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div v-if="downloadShortcuts.length === 0" class="col-span-2 py-8 text-center text-gray-400 text-xs bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800">
+              <div v-if="safeDownloads.length === 0" class="col-span-2 py-8 text-center text-gray-400 text-xs bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800">
                 Belum ada berkas unduhan terdaftar.
               </div>
               <a 
-                v-for="doc in downloadShortcuts" 
+                v-for="doc in safeDownloads" 
                 :key="doc.id"
                 :href="doc.file_path ? doc.file_path : route('public.downloads.index')"
                 target="_blank"
@@ -626,15 +626,21 @@ import { storageUrl } from '@/utils/storage';
 import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar, Download, FileText, ArrowRight, Ticket } from '@lucide/vue';
 
 const props = defineProps({
-  banners: Array,
-  tickers: Array,
+  banners: [Array, Object],
+  tickers: [Array, Object],
   popup: Object,
-  recentNews: Array,
-  innovations: Array,
-  downloadShortcuts: Array,
+  recentNews: [Array, Object],
+  innovations: [Array, Object],
+  downloadShortcuts: [Array, Object],
   stats: Object,
   ikmWidget: Object,
 });
+
+const safeBanners = computed(() => Array.isArray(props.banners) ? props.banners : []);
+const safeTickers = computed(() => Array.isArray(props.tickers) ? props.tickers : []);
+const safeNews = computed(() => Array.isArray(props.recentNews) ? props.recentNews : []);
+const safeInnovations = computed(() => Array.isArray(props.innovations) ? props.innovations : []);
+const safeDownloads = computed(() => Array.isArray(props.downloadShortcuts) ? props.downloadShortcuts : []);
 
 const page = usePage();
 const sanaiConfig = computed(() => {
@@ -676,9 +682,9 @@ const goToComplaints = () => {
 };
 
 onMounted(() => {
-  if (props.banners.length > 1) {
+  if (safeBanners.value.length > 1) {
     slideInterval = setInterval(() => {
-      currentSlide.value = (currentSlide.value + 1) % props.banners.length;
+      currentSlide.value = (currentSlide.value + 1) % safeBanners.value.length;
     }, 5000);
   }
 });

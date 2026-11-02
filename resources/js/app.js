@@ -12,18 +12,23 @@ createInertiaApp({
     title: (title) => title ? `${title} - Dukcapil Dompu` : 'Dukcapil Dompu',
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
-            .use(plugin)
-            .use(ZiggyVue)
-            .use(pinia)
-            .mount(el);
+        const app = createApp({ render: () => h(App, props) });
+        app.config.errorHandler = (err, instance, info) => {
+            console.error('Antigravity Vue Safe Handler:', err, info);
+        };
+        app.use(plugin)
+           .use(ZiggyVue)
+           .use(pinia)
+           .mount(el);
 
         // Smoothly dismiss the initial first-paint brand preloader
         const preloader = document.getElementById('initial-page-preloader');
         if (preloader) {
             preloader.style.opacity = '0';
             setTimeout(() => {
-                preloader.remove();
+                if (preloader && preloader.parentNode) {
+                    preloader.remove();
+                }
             }, 350);
         }
     },
