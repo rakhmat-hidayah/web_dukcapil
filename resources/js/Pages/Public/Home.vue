@@ -21,12 +21,8 @@
       <div class="relative h-64 sm:h-96 md:h-[28rem] rounded-2xl sm:rounded-[2.5rem] overflow-hidden border border-blue-900/30 dark:border-zinc-800 shadow-xl shadow-blue-950/20 bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 flex items-center">
         
         <!-- Institutional Identity Background Layer (Opacity ~10%) -->
-        <!-- 1. Blurred Government Public Service Backdrop -->
-        <img 
-          src="https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1400&q=80"
-          class="absolute inset-0 w-full h-full object-cover opacity-20 filter blur-[3px] scale-105 pointer-events-none z-0"
-          alt="Latar Pelayanan Dukcapil" 
-        />
+        <!-- 1. Government Public Service Ambient Glow (Zero external network latency) -->
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-700/25 via-transparent to-transparent pointer-events-none z-0"></div>
 
         <!-- 2. Modern Grid Line Pattern (10% Opacity) -->
         <div class="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:28px_28px] pointer-events-none z-0"></div>
@@ -76,9 +72,12 @@
           <!-- Soft Glassmorphic Gradient Overlay -->
           <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-blue-950/50 to-transparent z-10"></div>
           <img 
-            :src="banner.image_url || 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80'" 
+            v-if="banner.image_url"
+            :src="banner.image_url" 
             class="w-full h-full object-cover mix-blend-overlay opacity-80"
             alt="Hero Slide" 
+            loading="lazy"
+            decoding="async"
           />
 
           <!-- Text content overlay -->
@@ -363,6 +362,8 @@
                     :src="storageUrl(item.thumbnail)" 
                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                     :alt="item.title" 
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div v-else class="flex flex-col items-center justify-center space-y-1 text-gray-400 dark:text-zinc-600">
                     <span class="text-2xl">📰</span>

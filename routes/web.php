@@ -54,6 +54,7 @@ Route::get('/profil', [\App\Http\Controllers\Public\ProfilePageController::class
 Route::get('/profil/struktur-organisasi', [\App\Http\Controllers\Public\OrganizationChartViewerController::class, 'show'])->name('public.profile.org-chart');
 Route::get('/profil/pejabat', [\App\Http\Controllers\Public\OfficialDirectoryController::class, 'index'])->name('public.profile.officials.index');
 Route::get('/profil/pejabat/{identifier}', [\App\Http\Controllers\Public\OfficialDirectoryController::class, 'show'])->name('public.profile.officials.show');
+Route::get('/page/{slug}', [\App\Http\Controllers\Public\PageController::class, 'show'])->name('public.pages.show');
 
 // Public Profile REST APIs (with throttle for rate-limiting consistency)
 Route::middleware(['throttle:60,1'])->prefix('api/v1/profile')->group(function () {

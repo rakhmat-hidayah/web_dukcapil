@@ -65,13 +65,26 @@ return new class extends Migration
         ");
 
         // District-level datasets (kecamatan_id IS NOT NULL) — use updated BPS code
-        DB::statement("
-            UPDATE demographic_datasets d
-            JOIN kecamatans k ON k.id = d.kecamatan_id
-            SET d.region_level = 'district',
-                d.region_code  = k.code
-            WHERE d.kecamatan_id IS NOT NULL
-        ");
+        if (DB::getDriverName() === 'sqlite') {
+            $datasets = DB::table('demographic_datasets')->whereNotNull('kecamatan_id')->get();
+            foreach ($datasets as $dataset) {
+                $k = DB::table('kecamatans')->where('id', $dataset->kecamatan_id)->first();
+                if ($k) {
+                    DB::table('demographic_datasets')->where('id', $dataset->id)->update([
+                        'region_level' => 'district',
+                        'region_code'  => $k->code,
+                    ]);
+                }
+            }
+        } else {
+            DB::statement("
+                UPDATE demographic_datasets d
+                JOIN kecamatans k ON k.id = d.kecamatan_id
+                SET d.region_level = 'district',
+                    d.region_code  = k.code
+                WHERE d.kecamatan_id IS NOT NULL
+            ");
+        }
     }
 
     public function down(): void

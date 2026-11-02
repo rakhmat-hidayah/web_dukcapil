@@ -9,11 +9,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("ALTER TABLE ppid_documents MODIFY category VARCHAR(50) NOT NULL");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE ppid_documents MODIFY category VARCHAR(50) NOT NULL");
+        }
     }
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE ppid_documents MODIFY category ENUM('informasi_publik', 'prosedur', 'layanan_informasi') NOT NULL");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE ppid_documents MODIFY category ENUM('informasi_publik', 'prosedur', 'layanan_informasi') NOT NULL");
+        }
     }
 };

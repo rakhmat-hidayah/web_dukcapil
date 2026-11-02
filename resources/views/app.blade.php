@@ -186,7 +186,6 @@
     <!-- Optimized Non-Blocking Google Fonts Loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
     <noscript>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
@@ -226,5 +225,16 @@
         }
     </style>
     @inertia
+
+    <!-- Preloader Auto-Dismiss Failsafe (Guarantees dismiss within 1.5s max) -->
+    <script>
+        setTimeout(function() {
+            var pre = document.getElementById('initial-page-preloader');
+            if (pre) {
+                pre.style.opacity = '0';
+                setTimeout(function() { if (pre && pre.parentNode) pre.remove(); }, 350);
+            }
+        }, 1500);
+    </script>
 </body>
 </html>

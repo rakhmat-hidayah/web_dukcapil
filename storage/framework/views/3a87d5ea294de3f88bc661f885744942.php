@@ -185,10 +185,13 @@
         }
     </style>
 
-    <!-- Google Fonts -->
+    <!-- Optimized Non-Blocking Google Fonts Loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+    </noscript>
 
     <!-- Favicon Links (Transparent Emblem) -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -202,7 +205,39 @@
     <?php $__inertiaSsrResponse = app(\Inertia\Ssr\SsrState::class)->setPage($page)->dispatch();  if ($__inertiaSsrResponse) { echo $__inertiaSsrResponse->head; } ?>
 </head>
 <body class="h-full font-sans antialiased text-gray-900 bg-gray-50 dark:bg-zinc-950 dark:text-zinc-50 transition-colors duration-200">
+    <!-- Instant First-Paint Brand Splash Screen (Eliminates Blank White Screen during Initial Load) -->
+    <div id="initial-page-preloader" style="position:fixed;inset:0;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#ffffff;transition:opacity .35s ease-out;pointer-events:none;">
+        <div style="text-align:center;padding:24px;max-width:320px;">
+            <img src="/favicon.png" alt="Logo Disdukcapil" style="width:64px;height:64px;margin:0 auto 14px auto;display:block;animation:preloaderPulse 1.6s infinite ease-in-out;" onerror="this.style.display='none'">
+            <div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;font-weight:700;font-size:15px;color:#0c4270;letter-spacing:-0.01em;margin-bottom:4px;">Disdukcapil Kabupaten Dompu</div>
+            <div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;color:#64748b;margin-bottom:18px;">Memuat Layanan Kependudukan...</div>
+            <div style="width:140px;height:4px;background:#e2e8f0;border-radius:9999px;margin:0 auto;overflow:hidden;position:relative;">
+                <div style="position:absolute;top:0;bottom:0;width:40%;background:#0274cb;border-radius:9999px;animation:preloaderProgress 1.4s infinite ease-in-out;"></div>
+            </div>
+        </div>
+    </div>
+    <style>
+        @keyframes preloaderPulse { 0%, 100% { transform: scale(1); opacity: 0.95; } 50% { transform: scale(1.06); opacity: 1; } }
+        @keyframes preloaderProgress { 0% { left: -40%; width: 40%; } 50% { left: 40%; width: 50%; } 100% { left: 100%; width: 30%; } }
+        @media (prefers-color-scheme: dark) {
+            #initial-page-preloader { background: #09090b !important; }
+            #initial-page-preloader div > div:nth-child(2) { color: #f1f5f9 !important; }
+            #initial-page-preloader div > div:nth-child(3) { color: #94a3b8 !important; }
+            #initial-page-preloader div > div:nth-child(4) { background: #27272a !important; }
+        }
+    </style>
     <?php $__inertiaSsrResponse = app(\Inertia\Ssr\SsrState::class)->setPage($page)->dispatch();  if ($__inertiaSsrResponse) { echo $__inertiaSsrResponse->body; } else { ?><script data-page="app" type="application/json"><?php echo json_encode($page); ?></script><div id="app"></div><?php } ?>
+
+    <!-- Preloader Auto-Dismiss Failsafe (Guarantees dismiss within 1.5s max) -->
+    <script>
+        setTimeout(function() {
+            var pre = document.getElementById('initial-page-preloader');
+            if (pre) {
+                pre.style.opacity = '0';
+                setTimeout(function() { if (pre && pre.parentNode) pre.remove(); }, 350);
+            }
+        }, 1500);
+    </script>
 </body>
 </html>
 <?php /**PATH C:\laragon\www\dukcapil.dompukab.go.id\resources\views/app.blade.php ENDPATH**/ ?>

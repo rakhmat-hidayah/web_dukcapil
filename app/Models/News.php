@@ -41,7 +41,7 @@ class News extends Model
         'copy_link_count' => 'integer',
     ];
 
-    protected $appends = ['thumbnail_url', 'og_image_final_url', 'meta_description_final'];
+    protected $appends = [];
 
     /**
      * Get computed final Open Graph Image URL following requirement priority:
@@ -120,42 +120,22 @@ class News extends Model
     }
 
     /**
-     * Otomatis konversi thumbnail ke Base64 Data URL agar 100% lolos dari HTTP 403 Cloudflare WAF!
+     * URL thumbnail publik yang bersih dan optimal (tanpa base64, ramah performa & cache browser).
      */
     public function getThumbnailUrlAttribute(): ?string
     {
         if (!$this->thumbnail) return null;
+        if (str_starts_with($this->thumbnail, 'http://') || str_starts_with($this->thumbnail, 'https://')) {
+            return $this->thumbnail;
+        }
         if (str_starts_with($this->thumbnail, 'data:')) {
             return $this->thumbnail;
         }
 
-        // Strip full domain URLs if present
         $clean = preg_replace('#^https?://[^/]+#i', '', $this->thumbnail);
         $clean = ltrim(str_replace(['/storage/', 'storage/', '/uploads/', 'uploads/'], '', $clean), '/');
         
-        $possibleFiles = [
-            public_path('uploads/' . $clean),
-            public_path($clean),
-        ];
-
-        foreach ($possibleFiles as $file) {
-            if (file_exists($file) && is_file($file)) {
-                $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                $mime = match($ext) {
-                    'webp' => 'image/webp',
-                    'png'  => 'image/png',
-                    'jpg', 'jpeg' => 'image/jpeg',
-                    'gif'  => 'image/gif',
-                    'svg'  => 'image/svg+xml',
-                    default => 'image/jpeg',
-                };
-                $data = base64_encode(file_get_contents($file));
-                return "data:{$mime};base64,{$data}";
-            }
-        }
-
-        // If file does not exist physically on disk, return null so Vue renders clean placeholder
-        return null;
+        return '/uploads/' . $clean;
     }
 
     public function author(): BelongsTo
