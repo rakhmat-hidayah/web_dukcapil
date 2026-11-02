@@ -283,19 +283,34 @@
 
               <!-- Nomor WhatsApp / HP -->
               <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                  Nomor WhatsApp / HP Pemohon <span class="text-rose-500">*</span>
-                </label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                    Nomor WhatsApp / HP Pemohon <span class="text-rose-500">*</span>
+                  </label>
+                  <span class="text-[10px] font-mono" :class="form.applicant_phone && form.applicant_phone.length >= 10 && form.applicant_phone.length <= 13 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
+                    {{ (form.applicant_phone || '').length }}/13 Digit (Min. 10)
+                  </span>
+                </div>
                 <input
                   id="field_applicant_phone"
-                  v-model="form.applicant_phone"
+                  :value="form.applicant_phone"
+                  @input="onPhoneInput"
+                  @keypress="filterPhoneKeypress"
                   type="tel"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="13"
+                  autocomplete="tel"
                   placeholder="Contoh: 0823xxxxxxxx"
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
+                  :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.applicant_phone}"
                   required
                 />
                 <p v-if="form.errors.applicant_phone" class="text-xs text-rose-500 font-medium mt-1">
                   {{ form.errors.applicant_phone }}
+                </p>
+                <p v-else-if="form.applicant_phone && form.applicant_phone.length > 0 && form.applicant_phone.length < 10" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                  Kurang {{ 10 - form.applicant_phone.length }} digit lagi. Nomor HP harus antara 10 sampai 13 digit angka.
                 </p>
               </div>
 
@@ -626,19 +641,34 @@
 
                 <!-- Kontak Perwakilan -->
                 <div>
-                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-                    Nomor WhatsApp / HP Perwakilan <span class="text-rose-500">*</span>
-                  </label>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      Nomor WhatsApp / HP Perwakilan <span class="text-rose-500">*</span>
+                    </label>
+                    <span class="text-[10px] font-mono" :class="form.representative_phone && form.representative_phone.length >= 10 && form.representative_phone.length <= 13 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
+                      {{ (form.representative_phone || '').length }}/13 Digit (Min. 10)
+                    </span>
+                  </div>
                   <input
                     id="field_representative_phone"
-                    v-model="form.representative_phone"
+                    :value="form.representative_phone"
+                    @input="onRepresentativePhoneInput"
+                    @keypress="filterPhoneKeypress"
                     type="tel"
-                    placeholder="0823xxxxxxxx"
-                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    maxlength="13"
+                    autocomplete="tel"
+                    placeholder="Contoh: 0823xxxxxxxx"
+                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
+                    :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.representative_phone}"
                     required
                   />
                   <p v-if="form.errors.representative_phone" class="text-xs text-rose-500 font-medium mt-1">
                     {{ form.errors.representative_phone }}
+                  </p>
+                  <p v-else-if="form.representative_phone && form.representative_phone.length > 0 && form.representative_phone.length < 10" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                    Kurang {{ 10 - form.representative_phone.length }} digit lagi. Nomor HP harus antara 10 sampai 13 digit angka.
                   </p>
                 </div>
 
@@ -945,6 +975,32 @@ function onRepresentativeNikInput(e) {
   }
 }
 
+// Phone Keypress filter (only numbers 0-9)
+function filterPhoneKeypress(e) {
+  if (!/[0-9]/.test(e.key)) {
+    e.preventDefault();
+  }
+}
+
+// Phone Input Sanitizer (strips anything non-digit and caps at 13)
+function onPhoneInput(e) {
+  const digits = (e.target.value || '').replace(/\D/g, '').slice(0, 13);
+  form.applicant_phone = digits;
+  e.target.value = digits;
+  if (form.errors.applicant_phone && digits.length >= 10 && digits.length <= 13) {
+    delete form.errors.applicant_phone;
+  }
+}
+
+function onRepresentativePhoneInput(e) {
+  const digits = (e.target.value || '').replace(/\D/g, '').slice(0, 13);
+  form.representative_phone = digits;
+  e.target.value = digits;
+  if (form.errors.representative_phone && digits.length >= 10 && digits.length <= 13) {
+    delete form.errors.representative_phone;
+  }
+}
+
 // Age & Birth Date Validation
 const isBiometric = computed(() => !!selectedServiceObj.value?.is_biometric_first_recording);
 const minRequiredAge = computed(() => isBiometric.value ? 16 : 17);
@@ -1089,7 +1145,8 @@ function validateForm() {
   }
 
   // 6. Nomor HP / WhatsApp
-  if (!form.applicant_phone || !form.applicant_phone.trim()) {
+  const cleanPhone = (form.applicant_phone || '').replace(/\D/g, '');
+  if (!cleanPhone) {
     const msg = 'Nomor WhatsApp / HP aktif wajib diisi.';
     form.errors.applicant_phone = msg;
     errors.push({
@@ -1098,8 +1155,8 @@ function validateForm() {
       label: 'Nomor WhatsApp / HP',
       message: msg,
     });
-  } else if (form.applicant_phone.replace(/\D/g, '').length < 9) {
-    const msg = 'Nomor HP minimal 9 digit angka.';
+  } else if (cleanPhone.length < 10 || cleanPhone.length > 13) {
+    const msg = `Nomor WhatsApp / HP harus berupa angka 10 sampai 13 digit (saat ini ${cleanPhone.length} digit).`;
     form.errors.applicant_phone = msg;
     errors.push({
       field: 'applicant_phone',
@@ -1178,8 +1235,18 @@ function validateForm() {
       });
     }
 
-    if (!form.representative_phone || !form.representative_phone.trim()) {
+    const cleanRepPhone = (form.representative_phone || '').replace(/\D/g, '');
+    if (!cleanRepPhone) {
       const msg = 'Nomor HP / WhatsApp perwakilan wajib diisi.';
+      form.errors.representative_phone = msg;
+      errors.push({
+        field: 'representative_phone',
+        elementId: 'field_representative_phone',
+        label: 'Nomor HP Perwakilan',
+        message: msg,
+      });
+    } else if (cleanRepPhone.length < 10 || cleanRepPhone.length > 13) {
+      const msg = `Nomor WhatsApp / HP perwakilan harus berupa angka 10 sampai 13 digit (saat ini ${cleanRepPhone.length} digit).`;
       form.errors.representative_phone = msg;
       errors.push({
         field: 'representative_phone',
