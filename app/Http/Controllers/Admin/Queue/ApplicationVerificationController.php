@@ -285,6 +285,23 @@ class ApplicationVerificationController extends Controller
     public function startProcessing(Request $request, int $id): RedirectResponse
     {
         $application = QueueApplication::findOrFail($id);
+
+        if ($application->status === QueueApplication::STATUS_REJECTED) {
+            return back()->with('error', 'Permohonan telah ditolak. Tindakan loket dan cetak kartu dinonaktifkan.');
+        }
+
+        if (!in_array($application->status, [
+            QueueApplication::STATUS_PRE_VERIFIED,
+            QueueApplication::STATUS_QUEUE_BOOKED,
+            QueueApplication::STATUS_ARRIVED,
+            QueueApplication::STATUS_PHYSICAL_VERIFICATION,
+            QueueApplication::STATUS_APPROVED_FOR_SERVICE,
+            QueueApplication::STATUS_PROCESSING,
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+        ])) {
+            return back()->with('error', 'Tindakan loket dan status cetak hanya aktif setelah verifikasi berkas online disetujui.');
+        }
+
         $this->verificationService->startProcessing($application, Auth::user(), $request->input('notes'));
 
         return back()->with('success', "Status pelayanan diubah: Sedang Diproses.");
@@ -296,6 +313,23 @@ class ApplicationVerificationController extends Controller
     public function markReadyForPickup(Request $request, int $id): RedirectResponse
     {
         $application = QueueApplication::findOrFail($id);
+
+        if ($application->status === QueueApplication::STATUS_REJECTED) {
+            return back()->with('error', 'Permohonan telah ditolak. Tindakan loket dan cetak kartu dinonaktifkan.');
+        }
+
+        if (!in_array($application->status, [
+            QueueApplication::STATUS_PRE_VERIFIED,
+            QueueApplication::STATUS_QUEUE_BOOKED,
+            QueueApplication::STATUS_ARRIVED,
+            QueueApplication::STATUS_PHYSICAL_VERIFICATION,
+            QueueApplication::STATUS_APPROVED_FOR_SERVICE,
+            QueueApplication::STATUS_PROCESSING,
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+        ])) {
+            return back()->with('error', 'Tindakan loket dan status cetak hanya aktif setelah verifikasi berkas online disetujui.');
+        }
+
         $this->verificationService->markReadyForPickup($application, Auth::user(), $request->input('notes'));
 
         return back()->with('success', "KTP-el fisik telah selesai dicetak dan siap diambil.");

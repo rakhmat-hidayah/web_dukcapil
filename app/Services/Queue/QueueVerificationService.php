@@ -220,6 +220,28 @@ class QueueVerificationService
             'rejection_reason' => $reason,
         ]);
 
+        // Sync with Serah Terima KTP-el module if handover record exists
+        if ($application->handover) {
+            $fromHandover = $application->handover->status;
+            $application->handover->update([
+                'status'                => KtpHandover::STATUS_EXCEPTION,
+                'has_exception'         => true,
+                'exception_reason'      => "Pengajuan ditolak: {$reason}",
+                'exception_reported_at' => now(),
+                'exception_reported_by' => $officer?->id,
+            ]);
+
+            KtpHandoverLog::create([
+                'handover_id'    => $application->handover->id,
+                'application_id' => $application->id,
+                'user_id'        => $officer?->id,
+                'action'         => 'APPLICATION_REJECTED',
+                'from_status'    => $fromHandover,
+                'to_status'      => KtpHandover::STATUS_EXCEPTION,
+                'notes'          => "Pengajuan ditolak. Alasan: {$reason}",
+            ]);
+        }
+
         $this->recordHistory(
             $application,
             $fromStatus,
@@ -330,6 +352,28 @@ class QueueVerificationService
                 'from_status'    => $handover->status,
                 'to_status'      => KtpHandover::STATUS_PENDING,
                 'notes'          => 'Dokumen fisik asli pemohon telah diverifikasi di loket dan disetujui. Data masuk antrean ketersediaan fisik KTP-el.' . ($notes ? " Catatan: {$notes}" : ''),
+            ]);
+        }
+
+        // If rejected during physical verification, update handover exception status
+        if ($newStatus === QueueApplication::STATUS_REJECTED && $application->handover) {
+            $fromHandover = $application->handover->status;
+            $application->handover->update([
+                'status'                => KtpHandover::STATUS_EXCEPTION,
+                'has_exception'         => true,
+                'exception_reason'      => "Pemeriksaan fisik di loket ditolak: {$notes}",
+                'exception_reported_at' => now(),
+                'exception_reported_by' => $officer?->id,
+            ]);
+
+            KtpHandoverLog::create([
+                'handover_id'    => $application->handover->id,
+                'application_id' => $application->id,
+                'user_id'        => $officer?->id,
+                'action'         => 'PHYSICAL_VERIFICATION_REJECTED',
+                'from_status'    => $fromHandover,
+                'to_status'      => KtpHandover::STATUS_EXCEPTION,
+                'notes'          => "Pemeriksaan dokumen fisik di loket ditolak. Catatan: {$notes}",
             ]);
         }
     }

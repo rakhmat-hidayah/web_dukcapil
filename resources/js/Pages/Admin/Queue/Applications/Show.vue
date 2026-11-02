@@ -403,13 +403,35 @@
                 </span>
               </div>
 
+              <!-- Banner Status for Loket & Cetak Actions -->
+              <div
+                v-if="application.status === 'REJECTED'"
+                class="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-800 dark:text-rose-200 flex items-center gap-2.5"
+              >
+                <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div>
+                  <span class="font-bold">Permohonan Telah Ditolak:</span> Seluruh tindakan pelayanan loket dan status cetak KTP-el dinonaktifkan.
+                </div>
+              </div>
+
+              <div
+                v-else-if="!isOnlineApproved"
+                class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2.5"
+              >
+                <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div>
+                  <span class="font-bold">Menunggu Persetujuan Verifikasi Berkas Online:</span> Tombol pelayanan loket dan pembaruan status cetak kartu akan aktif setelah berkas online disetujui (Lolos Pra-Verifikasi / Ditetapkan Jadwal).
+                </div>
+              </div>
+
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <!-- Check-in / Verifikasi Fisik button if applicant arrived -->
                 <button
                   v-if="['QUEUE_BOOKED', 'SCHEDULED', 'APPROVED'].includes(application.status)"
                   type="button"
                   @click="handleCheckIn"
-                  class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer text-center"
+                  :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status)"
+                  class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer text-center"
                 >
                   <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                   <span>1. Check-In Kedatangan Pemohon</span>
@@ -420,7 +442,8 @@
                   v-if="['ARRIVED', 'CHECKED_IN', 'PHYSICAL_VERIFICATION'].includes(application.status)"
                   type="button"
                   @click="handlePhysicalVerifySuccess"
-                  class="p-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-2 cursor-pointer text-center"
+                  :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status)"
+                  class="p-3 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-2 cursor-pointer text-center"
                 >
                   <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                   <span>1. Dokumen Fisik Asli Sesuai (Lolos Loket)</span>
@@ -430,7 +453,7 @@
                 <button
                   type="button"
                   @click="openProcessingModal"
-                  :disabled="['COMPLETED', 'REJECTED'].includes(application.status) || application.status === 'PROCESSING'"
+                  :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.status === 'PROCESSING'"
                   :class="[
                     'p-3 rounded-2xl font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 cursor-pointer text-center border',
                     application.status === 'PROCESSING'
@@ -447,7 +470,7 @@
                 <button
                   type="button"
                   @click="openReadyPickupModal"
-                  :disabled="['COMPLETED', 'REJECTED'].includes(application.status) || application.status === 'READY_FOR_PICKUP'"
+                  :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.status === 'READY_FOR_PICKUP'"
                   :class="[
                     'p-3 rounded-2xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer text-center border',
                     application.status === 'READY_FOR_PICKUP'
@@ -491,9 +514,17 @@
                 <span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">✓</span>
                 <span class="text-slate-700 dark:text-slate-200 font-medium">
                   Tahap Verifikasi Berkas Online telah selesai. Status permohonan saat ini: <strong class="text-blue-600 dark:text-blue-400">{{ formatStatusName(application.status) }}</strong>
+                  <span v-if="canReject" class="block text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    * Tombol <strong>Tolak Pengajuan</strong> tetap aktif untuk keperluan pemeriksaan fisik dokumen asli di loket offline.
+                  </span>
                 </span>
               </div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tombol Keputusan Nonaktif</span>
+              <span v-if="canReject" class="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider shrink-0">
+                Tolak Aktif (Fisik Loket)
+              </span>
+              <span v-else class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
+                Tahap Ditutup
+              </span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
@@ -532,8 +563,9 @@
               <!-- REJECT BUTTON -->
               <button
                 @click="openRejectModal"
-                :disabled="['READY_FOR_PICKUP', 'COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status)"
+                :disabled="!canReject"
                 class="px-3.5 py-3.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-2xl font-bold text-xs shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
+                title="Tolak pengajuan jika berkas online tidak valid atau dokumen fisik di loket tidak sesuai"
               >
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <span>Tolak Pengajuan</span>
@@ -753,10 +785,10 @@
     <div v-if="rejectModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
         <h3 class="text-lg font-black text-rose-600 dark:text-rose-400">
-          Tolak Pengajuan Antrian
+          Tolak Pengajuan Antrean
         </h3>
         <p class="text-xs text-slate-500">
-          Penolakan bersifat permanen. Tuliskan alasan hukum atau ketentuan administrasi penolakan untuk arsip audit.
+          Penolakan bersifat permanen. Tuliskan alasan penolakan (misal: berkas online tidak valid atau dokumen fisik asli di loket tidak sesuai/palsu) untuk catatan audit.
         </p>
 
         <div class="space-y-3">
@@ -766,7 +798,7 @@
           <textarea
             v-model="rejectForm.reason"
             rows="3"
-            placeholder="Tuliskan alasan penolakan secara jelas..."
+            placeholder="Contoh: Dokumen fisik asli yang diserahkan di loket tidak cocok dengan data pendaftaran..."
             class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500"
           ></textarea>
         </div>
@@ -899,6 +931,20 @@ const props = defineProps({
 
 const isOnlineReviewPhase = computed(() => ['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW'].includes(props.application.status))
 const isPastOnlineVerification = computed(() => !['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW', 'DRAFT'].includes(props.application.status))
+const isOnlineApproved = computed(() => [
+  'PRE_VERIFIED',
+  'APPROVED',
+  'QUEUE_BOOKED',
+  'SCHEDULED',
+  'ARRIVED',
+  'CHECKED_IN',
+  'PHYSICAL_VERIFICATION',
+  'APPROVED_FOR_SERVICE',
+  'PROCESSING',
+  'IN_SERVICE',
+  'READY_FOR_PICKUP',
+].includes(props.application.status))
+const canReject = computed(() => !['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(props.application.status))
 
 // Viewer modal state
 const viewerState = ref({
