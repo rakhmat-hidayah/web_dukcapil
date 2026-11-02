@@ -112,6 +112,9 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                     Menunggu Kartu Fisik
                   </span>
+                  <span v-if="item.ready_notes" class="block text-[10px] text-slate-500 dark:text-slate-400 mt-1 italic max-w-[220px] truncate" :title="item.ready_notes">
+                    Catatan: {{ item.ready_notes }}
+                  </span>
                 </td>
                 <td class="py-4 text-right">
                   <div class="inline-flex items-center gap-2">

@@ -109,6 +109,9 @@
                 </td>
                 <td class="py-4 text-slate-600 dark:text-slate-400">
                   {{ item.ready_marked_user?.name || '-' }}
+                  <span v-if="item.ready_notes" class="block text-[10px] text-slate-400 italic max-w-[180px] truncate" :title="item.ready_notes">
+                    "{{ item.ready_notes }}"
+                  </span>
                 </td>
                 <td class="py-4 text-right">
                   <div class="inline-flex items-center gap-2">

@@ -47,9 +47,9 @@
 
           <!-- Check-In Button for physical arrival -->
           <button
-            v-if="['APPROVED', 'SCHEDULED'].includes(application.status)"
+            v-if="['APPROVED', 'SCHEDULED', 'QUEUE_BOOKED'].includes(application.status)"
             @click="handleCheckIn"
-            class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
+            class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             Check-In Kedatangan Loket
@@ -314,62 +314,193 @@
             </div>
           </div>
 
-          <!-- Integrasi Modul Serah Terima KTP-el -->
+          <!-- Pelayanan Loket Fisik & Status Ketersediaan Cetak KTP-el (Serah Terima) -->
           <div
-            v-if="application.handover"
-            class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3"
+            class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4"
           >
-            <div class="flex items-center justify-between">
-              <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                Status Serah Terima Fisik KTP-el
-              </h3>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700/60 pb-3">
+              <div>
+                <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                  Pelayanan Loket & Status Cetak KTP-el (Serah Terima)
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">
+                  Informasikan status pemeriksaan fisik dan kesiapan cetak kartu kepada Bagian Penerimaan (Petugas Penyerahan KTP-el).
+                </p>
+              </div>
+
               <Link
+                v-if="application.handover"
                 :href="route('admin.handover.show', application.handover.id)"
-                class="px-3.5 py-1.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white text-xs font-bold transition flex items-center gap-1.5"
+                class="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white text-xs font-bold transition flex items-center gap-1.5 self-start sm:self-auto shrink-0"
               >
-                Buka Modul Serah Terima &rarr;
+                <span>Buka Modul Serah Terima</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
               </Link>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                <span class="text-slate-400 text-[10px] uppercase font-bold block">Status Fisik Kartu</span>
-                <p class="font-bold text-slate-900 dark:text-white mt-1">
-                  {{ application.handover.status_label }}
-                </p>
+            <!-- Current Physical Status Indicators -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                <span class="text-slate-400 text-[10px] uppercase font-bold block">Status Fisik di Penerimaan</span>
+                <div class="mt-1">
+                  <span
+                    v-if="application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL'"
+                    class="px-2.5 py-1 rounded-xl text-xs font-black bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 inline-flex items-center gap-1"
+                  >
+                    <span>✓</span> Sudah Dicetak (Siap Diambil)
+                  </span>
+                  <span
+                    v-else-if="application.status === 'COMPLETED' || application.handover?.status === 'SUDAH_DISERAHKAN'"
+                    class="px-2.5 py-1 rounded-xl text-xs font-black bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 inline-flex items-center gap-1"
+                  >
+                    <span>✓</span> Selesai Diserahkan
+                  </span>
+                  <span
+                    v-else-if="application.handover?.status === 'KENDALA_PENGAMBILAN'"
+                    class="px-2.5 py-1 rounded-xl text-xs font-black bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 inline-flex items-center gap-1"
+                  >
+                    <span>⚠️</span> Ada Kendala Pengambilan
+                  </span>
+                  <span
+                    v-else
+                    class="px-2.5 py-1 rounded-xl text-xs font-black bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 inline-flex items-center gap-1"
+                  >
+                    <span>⏳</span> Belum Dicetak / Menunggu Cetak
+                  </span>
+                </div>
               </div>
 
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
                 <span class="text-slate-400 text-[10px] uppercase font-bold block">Pemeriksaan Ketersediaan</span>
                 <p class="font-bold text-slate-900 dark:text-white mt-1">
-                  {{ application.handover.ready_marked_at ? application.handover.ready_marked_at_formatted : 'Belum Ditandai Siap' }}
+                  {{ application.handover?.ready_marked_at ? application.handover.ready_marked_at_formatted : 'Belum Ditandai Siap' }}
+                </p>
+                <p v-if="application.handover?.ready_marked_user" class="text-[10px] text-slate-400 mt-0.5">
+                  Oleh: {{ application.handover.ready_marked_user.name }}
                 </p>
               </div>
 
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
                 <span class="text-slate-400 text-[10px] uppercase font-bold block">Penyerahan ke Pemohon</span>
                 <p class="font-bold text-slate-900 dark:text-white mt-1">
-                  {{ application.handover.handover_at ? application.handover.handover_at_formatted : 'Belum Diserahkan' }}
+                  {{ application.handover?.handover_at ? application.handover.handover_at_formatted : 'Belum Diserahkan' }}
                 </p>
+                <p v-if="application.handover?.handover_user" class="text-[10px] text-slate-400 mt-0.5">
+                  Oleh: {{ application.handover.handover_user.name }}
+                </p>
+              </div>
+            </div>
+
+            <!-- ACTION BUTTONS FOR OPERATOR VERIFIKASI / CETAK -->
+            <div class="pt-3 border-t border-slate-100 dark:border-slate-700/60 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">
+                  Tindakan Operator Loket & Petugas Cetak:
+                </span>
+                <span class="text-[11px] text-slate-400">
+                  Sinkron langsung dengan Modul Bagian Penerimaan
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <!-- Check-in / Verifikasi Fisik button if applicant arrived -->
+                <button
+                  v-if="['QUEUE_BOOKED', 'SCHEDULED', 'APPROVED'].includes(application.status)"
+                  type="button"
+                  @click="handleCheckIn"
+                  class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer text-center"
+                >
+                  <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>1. Check-In Kedatangan Pemohon</span>
+                </button>
+
+                <!-- Verifikasi Dokumen Fisik Asli button if arrived -->
+                <button
+                  v-if="['ARRIVED', 'CHECKED_IN', 'PHYSICAL_VERIFICATION'].includes(application.status)"
+                  type="button"
+                  @click="handlePhysicalVerifySuccess"
+                  class="p-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-2 cursor-pointer text-center"
+                >
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span>1. Dokumen Fisik Asli Sesuai (Lolos Loket)</span>
+                </button>
+
+                <!-- Action Button 1: Informasikan Belum Dicetak / Sedang Diproses -->
+                <button
+                  type="button"
+                  @click="openProcessingModal"
+                  :disabled="['COMPLETED', 'REJECTED'].includes(application.status) || application.status === 'PROCESSING'"
+                  :class="[
+                    'p-3 rounded-2xl font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 cursor-pointer text-center border',
+                    application.status === 'PROCESSING'
+                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-700 cursor-default'
+                      : 'bg-white dark:bg-slate-900 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 disabled:opacity-40 disabled:cursor-not-allowed'
+                  ]"
+                  title="Informasikan ke Bagian Penerimaan bahwa KTP-el sedang dalam proses cetak/rekam"
+                >
+                  <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span>{{ application.status === 'PROCESSING' ? 'Sedang Diproses Cetak' : '⏳ KTP Belum Dicetak (Sedang Proses)' }}</span>
+                </button>
+
+                <!-- Action Button 2: Informasikan KTP Sudah Selesai Dicetak (Siap Diambil) -->
+                <button
+                  type="button"
+                  @click="openReadyPickupModal"
+                  :disabled="['COMPLETED', 'REJECTED'].includes(application.status) || application.status === 'READY_FOR_PICKUP'"
+                  :class="[
+                    'p-3 rounded-2xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer text-center border',
+                    application.status === 'READY_FOR_PICKUP'
+                      ? 'bg-purple-600 text-white border-purple-600 cursor-default shadow-purple-600/30'
+                      : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600 shadow-emerald-600/30 disabled:opacity-40 disabled:cursor-not-allowed'
+                  ]"
+                  title="Informasikan ke Bagian Penerimaan bahwa KTP-el sudah selesai dicetak dan siap diambil pemohon"
+                >
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <span>{{ application.status === 'READY_FOR_PICKUP' ? '✓ Sudah Siap di Loket Penerimaan' : '✓ KTP Sudah Dicetak (Siap Diambil)' }}</span>
+                </button>
               </div>
             </div>
           </div>
 
           <!-- Main Verification Action Console -->
           <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-            <h3 class="text-base font-black text-slate-900 dark:text-white">
-              Keputusan Verifikasi Berkas Online
-            </h3>
-            <p class="text-xs text-slate-400">
-              Pilih tindakan verifikasi sesuai dengan hasil pemeriksaan berkas persyaratan pemohon di atas.
-            </p>
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-black text-slate-900 dark:text-white">
+                  Keputusan Verifikasi Berkas Online
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">
+                  Tindakan verifikasi awal berkas digital yang diunggah pemohon dari HP/portal.
+                </p>
+              </div>
+              <span
+                v-if="isPastOnlineVerification"
+                class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[10px] uppercase tracking-wider"
+              >
+                Tahap Selesai
+              </span>
+            </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+            <!-- Banner info if online verification has already finished -->
+            <div
+              v-if="isPastOnlineVerification"
+              class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-between text-xs"
+            >
+              <div class="flex items-center gap-2.5">
+                <span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">✓</span>
+                <span class="text-slate-700 dark:text-slate-200 font-medium">
+                  Tahap Verifikasi Berkas Online telah selesai. Status permohonan saat ini: <strong class="text-blue-600 dark:text-blue-400">{{ formatStatusName(application.status) }}</strong>
+                </span>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tombol Keputusan Nonaktif</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
               <!-- PRE-VERIFY BUTTON (Allows applicant to book slot) -->
               <button
                 @click="handlePreVerify"
-                :disabled="!['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW'].includes(application.status)"
+                :disabled="!isOnlineReviewPhase"
                 class="px-3.5 py-3.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-2xl font-bold text-xs shadow-md shadow-cyan-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
                 title="Loloskan pra-verifikasi dan izinkan pemohon memilih jadwal antrean sendiri"
               >
@@ -380,7 +511,7 @@
               <!-- DIRECT APPROVE & SCHEDULE BUTTON (Admin quick assign) -->
               <button
                 @click="openApproveModal"
-                :disabled="['APPROVED', 'SCHEDULED', 'COMPLETED', 'REJECTED'].includes(application.status)"
+                :disabled="!['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW', 'PRE_VERIFIED'].includes(application.status) || !!application.queue_number"
                 class="px-3.5 py-3.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-2xl font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
                 title="Tetapkan tanggal & nomor antrean langsung oleh admin"
               >
@@ -391,7 +522,7 @@
               <!-- REVISION BUTTON -->
               <button
                 @click="openRevisionModal"
-                :disabled="['COMPLETED', 'REJECTED'].includes(application.status)"
+                :disabled="!isOnlineReviewPhase"
                 class="px-3.5 py-3.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-2xl font-bold text-xs shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
               >
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -401,7 +532,7 @@
               <!-- REJECT BUTTON -->
               <button
                 @click="openRejectModal"
-                :disabled="['COMPLETED', 'REJECTED'].includes(application.status)"
+                :disabled="['READY_FOR_PICKUP', 'COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status)"
                 class="px-3.5 py-3.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-2xl font-bold text-xs shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
               >
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -658,6 +789,98 @@
         </div>
       </div>
     </div>
+
+    <!-- START PROCESSING MODAL (Informasikan Belum Dicetak / Sedang Diproses) -->
+    <div v-if="processingModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+        <div class="flex items-start justify-between">
+          <div>
+            <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <span class="text-amber-500">⏳</span> Informasikan KTP Belum Dicetak (Sedang Proses)
+            </h3>
+            <p class="text-xs text-slate-500 mt-1">
+              Data akan diinformasikan ke Bagian Penerimaan (Modul Serah Terima) dengan status <strong>Menunggu Ketersediaan KTP</strong>.
+            </p>
+          </div>
+          <button @click="processingModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">✕</button>
+        </div>
+
+        <div class="space-y-3">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            Catatan Proses Pencetakan (Opsional)
+          </label>
+          <textarea
+            v-model="processingForm.notes"
+            rows="3"
+            placeholder="Contoh: Fisik KTP-el dalam antrean cetak mesin / perekaman biometrik..."
+            class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+          <button
+            @click="processingModalOpen = false"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            @click="submitProcessing"
+            :disabled="processingSubmitting"
+            class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-white text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span v-if="processingSubmitting">Menyimpan...</span>
+            <span v-else>Informasikan ke Penerimaan</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- READY FOR PICKUP MODAL (Informasikan KTP Sudah Selesai Dicetak) -->
+    <div v-if="readyPickupModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+        <div class="flex items-start justify-between">
+          <div>
+            <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <span class="text-emerald-500">✓</span> Informasikan KTP Sudah Dicetak (Siap Diambil)
+            </h3>
+            <p class="text-xs text-slate-500 mt-1">
+              Kartu fisik KTP-el dinyatakan telah selesai dicetak. Bagian Penerimaan (Serah Terima) akan menerima notifikasi bahwa kartu <strong>Siap Diambil</strong> dan pemohon otomatis diberitahukan.
+            </p>
+          </div>
+          <button @click="readyPickupModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">✕</button>
+        </div>
+
+        <div class="space-y-3">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            Catatan Lokasi / Kesiapan Fisik (Opsional)
+          </label>
+          <textarea
+            v-model="readyPickupForm.notes"
+            rows="3"
+            placeholder="Contoh: Fisik KTP-el telah selesai dicetak dengan kualitas baik dan diletakkan di loket penyerahan..."
+            class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+          <button
+            @click="readyPickupModalOpen = false"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            @click="submitReadyPickup"
+            :disabled="readyPickupSubmitting"
+            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span v-if="readyPickupSubmitting">Menyimpan...</span>
+            <span v-else>Konfirmasi KTP Siap Diambil</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </AdminLayout>
 </template>
 
@@ -673,6 +896,9 @@ const props = defineProps({
   application: Object,
   availableSlots: Array,
 })
+
+const isOnlineReviewPhase = computed(() => ['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW'].includes(props.application.status))
+const isPastOnlineVerification = computed(() => !['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW', 'DRAFT'].includes(props.application.status))
 
 // Viewer modal state
 const viewerState = ref({
@@ -916,6 +1142,71 @@ const handleCheckIn = () => {
   if (confirm(`Check-in kedatangan untuk pemohon ${props.application.applicant_name} (${props.application.queue_number})?`)) {
     router.post(route('admin.queue.applications.checkin', props.application.id))
   }
+}
+
+// Physical Verification Success
+const handlePhysicalVerifySuccess = () => {
+  const notes = prompt(
+    'Catatan pemeriksaan dokumen fisik asli di loket (opsional):',
+    'Pemeriksaan dokumen fisik asli (KK, KTP lama / Surat Kehilangan, Surat Kuasa) telah sesuai dan lengkap.'
+  )
+  if (notes !== null) {
+    router.post(route('admin.queue.applications.physical-verification', props.application.id), {
+      decision: 'APPROVED_FOR_SERVICE',
+      notes: notes,
+      match_identity: true,
+      match_documents: true,
+      match_authorization: true,
+    })
+  }
+}
+
+// Processing Modal State (Informasikan Belum Dicetak / Sedang Diproses)
+const processingModalOpen = ref(false)
+const processingSubmitting = ref(false)
+const processingForm = ref({ notes: '' })
+
+const openProcessingModal = () => {
+  processingForm.value.notes = 'Fisik KTP-el dalam proses cetak/rekam biometrik.'
+  processingModalOpen.value = true
+}
+
+const submitProcessing = () => {
+  processingSubmitting.value = true
+  router.post(
+    route('admin.queue.applications.start-processing', props.application.id),
+    { notes: processingForm.value.notes },
+    {
+      onFinish: () => {
+        processingSubmitting.value = false
+        processingModalOpen.value = false
+      },
+    }
+  )
+}
+
+// Ready for Pickup Modal State (Informasikan KTP Sudah Selesai Dicetak)
+const readyPickupModalOpen = ref(false)
+const readyPickupSubmitting = ref(false)
+const readyPickupForm = ref({ notes: '' })
+
+const openReadyPickupModal = () => {
+  readyPickupForm.value.notes = 'Fisik KTP-el telah selesai dicetak dengan kualitas baik dan siap diserahkan kepada pemohon.'
+  readyPickupModalOpen.value = true
+}
+
+const submitReadyPickup = () => {
+  readyPickupSubmitting.value = true
+  router.post(
+    route('admin.queue.applications.ready-pickup', props.application.id),
+    { notes: readyPickupForm.value.notes },
+    {
+      onFinish: () => {
+        readyPickupSubmitting.value = false
+        readyPickupModalOpen.value = false
+      },
+    }
+  )
 }
 
 // Complete

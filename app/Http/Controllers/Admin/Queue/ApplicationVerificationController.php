@@ -132,6 +132,35 @@ class ApplicationVerificationController extends Controller
             'documents.serviceDocument',
         ]);
 
+        // Ensure KtpHandover record exists and matches current application stage
+        if (in_array($application->status, [
+            QueueApplication::STATUS_PRE_VERIFIED,
+            QueueApplication::STATUS_QUEUE_BOOKED,
+            QueueApplication::STATUS_ARRIVED,
+            QueueApplication::STATUS_PHYSICAL_VERIFICATION,
+            QueueApplication::STATUS_APPROVED_FOR_SERVICE,
+            QueueApplication::STATUS_PROCESSING,
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+            QueueApplication::STATUS_COMPLETED,
+        ])) {
+            if (!$application->handover) {
+                $initialHandoverStatus = match ($application->status) {
+                    QueueApplication::STATUS_READY_FOR_PICKUP => \App\Models\Queue\KtpHandover::STATUS_READY,
+                    QueueApplication::STATUS_COMPLETED        => \App\Models\Queue\KtpHandover::STATUS_HANDED_OVER,
+                    default                                   => \App\Models\Queue\KtpHandover::STATUS_PENDING,
+                };
+
+                \App\Models\Queue\KtpHandover::firstOrCreate(
+                    ['application_id' => $application->id],
+                    [
+                        'status'          => $initialHandoverStatus,
+                        'ready_marked_at' => ($initialHandoverStatus === \App\Models\Queue\KtpHandover::STATUS_READY) ? ($application->updated_at ?: now()) : null,
+                    ]
+                );
+                $application->load('handover');
+            }
+        }
+
         // Available upcoming slots for approval assignment
         $availableSlots = $this->slotService->getAvailableSlots(
             $application->service_type_id,

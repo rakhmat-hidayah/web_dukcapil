@@ -3,6 +3,8 @@
 namespace App\Services\Queue;
 
 use App\Models\Queue\ApplicationDocument;
+use App\Models\Queue\KtpHandover;
+use App\Models\Queue\KtpHandoverLog;
 use App\Models\Queue\QueueApplication;
 use App\Models\Queue\VerificationHistory;
 use App\Models\User;
@@ -304,10 +306,37 @@ class QueueVerificationService
         }
 
         $this->recordHistory($application, $fromStatus, $newStatus, $officer, $summary);
+
+        // If approved for service, ensure handover tracking is active in MENUNGGU_KETERSEDIAAN
+        if ($newStatus === QueueApplication::STATUS_APPROVED_FOR_SERVICE) {
+            $handover = KtpHandover::firstOrCreate(
+                ['application_id' => $application->id],
+                ['status' => KtpHandover::STATUS_PENDING]
+            );
+
+            if ($handover->status !== KtpHandover::STATUS_READY && $handover->status !== KtpHandover::STATUS_HANDED_OVER) {
+                $handover->update([
+                    'status'        => KtpHandover::STATUS_PENDING,
+                    'ready_notes'   => $notes,
+                    'has_exception' => false,
+                ]);
+            }
+
+            KtpHandoverLog::create([
+                'handover_id'    => $handover->id,
+                'application_id' => $application->id,
+                'user_id'        => $officer?->id,
+                'action'         => 'PHYSICAL_VERIFIED',
+                'from_status'    => $handover->status,
+                'to_status'      => KtpHandover::STATUS_PENDING,
+                'notes'          => 'Dokumen fisik asli pemohon telah diverifikasi di loket dan disetujui. Data masuk antrean ketersediaan fisik KTP-el.' . ($notes ? " Catatan: {$notes}" : ''),
+            ]);
+        }
     }
 
     /**
      * Start processing: Biometric recording or printing KTP-el.
+     * Updates handover status to MENUNGGU_KETERSEDIAAN so handover officer knows it is being printed.
      */
     public function startProcessing(QueueApplication $application, ?User $officer = null, ?string $notes = null): void
     {
@@ -323,12 +352,37 @@ class QueueVerificationService
             $fromStatus,
             QueueApplication::STATUS_PROCESSING,
             $officer,
-            'Permohonan sedang diproses oleh petugas (perekaman biometrik / pencetakan fisik kartu KTP-el).'
+            'Permohonan sedang diproses oleh petugas (perekaman biometrik / pencetakan fisik kartu KTP-el).' . ($notes ? " Catatan: {$notes}" : '')
         );
+
+        // Sync with Serah Terima KTP-el module (MENUNGGU_KETERSEDIAAN)
+        $handover = KtpHandover::firstOrCreate(
+            ['application_id' => $application->id],
+            ['status' => KtpHandover::STATUS_PENDING]
+        );
+        $fromHandoverStatus = $handover->status;
+        $handover->update([
+            'status'          => KtpHandover::STATUS_PENDING,
+            'ready_marked_at' => null,
+            'ready_marked_by' => null,
+            'ready_notes'     => $notes,
+            'has_exception'   => false,
+        ]);
+
+        KtpHandoverLog::create([
+            'handover_id'    => $handover->id,
+            'application_id' => $application->id,
+            'user_id'        => $officer?->id,
+            'action'         => 'PROCESSING',
+            'from_status'    => $fromHandoverStatus,
+            'to_status'      => KtpHandover::STATUS_PENDING,
+            'notes'          => 'Operator verifikasi/cetak menginformasikan ke bagian penerimaan bahwa KTP-el sedang dalam proses cetak/rekam (belum selesai).' . ($notes ? " Catatan: {$notes}" : ''),
+        ]);
     }
 
     /**
-     * Mark physical card as printed and ready for pickup.
+     * Mark physical card as printed and ready for pickup (SIAP_DIAMBIL).
+     * Synchronizes directly with Serah Terima KTP-el module for handover officers.
      */
     public function markReadyForPickup(QueueApplication $application, ?User $officer = null, ?string $notes = null): void
     {
@@ -346,6 +400,30 @@ class QueueVerificationService
             $officer,
             'Fisik KTP-el telah selesai dicetak dan siap diambil di loket penyerahan.' . ($notes ? " Catatan: {$notes}" : '')
         );
+
+        // Sync with Serah Terima KTP-el module (SIAP_DIAMBIL)
+        $handover = KtpHandover::firstOrCreate(
+            ['application_id' => $application->id],
+            ['status' => KtpHandover::STATUS_PENDING]
+        );
+        $fromHandoverStatus = $handover->status;
+        $handover->update([
+            'status'          => KtpHandover::STATUS_READY,
+            'ready_marked_at' => now(),
+            'ready_marked_by' => $officer?->id,
+            'ready_notes'     => $notes,
+            'has_exception'   => false,
+        ]);
+
+        KtpHandoverLog::create([
+            'handover_id'    => $handover->id,
+            'application_id' => $application->id,
+            'user_id'        => $officer?->id,
+            'action'         => 'MARKED_READY',
+            'from_status'    => $fromHandoverStatus,
+            'to_status'      => KtpHandover::STATUS_READY,
+            'notes'          => 'Operator verifikasi/cetak menginformasikan ke bagian penerimaan bahwa fisik KTP-el telah selesai dicetak dan siap diserahkan kepada pemohon.' . ($notes ? " Catatan: {$notes}" : ''),
+        ]);
 
         $this->notificationService->dispatch($application, 'ready_for_pickup');
     }
