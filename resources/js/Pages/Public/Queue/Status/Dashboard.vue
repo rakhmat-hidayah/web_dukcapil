@@ -652,7 +652,7 @@
       <!-- Verification History Timeline -->
       <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-md print:hidden">
         <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6">
-          Riwayat Progres & Audit Trail
+          Riwayat Progres
         </h3>
 
         <div class="space-y-6 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700">
