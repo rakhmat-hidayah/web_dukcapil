@@ -55,11 +55,21 @@
             Check-In Kedatangan Loket
           </button>
 
+          <!-- Verifikasi Dokumen Fisik Asli button if arrived -->
+          <button
+            v-if="['ARRIVED', 'CHECKED_IN', 'PHYSICAL_VERIFICATION'].includes(application.status)"
+            @click="openPhysicalVerifyModal"
+            class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-blue-600/20 cursor-pointer"
+          >
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Verifikasi Fisik Asli Lolos
+          </button>
+
           <!-- Complete Service Button -->
           <button
-            v-if="['CHECKED_IN', 'IN_SERVICE'].includes(application.status)"
+            v-if="['CHECKED_IN', 'IN_SERVICE', 'APPROVED_FOR_SERVICE'].includes(application.status)"
             @click="openCompleteModal"
-            class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+            class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-indigo-600/20 cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             Selesai Dilayani
@@ -449,38 +459,14 @@
                 </div>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <!-- Check-in / Verifikasi Fisik button if applicant arrived -->
-                <button
-                  v-if="['QUEUE_BOOKED', 'SCHEDULED', 'APPROVED'].includes(application.status)"
-                  type="button"
-                  @click="openCheckInModal"
-                  :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status)"
-                  class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer text-center"
-                >
-                  <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                  <span>1. Check-In Kedatangan Pemohon</span>
-                </button>
-
-                <!-- Verifikasi Dokumen Fisik Asli button if arrived -->
-                <button
-                  v-if="['ARRIVED', 'CHECKED_IN', 'PHYSICAL_VERIFICATION'].includes(application.status)"
-                  type="button"
-                  @click="openPhysicalVerifyModal"
-                  :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status)"
-                  class="p-3 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-2 cursor-pointer text-center"
-                >
-                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  <span>1. Dokumen Fisik Asli Sesuai (Lolos Loket)</span>
-                </button>
-
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <!-- Action Button 1: Informasikan Belum Dicetak / Sedang Diproses -->
                 <button
                   type="button"
                   @click="openProcessingModal"
                   :disabled="!isOnlineApproved || isKtpReadyOrCompleted || application.status === 'PROCESSING'"
                   :class="[
-                    'p-3 rounded-2xl font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 text-center border',
+                    'p-3.5 rounded-2xl font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 text-center border',
                     application.status === 'PROCESSING'
                       ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-700 cursor-default'
                       : isKtpReadyOrCompleted
@@ -499,7 +485,7 @@
                   @click="openReadyPickupModal"
                   :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL' || application.handover?.status === 'SUDAH_DISERAHKAN'"
                   :class="[
-                    'p-3 rounded-2xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 text-center border',
+                    'p-3.5 rounded-2xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 text-center border',
                     application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL'
                       ? 'bg-purple-600 text-white border-purple-600 cursor-default shadow-purple-600/30'
                       : ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.handover?.status === 'SUDAH_DISERAHKAN'
