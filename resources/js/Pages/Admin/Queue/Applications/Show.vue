@@ -48,7 +48,7 @@
           <!-- Check-In Button for physical arrival -->
           <button
             v-if="['APPROVED', 'SCHEDULED', 'QUEUE_BOOKED'].includes(application.status)"
-            @click="handleCheckIn"
+            @click="openCheckInModal"
             class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -454,7 +454,7 @@
                 <button
                   v-if="['QUEUE_BOOKED', 'SCHEDULED', 'APPROVED'].includes(application.status)"
                   type="button"
-                  @click="handleCheckIn"
+                  @click="openCheckInModal"
                   :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status)"
                   class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer text-center"
                 >
@@ -466,7 +466,7 @@
                 <button
                   v-if="['ARRIVED', 'CHECKED_IN', 'PHYSICAL_VERIFICATION'].includes(application.status)"
                   type="button"
-                  @click="handlePhysicalVerifySuccess"
+                  @click="openPhysicalVerifyModal"
                   :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status)"
                   class="p-3 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-2 cursor-pointer text-center"
                 >
@@ -562,7 +562,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
               <!-- PRE-VERIFY BUTTON (Allows applicant to book slot) -->
               <button
-                @click="handlePreVerify"
+                @click="openPreVerifyModal"
                 :disabled="!isOnlineReviewPhase"
                 class="px-3.5 py-3.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-2xl font-bold text-xs shadow-md shadow-cyan-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
                 title="Loloskan pra-verifikasi dan izinkan pemohon memilih jadwal antrean sendiri"
@@ -950,6 +950,308 @@
         </div>
       </div>
     </div>
+
+    <!-- PRE-VERIFY MODAL (Setujui Pra-Verifikasi Dokumen Digital) -->
+    <div v-if="preVerifyModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-cyan-100 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-black text-lg shrink-0">
+              ✓
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white">
+                Setujui Pra-Verifikasi Dokumen Digital
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Validasi kelengkapan berkas awal secara digital
+              </p>
+            </div>
+          </div>
+          <button @click="preVerifyModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">✕</button>
+        </div>
+
+        <!-- Info Card -->
+        <div class="p-4 rounded-2xl bg-cyan-50/70 dark:bg-cyan-950/30 border border-cyan-200/80 dark:border-cyan-800/60 text-xs text-slate-700 dark:text-slate-200 space-y-2">
+          <div class="flex justify-between items-center text-[11px]">
+            <span class="text-cyan-700 dark:text-cyan-300 font-bold uppercase tracking-wider">Pemohon Pelayanan</span>
+            <span class="font-mono bg-white dark:bg-slate-900 px-2 py-0.5 rounded-md font-bold text-slate-800 dark:text-slate-100">NIK: {{ application.nik }}</span>
+          </div>
+          <p class="font-extrabold text-sm text-slate-900 dark:text-white">
+            {{ application.applicant_name }}
+          </p>
+          <div class="text-[11px] text-slate-600 dark:text-slate-400 pt-2 border-t border-cyan-200/60 dark:border-cyan-900/50 flex items-start gap-1.5 leading-relaxed">
+            <span class="text-cyan-600 dark:text-cyan-400 font-bold">ℹ</span>
+            <span>Dengan menyetujui, pemohon akan menerima email notifikasi bahwa berkas telah lengkap & sah, serta diberikan akses memilih jadwal antrean sendiri di portal.</span>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            Catatan Persetujuan untuk Pemohon (Opsional)
+          </label>
+          <textarea
+            v-model="preVerifyForm.notes"
+            rows="3"
+            placeholder="Dokumen administrasi awal dinyatakan lengkap dan sah..."
+            class="w-full p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 leading-relaxed font-medium"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+          <button
+            @click="preVerifyModalOpen = false"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            @click="submitPreVerify"
+            :disabled="preVerifySubmitting"
+            class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 text-white text-xs font-bold shadow-md shadow-cyan-600/20 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span v-if="preVerifySubmitting">Menyetujui...</span>
+            <span v-else>Konfirmasi & Buka Akses Jadwal</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECK-IN MODAL (Konfirmasi Check-In Loket Pelayanan) -->
+    <div v-if="checkInModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-lg shrink-0">
+              🎫
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white">
+                Konfirmasi Check-In Kedatangan
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Tandai kehadiran fisik pemohon di loket pelayanan Disdukcapil
+              </p>
+            </div>
+          </div>
+          <button @click="checkInModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">✕</button>
+        </div>
+
+        <!-- Details Card -->
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-500">Nomor Antrean Pelayanan:</span>
+            <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-mono font-black text-sm rounded-xl">
+              {{ application.queue_number || 'Belum Terbit' }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-bold block">Nama Pemohon</span>
+              <span class="font-bold text-slate-900 dark:text-white">{{ application.applicant_name }}</span>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-bold block">Nomor Induk Kependudukan</span>
+              <span class="font-mono text-slate-800 dark:text-slate-200">{{ application.nik }}</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-200 dark:border-slate-800">
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-bold block">Jadwal Pelayanan</span>
+              <span class="font-medium text-slate-700 dark:text-slate-300">
+                {{ formatScheduleDate(application.slot?.schedule?.schedule_date) }}
+              </span>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-bold block">Status Kehadiran</span>
+              <span class="font-medium text-slate-700 dark:text-slate-300">
+                {{ application.attendance_type === 'PROXY' ? 'Dikuasakan (Surat Kuasa)' : 'Datang Sendiri' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-500 leading-relaxed">
+          Status permohonan akan diperbarui menjadi <strong>CHECKED_IN / ARRIVED</strong> dan berkas siap diverifikasi secara fisik di loket.
+        </p>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+          <button
+            @click="checkInModalOpen = false"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            @click="submitCheckIn"
+            :disabled="checkInSubmitting"
+            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span v-if="checkInSubmitting">Memproses...</span>
+            <span v-else>Konfirmasi Pemohon Hadir</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHYSICAL VERIFICATION MODAL (Pemeriksaan Dokumen Fisik Asli di Loket) -->
+    <div v-if="physicalVerifyModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-lg shrink-0">
+              🔍
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white">
+                Pemeriksaan Fisik Dokumen Asli
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Verifikasi keaslian dan kecocokan fisik berkas asli di loket
+              </p>
+            </div>
+          </div>
+          <button @click="physicalVerifyModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">✕</button>
+        </div>
+
+        <!-- Checklist -->
+        <div class="space-y-2 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80">
+          <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Checklist Pemeriksaan Loket</span>
+
+          <label class="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer transition">
+            <input
+              type="checkbox"
+              v-model="physicalVerifyForm.match_identity"
+              class="rounded text-blue-600 focus:ring-blue-500 mt-0.5"
+            />
+            <div class="text-xs">
+              <span class="font-bold text-slate-800 dark:text-slate-200">Kecocokan Identitas & Wajah Pemohon</span>
+              <p class="text-[11px] text-slate-500">Wajah pemohon / penerima kuasa sesuai dengan foto KTP dan sistem biometrik.</p>
+            </div>
+          </label>
+
+          <label class="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer transition">
+            <input
+              type="checkbox"
+              v-model="physicalVerifyForm.match_documents"
+              class="rounded text-blue-600 focus:ring-blue-500 mt-0.5"
+            />
+            <div class="text-xs">
+              <span class="font-bold text-slate-800 dark:text-slate-200">Keaslian Dokumen Fisik Asli</span>
+              <p class="text-[11px] text-slate-500">Berkas fisik asli (KK, KTP lama / Surat Kehilangan, Formulir) lengkap & valid.</p>
+            </div>
+          </label>
+
+          <label v-if="application.attendance_type === 'PROXY'" class="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer transition bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/60">
+            <input
+              type="checkbox"
+              v-model="physicalVerifyForm.match_authorization"
+              class="rounded text-blue-600 focus:ring-blue-500 mt-0.5"
+            />
+            <div class="text-xs">
+              <span class="font-bold text-slate-800 dark:text-slate-200">Surat Kuasa Sah & Bermeterai</span>
+              <p class="text-[11px] text-slate-500">Surat Kuasa F-1.07 asli bermeterai Rp 10.000 dan KTP asli penerima kuasa telah diverifikasi.</p>
+            </div>
+          </label>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            Catatan Pemeriksaan Fisik (Opsional)
+          </label>
+          <textarea
+            v-model="physicalVerifyForm.notes"
+            rows="2"
+            placeholder="Pemeriksaan dokumen fisik asli telah sesuai..."
+            class="w-full p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium leading-relaxed"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+          <button
+            @click="physicalVerifyModalOpen = false"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            @click="submitPhysicalVerify"
+            :disabled="physicalVerifySubmitting || !physicalVerifyForm.match_identity || !physicalVerifyForm.match_documents || (application.attendance_type === 'PROXY' && !physicalVerifyForm.match_authorization)"
+            class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span v-if="physicalVerifySubmitting">Menyimpan...</span>
+            <span v-else>Konfirmasi Lolos & Siap Dilayani</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPLETE MODAL (Konfirmasi Pelayanan Selesai & Penyerahan KTP-el) -->
+    <div v-if="completeModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-lg shrink-0">
+              🎉
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white">
+                Selesaikan Pelayanan & Penyerahan
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Konfirmasi penuntasan proses antrean dan penyerahan dokumen
+              </p>
+            </div>
+          </div>
+          <button @click="completeModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">✕</button>
+        </div>
+
+        <!-- Info Card -->
+        <div class="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-800/60 space-y-2 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="text-indigo-700 dark:text-indigo-300 font-bold uppercase tracking-wider text-[11px]">Rincian Penerima</span>
+            <span class="font-mono bg-white dark:bg-slate-900 px-2 py-0.5 rounded-md font-bold text-slate-800 dark:text-slate-100">Antrean: {{ application.queue_number || '-' }}</span>
+          </div>
+          <p class="font-extrabold text-sm text-slate-900 dark:text-white">
+            {{ application.applicant_name }} (NIK: {{ application.nik }})
+          </p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">
+            Penyerahan kepada: <strong>{{ application.handover?.received_by || application.applicant_name }}</strong> {{ application.attendance_type === 'PROXY' ? '(Penerima Kuasa)' : '(Pemilik Dokumen)' }}
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            Catatan Penyelesaian Pelayanan (Opsional)
+          </label>
+          <textarea
+            v-model="completeForm.notes"
+            rows="3"
+            placeholder="KTP-el fisik telah diserahkan kepada pemohon. Pelayanan selesai."
+            class="w-full p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium leading-relaxed"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+          <button
+            @click="completeModalOpen = false"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            @click="submitComplete"
+            :disabled="completeSubmitting"
+            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span v-if="completeSubmitting">Menyimpan...</span>
+            <span v-else>Selesaikan Pelayanan</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </AdminLayout>
 </template>
 
@@ -1271,39 +1573,93 @@ const submitReject = () => {
   )
 }
 
-// Pre-Verify
-const handlePreVerify = () => {
-  const notes = prompt(
-    'Catatan persetujuan pra-verifikasi (opsional):',
-    'Dokumen administrasi awal dinyatakan lengkap dan sah. Silakan memilih jadwal antrean kedatangan di portal.'
+// Pre-Verify Modal State
+const preVerifyModalOpen = ref(false)
+const preVerifySubmitting = ref(false)
+const preVerifyForm = ref({ notes: '' })
+
+const openPreVerifyModal = () => {
+  preVerifyForm.value.notes = 'Dokumen administrasi awal dinyatakan lengkap dan sah. Silakan memilih jadwal antrean kedatangan di portal.'
+  preVerifyModalOpen.value = true
+}
+const handlePreVerify = openPreVerifyModal
+
+const submitPreVerify = () => {
+  preVerifySubmitting.value = true
+  router.post(
+    route('admin.queue.applications.pre-verify', props.application.id),
+    { notes: preVerifyForm.value.notes },
+    {
+      onFinish: () => {
+        preVerifySubmitting.value = false
+        preVerifyModalOpen.value = false
+      },
+    }
   )
-  if (notes !== null) {
-    router.post(route('admin.queue.applications.pre-verify', props.application.id), { notes })
-  }
 }
 
-// Check-In
-const handleCheckIn = () => {
-  if (confirm(`Check-in kedatangan untuk pemohon ${props.application.applicant_name} (${props.application.queue_number})?`)) {
-    router.post(route('admin.queue.applications.checkin', props.application.id))
-  }
+// Check-In Modal State
+const checkInModalOpen = ref(false)
+const checkInSubmitting = ref(false)
+
+const openCheckInModal = () => {
+  checkInModalOpen.value = true
+}
+const handleCheckIn = openCheckInModal
+
+const submitCheckIn = () => {
+  checkInSubmitting.value = true
+  router.post(
+    route('admin.queue.applications.checkin', props.application.id),
+    {},
+    {
+      onFinish: () => {
+        checkInSubmitting.value = false
+        checkInModalOpen.value = false
+      },
+    }
+  )
 }
 
-// Physical Verification Success
-const handlePhysicalVerifySuccess = () => {
-  const notes = prompt(
-    'Catatan pemeriksaan dokumen fisik asli di loket (opsional):',
-    'Pemeriksaan dokumen fisik asli (KK, KTP lama / Surat Kehilangan, Surat Kuasa) telah sesuai dan lengkap.'
-  )
-  if (notes !== null) {
-    router.post(route('admin.queue.applications.physical-verification', props.application.id), {
+// Physical Verification Modal State
+const physicalVerifyModalOpen = ref(false)
+const physicalVerifySubmitting = ref(false)
+const physicalVerifyForm = ref({
+  notes: '',
+  match_identity: true,
+  match_documents: true,
+  match_authorization: true,
+})
+
+const openPhysicalVerifyModal = () => {
+  physicalVerifyForm.value = {
+    notes: 'Pemeriksaan dokumen fisik asli (KK, KTP lama / Surat Kehilangan, Surat Kuasa) telah sesuai dan lengkap.',
+    match_identity: true,
+    match_documents: true,
+    match_authorization: true,
+  }
+  physicalVerifyModalOpen.value = true
+}
+const handlePhysicalVerifySuccess = openPhysicalVerifyModal
+
+const submitPhysicalVerify = () => {
+  physicalVerifySubmitting.value = true
+  router.post(
+    route('admin.queue.applications.physical-verification', props.application.id),
+    {
       decision: 'APPROVED_FOR_SERVICE',
-      notes: notes,
-      match_identity: true,
-      match_documents: true,
-      match_authorization: true,
-    })
-  }
+      notes: physicalVerifyForm.value.notes,
+      match_identity: physicalVerifyForm.value.match_identity,
+      match_documents: physicalVerifyForm.value.match_documents,
+      match_authorization: physicalVerifyForm.value.match_authorization,
+    },
+    {
+      onFinish: () => {
+        physicalVerifySubmitting.value = false
+        physicalVerifyModalOpen.value = false
+      },
+    }
+  )
 }
 
 // Processing Modal State (Informasikan Belum Dicetak / Sedang Diproses)
@@ -1354,12 +1710,28 @@ const submitReadyPickup = () => {
   )
 }
 
-// Complete
+// Complete Modal State
+const completeModalOpen = ref(false)
+const completeSubmitting = ref(false)
+const completeForm = ref({ notes: '' })
+
 const openCompleteModal = () => {
-  const notes = prompt('Catatan penyelesaian pelayanan (opsional):', 'KTP-el fisik telah diserahkan kepada pemohon.')
-  if (notes !== null) {
-    router.post(route('admin.queue.applications.complete', props.application.id), { notes })
-  }
+  completeForm.value.notes = 'KTP-el fisik telah diserahkan kepada pemohon. Pelayanan selesai.'
+  completeModalOpen.value = true
+}
+
+const submitComplete = () => {
+  completeSubmitting.value = true
+  router.post(
+    route('admin.queue.applications.complete', props.application.id),
+    { notes: completeForm.value.notes },
+    {
+      onFinish: () => {
+        completeSubmitting.value = false
+        completeModalOpen.value = false
+      },
+    }
+  )
 }
 
 const cleanPhone = (phone) => {
