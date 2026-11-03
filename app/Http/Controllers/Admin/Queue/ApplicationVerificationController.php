@@ -337,15 +337,18 @@ class ApplicationVerificationController extends Controller
             return back()->with('error', 'KTP-el fisik telah selesai dicetak dan siap di loket penerimaan sehingga tidak dapat dikembalikan ke status proses cetak.');
         }
 
+        if (empty($application->queue_number)) {
+            return back()->with('error', 'Tindakan loket dan cetak kartu hanya dapat dilakukan setelah jadwal kedatangan ditetapkan dan nomor antrean terbit.');
+        }
+
         if (!in_array($application->status, [
-            QueueApplication::STATUS_PRE_VERIFIED,
             QueueApplication::STATUS_QUEUE_BOOKED,
             QueueApplication::STATUS_ARRIVED,
             QueueApplication::STATUS_PHYSICAL_VERIFICATION,
             QueueApplication::STATUS_APPROVED_FOR_SERVICE,
             QueueApplication::STATUS_PROCESSING,
         ])) {
-            return back()->with('error', 'Tindakan loket dan status cetak hanya aktif setelah verifikasi berkas online disetujui.');
+            return back()->with('error', 'Tindakan loket dan status cetak hanya aktif setelah permohonan memiliki jadwal kedatangan dan nomor antrean.');
         }
 
         $this->verificationService->startProcessing($application, Auth::user(), $request->input('notes'));
@@ -364,8 +367,11 @@ class ApplicationVerificationController extends Controller
             return back()->with('error', 'Permohonan telah ditolak. Tindakan loket dan cetak kartu dinonaktifkan.');
         }
 
+        if (empty($application->queue_number)) {
+            return back()->with('error', 'Tindakan loket dan cetak kartu hanya dapat dilakukan setelah jadwal kedatangan ditetapkan dan nomor antrean terbit.');
+        }
+
         if (!in_array($application->status, [
-            QueueApplication::STATUS_PRE_VERIFIED,
             QueueApplication::STATUS_QUEUE_BOOKED,
             QueueApplication::STATUS_ARRIVED,
             QueueApplication::STATUS_PHYSICAL_VERIFICATION,
@@ -373,7 +379,7 @@ class ApplicationVerificationController extends Controller
             QueueApplication::STATUS_PROCESSING,
             QueueApplication::STATUS_READY_FOR_PICKUP,
         ])) {
-            return back()->with('error', 'Tindakan loket dan status cetak hanya aktif setelah verifikasi berkas online disetujui.');
+            return back()->with('error', 'Tindakan loket dan status cetak hanya aktif setelah permohonan memiliki jadwal kedatangan dan nomor antrean.');
         }
 
         $this->verificationService->markReadyForPickup($application, Auth::user(), $request->input('notes'));

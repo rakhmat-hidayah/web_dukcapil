@@ -1002,4 +1002,43 @@ class QueueWorkflowTest extends TestCase
 
         $app->delete();
     }
+
+    public function test_printing_actions_blocked_before_schedule_and_queue_number_issued()
+    {
+        $admin = User::first() ?? User::factory()->create();
+        $service = ServiceType::first();
+
+        $appService = app(\App\Services\Queue\QueueApplicationService::class);
+        $application = $appService->createDraft([
+            'applicant_nik' => '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT),
+            'applicant_name' => 'Warga Tanpa Antrean',
+            'applicant_phone' => '081234567890',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+
+        $application->update([
+            'status' => QueueApplication::STATUS_PRE_VERIFIED,
+            'queue_number' => null,
+            'queue_slot_id' => null,
+        ]);
+
+        // Attempt start-processing before queue number/schedule is issued
+        $resProcess = $this->actingAs($admin)->post(
+            route('admin.queue.applications.start-processing', $application->id),
+            ['notes' => 'Cetak tanpa antrean']
+        );
+        $resProcess->assertSessionHas('error');
+        $this->assertStringContainsString('nomor antrean', session('error'));
+
+        // Attempt ready-pickup before queue number/schedule is issued
+        $resReady = $this->actingAs($admin)->post(
+            route('admin.queue.applications.ready-pickup', $application->id),
+            ['notes' => 'Siap ambil tanpa antrean']
+        );
+        $resReady->assertSessionHas('error');
+        $this->assertStringContainsString('nomor antrean', session('error'));
+
+        $application->delete();
+    }
 }

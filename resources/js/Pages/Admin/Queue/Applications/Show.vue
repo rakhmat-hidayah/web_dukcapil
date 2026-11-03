@@ -450,12 +450,12 @@
               </div>
 
               <div
-                v-else-if="!isOnlineApproved"
+                v-else-if="!canOperatePrinting"
                 class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2.5"
               >
                 <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <div>
-                  <span class="font-bold">Menunggu Persetujuan Verifikasi Berkas Online:</span> Tombol pelayanan loket dan pembaruan status cetak kartu akan aktif setelah berkas online disetujui (Lolos Pra-Verifikasi / Ditetapkan Jadwal).
+                  <span class="font-bold">Menunggu Penetapan Jadwal & Nomor Antrean:</span> Tombol cetak KTP-el dinonaktifkan dan akan aktif setelah jadwal kedatangan ditetapkan serta nomor antrean resmi terbit.
                 </div>
               </div>
 
@@ -464,16 +464,18 @@
                 <button
                   type="button"
                   @click="openProcessingModal"
-                  :disabled="!isOnlineApproved || isKtpReadyOrCompleted || application.status === 'PROCESSING'"
+                  :disabled="!canOperatePrinting || isKtpReadyOrCompleted || application.status === 'PROCESSING'"
                   :class="[
                     'p-3.5 rounded-2xl font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 text-center border',
-                    application.status === 'PROCESSING'
-                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-700 cursor-default'
-                      : isKtpReadyOrCompleted
-                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 cursor-not-allowed opacity-50'
-                        : 'bg-white dark:bg-slate-900 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer'
+                    !canOperatePrinting
+                      ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 cursor-not-allowed opacity-50'
+                      : application.status === 'PROCESSING'
+                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-700 cursor-default'
+                        : isKtpReadyOrCompleted
+                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 cursor-not-allowed opacity-50'
+                          : 'bg-white dark:bg-slate-900 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 cursor-pointer'
                   ]"
-                  title="Informasikan ke Bagian Penerimaan bahwa KTP-el sedang dalam proses cetak/rekam"
+                  :title="!canOperatePrinting ? 'Tombol aktif setelah jadwal kedatangan ditetapkan & nomor antrean terbit' : 'Informasikan ke Bagian Penerimaan bahwa KTP-el sedang dalam proses cetak/rekam'"
                 >
                   <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                   <span>{{ application.status === 'PROCESSING' ? 'Sedang Diproses Cetak' : '⏳ KTP Belum Dicetak (Sedang Proses)' }}</span>
@@ -483,16 +485,18 @@
                 <button
                   type="button"
                   @click="openReadyPickupModal"
-                  :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL' || application.handover?.status === 'SUDAH_DISERAHKAN'"
+                  :disabled="!canOperatePrinting || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL' || application.handover?.status === 'SUDAH_DISERAHKAN'"
                   :class="[
                     'p-3.5 rounded-2xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 text-center border',
-                    application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL'
-                      ? 'bg-purple-600 text-white border-purple-600 cursor-default shadow-purple-600/30'
-                      : ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.handover?.status === 'SUDAH_DISERAHKAN'
-                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 cursor-not-allowed opacity-50'
-                        : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600 shadow-emerald-600/30 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer'
+                    !canOperatePrinting
+                      ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 cursor-not-allowed opacity-50 shadow-none'
+                      : application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL'
+                        ? 'bg-purple-600 text-white border-purple-600 cursor-default shadow-purple-600/30'
+                        : ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.handover?.status === 'SUDAH_DISERAHKAN'
+                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 cursor-not-allowed opacity-50 shadow-none'
+                          : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600 shadow-emerald-600/30 cursor-pointer'
                   ]"
-                  title="Informasikan ke Bagian Penerimaan bahwa KTP-el sudah selesai dicetak dan siap diambil pemohon"
+                  :title="!canOperatePrinting ? 'Tombol aktif setelah jadwal kedatangan ditetapkan & nomor antrean terbit' : 'Informasikan ke Bagian Penerimaan bahwa KTP-el sudah selesai dicetak dan siap diambil pemohon'"
                 >
                   <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                   <span>{{ (application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL') ? '✓ Sudah Siap di Loket Penerimaan' : '✓ KTP Sudah Dicetak (Siap Diambil)' }}</span>
@@ -1256,19 +1260,28 @@ const props = defineProps({
 
 const isOnlineReviewPhase = computed(() => ['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW'].includes(props.application.status))
 const isPastOnlineVerification = computed(() => !['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW', 'DRAFT'].includes(props.application.status))
-const isOnlineApproved = computed(() => [
-  'PRE_VERIFIED',
-  'APPROVED',
-  'QUEUE_BOOKED',
-  'SCHEDULED',
-  'ARRIVED',
-  'CHECKED_IN',
-  'PHYSICAL_VERIFICATION',
-  'APPROVED_FOR_SERVICE',
-  'PROCESSING',
-  'IN_SERVICE',
-  'READY_FOR_PICKUP',
-].includes(props.application.status))
+const canOperatePrinting = computed(() => {
+  if (['REJECTED', 'CANCELLED', 'EXPIRED'].includes(props.application.status)) {
+    return false
+  }
+  // Tombol cetak hanya aktif setelah permohonan memiliki jadwal kedatangan & nomor antrean terbit
+  if (!props.application.queue_number) {
+    return false
+  }
+  return [
+    'APPROVED',
+    'QUEUE_BOOKED',
+    'SCHEDULED',
+    'ARRIVED',
+    'CHECKED_IN',
+    'PHYSICAL_VERIFICATION',
+    'APPROVED_FOR_SERVICE',
+    'PROCESSING',
+    'IN_SERVICE',
+    'READY_FOR_PICKUP',
+    'COMPLETED',
+  ].includes(props.application.status)
+})
 
 const isKtpReadyOrCompleted = computed(() => {
   return [
