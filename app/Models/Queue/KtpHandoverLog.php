@@ -58,13 +58,25 @@ class KtpHandoverLog extends Model
     public function getActionLabelAttribute(): string
     {
         return match ($this->action) {
-            'MIGRATION_INIT'     => 'Inisialisasi Sistem',
-            'CREATED'            => 'Pendaftaran KTP-el',
-            'MARKED_READY'       => 'Ditandai Siap Diambil',
-            'HANDOVER_COMPLETED' => 'Penyerahan Selesai',
-            'EXCEPTION_REPORTED' => 'Kendala Dilaporkan',
-            'EXCEPTION_RESOLVED' => 'Kendala Diselesaikan',
-            default              => $this->action,
+            'MIGRATION_INIT'                 => 'Inisialisasi Sistem',
+            'CREATED'                        => 'Pendaftaran KTP-el',
+            'MARKED_READY'                   => 'Ditandai Siap Diambil',
+            'HANDOVER_COMPLETED'             => 'Penyerahan Selesai',
+            'EXCEPTION_REPORTED'             => 'Kendala Dilaporkan',
+            'EXCEPTION_RESOLVED'             => 'Kendala Diselesaikan',
+            'PROCESSING'                     => 'Sedang Diproses (Cetak/Rekam)',
+            'PHYSICAL_VERIFIED'              => 'Verifikasi Fisik Selesai',
+            'PHYSICAL_VERIFICATION_REJECTED' => 'Verifikasi Fisik Ditolak',
+            'APPLICATION_REJECTED'           => 'Permohonan Ditolak',
+            'PRE_VERIFIED'                   => 'Lolos Pra-Verifikasi',
+            'SCHEDULED'                      => 'Jadwal Ditetapkan',
+            'CHECKED_IN'                     => 'Hadir di Loket',
+            'READY_FOR_PICKUP'               => 'Ditandai Siap Diambil',
+            'COMPLETED'                      => 'Pelayanan Selesai',
+            'CANCELLED'                      => 'Dibatalkan',
+            'REJECTED'                       => 'Permohonan Ditolak',
+            'EXPIRED'                        => 'Kedaluwarsa',
+            default                          => ucwords(strtolower(str_replace('_', ' ', (string) $this->action))),
         };
     }
 }

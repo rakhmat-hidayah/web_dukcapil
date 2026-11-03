@@ -403,7 +403,7 @@
           <!-- Submit Buttons -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
             <span class="text-xs text-slate-500 dark:text-slate-400">
-              * Seluruh data penerima dan foto dokumentasi disimpan aman di server dengan audit trail resmi.
+              * Seluruh data penerima dan foto dokumentasi disimpan aman di server dengan catatan riwayat aktivitas resmi.
             </span>
 
             <button
@@ -484,11 +484,11 @@
         </div>
       </div>
 
-      <!-- Audit Trail & Riwayat Aktivitas -->
+      <!-- Riwayat Aktivitas -->
       <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
         <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
           <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          Riwayat Aktivitas & Audit Trail Transaksi
+          Riwayat Aktivitas
         </h3>
 
         <div v-if="handover.logs?.length === 0" class="py-6 text-center text-slate-400 text-xs">
@@ -506,7 +506,7 @@
             </div>
             <div class="flex-1">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-slate-900 dark:text-white">{{ log.action_label }}</span>
+                <span class="font-bold text-slate-900 dark:text-white">{{ formatActionLabel(log.action_label || log.action) }}</span>
                 <span class="text-[11px] font-mono text-slate-400">{{ log.created_at_formatted }}</span>
               </div>
               <p class="text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed">{{ log.notes }}</p>
@@ -597,6 +597,32 @@ const handoverForm = reactive({
   receiver_relationship: props.handover.receiver_relationship || (props.handover.application?.attendance_type === 'representative' ? 'Kuasa Resmi (Surat Kuasa F-1.07)' : 'Sendiri'),
   handover_notes: '',
 });
+
+const actionLabels = {
+  MIGRATION_INIT: 'Inisialisasi Sistem',
+  CREATED: 'Pendaftaran KTP-el',
+  MARKED_READY: 'Ditandai Siap Diambil',
+  HANDOVER_COMPLETED: 'Penyerahan Selesai',
+  EXCEPTION_REPORTED: 'Kendala Dilaporkan',
+  EXCEPTION_RESOLVED: 'Kendala Diselesaikan',
+  PROCESSING: 'Sedang Diproses (Cetak/Rekam)',
+  PHYSICAL_VERIFIED: 'Verifikasi Fisik Selesai',
+  PHYSICAL_VERIFICATION_REJECTED: 'Verifikasi Fisik Ditolak',
+  APPLICATION_REJECTED: 'Permohonan Ditolak',
+  PRE_VERIFIED: 'Lolos Pra-Verifikasi',
+  SCHEDULED: 'Jadwal Ditetapkan',
+  CHECKED_IN: 'Hadir di Loket',
+  READY_FOR_PICKUP: 'Ditandai Siap Diambil',
+  COMPLETED: 'Pelayanan Selesai',
+  CANCELLED: 'Dibatalkan',
+  REJECTED: 'Permohonan Ditolak',
+  EXPIRED: 'Kedaluwarsa',
+};
+
+function formatActionLabel(label) {
+  if (!label) return '-';
+  return actionLabels[label] || label;
+}
 
 function handleReceiverTypeChange() {
   if (handoverForm.actual_receiver_type === 'self') {

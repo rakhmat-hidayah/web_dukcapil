@@ -600,10 +600,10 @@
             </div>
           </div>
 
-          <!-- Audit Trail & Verification History -->
+          <!-- Verification History -->
           <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
             <h3 class="text-xs font-black uppercase tracking-wider text-slate-400">
-              Riwayat Aktivitas & Audit Trail Verifikasi
+              Riwayat Aktivitas Verifikasi
             </h3>
 
             <div class="space-y-3">
@@ -1357,6 +1357,8 @@ const statusNames = {
   ARRIVED: 'Hadir di Loket',
   CHECKED_IN: 'Hadir di Loket',
   PHYSICAL_VERIFICATION: 'Pemeriksaan Fisik Dokumen',
+  PHYSICAL_VERIFIED: 'Verifikasi Fisik Selesai',
+  PHYSICAL_VERIFICATION_REJECTED: 'Verifikasi Fisik Ditolak',
   APPROVED_FOR_SERVICE: 'Disetujui untuk Dilayani',
   PROCESSING: 'Sedang Diproses (Rekam/Cetak)',
   IN_SERVICE: 'Sedang Dilayani',
