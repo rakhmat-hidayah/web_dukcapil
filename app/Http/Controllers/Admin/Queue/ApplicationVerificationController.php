@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Queue;
 
 use App\Http\Controllers\Controller;
 use App\Models\Queue\ApplicationDocument;
+use App\Models\Queue\KtpHandover;
 use App\Models\Queue\QueueApplication;
 use App\Models\Queue\QueueSlot;
 use App\Models\Queue\ServiceType;
@@ -242,6 +243,18 @@ class ApplicationVerificationController extends Controller
     {
         $application = QueueApplication::findOrFail($id);
 
+        if (in_array($application->status, [
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+            QueueApplication::STATUS_COMPLETED,
+            QueueApplication::STATUS_CANCELLED,
+            QueueApplication::STATUS_EXPIRED,
+        ]) || in_array($application->handover?->status, [
+            KtpHandover::STATUS_READY,
+            KtpHandover::STATUS_HANDED_OVER,
+        ])) {
+            return back()->with('error', 'Pengajuan tidak dapat ditolak karena fisik KTP-el telah selesai dicetak dan siap di loket penerimaan / telah diserahkan.');
+        }
+
         $request->validate([
             'reason' => 'required|string|min:5|max:1000',
         ], [
@@ -290,6 +303,18 @@ class ApplicationVerificationController extends Controller
             return back()->with('error', 'Permohonan telah ditolak. Tindakan loket dan cetak kartu dinonaktifkan.');
         }
 
+        if (in_array($application->status, [
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+            QueueApplication::STATUS_COMPLETED,
+            QueueApplication::STATUS_CANCELLED,
+            QueueApplication::STATUS_EXPIRED,
+        ]) || in_array($application->handover?->status, [
+            KtpHandover::STATUS_READY,
+            KtpHandover::STATUS_HANDED_OVER,
+        ])) {
+            return back()->with('error', 'KTP-el fisik telah selesai dicetak dan siap di loket penerimaan sehingga tidak dapat dikembalikan ke status proses cetak.');
+        }
+
         if (!in_array($application->status, [
             QueueApplication::STATUS_PRE_VERIFIED,
             QueueApplication::STATUS_QUEUE_BOOKED,
@@ -297,7 +322,6 @@ class ApplicationVerificationController extends Controller
             QueueApplication::STATUS_PHYSICAL_VERIFICATION,
             QueueApplication::STATUS_APPROVED_FOR_SERVICE,
             QueueApplication::STATUS_PROCESSING,
-            QueueApplication::STATUS_READY_FOR_PICKUP,
         ])) {
             return back()->with('error', 'Tindakan loket dan status cetak hanya aktif setelah verifikasi berkas online disetujui.');
         }

@@ -453,12 +453,14 @@
                 <button
                   type="button"
                   @click="openProcessingModal"
-                  :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.status === 'PROCESSING'"
+                  :disabled="!isOnlineApproved || isKtpReadyOrCompleted || application.status === 'PROCESSING'"
                   :class="[
-                    'p-3 rounded-2xl font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 cursor-pointer text-center border',
+                    'p-3 rounded-2xl font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 text-center border',
                     application.status === 'PROCESSING'
                       ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-700 cursor-default'
-                      : 'bg-white dark:bg-slate-900 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 disabled:opacity-40 disabled:cursor-not-allowed'
+                      : isKtpReadyOrCompleted
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 cursor-not-allowed opacity-50'
+                        : 'bg-white dark:bg-slate-900 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer'
                   ]"
                   title="Informasikan ke Bagian Penerimaan bahwa KTP-el sedang dalam proses cetak/rekam"
                 >
@@ -470,17 +472,19 @@
                 <button
                   type="button"
                   @click="openReadyPickupModal"
-                  :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.status === 'READY_FOR_PICKUP'"
+                  :disabled="!isOnlineApproved || ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL' || application.handover?.status === 'SUDAH_DISERAHKAN'"
                   :class="[
-                    'p-3 rounded-2xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer text-center border',
-                    application.status === 'READY_FOR_PICKUP'
+                    'p-3 rounded-2xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 text-center border',
+                    application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL'
                       ? 'bg-purple-600 text-white border-purple-600 cursor-default shadow-purple-600/30'
-                      : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600 shadow-emerald-600/30 disabled:opacity-40 disabled:cursor-not-allowed'
+                      : ['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(application.status) || application.handover?.status === 'SUDAH_DISERAHKAN'
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 cursor-not-allowed opacity-50'
+                        : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600 shadow-emerald-600/30 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer'
                   ]"
                   title="Informasikan ke Bagian Penerimaan bahwa KTP-el sudah selesai dicetak dan siap diambil pemohon"
                 >
                   <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                  <span>{{ application.status === 'READY_FOR_PICKUP' ? '✓ Sudah Siap di Loket Penerimaan' : '✓ KTP Sudah Dicetak (Siap Diambil)' }}</span>
+                  <span>{{ (application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL') ? '✓ Sudah Siap di Loket Penerimaan' : '✓ KTP Sudah Dicetak (Siap Diambil)' }}</span>
                 </button>
               </div>
             </div>
@@ -516,6 +520,9 @@
                   Tahap Verifikasi Berkas Online telah selesai. Status permohonan saat ini: <strong class="text-blue-600 dark:text-blue-400">{{ formatStatusName(application.status) }}</strong>
                   <span v-if="canReject" class="block text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                     * Tombol <strong>Tolak Pengajuan</strong> tetap aktif untuk keperluan pemeriksaan fisik dokumen asli di loket offline.
+                  </span>
+                  <span v-else-if="application.status === 'READY_FOR_PICKUP' || application.handover?.status === 'SIAP_DIAMBIL'" class="block text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
+                    * Fisik KTP-el telah selesai dicetak & siap di loket penerimaan. Tahap verifikasi dan penolakan telah ditutup.
                   </span>
                 </span>
               </div>
@@ -564,7 +571,12 @@
               <button
                 @click="openRejectModal"
                 :disabled="!canReject"
-                class="px-3.5 py-3.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-2xl font-bold text-xs shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
+                :class="[
+                  'px-3.5 py-3.5 rounded-2xl font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 text-center',
+                  canReject
+                    ? 'bg-rose-600 hover:bg-rose-500 shadow-rose-600/20 text-white cursor-pointer'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 cursor-not-allowed opacity-50 shadow-none'
+                ]"
                 title="Tolak pengajuan jika berkas online tidak valid atau dokumen fisik di loket tidak sesuai"
               >
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -944,7 +956,29 @@ const isOnlineApproved = computed(() => [
   'IN_SERVICE',
   'READY_FOR_PICKUP',
 ].includes(props.application.status))
-const canReject = computed(() => !['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED'].includes(props.application.status))
+
+const isKtpReadyOrCompleted = computed(() => {
+  return [
+    'READY_FOR_PICKUP',
+    'COMPLETED',
+    'REJECTED',
+    'CANCELLED',
+    'EXPIRED',
+  ].includes(props.application.status) || [
+    'SIAP_DIAMBIL',
+    'SUDAH_DISERAHKAN',
+  ].includes(props.application.handover?.status)
+})
+
+const canReject = computed(() => {
+  if (['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED', 'READY_FOR_PICKUP'].includes(props.application.status)) {
+    return false
+  }
+  if (['SIAP_DIAMBIL', 'SUDAH_DISERAHKAN'].includes(props.application.handover?.status)) {
+    return false
+  }
+  return true
+})
 
 // Viewer modal state
 const viewerState = ref({

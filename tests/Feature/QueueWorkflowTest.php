@@ -863,4 +863,46 @@ class QueueWorkflowTest extends TestCase
         // Cleanup
         $appService->deleteDraft($application);
     }
+
+    public function test_cannot_reject_or_restart_processing_when_ktp_is_ready_for_pickup()
+    {
+        $admin = User::first() ?? User::factory()->create();
+        $service = ServiceType::first();
+
+        $appService = app(\App\Services\Queue\QueueApplicationService::class);
+        $application = $appService->createDraft([
+            'applicant_nik' => '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT),
+            'applicant_name' => 'Pemohon Siap Ambil',
+            'applicant_phone' => '081234567890',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+
+        $application->update([
+            'status'         => QueueApplication::STATUS_READY_FOR_PICKUP,
+            'applicant_name' => 'Pemohon Siap Ambil',
+            'nik'            => '5205011212900001',
+            'phone'          => '081234567890',
+            'submitted_at'   => now(),
+        ]);
+
+        // Attempt to restart processing when KTP is already ready for pickup
+        $responseProcessing = $this->actingAs($admin)->post(
+            route('admin.queue.applications.start-processing', $application->id),
+            ['notes' => 'Coba proses kembali']
+        );
+        $responseProcessing->assertSessionHas('error');
+        $this->assertEquals(QueueApplication::STATUS_READY_FOR_PICKUP, $application->fresh()->status);
+
+        // Attempt to reject when KTP is already ready for pickup
+        $responseReject = $this->actingAs($admin)->post(
+            route('admin.queue.applications.reject', $application->id),
+            ['reason' => 'Dokumen asli tidak cocok']
+        );
+        $responseReject->assertSessionHas('error');
+        $this->assertEquals(QueueApplication::STATUS_READY_FOR_PICKUP, $application->fresh()->status);
+
+        // Cleanup
+        $application->delete();
+    }
 }
