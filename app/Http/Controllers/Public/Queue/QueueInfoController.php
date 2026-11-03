@@ -8,6 +8,7 @@ use App\Models\Queue\QueueSchedule;
 use App\Models\Queue\QueueSetting;
 use App\Models\Queue\QueueSlot;
 use App\Models\Queue\ServiceType;
+use App\Services\ConfigurationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -73,8 +74,8 @@ class QueueInfoController extends Controller
             ]);
 
         $settings = [
-            'office_address' => QueueSetting::get('queue.office_address', 'Jl. Bhayangkara No. 01, Kel. Bada, Kec. Dompu, NTB'),
-            'helpdesk_phone' => QueueSetting::get('queue.helpdesk_phone', '0823-4000-0000'),
+            'office_address' => ConfigurationService::get('office_address') ?: QueueSetting::get('queue.office_address', 'Jl. Soekarno-Hatta No. 09 Dompu, NTB 84211'),
+            'helpdesk_phone' => ConfigurationService::get('whatsapp_number') ?: QueueSetting::get('queue.helpdesk_phone', '6282124824114'),
             'open_time' => QueueSetting::get('queue.open_time', '08:00'),
             'close_time' => QueueSetting::get('queue.close_time', '15:30'),
         ];

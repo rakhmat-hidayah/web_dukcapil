@@ -66,7 +66,7 @@ class ThemeSettingSeeder extends Seeder
             
             // --- Footer Info ---
             ['key' => 'footer_about', 'value' => 'Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu menyediakan pelayanan pendaftaran penduduk dan pencatatan sipil yang terintegrasi, transparan, dan akuntabel.', 'type' => 'textarea', 'group' => 'footer'],
-            ['key' => 'footer_address', 'value' => 'Jl. Bhayangkara No. 05, Dompu, NTB', 'type' => 'text', 'group' => 'footer'],
+            ['key' => 'footer_address', 'value' => 'Jl. Soekarno-Hatta No. 09 Dompu, NTB 84211', 'type' => 'text', 'group' => 'footer'],
             ['key' => 'footer_copyright', 'value' => '© 2026 Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu. All Rights Reserved.', 'type' => 'text', 'group' => 'footer'],
 
             // --- Social Links ---

@@ -53,6 +53,12 @@ class OfficeContactController extends Controller
             foreach ($data as $key => $val) {
                 \App\Services\ConfigurationService::set($key, $val, 'office_contact', auth()->id(), 'Update via Pengaturan Kontak CMS');
             }
+
+            // Keep queue settings in sync with office contact settings
+            \App\Models\Queue\QueueSetting::set('queue.office_address', $data['office_address'], 'general', 'Alamat kantor pelayanan untuk instruksi kehadiran');
+            if (!empty($data['whatsapp_number'])) {
+                \App\Models\Queue\QueueSetting::set('queue.helpdesk_phone', $data['whatsapp_number'], 'general', 'Nomor WhatsApp helpdesk resmi');
+            }
         } catch (\RuntimeException $e) {
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }

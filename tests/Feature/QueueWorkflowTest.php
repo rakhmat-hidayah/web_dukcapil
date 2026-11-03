@@ -867,8 +867,43 @@ class QueueWorkflowTest extends TestCase
         $mailReady = (new KtpReadyForPickupNotification($application))->toMail(null);
         $this->assertStringContainsString('Siap Diambil', $mailReady->subject);
         $this->assertStringContainsString('selesai dicetak', implode(' ', $mailReady->introLines));
+        $this->assertStringNotContainsString('Bhayangkara', implode(' ', $mailReady->introLines));
+        $this->assertStringNotContainsString('Kel. Bada', implode(' ', $mailReady->introLines));
 
         // Cleanup
+        $appService->deleteDraft($application);
+    }
+
+    public function test_email_notifications_follow_office_contact_settings()
+    {
+        $appService = app(\App\Services\Queue\QueueApplicationService::class);
+        $service = ServiceType::first();
+
+        \App\Services\ConfigurationService::set('office_address', 'Jl. Pahlawan Reformasi No. 77, Dompu', 'office_contact');
+        \App\Services\ConfigurationService::set('office_work_hours', 'Senin - Kamis: 08:00 - 15:45 WITA | Jumat: 08:00 - 11:30 WITA', 'office_contact');
+
+        $application = $appService->createDraft([
+            'applicant_nik' => '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT),
+            'applicant_name' => 'Budi Santoso',
+            'applicant_phone' => '081234567890',
+            'applicant_email' => 'budi@example.com',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+
+        $mailReady = (new KtpReadyForPickupNotification($application))->toMail(null);
+        $readyContent = implode("\n", $mailReady->introLines);
+
+        $this->assertStringContainsString('Jl. Pahlawan Reformasi No. 77, Dompu', $readyContent);
+        $this->assertStringContainsString('08:00 - 15:45 WITA', $readyContent);
+        $this->assertStringNotContainsString('Bhayangkara', $readyContent);
+
+        $mailApproved = (new ApplicationApprovedNotification($application))->toMail(null);
+        $approvedContent = implode("\n", $mailApproved->introLines);
+
+        $this->assertStringContainsString('Jl. Pahlawan Reformasi No. 77, Dompu', $approvedContent);
+        $this->assertStringNotContainsString('Bhayangkara', $approvedContent);
+
         $appService->deleteDraft($application);
     }
 

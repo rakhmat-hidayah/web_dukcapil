@@ -3,6 +3,8 @@
 namespace App\Notifications\Queue;
 
 use App\Models\Queue\QueueApplication;
+use App\Models\Queue\QueueSetting;
+use App\Services\ConfigurationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -27,6 +29,9 @@ class ApplicationApprovedNotification extends Notification
         $timeWindow = $slot && $slot->schedule ? substr($slot->schedule->open_time, 0, 5) . ' - ' . substr($slot->schedule->close_time, 0, 5) . ' WITA' : '08:00 - 15:30 WITA';
         $serviceName = $this->application->serviceType?->name ?: 'Pelayanan KTP-el';
 
+        $officeAddress = ConfigurationService::get('office_address')
+            ?: QueueSetting::get('queue.office_address', 'Jl. Soekarno-Hatta No. 09 Dompu, NTB 84211');
+
         return (new MailMessage)
             ->subject("🎫 Nomor Antrean Terbit: {$this->application->queue_number} — Disdukcapil Kabupaten Dompu")
             ->greeting("Yth. Bapak/Ibu {$this->application->applicant_name},")
@@ -37,7 +42,7 @@ class ApplicationApprovedNotification extends Notification
             ->line("• **Jenis Layanan:** {$serviceName}")
             ->line("• **Tanggal Kedatangan:** {$dateLabel}")
             ->line("• **Jam Operasional Loket:** {$timeWindow}")
-            ->line("• **Lokasi Pelayanan:** Kantor Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu, Jl. Bhayangkara No. 01, Kel. Bada, Kec. Dompu.")
+            ->line("• **Lokasi Pelayanan:** Kantor Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu ({$officeAddress}).")
             ->action('Lihat & Cetak Tiket Antrean (QR Code)', $statusUrl)
             ->line("**Petunjuk Kehadiran di Loket:**")
             ->line("1. Harap hadir sesuai jadwal dan jam operasional loket di atas.")

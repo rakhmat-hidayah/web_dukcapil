@@ -3,6 +3,8 @@
 namespace App\Notifications\Queue;
 
 use App\Models\Queue\QueueApplication;
+use App\Models\Queue\QueueSetting;
+use App\Services\ConfigurationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -25,6 +27,10 @@ class KtpReadyForPickupNotification extends Notification
         $serviceName = $this->application->serviceType?->name ?: 'Pelayanan KTP-el';
         $notes = $this->application->handover?->ready_notes ?: $this->application->notes;
 
+        $officeAddress = ConfigurationService::get('office_address')
+            ?: QueueSetting::get('queue.office_address', 'Jl. Soekarno-Hatta No. 09 Dompu, NTB 84211');
+        $officeWorkHours = ConfigurationService::get('office_work_hours');
+
         $mail = (new MailMessage)
             ->subject("🪪 Fisik KTP-el Anda Selesai Dicetak & Siap Diambil — Disdukcapil Dompu")
             ->greeting("Kabar Baik, Bapak/Ibu {$this->application->applicant_name}!")
@@ -34,10 +40,23 @@ class KtpReadyForPickupNotification extends Notification
             ->line("• **Nomor Antrean:** `" . ($this->application->queue_number ?: $this->application->reg_number) . "`")
             ->line("• **Nomor Registrasi:** `{$this->application->reg_number}`")
             ->line("• **Jenis Layanan:** {$serviceName}")
-            ->line("• **Lokasi Pengambilan:** Loket Penyerahan / Serah Terima KTP-el, Kantor Disdukcapil Kabupaten Dompu (Jl. Bhayangkara No. 01, Kel. Bada, Kec. Dompu)")
-            ->line("• **Jam Operasional Loket Pengambilan:**")
-            ->line("  - **Senin s/d Kamis:** 08.00 - 15.30 WITA")
-            ->line("  - **Jumat:** 08.00 - 11.30 WITA");
+            ->line("• **Lokasi Pengambilan:** Loket Penyerahan / Serah Terima KTP-el, Kantor Disdukcapil Kabupaten Dompu ({$officeAddress})");
+
+        if (!empty($officeWorkHours)) {
+            $hoursParts = array_filter(array_map('trim', explode('|', $officeWorkHours)));
+            if (count($hoursParts) > 1) {
+                $mail->line("• **Jam Operasional Loket Pengambilan:**");
+                foreach ($hoursParts as $part) {
+                    $mail->line("  - {$part}");
+                }
+            } else {
+                $mail->line("• **Jam Operasional Loket Pengambilan:** {$officeWorkHours}");
+            }
+        } else {
+            $mail->line("• **Jam Operasional Loket Pengambilan:**")
+                ->line("  - **Senin s/d Kamis:** 08.00 - 16.00 WITA")
+                ->line("  - **Jumat:** 08.00 - 16.30 WITA");
+        }
 
         if ($notes) {
             $mail->line("• **Catatan Petugas:** *\"{$notes}\"*");

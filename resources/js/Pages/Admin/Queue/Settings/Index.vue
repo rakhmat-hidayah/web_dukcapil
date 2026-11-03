@@ -224,8 +224,8 @@ const getVal = (group, key, fallback = '') => {
 }
 
 const form = ref({
-  'queue.office_address': getVal('general', 'queue.office_address', 'Jl. Bhayangkara No. 01, Dompu'),
-  'queue.helpdesk_phone': getVal('general', 'queue.helpdesk_phone', '0823-4000-0000'),
+  'queue.office_address': getVal('general', 'queue.office_address', 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211'),
+  'queue.helpdesk_phone': getVal('general', 'queue.helpdesk_phone', '6282124824114'),
   'queue.open_time': getVal('schedule', 'queue.open_time', '08:00'),
   'queue.close_time': getVal('schedule', 'queue.close_time', '15:30'),
   'queue.registration_open_days_ahead': parseInt(getVal('schedule', 'queue.registration_open_days_ahead', '14')),

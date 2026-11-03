@@ -7,6 +7,7 @@ use App\Models\Queue\ApplicationDocument;
 use App\Models\Queue\QueueApplication;
 use App\Models\Queue\QueueSchedule;
 use App\Models\Queue\QueueSetting;
+use App\Services\ConfigurationService;
 use App\Services\Queue\QueueApplicationService;
 use App\Services\Queue\QueueDocumentStorage;
 use App\Services\Queue\QueueVerificationService;
@@ -75,8 +76,10 @@ class ApplicantDashboardController extends Controller
             }
         }
 
-        $officeAddress = QueueSetting::get('queue.office_address', 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211');
-        $helpdeskPhone = QueueSetting::get('queue.helpdesk_phone', '0823-4000-0000');
+        $officeAddress = ConfigurationService::get('office_address')
+            ?: QueueSetting::get('queue.office_address', 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211');
+        $helpdeskPhone = ConfigurationService::get('whatsapp_number')
+            ?: QueueSetting::get('queue.helpdesk_phone', '6282124824114');
 
         return Inertia::render('Public/Queue/Status/Dashboard', [
             'application' => $application,
