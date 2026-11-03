@@ -965,7 +965,7 @@
         <div class="p-4 rounded-2xl bg-cyan-50/70 dark:bg-cyan-950/30 border border-cyan-200/80 dark:border-cyan-800/60 text-xs text-slate-700 dark:text-slate-200 space-y-2">
           <div class="flex justify-between items-center text-[11px]">
             <span class="text-cyan-700 dark:text-cyan-300 font-bold uppercase tracking-wider">Pemohon Pelayanan</span>
-            <span class="font-mono bg-white dark:bg-slate-900 px-2 py-0.5 rounded-md font-bold text-slate-800 dark:text-slate-100">NIK: {{ application.nik }}</span>
+            <span class="font-mono bg-white dark:bg-slate-900 px-2 py-0.5 rounded-md font-bold text-slate-800 dark:text-slate-100">NIK: {{ application.applicant_nik || application.nik }}</span>
           </div>
           <p class="font-extrabold text-sm text-slate-900 dark:text-white">
             {{ application.applicant_name }}
@@ -1043,7 +1043,7 @@
             </div>
             <div>
               <span class="text-[10px] text-slate-400 uppercase font-bold block">Nomor Induk Kependudukan</span>
-              <span class="font-mono text-slate-800 dark:text-slate-200">{{ application.nik }}</span>
+              <span class="font-mono text-slate-800 dark:text-slate-200">{{ application.applicant_nik || application.nik }}</span>
             </div>
           </div>
 
@@ -1205,7 +1205,7 @@
             <span class="font-mono bg-white dark:bg-slate-900 px-2 py-0.5 rounded-md font-bold text-slate-800 dark:text-slate-100">Antrean: {{ application.queue_number || '-' }}</span>
           </div>
           <p class="font-extrabold text-sm text-slate-900 dark:text-white">
-            {{ application.applicant_name }} (NIK: {{ application.nik }})
+            {{ application.applicant_name }} (NIK: {{ application.applicant_nik || application.nik }})
           </p>
           <p class="text-[11px] text-slate-500 dark:text-slate-400">
             Penyerahan kepada: <strong>{{ application.handover?.received_by || application.applicant_name }}</strong> {{ application.attendance_type === 'PROXY' ? '(Penerima Kuasa)' : '(Pemilik Dokumen)' }}

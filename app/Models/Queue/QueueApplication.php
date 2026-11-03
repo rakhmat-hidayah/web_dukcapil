@@ -126,6 +126,7 @@ class QueueApplication extends Model
     ];
 
     protected $appends = [
+        'nik',
         'status_label',
         'status_color',
         'masked_nik',
@@ -227,6 +228,11 @@ class QueueApplication extends Model
     public function handover(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(KtpHandover::class, 'application_id');
+    }
+
+    public function getNikAttribute(): ?string
+    {
+        return $this->applicant_nik;
     }
 
     public function getIsRepresentedAttribute(): bool
