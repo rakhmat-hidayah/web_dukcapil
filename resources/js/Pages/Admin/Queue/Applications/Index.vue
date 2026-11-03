@@ -139,7 +139,7 @@
                   <div class="font-mono text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
                     <span>NIK: {{ maskNik(app.applicant_nik) }}</span>
                     <span>·</span>
-                    <span>{{ app.applicant_phone }}</span>
+                    <span>{{ formatPhoneChunked(app.applicant_phone) }}</span>
                   </div>
                 </td>
 
@@ -276,6 +276,18 @@ const resetFilters = () => {
   searchQuery.value = ''
   selectedService.value = ''
   router.get(route('admin.queue.applications.index'), {}, { preserveState: true, replace: true })
+}
+
+const formatPhoneChunked = (phone) => {
+  if (!phone) return '-'
+  let digits = String(phone).replace(/\D/g, '')
+  if (digits.startsWith('62')) {
+    digits = '0' + digits.slice(2)
+  }
+  digits = digits.slice(0, 13)
+  if (!digits) return String(phone)
+  const chunks = digits.match(/.{1,4}/g)
+  return chunks ? chunks.join('-') : digits
 }
 
 const maskNik = (nik) => {

@@ -972,4 +972,34 @@ class QueueWorkflowTest extends TestCase
         $doc2->delete();
         $application->delete();
     }
+
+    public function test_store_draft_accepts_hyphen_formatted_phone_numbers()
+    {
+        $service = ServiceType::first();
+        $this->assertNotNull($service);
+
+        $applicantNik = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $payload = [
+            'service_type_id' => $service->id,
+            'applicant_nik' => $applicantNik,
+            'applicant_name' => 'Hyphen Phone Tester',
+            'applicant_birth_place' => 'Dompu',
+            'applicant_birth_date' => '1995-05-15',
+            'applicant_phone' => '0853-3344-7003',
+            'applicant_address' => 'Jl. Bhayangkara No. 10',
+            'applicant_district' => 'Kecamatan Dompu',
+            'applicant_village' => 'Bada',
+            'attendance_type' => 'self',
+        ];
+
+        $response = $this->post(route('queue.apply.store'), $payload);
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect();
+
+        $app = QueueApplication::where('applicant_nik', $applicantNik)->first();
+        $this->assertNotNull($app);
+        $this->assertEquals('085333447003', $app->applicant_phone, 'Phone number must be cleanly stored without hyphens in database');
+
+        $app->delete();
+    }
 }

@@ -66,10 +66,13 @@
               </label>
               <div class="relative">
                 <input
-                  v-model="verifyForm.phone"
+                  :value="verifyForm.phone"
+                  @input="onHistoryPhoneInput"
                   type="tel"
-                  placeholder="Contoh: 082340001234..."
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  inputmode="numeric"
+                  maxlength="16"
+                  placeholder="Contoh: 0853-xxxx-xxxx"
+                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
                   required
                 />
               </div>
@@ -363,8 +366,30 @@ const verifyForm = useForm({
 const toastMessage = ref('');
 let toastTimer = null;
 
+function formatPhoneChunked(value) {
+  if (!value) return '';
+  let digits = String(value).replace(/\D/g, '');
+  if (digits.startsWith('62')) {
+    digits = '0' + digits.slice(2);
+  }
+  digits = digits.slice(0, 13);
+  if (!digits) return '';
+  const chunks = digits.match(/.{1,4}/g);
+  return chunks ? chunks.join('-') : digits;
+}
+
+function onHistoryPhoneInput(e) {
+  const el = e.target;
+  const formatted = formatPhoneChunked(el.value || '');
+  verifyForm.phone = formatted;
+  el.value = formatted;
+}
+
 function submitVerify() {
-  verifyForm.post(route('queue.history.verify'));
+  verifyForm.transform((data) => ({
+    ...data,
+    phone: (data.phone || '').replace(/\D/g, ''),
+  })).post(route('queue.history.verify'));
 }
 
 function logoutSession() {

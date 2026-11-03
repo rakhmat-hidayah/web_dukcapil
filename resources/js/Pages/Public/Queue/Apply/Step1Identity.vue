@@ -287,8 +287,8 @@
                   <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                     Nomor WhatsApp / HP Pemohon <span class="text-rose-500">*</span>
                   </label>
-                  <span class="text-[10px] font-mono" :class="form.applicant_phone && form.applicant_phone.length >= 10 && form.applicant_phone.length <= 13 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
-                    {{ (form.applicant_phone || '').length }}/13 Digit (Min. 10)
+                  <span class="text-[10px] font-mono" :class="rawPhoneDigits(form.applicant_phone).length >= 10 && rawPhoneDigits(form.applicant_phone).length <= 13 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
+                    {{ rawPhoneDigits(form.applicant_phone).length }}/13 Digit (Min. 10)
                   </span>
                 </div>
                 <input
@@ -298,10 +298,9 @@
                   @keypress="filterPhoneKeypress"
                   type="tel"
                   inputmode="numeric"
-                  pattern="[0-9]*"
-                  maxlength="13"
+                  maxlength="16"
                   autocomplete="tel"
-                  placeholder="Contoh: 0823xxxxxxxx"
+                  placeholder="Contoh: 0853-xxxx-xxxx"
                   class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
                   :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.applicant_phone}"
                   required
@@ -309,8 +308,8 @@
                 <p v-if="form.errors.applicant_phone" class="text-xs text-rose-500 font-medium mt-1">
                   {{ form.errors.applicant_phone }}
                 </p>
-                <p v-else-if="form.applicant_phone && form.applicant_phone.length > 0 && form.applicant_phone.length < 10" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
-                  Kurang {{ 10 - form.applicant_phone.length }} digit lagi. Nomor HP harus antara 10 sampai 13 digit angka.
+                <p v-else-if="rawPhoneDigits(form.applicant_phone).length > 0 && rawPhoneDigits(form.applicant_phone).length < 10" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                  Kurang {{ 10 - rawPhoneDigits(form.applicant_phone).length }} digit lagi. Nomor HP harus antara 10 sampai 13 digit angka.
                 </p>
               </div>
 
@@ -645,8 +644,8 @@
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                       Nomor WhatsApp / HP Perwakilan <span class="text-rose-500">*</span>
                     </label>
-                    <span class="text-[10px] font-mono" :class="form.representative_phone && form.representative_phone.length >= 10 && form.representative_phone.length <= 13 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
-                      {{ (form.representative_phone || '').length }}/13 Digit (Min. 10)
+                    <span class="text-[10px] font-mono" :class="rawPhoneDigits(form.representative_phone).length >= 10 && rawPhoneDigits(form.representative_phone).length <= 13 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
+                      {{ rawPhoneDigits(form.representative_phone).length }}/13 Digit (Min. 10)
                     </span>
                   </div>
                   <input
@@ -656,10 +655,9 @@
                     @keypress="filterPhoneKeypress"
                     type="tel"
                     inputmode="numeric"
-                    pattern="[0-9]*"
-                    maxlength="13"
+                    maxlength="16"
                     autocomplete="tel"
-                    placeholder="Contoh: 0823xxxxxxxx"
+                    placeholder="Contoh: 0853-xxxx-xxxx"
                     class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
                     :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.representative_phone}"
                     required
@@ -667,8 +665,8 @@
                   <p v-if="form.errors.representative_phone" class="text-xs text-rose-500 font-medium mt-1">
                     {{ form.errors.representative_phone }}
                   </p>
-                  <p v-else-if="form.representative_phone && form.representative_phone.length > 0 && form.representative_phone.length < 10" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
-                    Kurang {{ 10 - form.representative_phone.length }} digit lagi. Nomor HP harus antara 10 sampai 13 digit angka.
+                  <p v-else-if="rawPhoneDigits(form.representative_phone).length > 0 && rawPhoneDigits(form.representative_phone).length < 10" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                    Kurang {{ 10 - rawPhoneDigits(form.representative_phone).length }} digit lagi. Nomor HP harus antara 10 sampai 13 digit angka.
                   </p>
                 </div>
 
@@ -918,6 +916,12 @@ function handleCustomVillageInput() {
 }
 
 onMounted(() => {
+  if (form.applicant_phone) {
+    form.applicant_phone = formatPhoneChunked(form.applicant_phone);
+  }
+  if (form.representative_phone) {
+    form.representative_phone = formatPhoneChunked(form.representative_phone);
+  }
   if (form.applicant_district) {
     const matchKec = props.districts.find(
       d => d.name.toUpperCase() === form.applicant_district.trim().toUpperCase()
@@ -975,30 +979,78 @@ function onRepresentativeNikInput(e) {
   }
 }
 
-// Phone Keypress filter (only numbers 0-9)
+// Phone Number Formatter & Sanitizer (chunked by 4 digits: e.g. 0853-3344-7003)
+function formatPhoneChunked(value) {
+  if (!value) return '';
+  let digits = String(value).replace(/\D/g, '');
+  if (digits.startsWith('62')) {
+    digits = '0' + digits.slice(2);
+  }
+  digits = digits.slice(0, 13);
+  if (!digits) return '';
+  const chunks = digits.match(/.{1,4}/g);
+  return chunks ? chunks.join('-') : digits;
+}
+
+function rawPhoneDigits(value) {
+  if (!value) return '';
+  let digits = String(value).replace(/\D/g, '');
+  if (digits.startsWith('62')) {
+    digits = '0' + digits.slice(2);
+  }
+  return digits.slice(0, 13);
+}
+
+// Phone Keypress filter (only numbers 0-9 and hyphen)
 function filterPhoneKeypress(e) {
-  if (!/[0-9]/.test(e.key)) {
+  if (!/[0-9\-]/.test(e.key)) {
     e.preventDefault();
   }
 }
 
-// Phone Input Sanitizer (strips anything non-digit and caps at 13)
-function onPhoneInput(e) {
-  const digits = (e.target.value || '').replace(/\D/g, '').slice(0, 13);
-  form.applicant_phone = digits;
-  e.target.value = digits;
-  if (form.errors.applicant_phone && digits.length >= 10 && digits.length <= 13) {
-    delete form.errors.applicant_phone;
+function handlePhoneInput(e, formKey) {
+  const el = e.target;
+  const oldVal = el.value || '';
+  const cursorPos = el.selectionEnd || oldVal.length;
+  const digitsBeforeCursor = oldVal.slice(0, cursorPos).replace(/\D/g, '').length;
+
+  const formatted = formatPhoneChunked(oldVal);
+  form[formKey] = formatted;
+  el.value = formatted;
+
+  let newCursorPos = 0;
+  let digitCount = 0;
+  for (let i = 0; i < formatted.length; i++) {
+    if (formatted[i] !== '-') {
+      digitCount++;
+    }
+    if (digitCount === digitsBeforeCursor) {
+      newCursorPos = i + 1;
+      break;
+    }
+  }
+  if (digitCount < digitsBeforeCursor) {
+    newCursorPos = formatted.length;
+  }
+
+  requestAnimationFrame(() => {
+    if (el === document.activeElement && typeof el.setSelectionRange === 'function') {
+      el.setSelectionRange(newCursorPos, newCursorPos);
+    }
+  });
+
+  const digits = rawPhoneDigits(formatted);
+  if (form.errors[formKey] && digits.length >= 10 && digits.length <= 13) {
+    delete form.errors[formKey];
   }
 }
 
+function onPhoneInput(e) {
+  handlePhoneInput(e, 'applicant_phone');
+}
+
 function onRepresentativePhoneInput(e) {
-  const digits = (e.target.value || '').replace(/\D/g, '').slice(0, 13);
-  form.representative_phone = digits;
-  e.target.value = digits;
-  if (form.errors.representative_phone && digits.length >= 10 && digits.length <= 13) {
-    delete form.errors.representative_phone;
-  }
+  handlePhoneInput(e, 'representative_phone');
 }
 
 // Age & Birth Date Validation
@@ -1307,7 +1359,11 @@ function submitStep1() {
     return;
   }
 
-  form.post(route('queue.apply.store'), {
+  form.transform((data) => ({
+    ...data,
+    applicant_phone: rawPhoneDigits(data.applicant_phone),
+    representative_phone: data.representative_phone ? rawPhoneDigits(data.representative_phone) : '',
+  })).post(route('queue.apply.store'), {
     onError: (serverErrors) => {
       const serverList = [];
       for (const [key, val] of Object.entries(serverErrors)) {

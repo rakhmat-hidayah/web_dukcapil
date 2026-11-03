@@ -96,6 +96,16 @@ class QueueApplicationController extends Controller
      */
     public function storeDraft(Request $request): RedirectResponse
     {
+        // Sanitize phone numbers by removing non-digit characters (e.g. hyphens, spaces)
+        if ($request->has('applicant_phone') && $request->input('applicant_phone') !== null) {
+            $cleaned = preg_replace('/[^0-9]/', '', (string) $request->input('applicant_phone'));
+            $request->merge(['applicant_phone' => $cleaned]);
+        }
+        if ($request->has('representative_phone') && $request->input('representative_phone') !== null) {
+            $cleaned = preg_replace('/[^0-9]/', '', (string) $request->input('representative_phone'));
+            $request->merge(['representative_phone' => $cleaned !== '' ? $cleaned : null]);
+        }
+
         $service = ServiceType::find($request->service_type_id);
         $isBiometric = $service ? (bool) $service->is_biometric_first_recording : false;
         $minAge = $isBiometric ? 16 : 17;
