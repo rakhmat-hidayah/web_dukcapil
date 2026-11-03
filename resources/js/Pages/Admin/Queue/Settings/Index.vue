@@ -178,6 +178,18 @@
                 <span class="text-[11px] text-slate-400">Kirim email pemberitahuan penolakan beserta alasan dari petugas verifikator.</span>
               </div>
             </label>
+
+            <label class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="form['queue.notify_on_ready_for_pickup']"
+                class="rounded text-blue-600 focus:ring-blue-500"
+              />
+              <div>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Notifikasi KTP-el Siap Diambil</span>
+                <span class="text-[11px] text-slate-400">Kirim email saat fisik kartu KTP-el selesai dicetak dan siap diambil di loket penyerahan.</span>
+              </div>
+            </label>
           </div>
         </div>
 
@@ -223,6 +235,7 @@ const form = ref({
   'queue.notify_on_revision': getVal('notification', 'queue.notify_on_revision', '1') === '1',
   'queue.notify_on_approved': getVal('notification', 'queue.notify_on_approved', '1') === '1',
   'queue.notify_on_rejected': getVal('notification', 'queue.notify_on_rejected', '1') === '1',
+  'queue.notify_on_ready_for_pickup': getVal('notification', 'queue.notify_on_ready_for_pickup', '1') === '1',
 })
 
 const submitting = ref(false)

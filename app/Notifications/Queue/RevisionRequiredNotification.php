@@ -20,19 +20,24 @@ class RevisionRequiredNotification extends Notification
 
     public function toMail($notifiable): MailMessage
     {
+        $this->application->loadMissing(['serviceType']);
         $statusUrl = route('queue.status', ['token' => $this->application->access_token]);
-        $notes = $this->application->revision_notes ?: 'Terdapat dokumen yang buram, terpotong, atau tidak sesuai ketentuan.';
+        $serviceName = $this->application->serviceType?->name ?: 'Pelayanan KTP-el';
+        $notes = $this->application->revision_notes ?: 'Terdapat dokumen yang buram, terpotong, atau belum memenuhi ketentuan administrasi kependudukan.';
 
         return (new MailMessage)
-            ->subject("Perhatian: Dokumen Pengajuan Memerlukan Perbaikan [{$this->application->reg_number}]")
+            ->subject("⚠️ Permohonan Perbaikan Dokumen Persyaratan KTP-el [{$this->application->reg_number}] — Disdukcapil Dompu")
             ->greeting("Yth. Bapak/Ibu {$this->application->applicant_name},")
-            ->line("Petugas verifikator kami telah memeriksa berkas pendaftaran pelayanan KTP-el Anda.")
-            ->line("Ditemukan beberapa dokumen yang **memerlukan perbaikan / unggah ulang**.")
-            ->line("**Catatan Petugas Verifikator:**")
-            ->line("_{$notes}_")
-            ->action('Unggah Ulang Dokumen Sekarang', $statusUrl)
-            ->line("Anda tidak perlu membuat pendaftaran baru. Cukup buka tautan di atas dan unggah ulang dokumen yang ditandai.")
-            ->line("Harap perbaiki dalam waktu 3x24 jam agar permohonan Anda dapat segera diproses.")
+            ->line("Petugas verifikator Disdukcapil Kabupaten Dompu telah memeriksa dokumen permohonan pelayanan KTP-el Anda.")
+            ->line("Ditemukan beberapa berkas persyaratan yang **memerlukan perbaikan / unggah ulang** sebelum antrean dapat diproses lebih lanjut:")
+            ->line("• **Nomor Registrasi:** `{$this->application->reg_number}`")
+            ->line("• **Jenis Layanan:** {$serviceName}")
+            ->line("• **Catatan & Instruksi Perbaikan dari Petugas:**")
+            ->line("> *\"{$notes}\"*")
+            ->action('Unggah Dokumen Perbaikan Sekarang', $statusUrl)
+            ->line("**Informasi Penting:**")
+            ->line("1. Anda **tidak perlu mengulang pendaftaran dari awal**. Cukup klik tombol di atas dan unggah kembali dokumen yang diminta.")
+            ->line("2. Harap selesaikan perbaikan berkas sesegera mungkin agar permohonan Anda dapat langsung disetujui petugas.")
             ->salutation("Hormat kami,\nTim Verifikasi Disdukcapil Kabupaten Dompu");
     }
 }

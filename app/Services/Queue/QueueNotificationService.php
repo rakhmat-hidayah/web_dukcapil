@@ -8,6 +8,7 @@ use App\Models\Queue\QueueSetting;
 use App\Notifications\Queue\ApplicationApprovedNotification;
 use App\Notifications\Queue\ApplicationRejectedNotification;
 use App\Notifications\Queue\ApplicationSubmittedNotification;
+use App\Notifications\Queue\KtpReadyForPickupNotification;
 use App\Notifications\Queue\RevisionRequiredNotification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -20,7 +21,20 @@ class QueueNotificationService
      */
     public function dispatch(QueueApplication $application, string $event): void
     {
-        $settingKey = "queue.notify_on_{$event}";
+        $settingMap = [
+            'submit'           => 'queue.notify_on_submit',
+            'submitted'        => 'queue.notify_on_submit',
+            'revision'         => 'queue.notify_on_revision',
+            'revision_required'=> 'queue.notify_on_revision',
+            'approved'         => 'queue.notify_on_approved',
+            'queue_booked'     => 'queue.notify_on_approved',
+            'number_issued'    => 'queue.notify_on_approved',
+            'rejected'         => 'queue.notify_on_rejected',
+            'ready_for_pickup' => 'queue.notify_on_ready_for_pickup',
+            'ready'            => 'queue.notify_on_ready_for_pickup',
+        ];
+
+        $settingKey = $settingMap[$event] ?? "queue.notify_on_{$event}";
         $isEnabled = QueueSetting::get($settingKey, '1') === '1';
 
         $recipient = $application->applicant_email;
@@ -63,8 +77,9 @@ class QueueNotificationService
         return match ($event) {
             'submit', 'submitted' => new ApplicationSubmittedNotification($application),
             'revision', 'revision_required' => new RevisionRequiredNotification($application),
-            'approved', 'queue_booked' => new ApplicationApprovedNotification($application),
+            'approved', 'queue_booked', 'number_issued' => new ApplicationApprovedNotification($application),
             'rejected' => new ApplicationRejectedNotification($application),
+            'ready_for_pickup', 'ready' => new KtpReadyForPickupNotification($application),
             default => null,
         };
     }

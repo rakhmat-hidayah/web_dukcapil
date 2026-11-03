@@ -10,6 +10,10 @@ use App\Models\Queue\QueueSlot;
 use App\Models\Queue\ServiceDocument;
 use App\Models\Queue\ServiceType;
 use App\Models\User;
+use App\Notifications\Queue\ApplicationApprovedNotification;
+use App\Notifications\Queue\ApplicationRejectedNotification;
+use App\Notifications\Queue\KtpReadyForPickupNotification;
+use App\Notifications\Queue\RevisionRequiredNotification;
 use App\Services\Queue\QueueApplicationService;
 use App\Services\Queue\QueueNumberGenerator;
 use App\Services\Queue\QueueSlotService;
@@ -17,6 +21,7 @@ use App\Services\Queue\QueueVerificationService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -773,5 +778,89 @@ class QueueWorkflowTest extends TestCase
         $this->assertEquals('Jl. Soekarno Hatta No. 9, Dompu Testing PUT', \App\Models\Queue\QueueSetting::get('queue.office_address'));
         $this->assertEquals('08:30', \App\Models\Queue\QueueSetting::get('queue.open_time'));
         $this->assertEquals('0', \App\Models\Queue\QueueSetting::get('queue.notify_on_submit'));
+    }
+
+    public function test_all_four_applicant_email_notifications_are_dispatched_successfully(): void
+    {
+        Notification::fake();
+
+        $service = ServiceType::first();
+        $this->assertNotNull($service);
+        $appService = app(QueueApplicationService::class);
+        $notificationService = app(\App\Services\Queue\QueueNotificationService::class);
+
+        $testEmail = 'pemohon.uji@example.com';
+        $uniqueNik = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+
+        $application = $appService->createDraft([
+            'applicant_nik' => $uniqueNik,
+            'applicant_name' => 'Warga Uji Notifikasi',
+            'applicant_phone' => '081234567800',
+            'applicant_email' => $testEmail,
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+
+        $application->update([
+            'queue_number' => 'H-007',
+            'revision_notes' => 'Foto KK buram, mohon foto ulang.',
+            'rejection_reason' => 'NIK tidak terdaftar dalam database SIAK.',
+        ]);
+
+        // 1. Nomor Antrean Terbit
+        $notificationService->dispatch($application, 'approved');
+        Notification::assertSentOnDemand(
+            ApplicationApprovedNotification::class,
+            function ($notification, $channels, $notifiable) use ($testEmail) {
+                return $notifiable->routes['mail'] === $testEmail;
+            }
+        );
+
+        // 2. Permohonan Ditolak
+        $notificationService->dispatch($application, 'rejected');
+        Notification::assertSentOnDemand(
+            ApplicationRejectedNotification::class,
+            function ($notification, $channels, $notifiable) use ($testEmail) {
+                return $notifiable->routes['mail'] === $testEmail;
+            }
+        );
+
+        // 3. Permohonan Perbaikan
+        $notificationService->dispatch($application, 'revision');
+        Notification::assertSentOnDemand(
+            RevisionRequiredNotification::class,
+            function ($notification, $channels, $notifiable) use ($testEmail) {
+                return $notifiable->routes['mail'] === $testEmail;
+            }
+        );
+
+        // 4. KTP Siap Diambil
+        $notificationService->dispatch($application, 'ready_for_pickup');
+        Notification::assertSentOnDemand(
+            KtpReadyForPickupNotification::class,
+            function ($notification, $channels, $notifiable) use ($testEmail) {
+                return $notifiable->routes['mail'] === $testEmail;
+            }
+        );
+
+        // Verify mail messages content
+        $mailApproved = (new ApplicationApprovedNotification($application))->toMail(null);
+        $this->assertStringContainsString('H-007', $mailApproved->subject);
+        $this->assertStringContainsString('Nomor Antrean', $mailApproved->subject);
+
+        $mailRejected = (new ApplicationRejectedNotification($application))->toMail(null);
+        $this->assertStringContainsString('Ditolak', $mailRejected->subject);
+        $this->assertStringContainsString('SIAK', implode(' ', $mailRejected->introLines));
+
+        $mailRevision = (new RevisionRequiredNotification($application))->toMail(null);
+        $this->assertStringContainsString('Perbaikan', $mailRevision->subject);
+        $this->assertStringContainsString('Foto KK buram', implode(' ', $mailRevision->introLines));
+
+        $mailReady = (new KtpReadyForPickupNotification($application))->toMail(null);
+        $this->assertStringContainsString('Siap Diambil', $mailReady->subject);
+        $this->assertStringContainsString('selesai dicetak', implode(' ', $mailReady->introLines));
+
+        // Cleanup
+        $appService->deleteDraft($application);
     }
 }

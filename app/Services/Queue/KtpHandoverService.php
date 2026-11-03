@@ -16,6 +16,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class KtpHandoverService
 {
+    public function __construct(
+        protected QueueNotificationService $notificationService
+    ) {}
     /**
      * Get accurate dashboard statistics calculated entirely from database.
      */
@@ -121,6 +124,8 @@ class KtpHandoverService
                 'notes'          => 'Fisik KTP-el telah diperiksa dan siap diambil di Disdukcapil Kabupaten Dompu.' . ($notes ? " Catatan: {$notes}" : ''),
             ]);
 
+            $this->notificationService->dispatch($app, 'ready_for_pickup');
+
             return $handover->fresh(['application.serviceType', 'readyMarkedUser']);
         });
     }
@@ -212,6 +217,8 @@ class KtpHandoverService
                 'user_id'        => $officer?->id,
                 'notes'          => "Kendala serah terima diselesaikan: {$resolutionNotes}",
             ]);
+
+            $this->notificationService->dispatch($app, 'ready_for_pickup');
 
             return $handover->fresh(['application.serviceType', 'exceptionResolvedUser']);
         });

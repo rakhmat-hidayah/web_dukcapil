@@ -20,16 +20,20 @@ class ApplicationRejectedNotification extends Notification
 
     public function toMail($notifiable): MailMessage
     {
-        $reason = $this->application->rejection_reason ?: 'Dokumen tidak memenuhi persyaratan peraturan administrasi kependudukan.';
+        $this->application->loadMissing(['serviceType']);
+        $serviceName = $this->application->serviceType?->name ?: 'Pelayanan KTP-el';
+        $reason = $this->application->rejection_reason ?: 'Dokumen persyaratan tidak memenuhi ketentuan peraturan administrasi kependudukan yang berlaku.';
 
         return (new MailMessage)
-            ->subject("Pemberitahuan Penolakan Pengajuan [{$this->application->reg_number}]")
+            ->subject("❌ Pemberitahuan: Permohonan Pelayanan KTP-el Ditolak [{$this->application->reg_number}] — Disdukcapil Dompu")
             ->greeting("Yth. Bapak/Ibu {$this->application->applicant_name},")
-            ->line("Setelah dilakukan pemeriksaan menyeluruh, kami memberitahukan bahwa pengajuan pelayanan KTP-el Anda **tidak dapat disetujui**.")
-            ->line("**Alasan Penolakan:**")
-            ->line("_{$reason}_")
+            ->line("Setelah dilakukan pemeriksaan menyeluruh terhadap berkas yang diajukan, kami memberitahukan bahwa permohonan pendaftaran pelayanan KTP-el Anda **belum dapat disetujui**.")
+            ->line("• **Nomor Registrasi:** `{$this->application->reg_number}`")
+            ->line("• **Jenis Layanan:** {$serviceName}")
+            ->line("• **Alasan Penolakan dari Petugas:**")
+            ->line("> *\"{$reason}\"*")
             ->action('Ajukan Pendaftaran Baru', route('queue.index'))
-            ->line("Apabila Anda membutuhkan bantuan lebih lanjut, silakan datang langsung ke loket informasi Dinas Dukcapil Kabupaten Dompu.")
+            ->line("Apabila Anda membutuhkan informasi lebih lanjut mengenai ketentuan persyaratan yang sah, silakan datang langsung ke Loket Layanan Informasi Disdukcapil Kabupaten Dompu atau hubungi nomor WhatsApp helpdesk resmi kami.")
             ->salutation("Hormat kami,\nDisdukcapil Kabupaten Dompu");
     }
 }
