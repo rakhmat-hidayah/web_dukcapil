@@ -603,7 +603,7 @@
           <!-- Verification History -->
           <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
             <h3 class="text-xs font-black uppercase tracking-wider text-slate-400">
-              Riwayat Aktivitas Verifikasi
+              Riwayat Aktivitas
             </h3>
 
             <div class="space-y-3">
