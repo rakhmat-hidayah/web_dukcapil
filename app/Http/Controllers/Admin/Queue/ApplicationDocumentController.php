@@ -52,6 +52,33 @@ class ApplicationDocumentController extends Controller
     }
 
     /**
+     * Mark all pending documents for this application as approved.
+     */
+    public function approveAll(int $applicationId): JsonResponse|RedirectResponse
+    {
+        $application = QueueApplication::findOrFail($applicationId);
+        $user = Auth::user();
+
+        $application->documents()
+            ->where('status', ApplicationDocument::STATUS_PENDING)
+            ->update([
+                'status'      => ApplicationDocument::STATUS_APPROVED,
+                'reviewed_by' => $user?->id,
+                'reviewed_at' => now(),
+            ]);
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Seluruh berkas persyaratan ditandai sah / sudah diperiksa.',
+                'documents' => $application->fresh('documents')->documents,
+            ]);
+        }
+
+        return back()->with('success', 'Seluruh berkas persyaratan telah ditandai sah / sudah diperiksa.');
+    }
+
+    /**
      * Mark an individual document approved by officer.
      */
     public function approve(int $applicationId, int $docId): JsonResponse|RedirectResponse

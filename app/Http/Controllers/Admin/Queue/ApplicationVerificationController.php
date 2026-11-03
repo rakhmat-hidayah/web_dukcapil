@@ -133,6 +133,28 @@ class ApplicationVerificationController extends Controller
             'documents.serviceDocument',
         ]);
 
+        // Auto-sync any pending documents to APPROVED if application is already pre-verified or further
+        if (in_array($application->status, [
+            QueueApplication::STATUS_PRE_VERIFIED,
+            QueueApplication::STATUS_QUEUE_BOOKED,
+            QueueApplication::STATUS_ARRIVED,
+            QueueApplication::STATUS_PHYSICAL_VERIFICATION,
+            QueueApplication::STATUS_APPROVED_FOR_SERVICE,
+            QueueApplication::STATUS_PROCESSING,
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+            QueueApplication::STATUS_COMPLETED,
+        ])) {
+            $hasPending = $application->documents->where('status', ApplicationDocument::STATUS_PENDING)->isNotEmpty();
+            if ($hasPending) {
+                $application->documents()->where('status', ApplicationDocument::STATUS_PENDING)->update([
+                    'status'      => ApplicationDocument::STATUS_APPROVED,
+                    'reviewed_by' => $officer?->id,
+                    'reviewed_at' => now(),
+                ]);
+                $application->load('documents.serviceDocument');
+            }
+        }
+
         // Ensure KtpHandover record exists and matches current application stage
         if (in_array($application->status, [
             QueueApplication::STATUS_PRE_VERIFIED,

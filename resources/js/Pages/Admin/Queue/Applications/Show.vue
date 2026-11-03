@@ -228,9 +228,22 @@
                   Periksa kejelasan foto, kelengkapan berkas fisik, dan kesesuaian data pemohon.
                 </p>
               </div>
-              <span class="text-xs font-mono font-bold text-slate-500">
-                {{ uploadedCount }} / {{ totalDocsRequired }} Berkas Diunggah
-              </span>
+              <div class="flex items-center gap-2.5">
+                <span class="text-xs font-mono font-bold text-slate-500">
+                  {{ uploadedCount }} / {{ totalDocsRequired }} Berkas Diunggah
+                </span>
+                <button
+                  v-if="hasPendingDocuments"
+                  type="button"
+                  @click="approveAllDocs"
+                  :disabled="approvingAll"
+                  class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  title="Sahkan seluruh berkas persyaratan pemohon sekaligus"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span>{{ approvingAll ? 'Menyinkronkan...' : 'Sahkan Semua Berkas' }}</span>
+                </button>
+              </div>
             </div>
 
             <!-- Documents Grid -->
@@ -285,6 +298,18 @@
                           {{ getDocument(docConfig.id).formatted_size || (Math.round((getDocument(docConfig.id).file_size_bytes || 0) / 1024) + ' KB') }}
                         </p>
                       </div>
+
+                      <!-- Quick Approve button if pending -->
+                      <button
+                        v-if="getDocument(docConfig.id).status === 'PENDING'"
+                        type="button"
+                        @click="approveSingleDoc(getDocument(docConfig.id))"
+                        class="px-3 py-2 rounded-xl bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 text-xs font-bold transition flex items-center gap-1 shadow-sm cursor-pointer"
+                        title="Tandai berkas ini sah / sudah diperiksa"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span>Sahkan</span>
+                      </button>
 
                       <!-- Preview / Inspect Button -->
                       <button
@@ -1050,7 +1075,11 @@ const previewSelfie = () => {
   if (!selfieDocument.value) return
   if (selfieDocument.value.status === 'PENDING') {
     selfieDocument.value.status = 'APPROVED'
-    axios.post(`/admin/queue/applications/${props.application.id}/documents/${selfieDocument.value.id}/approve`).catch(() => {})
+    router.post(
+      route('admin.queue.documents.approve', { applicationId: props.application.id, docId: selfieDocument.value.id }),
+      {},
+      { preserveScroll: true, preserveState: true }
+    )
   }
   const url = selfieDocument.value.admin_serve_url || (selfieDocument.value.id ? `/admin/queue/documents/${selfieDocument.value.id}/serve` : '')
   viewerState.value = {
@@ -1065,7 +1094,11 @@ const openViewer = (doc, label) => {
   if (!doc) return
   if (doc.status === 'PENDING') {
     doc.status = 'APPROVED'
-    axios.post(`/admin/queue/applications/${props.application.id}/documents/${doc.id}/approve`).catch(() => {})
+    router.post(
+      route('admin.queue.documents.approve', { applicationId: props.application.id, docId: doc.id }),
+      {},
+      { preserveScroll: true, preserveState: true }
+    )
   }
   const url = doc.admin_serve_url || (doc.id ? `/admin/queue/documents/${doc.id}/serve` : '')
   viewerState.value = {
@@ -1076,9 +1109,41 @@ const openViewer = (doc, label) => {
   }
 }
 
+const approveSingleDoc = (doc) => {
+  if (!doc) return
+  doc.status = 'APPROVED'
+  router.post(
+    route('admin.queue.documents.approve', { applicationId: props.application.id, docId: doc.id }),
+    {},
+    { preserveScroll: true }
+  )
+}
+
+const approvingAll = ref(false)
+const hasPendingDocuments = computed(() => {
+  return props.application.documents?.some(d => d.status === 'PENDING')
+})
+
+const approveAllDocs = () => {
+  approvingAll.value = true
+  router.post(
+    route('admin.queue.documents.approve-all', props.application.id),
+    {},
+    {
+      preserveScroll: true,
+      onFinish: () => {
+        approvingAll.value = false
+      },
+    }
+  )
+}
+
 // Helpers
 const getDocument = (serviceDocId) => {
-  return props.application.documents?.find(d => d.service_document_id === serviceDocId || d.id === serviceDocId)
+  if (!serviceDocId) return null
+  return props.application.documents?.find(d => d.service_document_id === serviceDocId)
+    || props.application.documents?.find(d => !d.service_document_id && d.id === serviceDocId)
+    || null
 }
 
 const requirementsList = computed(() => {

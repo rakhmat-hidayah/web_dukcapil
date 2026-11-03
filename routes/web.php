@@ -438,6 +438,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Document stream & actions
             Route::get('/documents/{documentId}/serve', [\App\Http\Controllers\Admin\Queue\ApplicationDocumentController::class, 'serve'])->name('documents.serve');
+            Route::post('/applications/{applicationId}/documents/approve-all', [\App\Http\Controllers\Admin\Queue\ApplicationDocumentController::class, 'approveAll'])->name('documents.approve-all');
             Route::post('/applications/{applicationId}/documents/{docId}/approve', [\App\Http\Controllers\Admin\Queue\ApplicationDocumentController::class, 'approve'])->name('documents.approve');
             Route::post('/applications/{applicationId}/documents/{docId}/reject', [\App\Http\Controllers\Admin\Queue\ApplicationDocumentController::class, 'reject'])->name('documents.reject');
 

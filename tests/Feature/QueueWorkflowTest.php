@@ -905,4 +905,63 @@ class QueueWorkflowTest extends TestCase
         // Cleanup
         $application->delete();
     }
+
+    public function test_can_approve_single_and_all_documents_and_sync_status()
+    {
+        $admin = User::first() ?? User::factory()->create();
+        $service = ServiceType::first();
+
+        $appService = app(\App\Services\Queue\QueueApplicationService::class);
+        $application = $appService->createDraft([
+            'applicant_nik' => '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT),
+            'applicant_name' => 'Warga Uji Dokumen',
+            'applicant_phone' => '081234567890',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+
+        $doc1 = ApplicationDocument::create([
+            'application_id' => $application->id,
+            'service_document_id' => 1,
+            'original_filename' => 'surat_hilang.jpg',
+            'stored_filename' => 'surat_hilang.jpg',
+            'disk' => 'local',
+            'path' => 'test/surat_hilang.jpg',
+            'mime_type' => 'image/jpeg',
+            'file_size_bytes' => 1024,
+            'status' => ApplicationDocument::STATUS_PENDING,
+        ]);
+
+        $doc2 = ApplicationDocument::create([
+            'application_id' => $application->id,
+            'service_document_id' => 2,
+            'original_filename' => 'kk.jpg',
+            'stored_filename' => 'kk.jpg',
+            'disk' => 'local',
+            'path' => 'test/kk.jpg',
+            'mime_type' => 'image/jpeg',
+            'file_size_bytes' => 1024,
+            'status' => ApplicationDocument::STATUS_PENDING,
+        ]);
+
+        // 1. Approve single document
+        $responseSingle = $this->actingAs($admin)->post(
+            route('admin.queue.documents.approve', ['applicationId' => $application->id, 'docId' => $doc1->id])
+        );
+        $responseSingle->assertRedirect();
+        $this->assertEquals(ApplicationDocument::STATUS_APPROVED, $doc1->fresh()->status);
+        $this->assertEquals(ApplicationDocument::STATUS_PENDING, $doc2->fresh()->status);
+
+        // 2. Approve all pending documents
+        $responseAll = $this->actingAs($admin)->post(
+            route('admin.queue.documents.approve-all', ['applicationId' => $application->id])
+        );
+        $responseAll->assertRedirect();
+        $this->assertEquals(ApplicationDocument::STATUS_APPROVED, $doc2->fresh()->status);
+
+        // Cleanup
+        $doc1->delete();
+        $doc2->delete();
+        $application->delete();
+    }
 }
