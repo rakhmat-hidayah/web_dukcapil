@@ -177,11 +177,6 @@ class ArchiveService
         $period = $params['period'] ?? now()->format('Y-m');
         $serviceTypeId = !empty($params['service_type_id']) ? (int) $params['service_type_id'] : null;
 
-        // Determine next batch sequence for the month
-        $currentMonthCount = ArchivePackage::where('archive_period', $period)->count();
-        $seq = str_pad($currentMonthCount + 1, 4, '0', STR_PAD_LEFT);
-        $packageCode = "ARSIP_PERMOHONAN_{$period}_BATCH-{$seq}";
-
         // Collect applications
         if (!empty($params['application_ids']) && is_array($params['application_ids'])) {
             $applications = QueueApplication::with(['serviceType.documents', 'documents.serviceDocument'])
@@ -199,6 +194,28 @@ class ArchiveService
 
         if ($applications->isEmpty()) {
             throw new \InvalidArgumentException('Tidak ada permohonan yang memenuhi syarat untuk dibuatkan paket arsip.');
+        }
+
+        // Determine package code: if single application, include reg_number & applicant_nik
+        if ($applications->count() === 1) {
+            $singleApp = $applications->first();
+            $nikPart = !empty($singleApp->applicant_nik) ? "_{$singleApp->applicant_nik}" : '';
+            $baseCode = "ARSIP_{$period}_{$singleApp->reg_number}{$nikPart}";
+            $packageCode = $baseCode;
+            $c = 1;
+            while (ArchivePackage::where('package_code', $packageCode)->exists()) {
+                $packageCode = "{$baseCode}_V{$c}";
+                $c++;
+            }
+        } else {
+            // Determine next batch sequence for the month
+            $currentMonthCount = ArchivePackage::where('archive_period', $period)->count();
+            $seq = str_pad($currentMonthCount + 1, 4, '0', STR_PAD_LEFT);
+            $packageCode = "ARSIP_PERMOHONAN_{$period}_BATCH-{$seq}";
+            while (ArchivePackage::where('package_code', $packageCode)->exists()) {
+                $seq = str_pad(++$currentMonthCount, 4, '0', STR_PAD_LEFT);
+                $packageCode = "ARSIP_PERMOHONAN_{$period}_BATCH-{$seq}";
+            }
         }
 
         // Validate completeness of all applications
@@ -331,7 +348,10 @@ class ArchiveService
 
         // Process each application
         foreach ($applications as $app) {
-            $appFolderRelative = "permohonan/{$app->reg_number}";
+            $appFolderName = !empty($app->applicant_nik)
+                ? "{$app->reg_number}_{$app->applicant_nik}"
+                : $app->reg_number;
+            $appFolderRelative = "permohonan/{$appFolderName}";
             $appFolderFull = "{$tempDir}/{$appFolderRelative}";
             File::makeDirectory($appFolderFull, 0755, true);
 
@@ -362,6 +382,7 @@ class ArchiveService
                 $fileInfo = [
                     'relative_path' => $zipRelativePath,
                     'application_ref' => $app->reg_number,
+                    'applicant_nik' => $app->applicant_nik,
                     'original_filename' => $doc->original_filename,
                     'archive_filename' => $destFileName,
                     'mime_type' => $doc->mime_type,
@@ -394,6 +415,7 @@ class ArchiveService
                 'service_type' => $app->serviceType?->name,
                 'service_type_code' => $app->serviceType?->slug,
                 'applicant_name' => $app->applicant_name,
+                'applicant_nik' => $app->applicant_nik,
                 'applicant_nik_masked' => $app->masked_nik,
                 'applicant_district' => $app->applicant_district,
                 'applicant_village' => $app->applicant_village,
@@ -418,7 +440,9 @@ class ArchiveService
             $manifestApplications[] = [
                 'reg_number' => $app->reg_number,
                 'applicant_name' => $app->applicant_name,
+                'applicant_nik' => $app->applicant_nik,
                 'applicant_nik_masked' => $app->masked_nik,
+                'folder_name' => $appFolderName,
                 'service_type' => $app->serviceType?->name,
                 'document_count' => count($appDocManifests),
                 'completed_at' => $app->completed_at?->toIso8601String(),
@@ -516,9 +540,22 @@ class ArchiveService
             'sha256_checksum' => $package->sha256_checksum,
         ], $user);
 
-        return response()->download($zipFullPath, basename($zipFullPath), [
+        $downloadFileName = basename($zipFullPath);
+
+        // If package is for a single application and filename does not yet have NIK, dynamically include it
+        if ($package->total_applications === 1) {
+            $item = $package->items()->with('application')->first();
+            $app = $item?->application;
+            if ($app && !empty($app->applicant_nik) && !str_contains($downloadFileName, $app->applicant_nik)) {
+                $ext = pathinfo($downloadFileName, PATHINFO_EXTENSION);
+                $nameWithoutExt = pathinfo($downloadFileName, PATHINFO_FILENAME);
+                $downloadFileName = "{$nameWithoutExt}_{$app->applicant_nik}.{$ext}";
+            }
+        }
+
+        return response()->download($zipFullPath, $downloadFileName, [
             'Content-Type' => 'application/zip',
-            'Content-Disposition' => 'attachment; filename="' . basename($zipFullPath) . '"',
+            'Content-Disposition' => 'attachment; filename="' . $downloadFileName . '"',
         ]);
     }
 

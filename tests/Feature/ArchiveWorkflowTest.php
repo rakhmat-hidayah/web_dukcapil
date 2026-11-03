@@ -181,6 +181,7 @@ class ArchiveWorkflowTest extends TestCase
         $this->assertGreaterThan(0, $package->total_files);
         $this->assertNotEmpty($package->sha256_checksum);
         $this->assertNotEmpty($package->zip_path);
+        $this->assertTrue(str_contains($package->package_code, $app->applicant_nik), 'Package code for single application must contain NIK');
 
         $zipFullPath = storage_path('app/private/' . $package->zip_path);
         $this->assertTrue(File::exists($zipFullPath));
@@ -195,12 +196,14 @@ class ArchiveWorkflowTest extends TestCase
         $hasManifest = false;
         $hasCsv = false;
         $hasAppFolder = false;
+        $hasAppFolderWithNik = false;
 
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $stat = $zip->statIndex($i);
             if (str_contains($stat['name'], 'manifest.json')) $hasManifest = true;
             if (str_contains($stat['name'], 'daftar_arsip.csv')) $hasCsv = true;
             if (str_contains($stat['name'], "permohonan/{$app->reg_number}")) $hasAppFolder = true;
+            if (str_contains($stat['name'], "permohonan/{$app->reg_number}_{$app->applicant_nik}")) $hasAppFolderWithNik = true;
         }
 
         $zip->close();
@@ -208,6 +211,42 @@ class ArchiveWorkflowTest extends TestCase
         $this->assertTrue($hasManifest, 'ZIP must contain manifest.json');
         $this->assertTrue($hasCsv, 'ZIP must contain daftar_arsip.csv');
         $this->assertTrue($hasAppFolder, 'ZIP must contain application reference folder');
+        $this->assertTrue($hasAppFolderWithNik, 'ZIP application folder must contain applicant NIK');
+    }
+
+    public function test_multiple_applications_package_includes_applicant_nik_in_each_folder()
+    {
+        $app1 = $this->createValidCompletedApplication();
+        $app2 = $this->createValidCompletedApplication();
+
+        $service = app(ArchiveService::class);
+        $package = $service->createPackage([
+            'application_ids' => [$app1->id, $app2->id],
+            'period' => date('Y-m'),
+        ], $this->archiveOperatorUser);
+
+        $this->assertEquals(ArchivePackage::STATUS_READY_FOR_DOWNLOAD, $package->status);
+        $this->assertEquals(2, $package->total_applications);
+
+        $zipFullPath = storage_path('app/private/' . $package->zip_path);
+        $this->assertTrue(File::exists($zipFullPath));
+
+        $zip = new ZipArchive();
+        $this->assertTrue($zip->open($zipFullPath) === true);
+
+        $hasApp1Folder = false;
+        $hasApp2Folder = false;
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $stat = $zip->statIndex($i);
+            if (str_contains($stat['name'], "permohonan/{$app1->reg_number}_{$app1->applicant_nik}")) $hasApp1Folder = true;
+            if (str_contains($stat['name'], "permohonan/{$app2->reg_number}_{$app2->applicant_nik}")) $hasApp2Folder = true;
+        }
+
+        $zip->close();
+
+        $this->assertTrue($hasApp1Folder, 'ZIP must contain app1 folder with NIK');
+        $this->assertTrue($hasApp2Folder, 'ZIP must contain app2 folder with NIK');
     }
 
     public function test_application_with_missing_physical_document_is_flagged_incomplete()
@@ -351,6 +390,7 @@ class ArchiveWorkflowTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertHeader('content-type', 'application/zip');
+        $this->assertStringContainsString($app->applicant_nik, (string) $response->headers->get('content-disposition'));
 
         // Verify source file is strictly preserved
         $doc = $app->documents()->first();
