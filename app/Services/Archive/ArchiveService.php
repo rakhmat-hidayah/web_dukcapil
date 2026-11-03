@@ -82,7 +82,29 @@ class ArchiveService
      */
     public function checkApplicationCompleteness(QueueApplication $application): array
     {
-        $requiredDocs = $application->serviceType?->documents()->where('is_required', true)->get() ?? collect();
+        $isRepresented = $application->is_represented;
+        if ($application->handover && in_array(strtolower((string) $application->handover->receiver_type), ['self', 'sendiri'])) {
+            $isRepresented = false;
+        }
+
+        $requiredDocs = ($application->serviceType?->documents()->where('is_required', true)->get() ?? collect())
+            ->filter(function ($req) use ($isRepresented) {
+                if ($req->applicable_to === 'representative_only' && !$isRepresented) {
+                    return false;
+                }
+                if ($req->applicable_to === 'self_only' && $isRepresented) {
+                    return false;
+                }
+                if (!$isRepresented) {
+                    $label = strtolower($req->label ?? '');
+                    if (str_contains($label, 'f-1.07') || str_contains($label, 'f1.07') || str_contains($label, 'kuasa') || str_contains($label, 'dikuasakan') || str_contains($label, 'diwakilkan')) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+        $requiredDocIds = $requiredDocs->pluck('id')->toArray();
         $uploadedDocs = $application->documents;
 
         $issues = [];
@@ -118,10 +140,9 @@ class ArchiveService
             ];
         }
 
-        // Check optional docs as well
+        // Check optional / additional docs as well
         foreach ($uploadedDocs as $upDoc) {
-            $req = $upDoc->serviceDocument;
-            if ($req && $req->is_required) {
+            if ($upDoc->service_document_id && in_array($upDoc->service_document_id, $requiredDocIds)) {
                 continue; // Already handled above
             }
 
@@ -131,7 +152,7 @@ class ArchiveService
                 $totalBytes += $size;
                 $validDocuments[] = [
                     'document' => $upDoc,
-                    'requirement' => $req,
+                    'requirement' => $upDoc->serviceDocument,
                     'size' => $size,
                     'path' => $rawPath,
                 ];

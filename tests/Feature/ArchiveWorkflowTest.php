@@ -266,6 +266,80 @@ class ArchiveWorkflowTest extends TestCase
         $this->assertNull($package->zip_path);
     }
 
+    public function test_completeness_check_excludes_surat_kuasa_f107_when_applicant_attends_self()
+    {
+        $serviceType = ServiceType::create([
+            'name' => 'Layanan KTP Mandiri Test ' . uniqid(),
+            'slug' => 'layanan-ktp-mandiri-' . uniqid(),
+            'is_active' => true,
+        ]);
+
+        $kkDoc = ServiceDocument::create([
+            'service_type_id' => $serviceType->id,
+            'label' => 'Kartu Keluarga (KK)',
+            'is_required' => true,
+            'applicable_to' => 'all',
+            'accepted_formats' => 'jpg,png,pdf',
+            'max_size_kb' => 2048,
+        ]);
+
+        $kuasaDoc = ServiceDocument::create([
+            'service_type_id' => $serviceType->id,
+            'label' => 'Formulir F-1.07 Surat Kuasa dalam Pelayanan Administrasi Kependudukan (Jika Dikuasakan)',
+            'is_required' => true,
+            'applicable_to' => 'representative_only',
+            'accepted_formats' => 'jpg,png,pdf',
+            'max_size_kb' => 2048,
+        ]);
+
+        $app = QueueApplication::create([
+            'reg_number' => 'REG-' . date('ym') . '-' . strtoupper(\Illuminate\Support\Str::random(6)),
+            'service_type_id' => $serviceType->id,
+            'status' => QueueApplication::STATUS_COMPLETED,
+            'applicant_name' => 'Pemohon Mandiri Test',
+            'applicant_nik' => '5205010101950002',
+            'applicant_phone' => '082345678902',
+            'applicant_address' => 'Jl. Bhayangkara No. 5, Dompu',
+            'applicant_district' => 'DOMPU',
+            'applicant_village' => 'DOREBARA',
+            'attendance_type' => 'self',
+            'submitted_at' => now()->subDays(2),
+            'approved_at' => now()->subDay(),
+            'completed_at' => now(),
+        ]);
+
+        $relPath = "queue-documents/test/{$app->id}/kk.jpg";
+        Storage::disk('local')->put($relPath, 'IMAGE_BINARY_TEST_CONTENT_' . uniqid());
+
+        ApplicationDocument::create([
+            'application_id' => $app->id,
+            'service_document_id' => $kkDoc->id,
+            'original_filename' => 'kk.jpg',
+            'stored_filename' => 'kk.jpg',
+            'disk' => 'local',
+            'path' => $relPath,
+            'mime_type' => 'image/jpeg',
+            'file_size_bytes' => Storage::disk('local')->size($relPath),
+            'original_size_bytes' => Storage::disk('local')->size($relPath),
+            'status' => ApplicationDocument::STATUS_APPROVED,
+        ]);
+
+        $service = app(ArchiveService::class);
+
+        // 1. When attendance_type is 'self', F-1.07 must NOT be required
+        $completenessSelf = $service->checkApplicationCompleteness($app->fresh(['serviceType.documents', 'documents.serviceDocument']));
+        $this->assertTrue($completenessSelf['is_complete']);
+        $this->assertEmpty($completenessSelf['issues']);
+        $this->assertEquals(1, $completenessSelf['document_count']);
+
+        // 2. When attendance_type is 'family_in_kk', F-1.07 is required and should trigger missing issue
+        $app->update(['attendance_type' => 'family_in_kk']);
+        $completenessRep = $service->checkApplicationCompleteness($app->fresh(['serviceType.documents', 'documents.serviceDocument']));
+        $this->assertFalse($completenessRep['is_complete']);
+        $this->assertNotEmpty($completenessRep['issues']);
+        $this->assertStringContainsString('Formulir F-1.07', $completenessRep['issues'][0]);
+    }
+
     public function test_download_package_streams_file_and_logs_audit()
     {
         $app = $this->createValidCompletedApplication();

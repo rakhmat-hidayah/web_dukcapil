@@ -212,6 +212,14 @@ class QueueApplicationService
                 continue;
             }
 
+            // Safety guard: if not represented, skip any F-1.07 or proxy document
+            if (!$isRepresented) {
+                $docLabelLower = strtolower($doc->label ?? '');
+                if (str_contains($docLabelLower, 'kuasa') || str_contains($docLabelLower, 'f-1.07') || str_contains($docLabelLower, 'f1.07') || str_contains($docLabelLower, 'dikuasakan') || str_contains($docLabelLower, 'diwakilkan')) {
+                    continue;
+                }
+            }
+
             // If representative requires power of attorney specifically
             if ($doc->applicable_to === 'representative_only' && $isRepresented) {
                 $docLabelLower = strtolower($doc->label);

@@ -275,6 +275,12 @@ class QueueApplicationController extends Controller
             if ($doc->applicable_to === 'self_only' && $isRepresented) {
                 return false;
             }
+            if (!$isRepresented) {
+                $docLabelLower = strtolower($doc->label ?? '');
+                if (str_contains($docLabelLower, 'kuasa') || str_contains($docLabelLower, 'f-1.07') || str_contains($docLabelLower, 'f1.07') || str_contains($docLabelLower, 'dikuasakan') || str_contains($docLabelLower, 'diwakilkan')) {
+                    return false;
+                }
+            }
             return true;
         })->values();
 

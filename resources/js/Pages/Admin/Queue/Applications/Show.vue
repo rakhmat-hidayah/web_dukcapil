@@ -1447,31 +1447,70 @@ const getDocument = (serviceDocId) => {
     || null
 }
 
+const isRepresented = computed(() => {
+  if (props.application.handover?.receiver_type) {
+    const rType = String(props.application.handover.receiver_type).toLowerCase()
+    if (rType === 'self' || rType === 'sendiri') {
+      return false
+    }
+  }
+  if (props.application.attendance_type === 'self') {
+    return false
+  }
+  return !!props.application.is_represented
+})
+
 const requirementsList = computed(() => {
+  const isRep = isRepresented.value
   if (props.application.service_type?.documents && props.application.service_type.documents.length > 0) {
-    return props.application.service_type.documents
+    return props.application.service_type.documents.filter(doc => {
+      if (doc.applicable_to === 'representative_only' && !isRep) {
+        return false
+      }
+      if (doc.applicable_to === 'self_only' && isRep) {
+        return false
+      }
+      if (!isRep) {
+        const label = (doc.label || '').toLowerCase()
+        if (label.includes('f-1.07') || label.includes('f1.07') || label.includes('kuasa') || label.includes('dikuasakan') || label.includes('diwakilkan')) {
+          return false
+        }
+      }
+      return true
+    })
   }
   if (props.application.documents && props.application.documents.length > 0) {
-    return props.application.documents.map(d => ({
-      id: d.service_document_id || d.id,
-      label: d.service_document?.label || d.original_filename || 'Dokumen Persyaratan',
-      is_required: d.service_document?.is_required ?? true,
-      description: d.service_document?.description || '',
-      accepted_formats: d.service_document?.accepted_formats || 'jpg,jpeg,png,pdf',
-    }))
+    return props.application.documents
+      .filter(d => {
+        if (!isRep) {
+          const label = (d.service_document?.label || d.original_filename || '').toLowerCase()
+          if (label.includes('f-1.07') || label.includes('f1.07') || label.includes('kuasa') || label.includes('dikuasakan') || label.includes('diwakilkan')) {
+            return false
+          }
+        }
+        return true
+      })
+      .map(d => ({
+        id: d.service_document_id || d.id,
+        label: d.service_document?.label || d.original_filename || 'Dokumen Persyaratan',
+        is_required: d.service_document?.is_required ?? true,
+        description: d.service_document?.description || '',
+        accepted_formats: d.service_document?.accepted_formats || 'jpg,jpeg,png,pdf',
+      }))
   }
   return []
 })
 
 const uploadedCount = computed(() => {
+  const applicableIds = requirementsList.value.map(r => r.id)
+  if (applicableIds.length > 0) {
+    return props.application.documents?.filter(d => applicableIds.includes(d.service_document_id))?.length || 0
+  }
   return props.application.documents?.length || 0
 })
 
 const totalDocsRequired = computed(() => {
-  if (props.application.service_type?.documents && props.application.service_type.documents.length > 0) {
-    return props.application.service_type.documents.filter(d => d.is_required)?.length || 0
-  }
-  return props.application.documents?.length || 0
+  return requirementsList.value.filter(d => d.is_required)?.length || 0
 })
 
 // Approve Modal State
