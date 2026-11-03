@@ -27,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Auto-synchronize misplaced media and broken DB paths on boot
+        // Set Indonesian default locale for Carbon date formatting
+        \Carbon\Carbon::setLocale('id');
+        \Illuminate\Support\Carbon::setLocale('id');
+        config(['app.locale' => 'id']);
+
         \App\Services\AutoMediaSync::sync();
         \App\Services\AutoRoleSync::sync();
 

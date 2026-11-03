@@ -66,7 +66,7 @@ class QueueInfoController extends Controller
             ->get()
             ->map(fn($s) => [
                 'date' => $s->schedule_date->format('Y-m-d'),
-                'date_label' => $s->schedule_date->translatedFormat('D, d M'),
+                'date_label' => $s->schedule_date->locale('id')->translatedFormat('D, d M'),
                 'total_quota' => $s->slots->sum('quota'),
                 'total_booked' => $s->slots->sum('booked_count'),
                 'remaining' => max(0, $s->slots->sum('quota') - $s->slots->sum('booked_count')),

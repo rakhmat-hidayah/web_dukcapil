@@ -31,9 +31,7 @@ class QueueSlotService
             ->sortBy(fn($slot) => $slot->schedule->schedule_date)
             ->map(function ($slot) {
                 $schedDate = $slot->schedule->schedule_date;
-                $dateFormatted = $schedDate instanceof Carbon
-                    ? $schedDate->translatedFormat('l, d F Y')
-                    : Carbon::parse($schedDate)->translatedFormat('l, d F Y');
+                $dateFormatted = Carbon::parse($schedDate)->locale('id')->translatedFormat('l, d F Y');
                 $openTime = substr($slot->schedule->open_time, 0, 5);
                 $closeTime = substr($slot->schedule->close_time, 0, 5);
                 $remaining = max(0, $slot->quota - $slot->booked_count);

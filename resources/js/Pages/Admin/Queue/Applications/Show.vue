@@ -693,7 +693,7 @@
               :value="slot.id"
               :disabled="slot.remaining_quota <= 0"
             >
-              {{ slot.label || `${slot.date_label || slot.date} (${slot.open_time || '08:00'} - ${slot.close_time || '15:30'} WITA) — Sisa Kuota: ${slot.remaining_quota} orang (Terisi ${slot.booked_count}/${slot.quota})` }}
+              {{ formatSlotOptionLabel(slot) }}
             </option>
           </select>
 
@@ -704,7 +704,7 @@
           >
             <span class="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 block tracking-wider">Ringkasan Jadwal Terpilih</span>
             <p class="font-bold text-sm text-slate-900 dark:text-white">
-              {{ selectedSlotDetails.date_label || selectedSlotDetails.date }}
+              {{ formatSlotDateLabel(selectedSlotDetails) }}
             </p>
             <p class="text-xs text-slate-600 dark:text-slate-300">
               Jam Operasional: <strong>{{ selectedSlotDetails.open_time || '08:00' }} - {{ selectedSlotDetails.close_time || '15:30' }} WITA</strong>
@@ -1759,20 +1759,91 @@ const formatDate = (dateString) => {
   }
 }
 
+const MONTH_NAMES_ID = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+]
+const DAY_NAMES_ID = [
+  'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'
+]
+
+function translateDateToIndonesian(str) {
+  if (!str) return ''
+  const translations = {
+    'Sunday': 'Minggu',
+    'Monday': 'Senin',
+    'Tuesday': 'Selasa',
+    'Wednesday': 'Rabu',
+    'Thursday': 'Kamis',
+    'Friday': 'Jumat',
+    'Saturday': 'Sabtu',
+    'January': 'Januari',
+    'February': 'Februari',
+    'March': 'Maret',
+    'April': 'April',
+    'May': 'Mei',
+    'June': 'Juni',
+    'July': 'Juli',
+    'August': 'Agustus',
+    'September': 'September',
+    'October': 'Oktober',
+    'November': 'November',
+    'December': 'Desember',
+  }
+  let res = String(str)
+  for (const [en, id] of Object.entries(translations)) {
+    res = res.replace(new RegExp(`\\b${en}\\b`, 'gi'), id)
+  }
+  return res
+}
+
 const formatScheduleDate = (dateString) => {
   if (!dateString) return '-'
   try {
-    const cleanDate = typeof dateString === 'string' ? dateString.split('T')[0] : dateString
-    const d = new Date(cleanDate + 'T00:00:00')
-    if (isNaN(d.getTime())) return String(dateString)
-    return d.toLocaleDateString('id-ID', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    })
+    const cleanDate = typeof dateString === 'string' ? dateString.split('T')[0].trim() : String(dateString)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
+      const [y, m, day] = cleanDate.split('-').map(Number)
+      const d = new Date(y, m - 1, day)
+      const dayName = DAY_NAMES_ID[d.getDay()]
+      const dayNum = String(d.getDate()).padStart(2, '0')
+      const monthName = MONTH_NAMES_ID[d.getMonth()]
+      const year = d.getFullYear()
+      return `${dayName}, ${dayNum} ${monthName} ${year}`
+    }
+    const d = new Date(dateString)
+    if (!isNaN(d.getTime())) {
+      const dayName = DAY_NAMES_ID[d.getDay()]
+      const dayNum = String(d.getDate()).padStart(2, '0')
+      const monthName = MONTH_NAMES_ID[d.getMonth()]
+      const year = d.getFullYear()
+      return `${dayName}, ${dayNum} ${monthName} ${year}`
+    }
+    return translateDateToIndonesian(String(dateString))
   } catch (e) {
-    return String(dateString)
+    return translateDateToIndonesian(String(dateString))
   }
+}
+
+function formatSlotDateLabel(slot) {
+  if (!slot) return '-'
+  const dateStr = slot.date || slot.schedule?.schedule_date || slot.schedule_date
+  if (dateStr) {
+    return formatScheduleDate(dateStr)
+  }
+  if (slot.date_label) {
+    return translateDateToIndonesian(slot.date_label)
+  }
+  return '-'
+}
+
+function formatSlotOptionLabel(slot) {
+  if (!slot) return ''
+  const dateLabel = formatSlotDateLabel(slot)
+  const openTime = (slot.open_time || slot.schedule?.open_time || '08:00').substring(0, 5)
+  const closeTime = (slot.close_time || slot.schedule?.close_time || '15:30').substring(0, 5)
+  const remaining = slot.remaining_quota ?? Math.max(0, (slot.quota ?? 0) - (slot.booked_count ?? 0))
+  const quota = slot.quota ?? 0
+  const booked = slot.booked_count ?? 0
+  return `${dateLabel} (${openTime} - ${closeTime} WITA) — Sisa Kuota: ${remaining} dari ${quota} (Terisi: ${booked})`
 }
 </script>

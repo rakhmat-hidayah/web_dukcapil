@@ -313,39 +313,36 @@ const formatDate = (dateString) => {
   }
 }
 
+const MONTH_NAMES_SHORT_ID = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+  'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'
+]
+const DAY_NAMES_SHORT_ID = [
+  'Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'
+]
+
 const formatScheduleDate = (dateString) => {
   if (!dateString) return '-'
   try {
-    if (typeof dateString === 'string' && dateString.includes('T')) {
-      const d = new Date(dateString)
-      if (!isNaN(d.getTime())) {
-        return d.toLocaleDateString('id-ID', {
-          timeZone: 'Asia/Makassar',
-          weekday: 'short',
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        })
-      }
-    }
     const clean = typeof dateString === 'string' ? dateString.split('T')[0].trim() : String(dateString)
     if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
       const [y, m, day] = clean.split('-').map(Number)
-      return new Date(y, m - 1, day).toLocaleDateString('id-ID', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      })
+      const d = new Date(y, m - 1, day)
+      const dayName = DAY_NAMES_SHORT_ID[d.getDay()]
+      const dayNum = d.getDate()
+      const monthName = MONTH_NAMES_SHORT_ID[d.getMonth()]
+      const year = d.getFullYear()
+      return `${dayName}, ${dayNum} ${monthName} ${year}`
     }
     const fallback = new Date(dateString)
-    return isNaN(fallback.getTime()) ? String(dateString) : fallback.toLocaleDateString('id-ID', {
-      timeZone: 'Asia/Makassar',
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    })
+    if (!isNaN(fallback.getTime())) {
+      const dayName = DAY_NAMES_SHORT_ID[fallback.getDay()]
+      const dayNum = fallback.getDate()
+      const monthName = MONTH_NAMES_SHORT_ID[fallback.getMonth()]
+      const year = fallback.getFullYear()
+      return `${dayName}, ${dayNum} ${monthName} ${year}`
+    }
+    return String(dateString)
   } catch (e) {
     return String(dateString)
   }
