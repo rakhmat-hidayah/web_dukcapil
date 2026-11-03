@@ -256,11 +256,25 @@
                 </div>
               </div>
 
-              <!-- Right Action: Open Status Detail -->
+              <!-- Right Action: Open Status Detail or Direct Booking -->
               <div class="lg:self-center shrink-0 flex flex-col sm:flex-row lg:flex-col gap-2">
                 <Link
+                  v-if="['PRE_VERIFIED', 'APPROVED'].includes(app.status) && !app.queue_number"
+                  :href="route('queue.booking', { token: app.access_token })"
+                  class="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-md shadow-emerald-600/30 flex items-center justify-center gap-2 hover:scale-[1.02] cursor-pointer"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <span>Pilih Jadwal Sekarang &rarr;</span>
+                </Link>
+
+                <Link
                   :href="app.detail_url"
-                  class="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-md flex items-center justify-center gap-2 hover:scale-[1.02]"
+                  :class="[
+                    'px-6 py-3 rounded-2xl font-bold text-xs transition shadow-md flex items-center justify-center gap-2 hover:scale-[1.02] cursor-pointer',
+                    (['PRE_VERIFIED', 'APPROVED'].includes(app.status) && !app.queue_number)
+                      ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600'
+                      : 'bg-blue-600 hover:bg-blue-500 text-white'
+                  ]"
                 >
                   <span>Lihat Detail & Lacak</span>
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>

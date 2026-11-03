@@ -26,7 +26,7 @@ class ApplicantDashboardController extends Controller
     /**
      * Show applicant live tracking dashboard.
      */
-    public function show(string $token): Response
+    public function show(Request $request, string $token): Response|RedirectResponse
     {
         $application = QueueApplication::where('access_token', $token)
             ->with([
@@ -36,6 +36,17 @@ class ApplicantDashboardController extends Controller
                 'verificationHistory.user',
             ])
             ->firstOrFail();
+
+        // Otomatis arahkan pemohon langsung ke pemilihan jadwal jika berkas sudah lolos pra-verifikasi dan belum memiliki nomor antrean
+        if (
+            in_array($application->status, [QueueApplication::STATUS_PRE_VERIFIED, QueueApplication::STATUS_APPROVED])
+            && !$application->queue_number
+            && !$request->has('view_dashboard')
+            && !$request->has('stay')
+        ) {
+            return redirect()->route('queue.booking', ['token' => $token])
+                ->with('info', 'Dokumen online Anda telah lolos pra-verifikasi. Silakan pilih tanggal dan sesi jadwal kedatangan Anda.');
+        }
 
         // Establish verified session for this applicant's NIK so they can access their history seamlessly
         session([

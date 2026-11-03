@@ -160,6 +160,14 @@ class QueueWorkflowTest extends TestCase
         $verifierService->preVerify($submittedApp, $officer, 'Dokumen online lengkap dan sah.');
         $this->assertEquals(QueueApplication::STATUS_PRE_VERIFIED, $submittedApp->fresh()->status);
 
+        // Verification of seamless direction: Accessing status page automatically directs applicant to booking
+        $statusDirectResponse = $this->get(route('queue.status', ['token' => $submittedApp->access_token]));
+        $statusDirectResponse->assertRedirect(route('queue.booking', ['token' => $submittedApp->access_token]));
+
+        // Direct view dashboard when explicitly requested
+        $statusDashboardResponse = $this->get(route('queue.status', ['token' => $submittedApp->access_token, 'view_dashboard' => 1]));
+        $statusDashboardResponse->assertOk();
+
         // 5. Applicant chooses queue schedule slot
         $schedule = QueueSchedule::firstOrCreate(
             ['schedule_date' => now()->addDays(3)->format('Y-m-d')],

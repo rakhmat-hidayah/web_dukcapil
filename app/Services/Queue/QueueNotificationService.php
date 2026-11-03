@@ -6,6 +6,7 @@ use App\Models\Queue\NotificationLog;
 use App\Models\Queue\QueueApplication;
 use App\Models\Queue\QueueSetting;
 use App\Notifications\Queue\ApplicationApprovedNotification;
+use App\Notifications\Queue\ApplicationPreVerifiedNotification;
 use App\Notifications\Queue\ApplicationRejectedNotification;
 use App\Notifications\Queue\ApplicationSubmittedNotification;
 use App\Notifications\Queue\KtpReadyForPickupNotification;
@@ -24,6 +25,7 @@ class QueueNotificationService
         $settingMap = [
             'submit'           => 'queue.notify_on_submit',
             'submitted'        => 'queue.notify_on_submit',
+            'pre_verified'     => 'queue.notify_on_pre_verified',
             'revision'         => 'queue.notify_on_revision',
             'revision_required'=> 'queue.notify_on_revision',
             'approved'         => 'queue.notify_on_approved',
@@ -35,6 +37,7 @@ class QueueNotificationService
         ];
 
         $settingKey = $settingMap[$event] ?? "queue.notify_on_{$event}";
+        // Fallback pre_verified notification to default enabled ('1')
         $isEnabled = QueueSetting::get($settingKey, '1') === '1';
 
         $recipient = $application->applicant_email;
@@ -76,6 +79,7 @@ class QueueNotificationService
     {
         return match ($event) {
             'submit', 'submitted' => new ApplicationSubmittedNotification($application),
+            'pre_verified' => new ApplicationPreVerifiedNotification($application),
             'revision', 'revision_required' => new RevisionRequiredNotification($application),
             'approved', 'queue_booked', 'number_issued' => new ApplicationApprovedNotification($application),
             'rejected' => new ApplicationRejectedNotification($application),

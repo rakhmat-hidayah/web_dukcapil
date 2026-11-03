@@ -63,6 +63,36 @@
         </div>
       </div>
 
+      <!-- High-Priority Action Banner: Schedule Selection Required -->
+      <div
+        v-if="['PRE_VERIFIED', 'APPROVED'].includes(application.status) && !application.queue_number"
+        class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white rounded-3xl p-5 sm:p-6 shadow-xl border-2 border-emerald-400 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 print:hidden"
+      >
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0 text-2xl font-black">
+            📅
+          </div>
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/20 text-white mb-1.5">
+              Langkah Wajib Selanjutnya
+            </div>
+            <h2 class="text-lg sm:text-xl font-black">
+              Berkas Disetujui! Segera Pilih Jadwal Kedatangan Anda
+            </h2>
+            <p class="text-xs text-emerald-100 max-w-xl leading-relaxed mt-1">
+              Dokumen persyaratan digital Anda telah sah & lengkap. Harap segera memilih tanggal kedatangan untuk menerbitkan <strong>Nomor Antrean Resmi</strong> ke kantor Disdukcapil.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          :href="bookingUrl"
+          class="w-full md:w-auto px-6 py-3.5 rounded-2xl bg-white text-emerald-800 hover:bg-emerald-50 text-xs font-black transition shadow-lg hover:scale-105 text-center shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>Pilih Jadwal Kedatangan &rarr;</span>
+        </Link>
+      </div>
+
       <!-- Status Top Card -->
       <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-xl relative overflow-hidden print:hidden">
         <!-- Colored top border accent -->
@@ -642,6 +672,29 @@
               <p class="text-slate-700 dark:text-slate-300 mt-1 leading-relaxed font-medium">
                 {{ hist.notes || 'Status diperbarui.' }}
               </p>
+
+              <!-- Direct CTA Action Button in Timeline (Pre-Verified Phase) -->
+              <div
+                v-if="['PRE_VERIFIED', 'APPROVED'].includes(hist.to_status) && !application.queue_number"
+                class="mt-3 p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs"
+              >
+                <div class="text-xs text-emerald-900 dark:text-emerald-200 space-y-0.5">
+                  <span class="font-extrabold flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Aksi Lanjutan: Pilih Jadwal Pelayanan
+                  </span>
+                  <p class="text-[11px] text-emerald-700 dark:text-emerald-300 leading-snug">
+                    Klik tombol di samping untuk langsung memilih tanggal kedatangan dan menerbitkan nomor antrean resmi Anda.
+                  </p>
+                </div>
+                <Link
+                  :href="bookingUrl"
+                  class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5 shrink-0 hover:scale-[1.02] active:scale-95 cursor-pointer"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <span>Pilih Jadwal Sekarang &rarr;</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
