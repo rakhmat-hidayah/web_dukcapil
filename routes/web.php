@@ -427,6 +427,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/applications', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'index'])->name('applications.index');
             Route::get('/applications/{id}', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'show'])->name('applications.show');
             Route::delete('/applications/{id}', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'destroy'])->name('applications.destroy');
+            Route::post('/applications/{id}/restore', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'restore'])->name('applications.restore');
             Route::post('/applications/{id}/pre-verify', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'preVerify'])->name('applications.pre-verify');
             Route::post('/applications/{id}/approve', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'approve'])->name('applications.approve');
             Route::post('/applications/{id}/revision', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'requestRevision'])->name('applications.revision');

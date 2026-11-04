@@ -180,9 +180,9 @@ class ApplicationVerificationController extends Controller
     /**
      * Show detailed verification screen for an application.
      */
-    public function show(int $id): Response
+    public function show(int $id): Response|RedirectResponse
     {
-        $application = QueueApplication::with([
+        $application = QueueApplication::withTrashed()->with([
             'serviceType.documents' => fn($q) => $q->orderBy('sort_order'),
             'documents.serviceDocument',
             'slot.schedule',
@@ -191,12 +191,17 @@ class ApplicationVerificationController extends Controller
             'physicalVerifiedUser',
             'handoverUser',
             'handover',
-        ])->findOrFail($id);
+        ])->find($id);
+
+        if (!$application) {
+            return redirect()->route('admin.queue.applications.index')
+                ->with('error', "Permohonan dengan ID #{$id} tidak ditemukan dalam sistem.");
+        }
 
         $officer = Auth::user();
 
-        // Automatically start review if status is SUBMITTED or RESUBMITTED
-        if (in_array($application->status, [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED])) {
+        // Automatically start review if status is SUBMITTED or RESUBMITTED and not trashed
+        if (!$application->trashed() && in_array($application->status, [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED])) {
             $this->verificationService->startReview($application, $officer);
             $application->load([
                 'serviceType.documents' => fn($q) => $q->orderBy('sort_order'),
@@ -212,7 +217,7 @@ class ApplicationVerificationController extends Controller
         ]);
 
         // Auto-sync any pending documents to APPROVED if application is already pre-verified or further
-        if (in_array($application->status, [
+        if (!$application->trashed() && in_array($application->status, [
             QueueApplication::STATUS_PRE_VERIFIED,
             QueueApplication::STATUS_QUEUE_BOOKED,
             QueueApplication::STATUS_ARRIVED,
@@ -234,7 +239,7 @@ class ApplicationVerificationController extends Controller
         }
 
         // Ensure KtpHandover record exists and matches current application stage
-        if (in_array($application->status, [
+        if (!$application->trashed() && in_array($application->status, [
             QueueApplication::STATUS_PRE_VERIFIED,
             QueueApplication::STATUS_QUEUE_BOOKED,
             QueueApplication::STATUS_ARRIVED,
@@ -263,16 +268,25 @@ class ApplicationVerificationController extends Controller
         }
 
         // Available upcoming slots for approval assignment
-        $availableSlots = $this->slotService->getAvailableSlots(
-            $application->service_type_id,
-            now(),
-            14
-        );
+        $availableSlots = [];
+        if (!$application->trashed() && in_array($application->status, [
+            QueueApplication::STATUS_SUBMITTED,
+            QueueApplication::STATUS_RESUBMITTED,
+            QueueApplication::STATUS_UNDER_REVIEW,
+            QueueApplication::STATUS_PRE_VERIFIED,
+        ])) {
+            $availableSlots = $this->slotService->getAvailableSlots(
+                $application->service_type_id,
+                now(),
+                14
+            );
+        }
 
         return Inertia::render('Admin/Queue/Applications/Show', [
             'application'    => $application,
             'availableSlots' => $availableSlots,
             'can_delete'     => Auth::user()?->isSuperAdmin() ?? false,
+            'is_trashed'     => $application->trashed(),
         ]);
     }
 
@@ -298,6 +312,32 @@ class ApplicationVerificationController extends Controller
         }
 
         return redirect()->back()->with('success', "Permohonan {$regNumber} ({$name}) berhasil dihapus permanen oleh Super Admin.");
+    }
+
+    /**
+     * Restore a soft-deleted application.
+     */
+    public function restore(Request $request, int $id): RedirectResponse
+    {
+        $application = QueueApplication::withTrashed()->findOrFail($id);
+        if ($application->trashed()) {
+            $application->restore();
+
+            // Log to verification history
+            VerificationHistory::create([
+                'application_id' => $application->id,
+                'user_id'        => Auth::id(),
+                'from_status'    => $application->status,
+                'to_status'      => $application->status,
+                'notes'          => 'Permohonan dipulihkan kembali dari status terhapus oleh petugas (' . (Auth::user()?->name ?? 'Petugas') . ')',
+                'metadata'       => [
+                    'action' => 'RESTORE_APPLICATION',
+                    'ip'     => request()->ip(),
+                ],
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Permohonan {$application->reg_number} ({$application->applicant_name}) berhasil dipulihkan.");
     }
 
     /**
@@ -507,7 +547,10 @@ class ApplicationVerificationController extends Controller
      */
     public function updateStatus(Request $request, int $id): RedirectResponse|JsonResponse
     {
-        $application = QueueApplication::with(['serviceType', 'documents'])->findOrFail($id);
+        $application = QueueApplication::withTrashed()->with(['serviceType', 'documents'])->findOrFail($id);
+        if ($application->trashed()) {
+            $application->restore();
+        }
 
         $validated = $request->validate([
             'status'           => ['required', 'string', 'in:' . implode(',', QueueApplication::STATUSES)],

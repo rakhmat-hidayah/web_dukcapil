@@ -1,8 +1,56 @@
 <template>
-  <Head :title="`Verifikasi ${application.reg_number} - Admin Disdukcapil`" />
+  <Head :title="application?.reg_number ? `Verifikasi ${application.reg_number} - Admin Disdukcapil` : 'Detail Permohonan - Admin Disdukcapil'" />
 
   <AdminLayout>
-    <div class="space-y-6">
+    <!-- Fallback if Application Not Found -->
+    <div v-if="!application" class="p-12 text-center max-w-md mx-auto space-y-4">
+      <div class="w-16 h-16 rounded-3xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      </div>
+      <h2 class="text-lg font-black text-slate-800 dark:text-slate-100">Permohonan Tidak Ditemukan</h2>
+      <p class="text-xs text-slate-500">Data permohonan antrean tidak ditemukan atau telah dibersihkan dari sistem.</p>
+      <Link :href="route('admin.queue.applications.index')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-md shadow-blue-600/30">
+        Kembali ke Daftar Permohonan
+      </Link>
+    </div>
+
+    <div v-else class="space-y-6">
+      <!-- Trashed / Expired Notice Banner -->
+      <div
+        v-if="isTrashed"
+        class="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-50 to-amber-100/70 dark:from-amber-950/40 dark:to-amber-900/20 border-2 border-amber-300 dark:border-amber-700 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+      >
+        <div class="flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-sm sm:text-base font-black text-amber-950 dark:text-amber-200">
+                PERMOHONAN BERSTATUS TERHAPUS / KEDALUWARSA
+              </h3>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-600 text-white">
+                Soft Deleted
+              </span>
+            </div>
+            <p class="text-xs text-amber-800 dark:text-amber-300 mt-0.5">
+              Permohonan ini telah dibersihkan atau dihapus pada {{ formatDate(application.deleted_at) }}. Anda dapat memulihkannya kembali agar aktif di sistem.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            @click="restoreApplication"
+            :disabled="isRestoring"
+            class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+          >
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span>{{ isRestoring ? 'Memulihkan...' : 'Pulihkan Permohonan' }}</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Breadcrumb & Top Bar -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center gap-3">
@@ -1581,7 +1629,28 @@ const props = defineProps({
   application: Object,
   availableSlots: Array,
   can_delete: Boolean,
+  is_trashed: Boolean,
 })
+
+const isTrashed = computed(() => !!props.is_trashed || !!props.application?.deleted_at)
+const isRestoring = ref(false)
+
+const restoreApplication = () => {
+  if (!props.application?.id) return
+  if (confirm(`Pulihkan permohonan antrean ${props.application.reg_number || ('#' + props.application.id)} agar aktif kembali?`)) {
+    isRestoring.value = true
+    router.post(
+      route('admin.queue.applications.restore', props.application.id),
+      {},
+      {
+        preserveScroll: true,
+        onFinish: () => {
+          isRestoring.value = false
+        },
+      }
+    )
+  }
+}
 
 const page = usePage()
 const isSuperAdmin = computed(() => {
@@ -1596,6 +1665,7 @@ const deleteModalOpen = ref(false)
 const isDeleting = ref(false)
 
 const executeDelete = () => {
+  if (!props.application?.id) return
   isDeleting.value = true
   router.delete(route('admin.queue.applications.destroy', props.application.id), {
     onSuccess: () => {
@@ -1614,19 +1684,20 @@ const executeDelete = () => {
 // Status Escalation & Manual Sync
 const escalateModalOpen = ref(false)
 const escalateForm = useForm({
-  status: props.application.status === 'DRAFT' ? 'SUBMITTED' : props.application.status,
+  status: props.application?.status === 'DRAFT' ? 'SUBMITTED' : (props.application?.status || 'SUBMITTED'),
   reason: '',
   auto_issue_queue: true,
 })
 
 const openEscalateModal = () => {
-  escalateForm.status = props.application.status === 'DRAFT' ? 'SUBMITTED' : props.application.status
+  escalateForm.status = props.application?.status === 'DRAFT' ? 'SUBMITTED' : (props.application?.status || 'SUBMITTED')
   escalateForm.reason = ''
   escalateForm.auto_issue_queue = true
   escalateModalOpen.value = true
 }
 
 const submitEscalate = () => {
+  if (!props.application?.id) return
   escalateForm.post(route('admin.queue.applications.update-status', props.application.id), {
     preserveScroll: true,
     onSuccess: () => {
@@ -1636,6 +1707,7 @@ const submitEscalate = () => {
 }
 
 const quickEscalateToSubmitted = () => {
+  if (!props.application?.id) return
   if (confirm(`Eskalasi status permohonan ${props.application.reg_number} langsung ke Menunggu Verifikasi?`)) {
     router.post(
       route('admin.queue.applications.update-status', props.application.id),
@@ -1649,9 +1721,10 @@ const quickEscalateToSubmitted = () => {
   }
 }
 
-const isOnlineReviewPhase = computed(() => ['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW'].includes(props.application.status))
-const isPastOnlineVerification = computed(() => !['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW', 'DRAFT'].includes(props.application.status))
+const isOnlineReviewPhase = computed(() => ['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW'].includes(props.application?.status))
+const isPastOnlineVerification = computed(() => !['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW', 'DRAFT'].includes(props.application?.status))
 const canOperatePrinting = computed(() => {
+  if (!props.application) return false
   if (['REJECTED', 'CANCELLED', 'EXPIRED'].includes(props.application.status)) {
     return false
   }
@@ -1675,6 +1748,7 @@ const canOperatePrinting = computed(() => {
 })
 
 const isKtpReadyOrCompleted = computed(() => {
+  if (!props.application) return false
   return [
     'READY_FOR_PICKUP',
     'COMPLETED',
@@ -1688,6 +1762,7 @@ const isKtpReadyOrCompleted = computed(() => {
 })
 
 const canReject = computed(() => {
+  if (!props.application) return false
   if (['COMPLETED', 'REJECTED', 'CANCELLED', 'EXPIRED', 'READY_FOR_PICKUP'].includes(props.application.status)) {
     return false
   }
@@ -1878,6 +1953,7 @@ const getDocument = (serviceDocId) => {
 }
 
 const isRepresented = computed(() => {
+  if (!props.application) return false
   if (props.application.handover?.receiver_type) {
     const rType = String(props.application.handover.receiver_type).toLowerCase()
     if (rType === 'self' || rType === 'sendiri') {
@@ -1891,6 +1967,7 @@ const isRepresented = computed(() => {
 })
 
 const requirementsList = computed(() => {
+  if (!props.application) return []
   const isRep = isRepresented.value
   if (props.application.service_type?.documents && props.application.service_type.documents.length > 0) {
     return props.application.service_type.documents.filter(doc => {
