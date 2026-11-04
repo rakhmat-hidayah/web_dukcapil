@@ -139,6 +139,7 @@ class QueueApplication extends Model
         'applicant_birth_date_formatted',
         'selfie_document',
         'selfie_url',
+        'selfie_thumbnail_url',
         'tracking_url',
         'qr_code_svg',
         'verification_urgency',
@@ -337,9 +338,12 @@ class QueueApplication extends Model
             if (!$serviceDoc) {
                 return false;
             }
+            $label = strtolower($serviceDoc->label ?? '');
             return $serviceDoc->capture_mode === 'user'
-                || str_contains(strtolower($serviceDoc->label), 'selfie')
-                || str_contains(strtolower($serviceDoc->label), 'foto wajah');
+                || str_contains($label, 'selfie')
+                || str_contains($label, 'foto wajah')
+                || str_contains($label, 'foto pemohon')
+                || str_contains($label, 'pas foto');
         });
     }
 
@@ -350,6 +354,15 @@ class QueueApplication extends Model
             return null;
         }
         return route('admin.queue.documents.serve', ['documentId' => $selfie->id]);
+    }
+
+    public function getSelfieThumbnailUrlAttribute(): ?string
+    {
+        $selfie = $this->selfie_document;
+        if (!$selfie) {
+            return null;
+        }
+        return route('admin.queue.documents.serve', ['documentId' => $selfie->id, 'preview_only' => 1]);
     }
 
     public function getTrackingUrlAttribute(): string

@@ -38,7 +38,8 @@ class ApplicationDocumentController extends Controller
         Log::info("Queue document previewed: DocID {$document->id} by User {$user->id} ({$user->name}) from IP {$request->ip()}");
 
         // Otomatis sinkronkan status dokumen menjadi Sudah Diperiksa (APPROVED) saat dibuka oleh verifikator
-        if ($document->status === ApplicationDocument::STATUS_PENDING) {
+        // Kecuali saat dipanggil sebagai preview thumbnail di tabel antrean (preview_only)
+        if (!$request->boolean('preview_only', false) && $document->status === ApplicationDocument::STATUS_PENDING) {
             $document->update([
                 'status'      => ApplicationDocument::STATUS_APPROVED,
                 'reviewed_by' => $user->id,

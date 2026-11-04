@@ -50,7 +50,7 @@ class ApplicationVerificationController extends Controller
         ];
         $cutoff24h = now()->subHours(24);
 
-        $query = QueueApplication::with(['serviceType', 'slot.schedule']);
+        $query = QueueApplication::with(['serviceType', 'slot.schedule', 'documents.serviceDocument']);
 
         if ($urgency === 'overdue') {
             $query->whereIn('status', $unverifiedStatuses)

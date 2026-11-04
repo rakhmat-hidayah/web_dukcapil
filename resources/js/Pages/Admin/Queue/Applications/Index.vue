@@ -242,7 +242,7 @@
             <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700">
               <tr>
                 <th class="px-5 py-4">No. Registrasi / Antrian</th>
-                <th class="px-5 py-4">Pemohon & NIK</th>
+                <th class="px-5 py-4">Foto & Data Pemohon</th>
                 <th class="px-5 py-4">Jenis Layanan</th>
                 <th class="px-5 py-4">Jadwal Pelayanan</th>
                 <th class="px-5 py-4 text-center">Status</th>
@@ -298,15 +298,46 @@
                   </div>
                 </td>
 
-                <!-- Applicant & NIK -->
-                <td class="px-5 py-4">
-                  <div class="font-bold text-slate-900 dark:text-white">
-                    {{ app.applicant_name }}
-                  </div>
-                  <div class="font-mono text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
-                    <span>NIK: {{ maskNik(app.applicant_nik) }}</span>
-                    <span>·</span>
-                    <span>{{ formatPhoneChunked(app.applicant_phone) }}</span>
+                <!-- Applicant & NIK with Photo Preview -->
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-3.5">
+                    <!-- Photo Thumbnail -->
+                    <div
+                      v-if="app.selfie_thumbnail_url || app.selfie_url"
+                      @click.stop="openPhotoPreview(app)"
+                      class="relative w-12 h-12 rounded-xl overflow-hidden border border-blue-200 dark:border-blue-900 shadow-sm shrink-0 cursor-pointer group/photo bg-slate-100 dark:bg-slate-800 transition transform hover:scale-105 hover:ring-2 hover:ring-blue-500"
+                      title="Klik untuk melihat pratinjau foto pemohon"
+                    >
+                      <img
+                        :src="app.selfie_thumbnail_url || app.selfie_url"
+                        :alt="app.applicant_name"
+                        class="w-full h-full object-cover transition duration-200"
+                        loading="lazy"
+                      />
+                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 transition flex items-center justify-center text-white">
+                        <svg class="w-4 h-4 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                      </div>
+                    </div>
+                    <div
+                      v-else
+                      class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700/60 border border-dashed border-slate-300 dark:border-slate-600 flex flex-col items-center justify-center text-slate-400 shrink-0 text-[8px] font-semibold select-none"
+                      title="Belum ada foto selfie pemohon"
+                    >
+                      <svg class="w-5 h-5 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                      <span class="text-[8px] leading-tight text-slate-400 mt-0.5">No Foto</span>
+                    </div>
+
+                    <!-- Applicant Text Info -->
+                    <div class="min-w-0">
+                      <div class="font-bold text-slate-900 dark:text-white truncate">
+                        {{ app.applicant_name }}
+                      </div>
+                      <div class="font-mono text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                        <span>NIK: {{ maskNik(app.applicant_nik) }}</span>
+                        <span>·</span>
+                        <span>{{ formatPhoneChunked(app.applicant_phone) }}</span>
+                      </div>
+                    </div>
                   </div>
                 </td>
 
@@ -483,6 +514,95 @@
           </div>
         </div>
       </transition>
+
+      <!-- Modal Preview Foto Pemohon (Lightbox) -->
+      <transition name="fade">
+        <div
+          v-if="previewPhotoApp"
+          class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          @click.self="closePhotoPreview"
+        >
+          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden relative animate-in fade-in zoom-in-95 duration-150">
+            <!-- Header -->
+            <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-800/90">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shadow-sm">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
+                    Preview Foto Pemohon
+                  </h3>
+                  <p class="text-xs text-slate-400 font-mono mt-0.5">
+                    {{ previewPhotoApp.reg_number }}
+                    <span v-if="previewPhotoApp.queue_number" class="ml-1 px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-black">
+                      No. Antrean: {{ previewPhotoApp.queue_number }}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                @click="closePhotoPreview"
+                class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition cursor-pointer"
+                title="Tutup (Esc)"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <!-- Image Container -->
+            <div class="p-6 bg-slate-950 flex items-center justify-center relative min-h-[260px] max-h-[58vh]">
+              <img
+                :src="previewPhotoApp.selfie_url || previewPhotoApp.selfie_thumbnail_url"
+                :alt="previewPhotoApp.applicant_name"
+                class="max-w-full max-h-[52vh] object-contain rounded-2xl shadow-2xl border border-white/10"
+              />
+            </div>
+
+            <!-- Detail Information -->
+            <div class="p-5 bg-white dark:bg-slate-800 space-y-3.5">
+              <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Nama Lengkap</span>
+                  <span class="font-bold text-slate-900 dark:text-white text-sm block truncate">{{ previewPhotoApp.applicant_name }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">NIK Pemilik</span>
+                  <span class="font-mono font-bold text-slate-900 dark:text-white block">{{ previewPhotoApp.applicant_nik }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Jenis Layanan</span>
+                  <span class="font-semibold text-blue-600 dark:text-blue-400 block truncate">{{ previewPhotoApp.service_type?.name }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Status Berkas</span>
+                  <StatusBadge :status="previewPhotoApp.status" class="mt-0.5 inline-block" />
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                <button
+                  type="button"
+                  @click="closePhotoPreview"
+                  class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold transition cursor-pointer"
+                >
+                  Tutup
+                </button>
+                <Link
+                  :href="route('admin.queue.applications.show', { id: previewPhotoApp.id })"
+                  class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-600/30 flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  <span>Buka & Verifikasi Berkas</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
   </AdminLayout>
 </template>
@@ -511,6 +631,16 @@ const isSuperAdmin = computed(() => {
     || page.props.auth?.roles?.includes('Super Administrator') 
     || page.props.auth?.user?.username === 'superadmin'
 })
+
+const previewPhotoApp = ref(null)
+
+const openPhotoPreview = (app) => {
+  previewPhotoApp.value = app
+}
+
+const closePhotoPreview = () => {
+  previewPhotoApp.value = null
+}
 
 const deleteModalOpen = ref(false)
 const appToDelete = ref(null)
