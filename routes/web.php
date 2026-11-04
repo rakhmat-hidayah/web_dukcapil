@@ -452,6 +452,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/service-types/{serviceTypeId}/documents/{documentId}', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'update'])->name('service-documents.update');
             Route::delete('/service-types/{serviceTypeId}/documents/{documentId}', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'destroy'])->name('service-documents.destroy');
             Route::post('/service-types/{serviceTypeId}/documents/reorder', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'reorder'])->name('service-documents.reorder');
+            Route::post('/service-types/{serviceTypeId}/documents/{documentId}/toggle-active', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'toggleActive'])->name('service-documents.toggle-active');
+            Route::post('/service-types/{serviceTypeId}/documents/{documentId}/toggle-required', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'toggleRequired'])->name('service-documents.toggle-required');
 
             // Requirement Documents (Aliases for nested service-types.documents.* convention)
             Route::post('/service-types/{serviceTypeId}/docs/store', [\App\Http\Controllers\Admin\Queue\ServiceDocumentController::class, 'store'])->name('service-types.documents.store');

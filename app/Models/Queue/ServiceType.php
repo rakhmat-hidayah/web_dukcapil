@@ -78,7 +78,12 @@ class ServiceType extends Model
 
     public function requiredDocuments()
     {
-        return $this->documents()->where('is_required', true);
+        return $this->documents()->where('is_active', true)->where('is_required', true);
+    }
+
+    public function activeDocuments()
+    {
+        return $this->documents()->where('is_active', true);
     }
 
     public function slots()

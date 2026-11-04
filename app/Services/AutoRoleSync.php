@@ -47,17 +47,17 @@ class AutoRoleSync
     public static function sync(bool $force = false): void
     {
         // Avoid running 30+ DB queries and clearing Spatie cache on every web request
-        if (!$force && Cache::has('auto_role_sync_v8_done')) {
+        if (!$force && Cache::has('auto_role_sync_v9_done')) {
             return;
         }
 
-        Cache::put('auto_role_sync_v8_done', true, now()->addHours(24));
+        Cache::put('auto_role_sync_v9_done', true, now()->addHours(24));
 
         // 1. Run pending migrations safely if not yet cached as completed
         try {
-            if (!Cache::has('db_auto_migrations_v12')) {
+            if (!Cache::has('db_auto_migrations_v13')) {
                 Artisan::call('migrate', ['--force' => true]);
-                Cache::put('db_auto_migrations_v12', true, now()->addDays(7));
+                Cache::put('db_auto_migrations_v13', true, now()->addDays(7));
             }
         } catch (\Throwable $e) {
             Log::warning('AutoRoleSync migration warning: ' . $e->getMessage());

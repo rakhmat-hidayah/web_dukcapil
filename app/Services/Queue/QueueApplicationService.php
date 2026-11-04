@@ -73,6 +73,7 @@ class QueueApplicationService
                         'accepted_formats' => 'jpg,jpeg,png,pdf',
                         'max_size_kb'      => 5120,
                         'is_required'      => true,
+                        'is_active'        => true,
                         'capture_hint'     => 'Foto seluruh lembar Formulir F-1.02 yang telah diisi dan ditandatangani. Pastikan tulisan terbaca jelas dan tidak terpotong.',
                         'capture_mode'     => 'environment',
                         'applicable_to'    => 'all',
@@ -80,11 +81,11 @@ class QueueApplicationService
                         'sort_order'       => 2,
                     ]);
                 } else {
-                    $f102Doc->update([
-                        'is_required'   => true,
-                        'applicable_to' => 'all',
-                        'template_url'  => $f102TemplateUrl,
-                    ]);
+                    if (!$f102Doc->template_url && $f102TemplateUrl) {
+                        $f102Doc->update([
+                            'template_url'  => $f102TemplateUrl,
+                        ]);
+                    }
                 }
             }
 
@@ -176,6 +177,7 @@ class QueueApplicationService
                         'accepted_formats' => 'jpg,jpeg,png',
                         'max_size_kb'      => 5120,
                         'is_required'      => true,
+                        'is_active'        => true,
                         'capture_hint'     => 'Gunakan kamera depan, tatap lurus ke kamera di tempat terang, tanpa kacamata hitam, masker, atau penutup wajah.',
                         'capture_mode'     => 'user',
                         'applicable_to'    => 'all',
@@ -183,14 +185,8 @@ class QueueApplicationService
                     ]);
                 } else {
                     $updates = [];
-                    if (!$selfieDoc->is_required) {
-                        $updates['is_required'] = true;
-                    }
                     if ($selfieDoc->capture_mode !== 'user') {
                         $updates['capture_mode'] = 'user';
-                    }
-                    if ($selfieDoc->sort_order != 3) {
-                        $updates['sort_order'] = 3;
                     }
                     if (!empty($updates)) {
                         $selfieDoc->update($updates);
@@ -379,7 +375,7 @@ class QueueApplicationService
         }
 
         // Determine required documents taking into account representation policy
-        $allDocs = $application->serviceType->documents()->get();
+        $allDocs = $application->serviceType->documents()->where('is_active', true)->get();
         $isRepresented = $application->is_represented;
 
         $uploadedDocIds = $application->documents()->pluck('service_document_id')->toArray();

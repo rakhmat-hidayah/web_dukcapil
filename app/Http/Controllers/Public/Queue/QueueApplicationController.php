@@ -57,12 +57,12 @@ class QueueApplicationController extends Controller
         if ($serviceSlug) {
             $selectedService = ServiceType::active()
                 ->where('slug', $serviceSlug)
-                ->with(['documents' => fn($q) => $q->orderBy('sort_order')])
+                ->with(['documents' => fn($q) => $q->where('is_active', true)->orderBy('sort_order')])
                 ->first();
         }
 
         $services = ServiceType::active()
-            ->with(['documents' => fn($q) => $q->orderBy('sort_order')])
+            ->with(['documents' => fn($q) => $q->where('is_active', true)->orderBy('sort_order')])
             ->get();
 
         // Ensure Dompu Kecamatan and Desa are seeded
@@ -315,7 +315,7 @@ class QueueApplicationController extends Controller
 
         $application = QueueApplication::where('reg_number', $regNumber)
             ->with([
-                'serviceType.documents' => fn($q) => $q->orderBy('sort_order'),
+                'serviceType.documents' => fn($q) => $q->where('is_active', true)->orderBy('sort_order'),
                 'documents.serviceDocument',
             ])
             ->first();

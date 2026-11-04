@@ -15,6 +15,7 @@ class ServiceDocument extends Model
         'accepted_formats',
         'max_size_kb',
         'is_required',
+        'is_active',
         'capture_hint',
         'capture_mode',
         'applicable_to',
@@ -24,9 +25,15 @@ class ServiceDocument extends Model
 
     protected $casts = [
         'is_required' => 'boolean',
+        'is_active'   => 'boolean',
         'max_size_kb' => 'integer',
-        'sort_order' => 'integer',
+        'sort_order'  => 'integer',
     ];
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 
     protected $appends = ['accepted_formats_array', 'max_size_bytes', 'template_url'];
 

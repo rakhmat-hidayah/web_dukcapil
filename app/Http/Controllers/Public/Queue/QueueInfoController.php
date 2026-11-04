@@ -36,9 +36,12 @@ class QueueInfoController extends Controller
 
         // Fetch active service types with their requirement counts
         $services = ServiceType::active()
-            ->withCount(['documents', 'requiredDocuments'])
+            ->withCount([
+                'documents as documents_count' => fn($q) => $q->where('is_active', true),
+                'requiredDocuments'
+            ])
             ->with(['documents' => function ($q) {
-                $q->orderBy('sort_order');
+                $q->where('is_active', true)->orderBy('sort_order');
             }])
             ->get();
 

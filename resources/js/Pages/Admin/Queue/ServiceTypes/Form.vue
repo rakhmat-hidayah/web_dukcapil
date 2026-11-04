@@ -313,7 +313,8 @@
                     <th class="px-4 py-3">Nama Berkas</th>
                     <th class="px-4 py-3">Format / Batas</th>
                     <th class="px-4 py-3">Mode Kamera</th>
-                    <th class="px-4 py-3 text-center">Wajib?</th>
+                    <th class="px-4 py-3 text-center">Wajib / Opsional</th>
+                    <th class="px-4 py-3 text-center">Status</th>
                     <th class="px-4 py-3 text-right">Aksi</th>
                   </tr>
                 </thead>
@@ -321,13 +322,26 @@
                   <tr
                     v-for="doc in serviceType.documents"
                     :key="doc.id"
-                    class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition"
+                    :class="[
+                      'transition',
+                      doc.is_active === false
+                        ? 'opacity-65 bg-slate-50/60 dark:bg-slate-900/40'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'
+                    ]"
                   >
                     <td class="px-4 py-3 font-mono font-bold text-slate-400">
                       {{ doc.sort_order }}
                     </td>
                     <td class="px-4 py-3">
-                      <p class="font-bold text-slate-900 dark:text-white">{{ doc.label }}</p>
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <p class="font-bold text-slate-900 dark:text-white">{{ doc.label }}</p>
+                        <span
+                          v-if="doc.is_active === false"
+                          class="px-2 py-0.5 rounded text-[9.5px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800"
+                        >
+                          Nonaktif
+                        </span>
+                      </div>
                       <p v-if="doc.description" class="text-[11px] text-slate-400 mt-0.5">{{ doc.description }}</p>
                       <div class="flex items-center gap-2 mt-1 flex-wrap">
                         <span v-if="doc.applicable_to && doc.applicable_to !== 'all'" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
@@ -352,15 +366,39 @@
                       <span v-else-if="doc.capture_mode === 'user'" class="text-indigo-600 font-bold">Kamera Depan (Selfie)</span>
                       <span v-else class="text-slate-500 font-bold">Bebas / Galeri</span>
                     </td>
-                    <td class="px-4 py-3 text-center">
-                      <span
+                    <!-- Kolom Wajib / Opsional (Interactive Toggle Button) -->
+                    <td class="px-4 py-3 text-center whitespace-nowrap">
+                      <button
+                        type="button"
+                        @click="toggleDocRequired(doc)"
+                        :title="doc.is_required ? 'Klik untuk mengubah jadi Opsional' : 'Klik untuk mengubah jadi Wajib'"
                         :class="[
-                          'px-2 py-0.5 rounded text-[10px] font-bold',
-                          doc.is_required ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                          'px-2.5 py-1 rounded-full text-[10px] font-black transition cursor-pointer inline-flex items-center gap-1.5 shadow-2xs hover:scale-105 active:scale-95',
+                          doc.is_required
+                            ? 'bg-rose-100 text-rose-700 hover:bg-rose-200 border border-rose-300 dark:bg-rose-950/80 dark:text-rose-300 dark:border-rose-800'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
                         ]"
                       >
-                        {{ doc.is_required ? 'Wajib' : 'Opsional' }}
-                      </span>
+                        <span class="w-1.5 h-1.5 rounded-full" :class="doc.is_required ? 'bg-rose-600' : 'bg-slate-400'"></span>
+                        <span>{{ doc.is_required ? 'Wajib' : 'Opsional' }}</span>
+                      </button>
+                    </td>
+                    <!-- Kolom Status Aktif / Nonaktif (Interactive Toggle Button) -->
+                    <td class="px-4 py-3 text-center whitespace-nowrap">
+                      <button
+                        type="button"
+                        @click="toggleDocActive(doc)"
+                        :title="doc.is_active !== false ? 'Klik untuk Menonaktifkan persyaratan ini (sembunyikan dari warga)' : 'Klik untuk Mengaktifkan kembali'"
+                        :class="[
+                          'px-2.5 py-1 rounded-full text-[10px] font-black transition cursor-pointer inline-flex items-center gap-1.5 shadow-2xs hover:scale-105 active:scale-95',
+                          doc.is_active !== false
+                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800'
+                            : 'bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-300 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800'
+                        ]"
+                      >
+                        <span class="w-1.5 h-1.5 rounded-full" :class="doc.is_active !== false ? 'bg-emerald-600 animate-pulse' : 'bg-amber-500'"></span>
+                        <span>{{ doc.is_active !== false ? 'Aktif' : 'Nonaktif' }}</span>
+                      </button>
                     </td>
                     <td class="px-4 py-3 text-right whitespace-nowrap space-x-1">
                       <button
@@ -381,7 +419,7 @@
                   </tr>
 
                   <tr v-if="!serviceType.documents || serviceType.documents.length === 0">
-                    <td colspan="6" class="px-4 py-8 text-center text-slate-400 italic">
+                    <td colspan="7" class="px-4 py-8 text-center text-slate-400 italic">
                       Belum ada berkas persyaratan. Klik tombol "Tambah Persyaratan" di atas.
                     </td>
                   </tr>
@@ -562,17 +600,82 @@
             />
           </div>
 
-          <div class="pt-2">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                v-model="docForm.is_required"
-                class="rounded text-rose-600 focus:ring-rose-500"
-              />
-              <span class="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Wajib Diunggah (Pendaftaran tidak dapat dikirim tanpa berkas ini)
-              </span>
-            </label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+            <!-- Pilihan Wajib / Opsional -->
+            <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/60">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                Ketentuan Berkas
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  @click="docForm.is_required = true"
+                  :class="[
+                    'px-3 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border cursor-pointer',
+                    docForm.is_required
+                      ? 'bg-rose-50 border-rose-300 text-rose-700 dark:bg-rose-950/60 dark:border-rose-700 dark:text-rose-300 ring-2 ring-rose-500/20'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'
+                  ]"
+                >
+                  <span class="w-2 h-2 rounded-full" :class="docForm.is_required ? 'bg-rose-500' : 'bg-slate-300'"></span>
+                  <span>Wajib</span>
+                </button>
+                <button
+                  type="button"
+                  @click="docForm.is_required = false"
+                  :class="[
+                    'px-3 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border cursor-pointer',
+                    !docForm.is_required
+                      ? 'bg-slate-200/80 border-slate-300 text-slate-800 dark:bg-slate-700 dark:border-slate-600 dark:text-white ring-2 ring-slate-400/20'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'
+                  ]"
+                >
+                  <span class="w-2 h-2 rounded-full" :class="!docForm.is_required ? 'bg-slate-600 dark:bg-slate-300' : 'bg-slate-300'"></span>
+                  <span>Opsional</span>
+                </button>
+              </div>
+              <p class="text-[10.5px] text-slate-500 dark:text-slate-400 mt-2">
+                {{ docForm.is_required ? '• Pemohon wajib melampirkan berkas ini agar pendaftaran dapat diproses.' : '• Pemohon dapat melewati berkas ini jika tidak memilikinya.' }}
+              </p>
+            </div>
+
+            <!-- Pilihan Aktif / Nonaktif -->
+            <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/60">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                Status Persyaratan
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  @click="docForm.is_active = true"
+                  :class="[
+                    'px-3 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border cursor-pointer',
+                    docForm.is_active
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-800 dark:bg-emerald-950/60 dark:border-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'
+                  ]"
+                >
+                  <span class="w-2 h-2 rounded-full" :class="docForm.is_active ? 'bg-emerald-500' : 'bg-slate-300'"></span>
+                  <span>Aktif</span>
+                </button>
+                <button
+                  type="button"
+                  @click="docForm.is_active = false"
+                  :class="[
+                    'px-3 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border cursor-pointer',
+                    !docForm.is_active
+                      ? 'bg-amber-50 border-amber-300 text-amber-800 dark:bg-amber-950/60 dark:border-amber-700 dark:text-amber-300 ring-2 ring-amber-500/20'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'
+                  ]"
+                >
+                  <span class="w-2 h-2 rounded-full" :class="!docForm.is_active ? 'bg-amber-500' : 'bg-slate-300'"></span>
+                  <span>Nonaktif</span>
+                </button>
+              </div>
+              <p class="text-[10.5px] text-slate-500 dark:text-slate-400 mt-2">
+                {{ docForm.is_active ? '• Tampil di form pendaftaran online pemohon.' : '• Disembunyikan dari pemohon tanpa menghapus data.' }}
+              </p>
+            </div>
           </div>
 
           <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/60">
@@ -655,6 +758,7 @@ const docForm = useForm({
   accepted_formats: 'jpg,jpeg,png,pdf',
   max_size_kb: 5120,
   is_required: true,
+  is_active: true,
   capture_mode: 'environment',
   applicable_to: 'all',
   capture_hint: '',
@@ -671,6 +775,7 @@ const openAddDocModal = () => {
   docForm.accepted_formats = 'jpg,jpeg,png,pdf'
   docForm.max_size_kb = 5120
   docForm.is_required = true
+  docForm.is_active = true
   docForm.capture_mode = 'environment'
   docForm.applicable_to = 'all'
   docForm.capture_hint = 'Posisikan dokumen dalam bingkai dan hindari pantulan cahaya'
@@ -686,13 +791,40 @@ const openEditDocModal = (doc) => {
   docForm.description = doc.description || ''
   docForm.accepted_formats = doc.accepted_formats || 'jpg,jpeg,png,pdf'
   docForm.max_size_kb = doc.max_size_kb || 5120
-  docForm.is_required = !!doc.is_required
+  docForm.is_required = doc.is_required !== false
+  docForm.is_active = doc.is_active !== false
   docForm.capture_mode = doc.capture_mode || 'environment'
   docForm.applicable_to = doc.applicable_to || 'all'
   docForm.capture_hint = doc.capture_hint || ''
   docForm.template_url = doc.template_url || ''
   docForm.sort_order = doc.sort_order ?? 1
   docModalOpen.value = true
+}
+
+const toggleDocRequired = (doc) => {
+  router.post(
+    route('admin.queue.service-documents.toggle-required', {
+      serviceTypeId: props.serviceType.id,
+      documentId: doc.id,
+    }),
+    {},
+    {
+      preserveScroll: true,
+    }
+  )
+}
+
+const toggleDocActive = (doc) => {
+  router.post(
+    route('admin.queue.service-documents.toggle-active', {
+      serviceTypeId: props.serviceType.id,
+      documentId: doc.id,
+    }),
+    {},
+    {
+      preserveScroll: true,
+    }
+  )
 }
 
 const saveDoc = () => {
