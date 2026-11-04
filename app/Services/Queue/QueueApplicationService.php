@@ -23,6 +23,64 @@ class QueueApplicationService
     ) {}
 
     /**
+     * Self-healing: Ensure all Perekaman KTP-el services have the mandatory selfie photo requirement.
+     * Guaranteed to execute and heal the database on any environment even if CLI migrations are not run.
+     */
+    public static function ensureSelfieRequirementForPerekaman(): void
+    {
+        try {
+            $rekamServices = ServiceType::where('slug', 'like', '%perekaman%')
+                ->orWhere('slug', 'like', '%rekam%')
+                ->orWhere('is_biometric_first_recording', true)
+                ->orWhere('name', 'like', '%Perekaman%')
+                ->get();
+
+            foreach ($rekamServices as $rekam) {
+                if (!$rekam->requires_face_photo) {
+                    $rekam->update(['requires_face_photo' => true]);
+                }
+
+                $selfieDoc = ServiceDocument::where('service_type_id', $rekam->id)
+                    ->where(function ($q) {
+                        $q->where('label', 'like', '%Selfie%')
+                          ->orWhere('label', 'like', '%Foto Wajah%');
+                    })->first();
+
+                if (!$selfieDoc) {
+                    ServiceDocument::create([
+                        'service_type_id'  => $rekam->id,
+                        'label'            => 'Foto Wajah Pemohon (Selfie Verifikasi)',
+                        'description'      => 'Foto wajah tampak depan pemohon terbaru tanpa kacamata untuk verifikasi biometrik oleh petugas.',
+                        'accepted_formats' => 'jpg,jpeg,png',
+                        'max_size_kb'      => 5120,
+                        'is_required'      => true,
+                        'capture_hint'     => 'Gunakan kamera depan, tatap lurus ke kamera di tempat terang, tanpa kacamata hitam, masker, atau penutup wajah.',
+                        'capture_mode'     => 'user',
+                        'applicable_to'    => 'all',
+                        'sort_order'       => 3,
+                    ]);
+                } else {
+                    $updates = [];
+                    if (!$selfieDoc->is_required) {
+                        $updates['is_required'] = true;
+                    }
+                    if ($selfieDoc->capture_mode !== 'user') {
+                        $updates['capture_mode'] = 'user';
+                    }
+                    if ($selfieDoc->sort_order != 3) {
+                        $updates['sort_order'] = 3;
+                    }
+                    if (!empty($updates)) {
+                        $selfieDoc->update($updates);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('ensureSelfieRequirementForPerekaman warning: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Create a new draft application with identity and representation validation.
      */
     public function createDraft(array $data, int $serviceTypeId): QueueApplication

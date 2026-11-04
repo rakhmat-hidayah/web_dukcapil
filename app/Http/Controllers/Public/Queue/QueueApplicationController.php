@@ -34,6 +34,9 @@ class QueueApplicationController extends Controller
      */
     public function create(Request $request): Response
     {
+        // Self-heal: ensure mandatory selfie photo exists for Perekaman KTP-el
+        \App\Services\Queue\QueueApplicationService::ensureSelfieRequirementForPerekaman();
+
         // Auto-seed initial queue services & settings if table is empty in production
         if (ServiceType::count() === 0) {
             try {
@@ -96,6 +99,8 @@ class QueueApplicationController extends Controller
      */
     public function storeDraft(Request $request): RedirectResponse
     {
+        \App\Services\Queue\QueueApplicationService::ensureSelfieRequirementForPerekaman();
+
         // Sanitize phone numbers by removing non-digit characters (e.g. hyphens, spaces)
         if ($request->has('applicant_phone') && $request->input('applicant_phone') !== null) {
             $cleaned = preg_replace('/[^0-9]/', '', (string) $request->input('applicant_phone'));
@@ -302,6 +307,9 @@ class QueueApplicationController extends Controller
      */
     public function showDocuments(string $regNumber): Response|RedirectResponse
     {
+        // Self-heal: ensure mandatory selfie photo exists for Perekaman KTP-el
+        \App\Services\Queue\QueueApplicationService::ensureSelfieRequirementForPerekaman();
+
         $application = QueueApplication::where('reg_number', $regNumber)
             ->with([
                 'serviceType.documents' => fn($q) => $q->orderBy('sort_order'),
@@ -434,6 +442,8 @@ class QueueApplicationController extends Controller
      */
     public function submit(Request $request, string $regNumber): RedirectResponse
     {
+        \App\Services\Queue\QueueApplicationService::ensureSelfieRequirementForPerekaman();
+
         $application = QueueApplication::where('reg_number', $regNumber)
             ->with(['serviceType.documents', 'documents'])
             ->first();
