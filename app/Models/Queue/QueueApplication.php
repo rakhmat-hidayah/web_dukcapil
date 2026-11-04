@@ -363,17 +363,40 @@ class QueueApplication extends Model
             ? $this->documents 
             : $this->documents()->with('serviceDocument')->get();
 
-        return $docs->first(function ($doc) {
+        if (!$docs || $docs->isEmpty()) {
+            return null;
+        }
+
+        // 1. Primary match: service document with user capture mode or label indicating photo/selfie
+        $matched = $docs->first(function ($doc) {
             $serviceDoc = $doc->serviceDocument;
-            if (!$serviceDoc) {
-                return false;
+            if ($serviceDoc) {
+                $label = strtolower($serviceDoc->label ?? '');
+                if ($serviceDoc->capture_mode === 'user'
+                    || str_contains($label, 'selfie')
+                    || str_contains($label, 'foto wajah')
+                    || str_contains($label, 'foto pemohon')
+                    || str_contains($label, 'pas foto')
+                    || str_contains($label, 'foto diri')) {
+                    return true;
+                }
             }
-            $label = strtolower($serviceDoc->label ?? '');
-            return $serviceDoc->capture_mode === 'user'
-                || str_contains($label, 'selfie')
-                || str_contains($label, 'foto wajah')
-                || str_contains($label, 'foto pemohon')
-                || str_contains($label, 'pas foto');
+            $filename = strtolower($doc->original_filename ?? '');
+            return str_contains($filename, 'selfie')
+                || str_contains($filename, 'foto_wajah')
+                || str_contains($filename, 'foto-wajah')
+                || str_contains($filename, 'pas_foto')
+                || str_contains($filename, 'foto_pemohon');
+        });
+
+        if ($matched) {
+            return $matched;
+        }
+
+        // 2. Secondary fallback: first uploaded image document if no specific selfie is configured
+        return $docs->first(function ($doc) {
+            $mime = strtolower($doc->mime_type ?? '');
+            return str_starts_with($mime, 'image/');
         });
     }
 
@@ -383,16 +406,26 @@ class QueueApplication extends Model
         if (!$selfie) {
             return null;
         }
+
+        // Admin portal context
+        if (request()->is('admin*') || (auth()->check() && !request()->is('layanan/antrian*'))) {
+            return route('admin.queue.documents.serve', ['documentId' => $selfie->id]);
+        }
+
+        // Public applicant context with access token
+        if (!empty($this->access_token)) {
+            return route('queue.serve-doc', [
+                'token' => $this->access_token,
+                'documentId' => $selfie->id,
+            ]);
+        }
+
         return route('admin.queue.documents.serve', ['documentId' => $selfie->id]);
     }
 
     public function getSelfieThumbnailUrlAttribute(): ?string
     {
-        $selfie = $this->selfie_document;
-        if (!$selfie) {
-            return null;
-        }
-        return route('admin.queue.documents.serve', ['documentId' => $selfie->id, 'preview_only' => 1]);
+        return $this->selfie_url;
     }
 
     public function getTrackingUrlAttribute(): string

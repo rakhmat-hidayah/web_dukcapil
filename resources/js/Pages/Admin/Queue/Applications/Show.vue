@@ -930,7 +930,7 @@
           </button>
         </div>
 
-        <div v-if="availableSlots.length === 0" class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300">
+        <div v-if="!availableSlots || availableSlots.length === 0" class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300">
           <strong>Belum ada jadwal buka:</strong> Tidak ditemukan jadwal pelayanan yang aktif dengan kuota tersedia untuk jenis layanan ini dalam 14 hari ke depan. Harap buka kuota pelayanan di menu <em>Jadwal & Kuota</em> terlebih dahulu.
         </div>
 
@@ -944,7 +944,7 @@
           >
             <option value="" disabled>-- Pilih Hari, Jam & Kuota Pelayanan --</option>
             <option
-              v-for="slot in availableSlots"
+              v-for="slot in (availableSlots || [])"
               :key="slot.id"
               :value="slot.id"
               :disabled="slot.remaining_quota <= 0"
@@ -1626,10 +1626,22 @@ import DocumentViewerModal from '@/Components/Queue/DocumentViewerModal.vue'
 import { Trash2 } from '@lucide/vue'
 
 const props = defineProps({
-  application: Object,
-  availableSlots: Array,
-  can_delete: Boolean,
-  is_trashed: Boolean,
+  application: {
+    type: Object,
+    default: () => ({}),
+  },
+  availableSlots: {
+    type: Array,
+    default: () => [],
+  },
+  can_delete: {
+    type: Boolean,
+    default: false,
+  },
+  is_trashed: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const isTrashed = computed(() => !!props.is_trashed || !!props.application?.deleted_at)

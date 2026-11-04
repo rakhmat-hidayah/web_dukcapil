@@ -167,11 +167,11 @@
 
         <!-- Validation Error Alert if any -->
         <div
-          v-if="errorMessage"
+          v-if="errorMessage || $page.props.flash?.error"
           class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-xs text-rose-800 dark:text-rose-200 flex items-start gap-2.5"
         >
           <svg class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <p class="font-medium leading-relaxed">{{ errorMessage }}</p>
+          <p class="font-medium leading-relaxed">{{ errorMessage || $page.props.flash?.error }}</p>
         </div>
 
         <!-- Submission Actions Card -->
@@ -744,6 +744,14 @@ async function handleSubmitApplication() {
     route('queue.apply.submit', { regNumber: props.application.reg_number }),
     { statement_agreed: true },
     {
+      onSuccess: (page) => {
+        isSubmitting.value = false;
+        uploadProgress.value.active = false;
+        if (page.props?.flash?.error) {
+          errorMessage.value = page.props.flash.error;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      },
       onFinish: () => {
         isSubmitting.value = false;
         uploadProgress.value.active = false;
@@ -752,7 +760,8 @@ async function handleSubmitApplication() {
         isSubmitting.value = false;
         uploadProgress.value.active = false;
         errorMessage.value =
-          errors.statement_agreed || Object.values(errors)[0] || 'Terjadi kesalahan saat mengirim pendaftaran.';
+          errors.documents || errors.statement_agreed || Object.values(errors)[0] || 'Terjadi kesalahan saat mengirim pendaftaran.';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       },
     }
   );

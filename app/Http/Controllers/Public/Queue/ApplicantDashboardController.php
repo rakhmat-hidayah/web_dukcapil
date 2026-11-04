@@ -97,23 +97,61 @@ class ApplicantDashboardController extends Controller
             ->with(['serviceType', 'slot.schedule'])
             ->firstOrFail();
 
-        // If queue number is already issued and not explicitly rescheduling, redirect directly to status
-        if ($application->queue_number && !$request->has('reschedule')) {
+        // 1. Dokumen yang telah selesai atau telah diproses di loket TIDAK BOLEH dijadwalkan ulang
+        $completedOrLockedStatuses = [
+            QueueApplication::STATUS_COMPLETED,
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+            QueueApplication::STATUS_PROCESSING,
+            QueueApplication::STATUS_IN_SERVICE,
+            QueueApplication::STATUS_APPROVED_FOR_SERVICE,
+            QueueApplication::STATUS_PHYSICAL_VERIFIED,
+            QueueApplication::STATUS_PHYSICAL_VERIFICATION,
+            QueueApplication::STATUS_PHYSICAL_VERIFICATION_REJECTED,
+            QueueApplication::STATUS_ARRIVED,
+            QueueApplication::STATUS_CHECKED_IN,
+            QueueApplication::STATUS_REJECTED,
+            QueueApplication::STATUS_CANCELLED,
+            QueueApplication::STATUS_DRAFT,
+        ];
+
+        if (in_array($application->status, $completedOrLockedStatuses)) {
+            $isCompleted = in_array($application->status, [
+                QueueApplication::STATUS_COMPLETED,
+                QueueApplication::STATUS_READY_FOR_PICKUP,
+                QueueApplication::STATUS_PROCESSING,
+                QueueApplication::STATUS_IN_SERVICE,
+            ]);
+
+            $message = $isCompleted
+                ? 'Permohonan dokumen Anda telah selesai atau sedang dalam proses loket. Jadwal kedatangan tidak dapat diubah.'
+                : 'Pemesanan atau perubahan jadwal antrean tidak dapat dilakukan untuk status permohonan saat ini.';
+
             return redirect()->route('queue.status', ['token' => $token])
-                ->with('info', "Nomor antrean resmi Anda telah diterbitkan: {$application->queue_number}.");
+                ->with('info', $message);
         }
 
+        // 2. Hanya permohonan aktif pra-kehadiran fisik yang diizinkan untuk memilih / mengubah jadwal
         $allowedStatuses = [
             QueueApplication::STATUS_SUBMITTED,
+            QueueApplication::STATUS_UNDER_REVIEW,
             QueueApplication::STATUS_RESUBMITTED,
             QueueApplication::STATUS_PRE_VERIFIED,
             QueueApplication::STATUS_APPROVED,
             QueueApplication::STATUS_QUEUE_BOOKED,
+            QueueApplication::STATUS_SCHEDULED,
         ];
 
         if (!in_array($application->status, $allowedStatuses)) {
             return redirect()->route('queue.status', ['token' => $token])
                 ->with('info', 'Pemesanan jadwal antrean hanya dapat dilakukan untuk permohonan yang aktif.');
+        }
+
+        $isReschedule = (bool) $request->has('reschedule') || (bool) $request->boolean('reschedule');
+
+        // If queue number is already issued and not explicitly rescheduling, redirect directly to status
+        if ($application->queue_number && !$isReschedule) {
+            return redirect()->route('queue.status', ['token' => $token])
+                ->with('info', "Nomor antrean resmi Anda telah diterbitkan: {$application->queue_number}.");
         }
 
         $availableSchedules = QueueSchedule::where('is_open', true)
@@ -133,7 +171,7 @@ class ApplicantDashboardController extends Controller
         return Inertia::render('Public/Queue/Status/Booking', [
             'application' => $application,
             'schedules'   => $availableSchedules,
-            'isReschedule' => (bool) $request->has('reschedule'),
+            'isReschedule' => $isReschedule,
         ]);
     }
 
@@ -149,10 +187,50 @@ class ApplicantDashboardController extends Controller
             'slot_id.exists'   => 'Jadwal yang dipilih tidak valid atau sudah penuh.',
         ]);
 
-        $application = QueueApplication::where('access_token', $token)->firstOrFail();
+        $application = QueueApplication::where('access_token', $token)
+            ->with(['serviceType', 'slot.schedule'])
+            ->firstOrFail();
+
+        $completedOrLockedStatuses = [
+            QueueApplication::STATUS_COMPLETED,
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+            QueueApplication::STATUS_PROCESSING,
+            QueueApplication::STATUS_IN_SERVICE,
+            QueueApplication::STATUS_APPROVED_FOR_SERVICE,
+            QueueApplication::STATUS_PHYSICAL_VERIFIED,
+            QueueApplication::STATUS_PHYSICAL_VERIFICATION,
+            QueueApplication::STATUS_PHYSICAL_VERIFICATION_REJECTED,
+            QueueApplication::STATUS_ARRIVED,
+            QueueApplication::STATUS_CHECKED_IN,
+            QueueApplication::STATUS_REJECTED,
+            QueueApplication::STATUS_CANCELLED,
+            QueueApplication::STATUS_DRAFT,
+        ];
+
+        if (in_array($application->status, $completedOrLockedStatuses)) {
+            return redirect()->route('queue.status', ['token' => $token])
+                ->with('error', 'Perubahan jadwal tidak dapat dilakukan karena dokumen telah selesai atau sedang dalam proses loket.');
+        }
+
+        $allowedStatuses = [
+            QueueApplication::STATUS_SUBMITTED,
+            QueueApplication::STATUS_UNDER_REVIEW,
+            QueueApplication::STATUS_RESUBMITTED,
+            QueueApplication::STATUS_PRE_VERIFIED,
+            QueueApplication::STATUS_APPROVED,
+            QueueApplication::STATUS_QUEUE_BOOKED,
+            QueueApplication::STATUS_SCHEDULED,
+        ];
+
+        if (!in_array($application->status, $allowedStatuses)) {
+            return redirect()->route('queue.status', ['token' => $token])
+                ->with('error', 'Pemesanan jadwal antrean tidak dapat dilakukan untuk status permohonan saat ini.');
+        }
+
+        $isReschedule = $request->boolean('reschedule') || $request->input('reschedule') == 1 || $request->has('reschedule');
 
         // If queue number is already issued and not rescheduling, prevent double-booking
-        if ($application->queue_number && !$request->has('reschedule')) {
+        if ($application->queue_number && !$isReschedule) {
             return redirect()->route('queue.status', ['token' => $token])
                 ->with('info', "Nomor antrean resmi Anda telah diterbitkan: {$application->queue_number}.");
         }
@@ -162,13 +240,35 @@ class ApplicantDashboardController extends Controller
             $application->update([
                 'scheduled_at' => now(),
             ]);
+
+            $freshApp = $application->fresh(['slot.schedule']);
+
+            if ($isReschedule) {
+                $schedDate = $freshApp->slot?->schedule?->schedule_date ? $freshApp->slot->schedule->schedule_date->format('d/m/Y') : '';
+                \App\Models\Queue\VerificationHistory::create([
+                    'application_id' => $application->id,
+                    'user_id'        => null,
+                    'from_status'    => $application->status,
+                    'to_status'      => $application->status,
+                    'notes'          => "Pemohon berhasil mengubah tanggal kedatangan ke jadwal {$schedDate}. Nomor antrean: {$freshApp->queue_number}.",
+                    'metadata'       => [
+                        'ip'           => $request->ip(),
+                        'rescheduled'  => true,
+                        'queue_number' => $freshApp->queue_number,
+                    ],
+                ]);
+            }
         } catch (\Throwable $e) {
             return back()->with('error', $e->getMessage());
         }
 
         $freshApp = $application->fresh();
+        $msg = $isReschedule
+            ? "Jadwal kedatangan berhasil diubah! Nomor antrean resmi Anda: {$freshApp->queue_number}."
+            : "Jadwal antrean berhasil ditetapkan! Nomor antrean resmi Anda: {$freshApp->queue_number}.";
+
         return redirect()->route('queue.status', ['token' => $token])
-            ->with('success', "Jadwal antrean berhasil ditetapkan! Nomor antrean resmi Anda: {$freshApp->queue_number}.");
+            ->with('success', $msg);
     }
 
     /**

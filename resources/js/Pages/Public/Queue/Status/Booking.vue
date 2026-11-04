@@ -21,13 +21,18 @@
           <div>
             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 mb-3">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-              Pra-Verifikasi Dokumen Disetujui
+              {{ isReschedule ? 'Perubahan Jadwal Kedatangan' : 'Pra-Verifikasi Dokumen Disetujui' }}
             </div>
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight">
-              Pilih Jadwal Kedatangan ke Kantor
+              {{ isReschedule ? 'Ubah Jadwal Kedatangan ke Kantor' : 'Pilih Jadwal Kedatangan ke Kantor' }}
             </h1>
             <p class="text-xs sm:text-sm text-emerald-100 mt-2 max-w-xl leading-relaxed">
-              Selamat! Dokumen persyaratan digital Anda telah diverifikasi oleh petugas. Silakan pilih hari dan sesi pelayanan untuk mendapatkan <strong>Nomor Antrean</strong> ke Kantor Disdukcapil Kabupaten Dompu.
+              <template v-if="isReschedule">
+                Silakan pilih hari dan sesi pelayanan baru untuk memperbarui jadwal dan nomor antrean Anda di Kantor Disdukcapil Kabupaten Dompu.
+              </template>
+              <template v-else>
+                Selamat! Dokumen persyaratan digital Anda telah diverifikasi oleh petugas. Silakan pilih hari dan sesi pelayanan untuk mendapatkan <strong>Nomor Antrean</strong> ke Kantor Disdukcapil Kabupaten Dompu.
+              </template>
             </p>
             <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-emerald-200">
               <span>No. Registrasi: <strong class="text-white font-mono font-bold">{{ application.reg_number }}</strong></span>
@@ -167,7 +172,8 @@
               :disabled="isSubmitting"
               class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-xl shadow-blue-600/30 transition transform active:scale-95 cursor-pointer disabled:opacity-50"
             >
-              <span v-if="isSubmitting">Menerbitkan Antrean...</span>
+              <span v-if="isSubmitting">Memproses...</span>
+              <span v-else-if="isReschedule">Konfirmasi Perubahan Jadwal &rarr;</span>
               <span v-else>Konfirmasi & Ambil Antrean &rarr;</span>
             </button>
           </div>
@@ -212,6 +218,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  isReschedule: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const selectedSchedule = ref(null);
@@ -234,7 +244,10 @@ function handleConfirmBooking() {
   isSubmitting.value = true;
   router.post(
     route('queue.booking.store', { token: props.application.access_token }),
-    { slot_id: selectedSlot.value.id },
+    { 
+      slot_id: selectedSlot.value.id,
+      reschedule: props.isReschedule ? 1 : 0,
+    },
     {
       onError: (errors) => {
         isSubmitting.value = false;

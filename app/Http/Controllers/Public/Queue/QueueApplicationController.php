@@ -505,6 +505,8 @@ class QueueApplicationController extends Controller
 
         try {
             $application = $this->applicationService->submit($application, true);
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            throw $ve;
         } catch (\Throwable $e) {
             \Log::error("Submit queue application failed [{$regNumber}]: " . $e->getMessage(), [
                 'exception' => $e,

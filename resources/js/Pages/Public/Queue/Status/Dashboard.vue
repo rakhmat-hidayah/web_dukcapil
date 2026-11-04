@@ -102,38 +102,51 @@
         ></div>
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div class="space-y-1 flex-1">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
-                NO. REGISTRASI: {{ application.reg_number }}
-              </span>
-              <StatusBadge :status="application.status" size="md" />
+          <div class="flex items-start gap-4 flex-1">
+            <!-- Applicant Photo Thumbnail in Top Card -->
+            <div v-if="application.selfie_url" class="shrink-0 hidden sm:block">
+              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800 p-0.5">
+                <img
+                  :src="application.selfie_url"
+                  :alt="application.applicant_name"
+                  class="w-full h-full object-cover rounded-xl"
+                  @error="(e) => (e.target.parentElement.style.display = 'none')"
+                />
+              </div>
             </div>
+            <div class="space-y-1 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
+                  NO. REGISTRASI: {{ application.reg_number }}
+                </span>
+                <StatusBadge :status="application.status" size="md" />
+              </div>
 
-            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white pt-1">
-              {{ application.service_type?.name }}
-            </h1>
+              <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white pt-1">
+                {{ application.service_type?.name }}
+              </h1>
 
-            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
-              <span>Pemohon: <strong class="text-slate-700 dark:text-slate-200">{{ application.applicant_name }}</strong></span>
-              <span>·</span>
-              <span>NIK: <span class="font-mono font-bold">{{ application.masked_nik }}</span></span>
-              <span>·</span>
-              <span class="inline-flex items-center gap-1 font-medium text-blue-600 dark:text-blue-400">
-                Kehadiran: {{ attendanceLabel }}
-              </span>
-            </div>
+              <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <span>Pemohon: <strong class="text-slate-700 dark:text-slate-200">{{ application.applicant_name }}</strong></span>
+                <span>·</span>
+                <span>NIK: <span class="font-mono font-bold">{{ application.masked_nik }}</span></span>
+                <span>·</span>
+                <span class="inline-flex items-center gap-1 font-medium text-blue-600 dark:text-blue-400">
+                  Kehadiran: {{ attendanceLabel }}
+                </span>
+              </div>
 
-            <!-- Representative Details if represented -->
-            <div
-              v-if="application.attendance_type !== 'self' && application.representative_name"
-              class="mt-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 flex flex-wrap items-center gap-3"
-            >
-              <span class="font-bold text-slate-800 dark:text-slate-200">Perwakilan / Kuasa:</span>
-              <span>{{ application.representative_name }}</span>
-              <span>(NIK: <span class="font-mono">{{ application.representative_nik }}</span>)</span>
-              <span>· Hubungan: <strong>{{ application.representative_relationship }}</strong></span>
-              <span v-if="application.representative_reason" class="text-slate-500 italic">· Alasan: "{{ application.representative_reason }}"</span>
+              <!-- Representative Details if represented -->
+              <div
+                v-if="application.attendance_type !== 'self' && application.representative_name"
+                class="mt-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 flex flex-wrap items-center gap-3"
+              >
+                <span class="font-bold text-slate-800 dark:text-slate-200">Perwakilan / Kuasa:</span>
+                <span>{{ application.representative_name }}</span>
+                <span>(NIK: <span class="font-mono">{{ application.representative_nik }}</span>)</span>
+                <span>· Hubungan: <strong>{{ application.representative_relationship }}</strong></span>
+                <span v-if="application.representative_reason" class="text-slate-500 italic">· Alasan: "{{ application.representative_reason }}"</span>
+              </div>
             </div>
           </div>
 
@@ -214,7 +227,7 @@
                   Dokumen persyaratan digital Anda sedang diperiksa kelengkapannya oleh verifikator Disdukcapil Kabupaten Dompu.
                 </template>
               </p>
-              <div v-if="application.queue_number" class="mt-2.5">
+              <div v-if="canReschedule" class="mt-2.5">
                 <Link
                   :href="route('queue.booking', { token: application.access_token, reschedule: 1 })"
                   class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 dark:text-blue-300 hover:underline"
@@ -263,6 +276,15 @@
               <p class="mt-1 leading-relaxed">
                 Silakan simpan atau cetak tiket antrean di bawah. Hadirlah di Kantor Disdukcapil Kabupaten Dompu pada tanggal <strong>{{ scheduleDateFormatted }}</strong> dan bawa seluruh dokumen fisik asli.
               </p>
+              <div v-if="canReschedule" class="mt-2.5">
+                <Link
+                  :href="route('queue.booking', { token: application.access_token, reschedule: 1 })"
+                  class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 dark:text-blue-300 hover:underline"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <span>Ingin ubah tanggal / jadwal kedatangan? Klik di sini</span>
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -462,6 +484,21 @@
               </template>
             </div>
 
+            <!-- Center: Applicant Photo on Printable Ticket -->
+            <div v-if="application.selfie_url" class="shrink-0 flex flex-col items-center text-center">
+              <div class="w-28 h-32 sm:w-32 sm:h-36 p-1 bg-white dark:bg-slate-800 rounded-2xl border-2 border-slate-300 dark:border-slate-600 shadow-md overflow-hidden">
+                <img
+                  :src="application.selfie_url"
+                  :alt="application.applicant_name"
+                  class="w-full h-full object-cover rounded-xl"
+                  @error="(e) => (e.target.parentElement.parentElement.style.display = 'none')"
+                />
+              </div>
+              <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1.5">
+                Foto Pemohon
+              </p>
+            </div>
+
             <!-- Right Side: Official QR Code Box for Scanner Device & Phone -->
             <div class="shrink-0 flex flex-col items-center text-center">
               <div
@@ -522,20 +559,30 @@
 
         <!-- Attendance & Representative Details on Ticket -->
         <div class="mt-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-700 text-xs">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <span class="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Pemilik Dokumen</span>
-              <p class="font-bold text-slate-900 dark:text-white mt-0.5">{{ application.applicant_name }}</p>
-              <p class="text-slate-500 font-mono">NIK: {{ application.masked_nik }}</p>
+          <div class="flex items-start gap-3.5">
+            <div v-if="application.selfie_url" class="shrink-0 hidden sm:block">
+              <img
+                :src="application.selfie_url"
+                :alt="application.applicant_name"
+                class="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-slate-600 shadow-xs"
+                @error="(e) => (e.target.style.display = 'none')"
+              />
             </div>
-            <div>
-              <span class="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Yang Hadir ke Kantor</span>
-              <p class="font-bold text-slate-900 dark:text-white mt-0.5">
-                {{ application.attendance_type === 'self' ? application.applicant_name + ' (Pemohon Sendiri)' : application.representative_name + ' (Perwakilan / Kuasa)' }}
-              </p>
-              <p v-if="application.attendance_type !== 'self'" class="text-slate-500 font-mono">
-                NIK Perwakilan: {{ application.representative_nik }} ({{ application.representative_relationship }})
-              </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
+              <div>
+                <span class="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Pemilik Dokumen</span>
+                <p class="font-bold text-slate-900 dark:text-white mt-0.5">{{ application.applicant_name }}</p>
+                <p class="text-slate-500 font-mono">NIK: {{ application.masked_nik }}</p>
+              </div>
+              <div>
+                <span class="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Yang Hadir ke Kantor</span>
+                <p class="font-bold text-slate-900 dark:text-white mt-0.5">
+                  {{ application.attendance_type === 'self' ? application.applicant_name + ' (Pemohon Sendiri)' : application.representative_name + ' (Perwakilan / Kuasa)' }}
+                </p>
+                <p v-if="application.attendance_type !== 'self'" class="text-slate-500 font-mono">
+                  NIK Perwakilan: {{ application.representative_nik }} ({{ application.representative_relationship }})
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -702,9 +749,9 @@
                 {{ hist.notes || 'Status diperbarui.' }}
               </p>
 
-              <!-- Direct CTA Action Button in Timeline (Pre-Verified Phase) -->
+              <!-- Direct CTA Action Button in Timeline (Pre-Verified Phase, only if active) -->
               <div
-                v-if="['PRE_VERIFIED', 'APPROVED'].includes(hist.to_status) && !application.queue_number"
+                v-if="['PRE_VERIFIED', 'APPROVED'].includes(hist.to_status) && !application.queue_number && !['COMPLETED', 'READY_FOR_PICKUP', 'PROCESSING', 'IN_SERVICE', 'APPROVED_FOR_SERVICE', 'PHYSICAL_VERIFIED', 'PHYSICAL_VERIFICATION', 'ARRIVED', 'CHECKED_IN', 'REJECTED', 'CANCELLED'].includes(application.status)"
                 class="mt-3 p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs"
               >
                 <div class="text-xs text-emerald-900 dark:text-emerald-200 space-y-0.5">
@@ -906,6 +953,34 @@ const bookingUrl = computed(() => {
     // ignore
   }
   return `/layanan/antrian/status/${props.application?.access_token}/booking`;
+});
+
+const canReschedule = computed(() => {
+  if (!props.application?.queue_number) return false;
+
+  // Status dokumen telah selesai, sedang diproses mesin/loket, atau telah hadir di loket - LINK TIDAK BOLEH MUNCUL
+  const lockedStatuses = [
+    'COMPLETED',
+    'READY_FOR_PICKUP',
+    'PROCESSING',
+    'IN_SERVICE',
+    'APPROVED_FOR_SERVICE',
+    'PHYSICAL_VERIFIED',
+    'PHYSICAL_VERIFICATION',
+    'PHYSICAL_VERIFICATION_REJECTED',
+    'CHECKED_IN',
+    'ARRIVED',
+    'REJECTED',
+    'CANCELLED',
+    'DRAFT',
+  ];
+
+  if (lockedStatuses.includes(props.application?.status)) {
+    return false;
+  }
+
+  // Hanya izinkan jika berkas masih dalam tahap aktif sebelum kehadiran fisik di loket
+  return ['SUBMITTED', 'UNDER_REVIEW', 'PRE_VERIFIED', 'APPROVED', 'QUEUE_BOOKED', 'SCHEDULED', 'RESUBMITTED'].includes(props.application?.status);
 });
 
 const attendanceLabel = computed(() => {
