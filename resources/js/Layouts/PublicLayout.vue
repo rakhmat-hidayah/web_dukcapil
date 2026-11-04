@@ -27,6 +27,7 @@
             src="/img/logo-dompu.png" 
             @error="$event.target.src = '/images/logo-dompu.png'"
             alt="Logo Kabupaten Dompu" 
+            style="height: 36px; max-height: 36px; width: auto; object-fit: contain;"
             class="h-8 lg:h-9 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
           />
 
@@ -38,6 +39,7 @@
             src="/img/logo-dukcapil.png" 
             @error="$event.target.src = '/images/logo-dukcapil.png'"
             alt="Logo Disdukcapil Dompu" 
+            style="height: 40px; max-height: 40px; width: auto; object-fit: contain;"
             class="h-9 lg:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
           />
         </Link>
@@ -400,9 +402,9 @@
         <!-- Brand Info -->
         <div class="space-y-3 flex flex-col items-center sm:items-start">
           <div class="flex items-center justify-center sm:justify-start gap-3 p-2 rounded-xl dark:bg-white/95 dark:shadow-md">
-            <img src="/img/logo-dompu.png" @error="$event.target.src = '/images/logo-dompu.png'" alt="Logo Dompu" class="h-11 w-auto object-contain" />
+            <img src="/img/logo-dompu.png" @error="$event.target.src = '/images/logo-dompu.png'" alt="Logo Dompu" style="height: 44px; max-height: 44px; width: auto; object-fit: contain;" class="h-11 w-auto object-contain" />
             <div class="h-8 w-px bg-gray-200 dark:bg-gray-300"></div>
-            <img src="/img/logo-dukcapil.png" @error="$event.target.src = '/images/logo-dukcapil.png'" alt="Logo Disdukcapil" class="h-12 w-auto object-contain" />
+            <img src="/img/logo-dukcapil.png" @error="$event.target.src = '/images/logo-dukcapil.png'" alt="Logo Disdukcapil" style="height: 48px; max-height: 48px; width: auto; object-fit: contain;" class="h-12 w-auto object-contain" />
           </div>
           <p class="text-gray-500 dark:text-zinc-400 leading-relaxed">
             Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu resmi menyelenggarakan tertib administrasi kependudukan prima.

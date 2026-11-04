@@ -142,7 +142,19 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* SVG Safeguard against unstyled sizing explosion */
+        /* Standalone Resets & Image/SVG Safeguards against unstyled sizing explosion */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        header img, a img, .brand-logo-container img {
+            max-height: 40px !important;
+            height: auto;
+            object-fit: contain !important;
+        }
         svg {
             max-width: 100%;
         }
@@ -186,21 +198,27 @@
         <div class="max-w-7xl mx-auto px-3 xs:px-4 sm:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4">
             
             <!-- Dual Logo: Logo Kabupaten Dompu & Logo Disdukcapil Dompu -->
-            <a href="{{ $backUrl }}" class="flex items-center gap-1.5 xs:gap-2.5 select-none group shrink-0 px-2 xs:px-2.5 py-1 rounded-xl transition-all bg-white dark:bg-zinc-800 shadow-sm border border-gray-200/80 dark:border-zinc-700">
+            <a href="{{ $backUrl }}" class="brand-logo-container flex items-center gap-1.5 xs:gap-2.5 select-none group shrink-0 px-2 xs:px-2.5 py-1 rounded-xl transition-all bg-white dark:bg-zinc-800 shadow-sm border border-gray-200/80 dark:border-zinc-700">
                 <!-- Logo 1: Logo Daerah Kabupaten Dompu -->
                 <img 
                     src="/images/logo-dompu.png" 
                     alt="Logo Kabupaten Dompu" 
+                    width="36"
+                    height="36"
+                    style="height: 36px; max-height: 36px; width: auto; object-fit: contain; display: inline-block;"
                     class="h-7 xs:h-8 sm:h-9 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
                 />
 
                 <!-- Thin Vertical Divider -->
-                <div class="h-4 xs:h-5 sm:h-6 w-px bg-gray-200 dark:bg-zinc-700"></div>
+                <div class="h-4 xs:h-5 sm:h-6 w-px bg-gray-200 dark:bg-zinc-700" style="width: 1px; height: 20px; background-color: #cbd5e1; display: inline-block;"></div>
 
                 <!-- Logo 2: Logo Official Disdukcapil Dompu -->
                 <img 
                     src="/images/logo-dukcapil.png" 
                     alt="Logo Disdukcapil Dompu" 
+                    width="40"
+                    height="40"
+                    style="height: 40px; max-height: 40px; width: auto; object-fit: contain; display: inline-block;"
                     class="h-8 xs:h-9 sm:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
                 />
             </a>
