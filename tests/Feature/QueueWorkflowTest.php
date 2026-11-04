@@ -1166,4 +1166,37 @@ class QueueWorkflowTest extends TestCase
         $app2->forceDelete();
         $app3->forceDelete();
     }
+
+    public function test_workflow_lifecycle_status_tabs_and_filtering()
+    {
+        $admin = User::first() ?? User::factory()->create();
+        $service = ServiceType::first();
+        $appService = app(\App\Services\Queue\QueueApplicationService::class);
+
+        $appReady = $appService->createDraft([
+            'applicant_nik' => '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT),
+            'applicant_name' => 'Warga Siap Ambil',
+            'applicant_phone' => '081234567899',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+        $appReady->update([
+            'status' => QueueApplication::STATUS_READY_FOR_PICKUP,
+            'queue_number' => 'H-999',
+        ]);
+
+        $res = $this->actingAs($admin)->get(route('admin.queue.applications.index', ['status' => 'READY_FOR_PICKUP']));
+        $res->assertStatus(200);
+        $res->assertInertia(fn ($page) => 
+            $page->component('Admin/Queue/Applications/Index')
+                ->where('filters.status', 'READY_FOR_PICKUP')
+                ->has('statusCounts.READY_FOR_PICKUP')
+                ->has('statusCounts.QUEUE_BOOKED')
+                ->has('statusCounts.PROCESSING')
+                ->has('statusCounts.PRE_VERIFIED')
+                ->has('statusCounts.ARRIVED')
+        );
+
+        $appReady->forceDelete();
+    }
 }

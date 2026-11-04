@@ -78,7 +78,23 @@ class ApplicationVerificationController extends Controller
         }
 
         if ($status && empty($urgency)) {
-            $query->where('status', $status);
+            if ($status === 'SUBMITTED') {
+                $query->whereIn('status', [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED]);
+            } elseif (in_array($status, ['PRE_VERIFIED', 'APPROVED'])) {
+                $query->whereIn('status', [QueueApplication::STATUS_PRE_VERIFIED, 'APPROVED']);
+            } elseif (in_array($status, ['QUEUE_BOOKED', 'SCHEDULED'])) {
+                $query->whereIn('status', [QueueApplication::STATUS_QUEUE_BOOKED, 'SCHEDULED']);
+            } elseif (in_array($status, ['ARRIVED', 'CHECKED_IN'])) {
+                $query->whereIn('status', [QueueApplication::STATUS_ARRIVED, 'CHECKED_IN']);
+            } elseif (in_array($status, ['PHYSICAL_VERIFICATION', 'APPROVED_FOR_SERVICE'])) {
+                $query->whereIn('status', [QueueApplication::STATUS_PHYSICAL_VERIFICATION, QueueApplication::STATUS_APPROVED_FOR_SERVICE]);
+            } elseif (in_array($status, ['PROCESSING', 'IN_SERVICE'])) {
+                $query->whereIn('status', [QueueApplication::STATUS_PROCESSING, 'IN_SERVICE']);
+            } elseif (in_array($status, ['EXPIRED', 'CANCELLED'])) {
+                $query->whereIn('status', [QueueApplication::STATUS_EXPIRED, QueueApplication::STATUS_CANCELLED]);
+            } else {
+                $query->where('status', $status);
+            }
         }
 
         if ($serviceId) {
@@ -105,16 +121,15 @@ class ApplicationVerificationController extends Controller
             'SUBMITTED'             => QueueApplication::whereIn('status', [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED])->count(),
             'UNDER_REVIEW'          => QueueApplication::where('status', QueueApplication::STATUS_UNDER_REVIEW)->count(),
             'REVISION_REQUIRED'     => QueueApplication::where('status', QueueApplication::STATUS_REVISION_REQUIRED)->count(),
-            'PRE_VERIFIED'          => QueueApplication::where('status', QueueApplication::STATUS_PRE_VERIFIED)->count(),
-            'QUEUE_BOOKED'          => QueueApplication::where('status', QueueApplication::STATUS_QUEUE_BOOKED)->count(),
-            'ARRIVED'               => QueueApplication::where('status', QueueApplication::STATUS_ARRIVED)->count(),
-            'PHYSICAL_VERIFICATION' => QueueApplication::where('status', QueueApplication::STATUS_PHYSICAL_VERIFICATION)->count(),
-            'APPROVED_FOR_SERVICE'  => QueueApplication::where('status', QueueApplication::STATUS_APPROVED_FOR_SERVICE)->count(),
-            'PROCESSING'            => QueueApplication::where('status', QueueApplication::STATUS_PROCESSING)->count(),
+            'PRE_VERIFIED'          => QueueApplication::whereIn('status', [QueueApplication::STATUS_PRE_VERIFIED, 'APPROVED'])->count(),
+            'QUEUE_BOOKED'          => QueueApplication::whereIn('status', [QueueApplication::STATUS_QUEUE_BOOKED, 'SCHEDULED'])->count(),
+            'ARRIVED'               => QueueApplication::whereIn('status', [QueueApplication::STATUS_ARRIVED, 'CHECKED_IN'])->count(),
+            'PHYSICAL_VERIFICATION' => QueueApplication::whereIn('status', [QueueApplication::STATUS_PHYSICAL_VERIFICATION, QueueApplication::STATUS_APPROVED_FOR_SERVICE])->count(),
+            'PROCESSING'            => QueueApplication::whereIn('status', [QueueApplication::STATUS_PROCESSING, 'IN_SERVICE'])->count(),
             'READY_FOR_PICKUP'      => QueueApplication::where('status', QueueApplication::STATUS_READY_FOR_PICKUP)->count(),
             'COMPLETED'             => QueueApplication::where('status', QueueApplication::STATUS_COMPLETED)->count(),
             'REJECTED'              => QueueApplication::where('status', QueueApplication::STATUS_REJECTED)->count(),
-            'EXPIRED'               => QueueApplication::where('status', QueueApplication::STATUS_EXPIRED)->count(),
+            'EXPIRED'               => QueueApplication::whereIn('status', [QueueApplication::STATUS_EXPIRED, QueueApplication::STATUS_CANCELLED])->count(),
         ];
 
         // Specific urgent counts for operator verification reminders

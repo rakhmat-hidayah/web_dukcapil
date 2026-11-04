@@ -173,7 +173,7 @@
           @click="selectStatus(tab.value)"
           :class="[
             'px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 cursor-pointer',
-            activeStatus === tab.value && !activeUrgency
+            isTabActive(tab.value)
               ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
               : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700'
           ]"
@@ -182,7 +182,7 @@
           <span
             :class="[
               'px-2 py-0.5 rounded-full text-[10px] font-mono',
-              activeStatus === tab.value && !activeUrgency ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+              isTabActive(tab.value) ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
             ]"
           >
             {{ tab.count }}
@@ -441,13 +441,28 @@ const selectedService = ref(props.filters?.service_id || '')
 
 const statusTabs = computed(() => [
   { label: 'Menunggu Verifikasi', value: 'SUBMITTED', count: props.statusCounts?.SUBMITTED || 0 },
-  { label: 'Sedang Diperiksa', value: 'UNDER_REVIEW', count: props.statusCounts?.UNDER_REVIEW || 0 },
+  { label: 'Sedang Diverifikasi', value: 'UNDER_REVIEW', count: props.statusCounts?.UNDER_REVIEW || 0 },
   { label: 'Perlu Perbaikan', value: 'REVISION_REQUIRED', count: props.statusCounts?.REVISION_REQUIRED || 0 },
-  { label: 'Disetujui', value: 'APPROVED', count: props.statusCounts?.APPROVED || 0 },
-  { label: 'Sudah Hadir', value: 'CHECKED_IN', count: props.statusCounts?.CHECKED_IN || 0 },
-  { label: 'Selesai', value: 'COMPLETED', count: props.statusCounts?.COMPLETED || 0 },
-  { label: 'Ditolak', value: 'REJECTED', count: props.statusCounts?.REJECTED || 0 },
+  { label: 'Lolos Pra-Verifikasi', value: 'PRE_VERIFIED', count: props.statusCounts?.PRE_VERIFIED || 0 },
+  { label: 'Jadwal Antrean Terbit', value: 'QUEUE_BOOKED', count: props.statusCounts?.QUEUE_BOOKED || 0 },
+  { label: 'Hadir di Loket', value: 'ARRIVED', count: props.statusCounts?.ARRIVED || 0 },
+  { label: 'Pemeriksaan Fisik', value: 'PHYSICAL_VERIFICATION', count: props.statusCounts?.PHYSICAL_VERIFICATION || 0 },
+  { label: 'Sedang Rekam / Cetak', value: 'PROCESSING', count: props.statusCounts?.PROCESSING || 0 },
+  { label: 'KTP Siap Diambil', value: 'READY_FOR_PICKUP', count: props.statusCounts?.READY_FOR_PICKUP || 0 },
+  { label: 'Pelayanan Selesai', value: 'COMPLETED', count: props.statusCounts?.COMPLETED || 0 },
+  { label: 'Pengajuan Ditolak', value: 'REJECTED', count: props.statusCounts?.REJECTED || 0 },
+  { label: 'Batal / Kedaluwarsa', value: 'EXPIRED', count: props.statusCounts?.EXPIRED || 0 },
 ])
+
+const isTabActive = (tabVal) => {
+  if (activeUrgency.value) return false
+  if (activeStatus.value === tabVal) return true
+  if (tabVal === 'PRE_VERIFIED' && activeStatus.value === 'APPROVED') return true
+  if (tabVal === 'QUEUE_BOOKED' && activeStatus.value === 'SCHEDULED') return true
+  if (tabVal === 'ARRIVED' && activeStatus.value === 'CHECKED_IN') return true
+  if (tabVal === 'PROCESSING' && activeStatus.value === 'IN_SERVICE') return true
+  return false
+}
 
 const selectStatus = (status) => {
   activeStatus.value = status
