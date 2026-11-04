@@ -195,17 +195,19 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="packages.links && packages.links.length > 3" class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
-          <div class="flex items-center gap-1">
+        <div v-if="packages.links && packages.links.length > 3" class="flex flex-col sm:flex-row items-center justify-end pt-4 border-t border-slate-100 dark:border-slate-700">
+          <div class="w-full sm:w-auto flex items-center justify-start sm:justify-end gap-1 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-thin select-none touch-pan-x">
             <template v-for="(link, i) in packages.links" :key="i">
               <Link
                 v-if="link.url"
                 :href="link.url"
+                preserve-scroll
+                preserve-state
                 v-html="link.label"
-                class="px-3 py-1.5 rounded-xl text-xs font-semibold transition"
+                class="min-w-[36px] h-9 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center shrink-0 cursor-pointer active:scale-95 touch-manipulation"
                 :class="link.active ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200'"
               />
-              <span v-else v-html="link.label" class="px-3 py-1.5 text-xs text-slate-400" />
+              <span v-else v-html="link.label" class="min-w-[36px] h-9 px-2.5 text-xs text-slate-400 flex items-center justify-center shrink-0 cursor-not-allowed opacity-50 select-none" />
             </template>
           </div>
         </div>

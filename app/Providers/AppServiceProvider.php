@@ -32,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Carbon::setLocale('id');
         config(['app.locale' => 'id']);
 
+        if (request()->server('HTTP_X_FORWARDED_PROTO') === 'https' || str_starts_with(config('app.url'), 'https://')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         \App\Services\AutoMediaSync::sync();
         \App\Services\AutoRoleSync::sync();
 

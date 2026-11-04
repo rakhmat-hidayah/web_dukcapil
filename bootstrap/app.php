@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Console\Commands\PurgeExpiredDraftApplicationsCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+
         $middleware->redirectTo(
             guests: '/admin/login',
             users: '/admin/dashboard',

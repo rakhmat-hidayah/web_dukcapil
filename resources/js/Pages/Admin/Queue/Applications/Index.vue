@@ -453,26 +453,32 @@
         <!-- Pagination -->
         <div
           v-if="applications.links && applications.links.length > 3"
-          class="px-5 py-4 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between"
+          class="px-5 py-4 border-t border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-center justify-between gap-3"
         >
-          <div class="text-xs text-slate-500">
+          <div class="text-xs text-slate-500 text-center sm:text-left">
             Menampilkan {{ applications.from || 0 }} - {{ applications.to || 0 }} dari total {{ applications.total }} pendaftaran
           </div>
-          <div class="flex items-center gap-1">
-            <Link
-              v-for="(link, i) in applications.links"
-              :key="i"
-              :href="link.url || '#'"
-              :class="[
-                'px-3 py-1.5 rounded-lg text-xs font-bold transition',
-                link.active
-                  ? 'bg-blue-600 text-white'
-                  : link.url
-                  ? 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200'
-                  : 'text-slate-400 cursor-not-allowed'
-              ]"
-              v-html="link.label"
-            />
+          <div class="w-full sm:w-auto flex items-center justify-start sm:justify-end gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-thin select-none touch-pan-x">
+            <template v-for="(link, i) in applications.links" :key="i">
+              <Link
+                v-if="link.url"
+                :href="link.url"
+                preserve-scroll
+                preserve-state
+                :class="[
+                  'min-w-[36px] h-9 px-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center shrink-0 cursor-pointer active:scale-95 touch-manipulation',
+                  link.active
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200'
+                ]"
+                v-html="link.label"
+              />
+              <span
+                v-else
+                class="min-w-[36px] h-9 px-2.5 rounded-lg text-xs font-medium text-slate-400 cursor-not-allowed opacity-50 flex items-center justify-center shrink-0 select-none"
+                v-html="link.label"
+              />
+            </template>
           </div>
         </div>
       </div>

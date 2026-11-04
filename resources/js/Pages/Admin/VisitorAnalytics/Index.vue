@@ -426,24 +426,36 @@
         </div>
 
         <!-- Pagination Controls -->
-        <div v-if="logs.links && logs.links.length > 3" class="p-4 bg-gray-50/50 dark:bg-zinc-800/40 border-t border-gray-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-          <p class="text-gray-500 font-medium">
-            Menampilkan <span class="font-bold text-gray-800 dark:text-zinc-100">{{ logs.from || 0 }}</span> sampai <span class="font-bold text-gray-800 dark:text-zinc-100">{{ logs.to || 0 }}</span> dari <span class="font-bold text-gray-800 dark:text-zinc-100">{{ logs.total }}</span> log visitor
+        <div v-if="logs.links && logs.links.length > 3" class="p-4 bg-gray-50/70 dark:bg-zinc-800/50 border-t border-gray-100 dark:border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+          <p class="text-gray-500 dark:text-zinc-400 font-medium text-center md:text-left text-xs shrink-0">
+            Menampilkan <span class="font-bold text-gray-800 dark:text-zinc-100">{{ formatNumber(logs.from || 0) }}</span> sampai <span class="font-bold text-gray-800 dark:text-zinc-100">{{ formatNumber(logs.to || 0) }}</span> dari <span class="font-bold text-gray-800 dark:text-zinc-100">{{ formatNumber(logs.total) }}</span> log visitor
           </p>
 
-          <div class="flex items-center gap-1">
-            <Component 
-              :is="link.url ? Link : 'span'"
-              v-for="(link, i) in logs.links" 
-              :key="i"
-              :href="link.url"
-              v-html="link.label"
-              class="px-3 py-1.5 rounded-xl font-bold transition text-xs"
-              :class="[
-                link.active ? 'bg-primary-600 text-white shadow-sm' : 'bg-white dark:bg-zinc-900 text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-700',
-                !link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
-              ]"
-            />
+          <!-- Scrollable Pagination Buttons Container for Mobile & Touch Devices -->
+          <div 
+            ref="paginationRef" 
+            class="w-full md:w-auto flex items-center justify-start sm:justify-center md:justify-end gap-1.5 overflow-x-auto max-w-full pb-2 md:pb-0 pt-1 px-1 scrollbar-thin select-none touch-pan-x"
+          >
+            <template v-for="(link, i) in logs.links" :key="i">
+              <button 
+                v-if="link.url"
+                type="button"
+                @click.prevent="goToPage(link.url)"
+                class="min-w-[38px] h-9.5 px-3 rounded-xl font-bold transition text-xs flex items-center justify-center shrink-0 select-none cursor-pointer active:scale-95 touch-manipulation"
+                :class="[
+                  link.active 
+                    ? 'active-page-btn bg-primary-600 text-white shadow-md shadow-primary-600/30 ring-2 ring-primary-600/30 font-black' 
+                    : 'bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-700 shadow-xs'
+                ]"
+              >
+                <span v-html="cleanLabel(link.label)"></span>
+              </button>
+              <span 
+                v-else
+                class="min-w-[38px] h-9.5 px-3 rounded-xl font-medium text-xs flex items-center justify-center shrink-0 text-gray-400 dark:text-zinc-600 bg-gray-100/50 dark:bg-zinc-800/30 border border-gray-100 dark:border-zinc-800/50 opacity-50 cursor-not-allowed select-none"
+                v-html="cleanLabel(link.label)"
+              ></span>
+            </template>
           </div>
         </div>
       </div>
@@ -735,7 +747,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUpdated, nextTick } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import axios from 'axios';
@@ -834,6 +846,50 @@ const retryGeolocation = async (id) => {
   } catch (err) {
     console.error('Failed to retry geolocation', err);
   }
+};
+
+const paginationRef = ref(null);
+
+const scrollToActivePage = () => {
+  nextTick(() => {
+    if (!paginationRef.value) return;
+    const activeBtn = paginationRef.value.querySelector('.active-page-btn');
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  });
+};
+
+onMounted(() => {
+  scrollToActivePage();
+});
+
+onUpdated(() => {
+  scrollToActivePage();
+});
+
+const goToPage = (url) => {
+  if (!url) return;
+  let targetUrl = url;
+  if (typeof window !== 'undefined' && window.location.protocol === 'https:' && targetUrl.startsWith('http://')) {
+    targetUrl = targetUrl.replace(/^http:\/\//, 'https://');
+  }
+
+  router.visit(targetUrl, {
+    preserveState: true,
+    preserveScroll: true,
+    onSuccess: () => {
+      scrollToActivePage();
+    }
+  });
+};
+
+const cleanLabel = (label) => {
+  if (!label) return '';
+  return label
+    .replace('&laquo; Previous', '&laquo; Prev')
+    .replace('Previous', 'Prev')
+    .replace('Next &raquo;', 'Next &raquo;');
 };
 
 const formatNumber = (num) => {

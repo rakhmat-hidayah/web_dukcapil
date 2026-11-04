@@ -107,24 +107,31 @@
         </div>
 
         <!-- Pagination -->
-        <div class="px-6 py-4 border-t border-gray-50 dark:border-zinc-800/60 flex items-center justify-between">
-          <span class="text-[10px] text-gray-400 font-semibold">
+        <div class="px-6 py-4 border-t border-gray-50 dark:border-zinc-800/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <span class="text-[10px] text-gray-400 font-semibold text-center sm:text-left">
             Menampilkan {{ logs.from || 0 }} sampai {{ logs.to || 0 }} dari {{ logs.total }} log
           </span>
-          <div class="flex gap-1.5">
-            <Link 
-              v-for="(link, lIdx) in logs.links" 
-              :key="lIdx"
-              :href="link.url || '#'"
-              class="px-3 py-1.5 border rounded-lg text-[10px] font-bold transition"
-              :class="[
-                link.active 
-                  ? 'bg-primary-600 border-primary-600 text-white shadow-sm' 
-                  : 'bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-500 hover:text-gray-700 dark:hover:text-zinc-200',
-                !link.url ? 'opacity-40 pointer-events-none' : ''
-              ]"
-              v-html="link.label"
-            />
+          <div class="w-full sm:w-auto flex items-center justify-start sm:justify-end gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-thin select-none touch-pan-x">
+            <template v-for="(link, lIdx) in logs.links" :key="lIdx">
+              <Link 
+                v-if="link.url"
+                :href="link.url"
+                preserve-scroll
+                preserve-state
+                class="min-w-[34px] h-8 px-2.5 border rounded-lg text-[10px] font-bold transition flex items-center justify-center shrink-0 cursor-pointer active:scale-95 touch-manipulation"
+                :class="[
+                  link.active 
+                    ? 'bg-primary-600 border-primary-600 text-white shadow-sm' 
+                    : 'bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-500 hover:text-gray-700 dark:hover:text-zinc-200'
+                ]"
+                v-html="link.label"
+              />
+              <span
+                v-else
+                class="min-w-[34px] h-8 px-2.5 border rounded-lg text-[10px] font-medium border-gray-100 dark:border-zinc-800/60 text-gray-400 dark:text-zinc-600 opacity-40 cursor-not-allowed flex items-center justify-center shrink-0 select-none"
+                v-html="link.label"
+              />
+            </template>
           </div>
         </div>
       </div>
