@@ -93,8 +93,8 @@
         </form>
       </div>
 
-      <!-- Top Metric Cards -->
-      <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Top Metric Cards (5 KPI Cards) -->
+      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <!-- Total Pengajuan -->
         <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Total Pengajuan</span>
@@ -145,18 +145,44 @@
         <!-- Tingkat Kehadiran Loket -->
         <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Check-In Loket</span>
-            <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center">
+            <span class="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider">Check-In Loket</span>
+            <div class="w-7 h-7 rounded-lg bg-teal-50 dark:bg-teal-950/40 text-teal-600 flex items-center justify-center">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
           </div>
-          <p class="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-2 font-mono">
+          <p class="text-3xl font-black text-teal-600 dark:text-teal-400 mt-2 font-mono">
             {{ stats.attendance_rate }}%
           </p>
           <p class="text-[11px] text-slate-400 mt-1">
             {{ stats.today_checked_in }} dari {{ stats.today_booked }} antrean telah hadir
           </p>
         </div>
+
+        <!-- KPI: Total Pencetakan KTP-el -->
+        <Link
+          :href="route('admin.queue.applications.index', { status: 'READY_FOR_PICKUP' })"
+          class="bg-gradient-to-br from-indigo-50/50 via-white to-emerald-50/40 dark:from-slate-800 dark:to-slate-800 p-5 rounded-3xl border border-indigo-200 dark:border-indigo-800/60 shadow-sm hover:shadow-md transition col-span-2 sm:col-span-1"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span>Total Cetak KTP-el</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300">KPI</span>
+            </span>
+            <div class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+            </div>
+          </div>
+          <p class="text-3xl font-black text-indigo-900 dark:text-indigo-200 mt-2 font-mono">
+            {{ stats.total_printed }}
+            <span class="text-xs font-normal text-slate-400">kartu</span>
+          </p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center justify-between">
+            <span>{{ stats.today_printed }} dicetak hari ini</span>
+            <span class="font-bold text-emerald-600 dark:text-emerald-400 font-mono">{{ stats.print_rate }}%</span>
+          </p>
+        </Link>
       </div>
 
       <!-- Representation Breakdown & Lifecycle Pipeline -->
@@ -201,63 +227,131 @@
 
         <!-- Right 2 cols: Full Lifecycle Pipeline -->
         <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
-            <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-              Status Pipeline Pelayanan KTP-el
-            </h3>
-            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-              Penyelesaian: {{ stats.completion_rate }}%
-            </span>
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <span>Status Pipeline Pelayanan KTP-el</span>
+              </h3>
+              <p class="text-xs text-slate-400">
+                Alur status berkas pengajuan dari pra-verifikasi hingga pencetakan fisik dan serah terima kartu
+              </p>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Total Dicetak: <strong class="font-mono">{{ stats.total_printed }}</strong> ({{ stats.print_rate }}%)
+              </span>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Selesai Diserahkan: <strong class="font-mono">{{ stats.completion_rate }}%</strong>
+              </span>
+            </div>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-            <div class="p-3.5 rounded-2xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800">
-              <span class="text-[10px] font-bold text-cyan-700 dark:text-cyan-300 uppercase block">Pra-Verifikasi Lolos</span>
+            <!-- 1. Pra-Verifikasi Lolos -->
+            <Link
+              :href="route('admin.queue.applications.index', { status: 'PRE_VERIFIED' })"
+              class="p-3.5 rounded-2xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800 hover:shadow-md transition block group"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-cyan-700 dark:text-cyan-300 uppercase block">Pra-Verifikasi Lolos</span>
+                <span class="text-[10px] text-cyan-500 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
+              </div>
               <p class="text-2xl font-black text-cyan-900 dark:text-cyan-200 font-mono mt-1">{{ stats.pre_verified }}</p>
-              <p class="text-[10px] text-cyan-600 mt-0.5">Siap ambil jadwal</p>
-            </div>
+              <p class="text-[10px] text-cyan-600 dark:text-cyan-400 mt-0.5">Siap ambil jadwal</p>
+            </Link>
 
-            <div class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
-              <span class="text-[10px] font-bold text-blue-700 dark:text-blue-300 uppercase block">Jadwal Terbit</span>
+            <!-- 2. Jadwal Terbit -->
+            <Link
+              :href="route('admin.queue.applications.index', { status: 'QUEUE_BOOKED' })"
+              class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 hover:shadow-md transition block group"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-blue-700 dark:text-blue-300 uppercase block">Jadwal Terbit</span>
+                <span class="text-[10px] text-blue-500 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
+              </div>
               <p class="text-2xl font-black text-blue-900 dark:text-blue-200 font-mono mt-1">{{ stats.queue_booked }}</p>
-              <p class="text-[10px] text-blue-600 mt-0.5">Menunggu hari H</p>
-            </div>
+              <p class="text-[10px] text-blue-600 dark:text-blue-400 mt-0.5">Menunggu hari kedatangan</p>
+            </Link>
 
-            <div class="p-3.5 rounded-2xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800">
-              <span class="text-[10px] font-bold text-teal-700 dark:text-teal-300 uppercase block">Hadir di Loket</span>
+            <!-- 3. Hadir di Loket -->
+            <Link
+              :href="route('admin.queue.applications.index', { status: 'ARRIVED' })"
+              class="p-3.5 rounded-2xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 hover:shadow-md transition block group"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-teal-700 dark:text-teal-300 uppercase block">Hadir di Loket</span>
+                <span class="text-[10px] text-teal-500 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
+              </div>
               <p class="text-2xl font-black text-teal-900 dark:text-teal-200 font-mono mt-1">{{ stats.arrived }}</p>
-              <p class="text-[10px] text-teal-600 mt-0.5">Verifikasi fisik asli</p>
-            </div>
+              <p class="text-[10px] text-teal-600 dark:text-teal-400 mt-0.5">Pemeriksaan fisik asli</p>
+            </Link>
 
-            <div class="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">
-              <span class="text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase block">Rekam / Cetak</span>
+            <!-- 4. Rekam / Antrean Cetak -->
+            <Link
+              :href="route('admin.queue.applications.index', { status: 'PROCESSING' })"
+              class="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 hover:shadow-md transition block group"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase block">Rekam / Cetak</span>
+                <span class="text-[10px] text-purple-500 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
+              </div>
               <p class="text-2xl font-black text-purple-900 dark:text-purple-200 font-mono mt-1">{{ stats.processing }}</p>
-              <p class="text-[10px] text-purple-600 mt-0.5">Sedang diproses</p>
-            </div>
+              <p class="text-[10px] text-purple-600 dark:text-purple-400 mt-0.5">Disetujui & antre cetak</p>
+            </Link>
 
-            <div class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
-              <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 uppercase block">Siap Diambil</span>
+            <!-- 5. Siap Diambil (KTP Selesai Dicetak) -->
+            <Link
+              :href="route('admin.queue.applications.index', { status: 'READY_FOR_PICKUP' })"
+              class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700 hover:shadow-md transition block group ring-1 ring-emerald-500/20"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase block">Siap Diambil</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200">Tercetak</span>
+              </div>
               <p class="text-2xl font-black text-emerald-900 dark:text-emerald-200 font-mono mt-1">{{ stats.ready_pickup }}</p>
-              <p class="text-[10px] text-emerald-600 mt-0.5">Di meja penyerahan</p>
-            </div>
+              <p class="text-[10px] text-emerald-700 dark:text-emerald-400 mt-0.5">Di meja penyerahan</p>
+            </Link>
 
-            <div class="p-3.5 rounded-2xl bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800">
-              <span class="text-[10px] font-bold text-green-700 dark:text-green-300 uppercase block">Selesai Diserahkan</span>
+            <!-- 6. Selesai Diserahkan (Status Akhir) -->
+            <Link
+              :href="route('admin.queue.applications.index', { status: 'COMPLETED' })"
+              class="p-3.5 rounded-2xl bg-green-50 dark:bg-green-950/40 border border-green-300 dark:border-green-700 hover:shadow-md transition block group ring-1 ring-green-500/20"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-green-800 dark:text-green-300 uppercase block">Selesai Diserahkan</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-green-200 text-green-900 dark:bg-green-900 dark:text-green-200">Tuntas</span>
+              </div>
               <p class="text-2xl font-black text-green-900 dark:text-green-200 font-mono mt-1">{{ stats.completed }}</p>
-              <p class="text-[10px] text-green-600 mt-0.5">Layanan tuntas</p>
-            </div>
+              <p class="text-[10px] text-green-700 dark:text-green-400 mt-0.5">Layanan tuntas (status akhir)</p>
+            </Link>
 
-            <div class="p-3.5 rounded-2xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800">
-              <span class="text-[10px] font-bold text-orange-700 dark:text-orange-300 uppercase block">Perlu Perbaikan</span>
+            <!-- 7. Perlu Perbaikan -->
+            <Link
+              :href="route('admin.queue.applications.index', { status: 'REVISION_REQUIRED' })"
+              class="p-3.5 rounded-2xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 hover:shadow-md transition block group"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-orange-700 dark:text-orange-300 uppercase block">Perlu Perbaikan</span>
+                <span class="text-[10px] text-orange-500 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
+              </div>
               <p class="text-2xl font-black text-orange-900 dark:text-orange-200 font-mono mt-1">{{ stats.revision_required }}</p>
-              <p class="text-[10px] text-orange-600 mt-0.5">Revisi dokumen</p>
-            </div>
+              <p class="text-[10px] text-orange-600 dark:text-orange-400 mt-0.5">Revisi dokumen</p>
+            </Link>
 
-            <div class="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900">
-              <span class="text-[10px] font-bold text-rose-700 dark:text-rose-300 uppercase block">Ditolak</span>
+            <!-- 8. Ditolak -->
+            <Link
+              :href="route('admin.queue.applications.index', { status: 'REJECTED' })"
+              class="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 hover:shadow-md transition block group"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-rose-700 dark:text-rose-300 uppercase block">Ditolak</span>
+                <span class="text-[10px] text-rose-500 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
+              </div>
               <p class="text-2xl font-black text-rose-900 dark:text-rose-200 font-mono mt-1">{{ stats.rejected }}</p>
-              <p class="text-[10px] text-rose-600 mt-0.5">Tidak memenuhi syarat</p>
-            </div>
+              <p class="text-[10px] text-rose-600 dark:text-rose-400 mt-0.5">Tidak memenuhi syarat</p>
+            </Link>
           </div>
         </div>
       </div>

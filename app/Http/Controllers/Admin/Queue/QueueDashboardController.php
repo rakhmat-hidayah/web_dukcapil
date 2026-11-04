@@ -60,11 +60,28 @@ class QueueDashboardController extends Controller
         $preVerifiedCount = (clone $baseQuery)->where('status', QueueApplication::STATUS_PRE_VERIFIED)->count();
         $queueBookedCount = (clone $baseQuery)->where('status', QueueApplication::STATUS_QUEUE_BOOKED)->count();
         $arrivedCount = (clone $baseQuery)->whereIn('status', [QueueApplication::STATUS_ARRIVED, QueueApplication::STATUS_PHYSICAL_VERIFICATION])->count();
-        $processingCount = (clone $baseQuery)->where('status', QueueApplication::STATUS_PROCESSING)->count();
+        $processingCount = (clone $baseQuery)->whereIn('status', [QueueApplication::STATUS_APPROVED_FOR_SERVICE, QueueApplication::STATUS_PROCESSING])->count();
         $readyPickupCount = (clone $baseQuery)->where('status', QueueApplication::STATUS_READY_FOR_PICKUP)->count();
         $completedCount = (clone $baseQuery)->where('status', QueueApplication::STATUS_COMPLETED)->count();
         $rejectedCount = (clone $baseQuery)->where('status', QueueApplication::STATUS_REJECTED)->count();
         $expiredCount = (clone $baseQuery)->where('status', QueueApplication::STATUS_EXPIRED)->count();
+        $cancelledCount = (clone $baseQuery)->where('status', QueueApplication::STATUS_CANCELLED)->count();
+
+        // Total KTP-el Fisik Dicetak (Status Siap Diambil & Selesai Diserahkan)
+        $totalPrintedCount = (clone $baseQuery)->whereIn('status', [
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+            QueueApplication::STATUS_COMPLETED,
+        ])->count();
+
+        // KTP-el Fisik Dicetak Hari Ini
+        $todayPrintedCount = (clone $baseQuery)->whereIn('status', [
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+            QueueApplication::STATUS_COMPLETED,
+        ])->where(function ($q) use ($today) {
+            $q->whereDate('updated_at', $today)
+              ->orWhereDate('handover_at', $today)
+              ->orWhereDate('completed_at', $today);
+        })->count();
 
         // Representation breakdown
         $selfCount = (clone $baseQuery)->where('attendance_type', 'self')->count();
@@ -90,6 +107,7 @@ class QueueDashboardController extends Controller
         ])->count();
 
         $attendanceRate = $todayBooked > 0 ? round(($todayCheckedIn / $todayBooked) * 100, 1) : 0;
+        $printRate = $totalApplications > 0 ? round(($totalPrintedCount / $totalApplications) * 100, 1) : 0;
         $completionRate = $totalApplications > 0 ? round(($completedCount / $totalApplications) * 100, 1) : 0;
 
         // Service distribution (actual counts)
@@ -136,6 +154,10 @@ class QueueDashboardController extends Controller
                 'completed'                => $completedCount,
                 'rejected'                 => $rejectedCount,
                 'expired'                  => $expiredCount,
+                'cancelled'                => $cancelledCount,
+                'total_printed'            => $totalPrintedCount,
+                'today_printed'            => $todayPrintedCount,
+                'print_rate'               => $printRate,
                 'self_count'               => $selfCount,
                 'represented_count'        => $representedCount,
                 'completion_rate'          => $completionRate,
