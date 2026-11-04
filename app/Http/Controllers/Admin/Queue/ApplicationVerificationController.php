@@ -83,6 +83,8 @@ class ApplicationVerificationController extends Controller
         if ($status && empty($urgency)) {
             if ($status === 'SUBMITTED') {
                 $query->whereIn('status', [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED]);
+            } elseif ($status === 'DRAFT') {
+                $query->where('status', QueueApplication::STATUS_DRAFT);
             } elseif (in_array($status, ['PRE_VERIFIED', 'APPROVED'])) {
                 $query->whereIn('status', [QueueApplication::STATUS_PRE_VERIFIED, 'APPROVED']);
             } elseif (in_array($status, ['QUEUE_BOOKED', 'SCHEDULED'])) {
@@ -97,6 +99,11 @@ class ApplicationVerificationController extends Controller
                 $query->whereIn('status', [QueueApplication::STATUS_EXPIRED, QueueApplication::STATUS_CANCELLED]);
             } else {
                 $query->where('status', $status);
+            }
+        } else {
+            // Default view (Semua Status / Urgency): exclude unsubmitted raw drafts unless searched by specific REG code
+            if (empty($search) && empty($urgency)) {
+                $query->where('status', '!=', QueueApplication::STATUS_DRAFT);
             }
         }
 

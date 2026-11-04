@@ -89,6 +89,19 @@
         </div>
       </div>
 
+      <!-- Top Alert for Errors -->
+      <div
+        v-if="errorMessage || $page.props.flash?.error"
+        id="top_error_banner"
+        class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-xs text-rose-800 dark:text-rose-200 flex items-start gap-2.5 shadow-sm"
+      >
+        <svg class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <div class="flex-1">
+          <p class="font-bold">Perhatian Pengiriman Berkas:</p>
+          <p class="font-medium leading-relaxed mt-0.5">{{ errorMessage || $page.props.flash?.error }}</p>
+        </div>
+      </div>
+
       <!-- Main Upload Workspace -->
       <div class="space-y-6">
         <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-md">
@@ -315,13 +328,18 @@
       @close="activePreviewDoc = null"
     />
 
-    <!-- Batch Compression & Upload Progress Modal -->
+    <!-- Batch Compression & Upload Progress / Error Modal -->
     <div
       v-if="uploadProgress.active"
       class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4"
     >
       <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 text-center space-y-5">
-        <div class="w-16 h-16 mx-auto rounded-3xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center relative">
+        <!-- Error State Icon -->
+        <div v-if="uploadProgress.step === 'error'" class="w-16 h-16 mx-auto rounded-3xl bg-rose-100 dark:bg-rose-950/80 text-rose-600 flex items-center justify-center shadow-inner">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <!-- In Progress Spinner -->
+        <div v-else class="w-16 h-16 mx-auto rounded-3xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center relative">
           <svg class="w-8 h-8 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -329,16 +347,16 @@
         </div>
 
         <div>
-          <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-            {{ uploadProgress.step === 'compressing' ? 'Mengompresi Berkas Dokumen...' : (uploadProgress.step === 'uploading' ? 'Mengunggah ke Server...' : 'Memproses Pra-Verifikasi...') }}
+          <h3 :class="['text-base sm:text-lg font-black', uploadProgress.step === 'error' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white']">
+            {{ uploadProgress.step === 'error' ? 'Pengiriman Berkas Belum Berhasil' : (uploadProgress.step === 'compressing' ? 'Mengompresi Berkas Dokumen...' : (uploadProgress.step === 'uploading' ? 'Mengunggah ke Server...' : 'Memproses Pra-Verifikasi...')) }}
           </h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+          <p class="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed font-medium">
             {{ uploadProgress.label }}
           </p>
         </div>
 
-        <!-- Progress Bar -->
-        <div class="space-y-2">
+        <!-- Progress Bar (Only during active upload, not error) -->
+        <div v-if="uploadProgress.step !== 'error'" class="space-y-2">
           <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700">
             <div
               class="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-300"
@@ -349,11 +367,28 @@
             <span>{{ uploadProgress.step === 'compressing' ? 'Tahap 1: Kompresi Gambar' : (uploadProgress.step === 'uploading' ? 'Tahap 2: Pengiriman Berkas' : 'Tahap 3: Finalisasi') }}</span>
             <span class="font-mono">{{ uploadProgress.percent }}%</span>
           </div>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 italic mt-2">
+            Mohon jangan menutup halaman ini selama proses kompresi dan pengiriman berlangsung.
+          </p>
         </div>
 
-        <p class="text-[11px] text-slate-400 dark:text-slate-500 italic">
-          Mohon jangan menutup halaman ini selama proses kompresi dan pengiriman berlangsung.
-        </p>
+        <!-- Action Buttons when Error Occurs -->
+        <div v-if="uploadProgress.step === 'error'" class="pt-2 flex flex-col sm:flex-row gap-2.5">
+          <button
+            type="button"
+            @click="uploadProgress.active = false"
+            class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
+          >
+            Tutup & Periksa Berkas
+          </button>
+          <button
+            type="button"
+            @click="handleSubmit"
+            class="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-blue-600/30 transition cursor-pointer"
+          >
+            Coba Kirim Ulang
+          </button>
+        </div>
       </div>
     </div>
   </PublicLayout>
@@ -713,18 +748,33 @@ async function handleSubmitApplication() {
         if (res.data && res.data.document) {
           docs.value = docs.value.filter((d) => d.service_document_id !== item.service_document_id);
           docs.value.push(res.data.document);
+          // Delete from local staged cache once safely saved on server
+          delete stagedFiles.value[item.service_document_id];
         }
       } catch (uploadErr) {
         isSubmitting.value = false;
-        uploadProgress.value.active = false;
         if (uploadErr.response?.status === 419 || uploadErr.response?.data?.session_expired) {
+          uploadProgress.value.active = false;
           alert(`Sesi draft permohonan telah kedaluwarsa (${props.draftTimeoutMinutes} menit) dan dihapus otomatis. Sesi telah ditutup.`);
           window.location.href = route('queue.apply.create');
           return;
         }
-        errorMessage.value =
+
+        const msg =
           uploadErr.response?.data?.message ||
-          `Gagal mengunggah berkas "${item.label}". Pastikan koneksi internet stabil dan coba lagi.`;
+          (uploadErr.response?.data?.errors ? Object.values(uploadErr.response.data.errors).flat().join(' ') : null) ||
+          `Gagal mengunggah berkas "${item.label}". Pastikan koneksi internet stabil dan format file sesuai.`;
+
+        errorMessage.value = msg;
+        uploadProgress.value = {
+          active: true,
+          step: 'error',
+          current: i + 1,
+          total: totalStaged,
+          label: msg,
+          percent: uploadProgress.value.percent,
+        };
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
     }
@@ -746,21 +796,37 @@ async function handleSubmitApplication() {
     {
       onSuccess: (page) => {
         isSubmitting.value = false;
-        uploadProgress.value.active = false;
         if (page.props?.flash?.error) {
           errorMessage.value = page.props.flash.error;
+          uploadProgress.value = {
+            active: true,
+            step: 'error',
+            current: totalStaged,
+            total: totalStaged,
+            label: page.props.flash.error,
+            percent: 98,
+          };
           window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          uploadProgress.value.active = false;
         }
       },
       onFinish: () => {
         isSubmitting.value = false;
-        uploadProgress.value.active = false;
       },
       onError: (errors) => {
         isSubmitting.value = false;
-        uploadProgress.value.active = false;
-        errorMessage.value =
-          errors.documents || errors.statement_agreed || Object.values(errors)[0] || 'Terjadi kesalahan saat mengirim pendaftaran.';
+        const msg =
+          errors.documents || errors.statement_agreed || Object.values(errors)[0] || 'Terjadi kesalahan saat memfinalisasi pendaftaran.';
+        errorMessage.value = msg;
+        uploadProgress.value = {
+          active: true,
+          step: 'error',
+          current: totalStaged,
+          total: totalStaged,
+          label: msg,
+          percent: 98,
+        };
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
     }

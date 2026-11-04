@@ -24,11 +24,35 @@ export async function compressImage(file, options = {}) {
 
   const originalSize = file.size;
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const reader = new FileReader();
+
+    reader.onerror = () => {
+      resolve({
+        file,
+        blob: file,
+        originalSize,
+        compressedSize: originalSize,
+        isCompressed: false,
+        width: null,
+        height: null,
+      });
+    };
 
     reader.onload = (e) => {
       const img = new Image();
+
+      img.onerror = () => {
+        resolve({
+          file,
+          blob: file,
+          originalSize,
+          compressedSize: originalSize,
+          isCompressed: false,
+          width: null,
+          height: null,
+        });
+      };
 
       img.onload = () => {
         let width = img.width;

@@ -399,6 +399,8 @@ class QueueApplicationController extends Controller
         }
 
         try {
+            \Log::info("Queue doc upload attempt [{$regNumber}] doc_id={$request->input('service_document_id')}");
+
             $request->validate([
                 'service_document_id' => 'required|exists:queue_service_documents,id',
                 'file'                => 'required|file|max:32768',
@@ -414,6 +416,8 @@ class QueueApplicationController extends Controller
                 $request->file('file')
             );
 
+            \Log::info("Queue doc upload success [{$regNumber}] doc_id={$request->input('service_document_id')} app_doc_id={$uploaded->id}");
+
             return response()->json([
                 'success' => true,
                 'message' => 'Dokumen berhasil diunggah dan disimpan.',
@@ -421,6 +425,7 @@ class QueueApplicationController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $errors = $e->validator->errors()->all();
+            \Log::warning("Queue doc upload validation error [{$regNumber}]: " . json_encode($e->errors()));
             return response()->json([
                 'success' => false,
                 'message' => implode(' ', $errors),

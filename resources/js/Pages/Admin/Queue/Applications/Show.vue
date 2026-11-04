@@ -127,6 +127,24 @@
         </div>
       </div>
 
+      <!-- Top Alert: Permohonan Masih Draf -->
+      <div
+        v-if="application.status === 'DRAFT'"
+        class="p-4 sm:p-5 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-800 shadow-sm flex items-start gap-3.5"
+      >
+        <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30 font-bold">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="min-w-0 flex-1">
+          <h3 class="text-sm sm:text-base font-black text-amber-900 dark:text-amber-200">
+            STATUS PERMOHONAN: DRAF (BELUM DIKIRIM PEMOHON)
+          </h3>
+          <p class="text-xs text-amber-800 dark:text-amber-300 mt-1 leading-relaxed">
+            Permohonan ini masih dalam proses pengisian oleh pemohon dan belum difinalisasi. Berkas fisik dan digital belum dikirimkan untuk pra-verifikasi. Permohonan draf akan kedaluwarsa otomatis sesuai jeda waktu sistem jika tidak diselesaikan.
+          </p>
+        </div>
+      </div>
+
       <!-- Top Alert: Permohonan Ditolak -->
       <div
         v-if="application.status === 'REJECTED'"

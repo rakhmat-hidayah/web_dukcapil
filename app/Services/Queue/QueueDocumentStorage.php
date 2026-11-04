@@ -20,7 +20,7 @@ class QueueDocumentStorage
     const DISK = 'local';
     const BASE_PATH = 'queue-documents';
 
-    const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'pdf'];
+    const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'jfif', 'pjpeg', 'pdf'];
     const BLOCKED_EXTENSIONS = ['php', 'exe', 'bat', 'cmd', 'js', 'sh', 'dll', 'cgi', 'pl', 'asp', 'aspx', 'jsp', 'phar'];
     const ALLOWED_MIMES = [
         'image/jpeg',
@@ -31,11 +31,18 @@ class QueueDocumentStorage
         'image/webp',
         'image/heic',
         'image/heif',
+        'image/heic-sequence',
+        'image/heif-sequence',
+        'image/jfif',
         'application/pdf',
         'application/x-pdf',
         'application/acrobat',
         'applications/vnd.pdf',
         'text/pdf',
+        'application/octet-stream',
+        'binary/octet-stream',
+        'application/download',
+        'application/x-download',
     ];
 
     // Maximum image dimensions to ensure readability while optimizing disk usage
@@ -49,7 +56,15 @@ class QueueDocumentStorage
      */
     public static function store(UploadedFile $file, QueueApplication $application): array
     {
-        $extension = strtolower($file->getClientOriginalExtension());
+        $mimeType = $file->getMimeType() ?: 'application/octet-stream';
+        $extension = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: '');
+
+        if (empty($extension)) {
+            $extension = str_starts_with($mimeType, 'image/') ? 'jpg' : ($mimeType === 'application/pdf' ? 'pdf' : 'jpg');
+        }
+        if (in_array($extension, ['jpeg', 'jfif', 'pjpeg'])) {
+            $extension = 'jpg';
+        }
 
         if (in_array($extension, self::BLOCKED_EXTENSIONS)) {
             throw ValidationException::withMessages([
@@ -63,16 +78,19 @@ class QueueDocumentStorage
             ]);
         }
 
-        $mimeType = $file->getMimeType();
         if (!in_array($mimeType, self::ALLOWED_MIMES)) {
-            // Check fallback for octet-stream with valid document extension from mobile devices
-            if ($mimeType === 'application/octet-stream' && in_array($extension, self::ALLOWED_EXTENSIONS)) {
+            // Check fallback for generic octet-stream / download stream with valid document extension
+            if (in_array($mimeType, ['application/octet-stream', 'binary/octet-stream', 'application/download', 'application/x-download'])) {
                 $mimeType = $extension === 'pdf' ? 'application/pdf' : 'image/jpeg';
             } else {
                 throw ValidationException::withMessages([
                     'file' => "Tipe konten file ({$mimeType}) tidak didukung. Harap unggah foto asli atau dokumen PDF.",
                 ]);
             }
+        }
+
+        if (in_array($mimeType, ['application/octet-stream', 'binary/octet-stream', 'application/download', 'application/x-download'])) {
+            $mimeType = $extension === 'pdf' ? 'application/pdf' : 'image/jpeg';
         }
 
         $originalSize = $file->getSize();

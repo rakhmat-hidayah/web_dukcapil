@@ -458,7 +458,7 @@
           <div class="text-xs text-slate-500 text-center sm:text-left">
             Menampilkan {{ applications.from || 0 }} - {{ applications.to || 0 }} dari total {{ applications.total }} pendaftaran
           </div>
-          <div class="w-full sm:w-auto flex items-center justify-start sm:justify-end gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-thin select-none touch-pan-x">
+          <div class="w-full sm:w-auto flex items-center justify-start sm:justify-end gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-thin">
             <template v-for="(link, i) in applications.links" :key="i">
               <Link
                 v-if="link.url"

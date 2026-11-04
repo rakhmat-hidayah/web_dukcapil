@@ -144,11 +144,19 @@ class QueueApplicationService
             ->firstOrFail();
 
         // Validate accepted format
-        $extension = strtolower($file->getClientOriginalExtension());
-        $allowed = $serviceDoc->accepted_formats_array;
-        if (!in_array($extension, $allowed)) {
+        $extension = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: '');
+        if (in_array($extension, ['jpeg', 'jfif', 'pjpeg'])) {
+            $extension = 'jpg';
+        }
+
+        $allowed = array_map(fn($f) => strtolower(trim($f)), $serviceDoc->accepted_formats_array);
+        if (in_array('jpg', $allowed) || in_array('jpeg', $allowed) || in_array('png', $allowed)) {
+            $allowed = array_unique(array_merge($allowed, ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'jfif', 'pjpeg']));
+        }
+
+        if (!empty($extension) && !in_array($extension, $allowed)) {
             throw ValidationException::withMessages([
-                'file' => "Format file .{$extension} tidak didukung untuk {$serviceDoc->label}. Harap gunakan: " . implode(', ', $allowed),
+                'file' => "Format file .{$extension} tidak didukung untuk {$serviceDoc->label}. Harap gunakan format gambar (JPG/PNG) atau PDF.",
             ]);
         }
 
