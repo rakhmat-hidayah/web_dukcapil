@@ -51,6 +51,9 @@ class QueueApplicationController extends Controller
         $serviceSlug = $request->query('layanan');
         $selectedService = null;
 
+        // Self-heal: ensure mandatory requirements (Formulir F-1.02 and Selfie) are present across all services
+        \App\Services\Queue\QueueApplicationService::ensureAllRequiredDocuments();
+
         if ($serviceSlug) {
             $selectedService = ServiceType::active()
                 ->where('slug', $serviceSlug)
@@ -99,7 +102,7 @@ class QueueApplicationController extends Controller
      */
     public function storeDraft(Request $request): RedirectResponse
     {
-        \App\Services\Queue\QueueApplicationService::ensureSelfieRequirementForPerekaman();
+        \App\Services\Queue\QueueApplicationService::ensureAllRequiredDocuments();
 
         // Sanitize phone numbers by removing non-digit characters (e.g. hyphens, spaces)
         if ($request->has('applicant_phone') && $request->input('applicant_phone') !== null) {
@@ -307,8 +310,8 @@ class QueueApplicationController extends Controller
      */
     public function showDocuments(string $regNumber): Response|RedirectResponse
     {
-        // Self-heal: ensure mandatory selfie photo exists for Perekaman KTP-el
-        \App\Services\Queue\QueueApplicationService::ensureSelfieRequirementForPerekaman();
+        // Self-heal: ensure mandatory requirements (Formulir F-1.02 and Selfie) exist across all services
+        \App\Services\Queue\QueueApplicationService::ensureAllRequiredDocuments();
 
         $application = QueueApplication::where('reg_number', $regNumber)
             ->with([

@@ -105,7 +105,7 @@
                 >
                   <div class="flex items-start gap-2">
                     <span class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                      {{ doc.sort_order || (dIdx + 1) }}
+                      {{ dIdx + 1 }}
                     </span>
                     <div class="flex-1 min-w-0">
                       <p class="text-xs font-bold text-slate-800 dark:text-slate-200 leading-snug">

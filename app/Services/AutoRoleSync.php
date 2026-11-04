@@ -47,27 +47,27 @@ class AutoRoleSync
     public static function sync(bool $force = false): void
     {
         // Avoid running 30+ DB queries and clearing Spatie cache on every web request
-        if (!$force && Cache::has('auto_role_sync_v6_done')) {
+        if (!$force && Cache::has('auto_role_sync_v8_done')) {
             return;
         }
 
-        Cache::put('auto_role_sync_v6_done', true, now()->addHours(24));
+        Cache::put('auto_role_sync_v8_done', true, now()->addHours(24));
 
         // 1. Run pending migrations safely if not yet cached as completed
         try {
-            if (!Cache::has('db_auto_migrations_v10')) {
+            if (!Cache::has('db_auto_migrations_v12')) {
                 Artisan::call('migrate', ['--force' => true]);
-                Cache::put('db_auto_migrations_v10', true, now()->addDays(7));
+                Cache::put('db_auto_migrations_v12', true, now()->addDays(7));
             }
         } catch (\Throwable $e) {
             Log::warning('AutoRoleSync migration warning: ' . $e->getMessage());
         }
 
-        // 2. Ensure mandatory selfie requirement for Perekaman KTP-el service
+        // 2. Ensure all mandatory requirements (Formulir F-1.02 and Selfie photo) exist across all services
         try {
-            \App\Services\Queue\QueueApplicationService::ensureSelfieRequirementForPerekaman();
+            \App\Services\Queue\QueueApplicationService::ensureAllRequiredDocuments();
         } catch (\Throwable $e) {
-            Log::warning('AutoRoleSync ensureSelfieRequirement warning: ' . $e->getMessage());
+            Log::warning('AutoRoleSync ensureAllRequiredDocuments warning: ' . $e->getMessage());
         }
 
         // 3. Ensure Indonesian roles and Supervisor Layanan KTP-el exist
