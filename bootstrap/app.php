@@ -25,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $middleware->validateCsrfTokens(except: [
+            'layanan/antrian/daftar/*/dokumen',
+            'layanan/antrian/daftar/*/submit',
             'layanan/antrian/status/*/booking',
             'layanan/antrian/status/*/resubmit',
         ]);
@@ -49,6 +51,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson() || $request->is('layanan/antrian/daftar/*/dokumen'),
         );
     })->create();

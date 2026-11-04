@@ -398,31 +398,43 @@ class QueueApplicationController extends Controller
             return response()->json(['success' => false, 'session_expired' => true, 'message' => "Sesi permohonan draf Anda telah kedaluwarsa ({$timeoutMinutes} menit). Sesi ditutup otomatis."], 419);
         }
 
-        $request->validate([
-            'service_document_id' => 'required|exists:queue_service_documents,id',
-            'file'                => 'required|file|mimes:jpg,jpeg,png,pdf|max:32768',
-        ], [
-            'service_document_id.required' => 'Persyaratan dokumen harus ditentukan.',
-            'file.required'                => 'File atau foto dokumen wajib diunggah.',
-            'file.mimes'                   => 'Format file harus berupa JPG, PNG, atau PDF.',
-            'file.max'                     => 'Ukuran file melebihi batas sistem (maks 32 MB).',
-        ]);
+        try {
+            $request->validate([
+                'service_document_id' => 'required|exists:queue_service_documents,id',
+                'file'                => 'required|file|max:32768',
+            ], [
+                'service_document_id.required' => 'Persyaratan dokumen harus ditentukan.',
+                'file.required'                => 'File atau foto dokumen wajib diunggah.',
+                'file.max'                     => 'Ukuran file melebihi batas sistem (maks 32 MB).',
+            ]);
 
-        $uploaded = $this->applicationService->uploadDocument(
-            $application,
-            (int) $request->input('service_document_id'),
-            $request->file('file')
-        );
+            $uploaded = $this->applicationService->uploadDocument(
+                $application,
+                (int) $request->input('service_document_id'),
+                $request->file('file')
+            );
 
-        if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Dokumen berhasil diunggah dan disimpan.',
                 'document' => $uploaded->load('serviceDocument'),
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->validator->errors()->all();
+            return response()->json([
+                'success' => false,
+                'message' => implode(' ', $errors),
+                'errors'  => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            \Log::error("Upload document failed [{$regNumber}]: " . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengunggah berkas: ' . $e->getMessage(),
+            ], 500);
         }
-
-        return back()->with('success', 'Dokumen berhasil diunggah.');
     }
 
     /**
@@ -491,7 +503,14 @@ class QueueApplicationController extends Controller
             'statement_agreed.accepted' => 'Anda wajib mencentang persetujuan pernyataan pemohon sebelum mengirim berkas.',
         ]);
 
-        $application = $this->applicationService->submit($application, true);
+        try {
+            $application = $this->applicationService->submit($application, true);
+        } catch (\Throwable $e) {
+            \Log::error("Submit queue application failed [{$regNumber}]: " . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+            return redirect()->back()->with('error', 'Gagal memproses permohonan pendaftaran: ' . $e->getMessage());
+        }
 
         // Establish verified session for applicant's NIK
         session([

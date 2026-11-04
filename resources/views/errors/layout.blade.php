@@ -151,9 +151,12 @@
             height: auto;
         }
         header img, a img, .brand-logo-container img {
+            max-width: 44px !important;
             max-height: 40px !important;
-            height: auto;
+            width: auto !important;
+            height: auto !important;
             object-fit: contain !important;
+            display: inline-block !important;
         }
         svg {
             max-width: 100%;
@@ -205,7 +208,7 @@
                     alt="Logo Kabupaten Dompu" 
                     width="36"
                     height="36"
-                    style="height: 36px; max-height: 36px; width: auto; object-fit: contain; display: inline-block;"
+                    style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: contain !important; display: inline-block !important;"
                     class="h-7 xs:h-8 sm:h-9 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
                 />
 
@@ -218,7 +221,7 @@
                     alt="Logo Disdukcapil Dompu" 
                     width="40"
                     height="40"
-                    style="height: 40px; max-height: 40px; width: auto; object-fit: contain; display: inline-block;"
+                    style="width: 40px !important; height: 40px !important; max-width: 40px !important; max-height: 40px !important; object-fit: contain !important; display: inline-block !important;"
                     class="h-8 xs:h-9 sm:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
                 />
             </a>

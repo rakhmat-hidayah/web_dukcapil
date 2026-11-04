@@ -213,12 +213,12 @@
             <!-- Selfie Preview -->
             <div class="flex flex-col items-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700">
               <div
-                v-if="selfieDocument"
+                v-if="selfieDocument && (selfieDocument.id || selfieDocument.admin_serve_url)"
                 @click="previewSelfie"
                 class="w-32 h-32 rounded-2xl overflow-hidden border-2 border-blue-500 shadow-md cursor-pointer group relative bg-slate-100 dark:bg-slate-900"
               >
                 <img
-                  :src="selfieDocument.admin_serve_url || route('admin.queue.documents.serve', { documentId: selfieDocument.id })"
+                  :src="selfieDocument.admin_serve_url || (selfieDocument.id ? route('admin.queue.documents.serve', { documentId: selfieDocument.id }) : '')"
                   alt="Foto Wajah Pemohon"
                   class="w-full h-full object-cover group-hover:scale-105 transition"
                 />
@@ -1879,7 +1879,7 @@ const getLatestRejectionReason = () => {
 
 const previewSelfie = () => {
   if (!selfieDocument.value) return
-  if (selfieDocument.value.status === 'PENDING') {
+  if (selfieDocument.value.status === 'PENDING' && selfieDocument.value.id) {
     selfieDocument.value.status = 'APPROVED'
     router.post(
       route('admin.queue.documents.approve', { applicationId: props.application.id, docId: selfieDocument.value.id }),

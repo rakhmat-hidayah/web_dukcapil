@@ -701,7 +701,13 @@ async function handleSubmitApplication() {
         const res = await axios.post(
           route('queue.apply.upload-doc', { regNumber: props.application.reg_number }),
           formData,
-          { headers: { 'Content-Type': 'multipart/form-data' } }
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+          }
         );
 
         if (res.data && res.data.document) {

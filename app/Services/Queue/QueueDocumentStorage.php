@@ -8,6 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Intervention\Image\Laravel\Facades\Image;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -21,7 +22,21 @@ class QueueDocumentStorage
 
     const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'pdf'];
     const BLOCKED_EXTENSIONS = ['php', 'exe', 'bat', 'cmd', 'js', 'sh', 'dll', 'cgi', 'pl', 'asp', 'aspx', 'jsp', 'phar'];
-    const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    const ALLOWED_MIMES = [
+        'image/jpeg',
+        'image/pjpeg',
+        'image/jpg',
+        'image/png',
+        'image/x-png',
+        'image/webp',
+        'image/heic',
+        'image/heif',
+        'application/pdf',
+        'application/x-pdf',
+        'application/acrobat',
+        'applications/vnd.pdf',
+        'text/pdf',
+    ];
 
     // Maximum image dimensions to ensure readability while optimizing disk usage
     const IMAGE_MAX_WIDTH = 2048;
@@ -37,16 +52,27 @@ class QueueDocumentStorage
         $extension = strtolower($file->getClientOriginalExtension());
 
         if (in_array($extension, self::BLOCKED_EXTENSIONS)) {
-            throw new \InvalidArgumentException("Format file (.{$extension}) dilarang demi keamanan sistem.");
+            throw ValidationException::withMessages([
+                'file' => "Format file (.{$extension}) dilarang demi keamanan sistem.",
+            ]);
         }
 
         if (!in_array($extension, self::ALLOWED_EXTENSIONS)) {
-            throw new \InvalidArgumentException("Format file (.{$extension}) tidak didukung. Harap unggah format JPG, PNG, atau PDF.");
+            throw ValidationException::withMessages([
+                'file' => "Format file (.{$extension}) tidak didukung. Harap unggah format JPG, PNG, atau PDF.",
+            ]);
         }
 
         $mimeType = $file->getMimeType();
         if (!in_array($mimeType, self::ALLOWED_MIMES)) {
-            throw new \InvalidArgumentException("Tipe konten file ({$mimeType}) tidak valid.");
+            // Check fallback for octet-stream with valid document extension from mobile devices
+            if ($mimeType === 'application/octet-stream' && in_array($extension, self::ALLOWED_EXTENSIONS)) {
+                $mimeType = $extension === 'pdf' ? 'application/pdf' : 'image/jpeg';
+            } else {
+                throw ValidationException::withMessages([
+                    'file' => "Tipe konten file ({$mimeType}) tidak didukung. Harap unggah foto asli atau dokumen PDF.",
+                ]);
+            }
         }
 
         $originalSize = $file->getSize();
@@ -62,35 +88,56 @@ class QueueDocumentStorage
         $isCompressed = false;
         $finalSize = $originalSize;
 
-        // Process images with Intervention Image
+        // Process images with Intervention Image (supports both v3 and v4)
         if (str_starts_with($mimeType, 'image/')) {
             try {
-                $img = Image::read($file->getRealPath());
+                $manager = Image::getFacadeRoot();
+                $img = method_exists($manager, 'read')
+                    ? Image::read($file->getRealPath())
+                    : (method_exists($manager, 'decodePath')
+                        ? Image::decodePath($file->getRealPath())
+                        : Image::decode(file_get_contents($file->getRealPath())));
 
-                // EXIF auto-orientation is handled automatically in Intervention v3/v4 read()
+                // EXIF auto-orientation
+                if (method_exists($img, 'orient')) {
+                    $img->orient();
+                }
+
                 $width = $img->width();
                 $height = $img->height();
 
                 // Proportional scale down if exceeding maximum bounds
                 if ($width > self::IMAGE_MAX_WIDTH || $height > self::IMAGE_MAX_HEIGHT) {
-                    $img->scaleDown(width: self::IMAGE_MAX_WIDTH, height: self::IMAGE_MAX_HEIGHT);
+                    if (method_exists($img, 'scaleDown')) {
+                        $img->scaleDown(width: self::IMAGE_MAX_WIDTH, height: self::IMAGE_MAX_HEIGHT);
+                    } elseif (method_exists($img, 'scale')) {
+                        $img->scale(width: self::IMAGE_MAX_WIDTH, height: self::IMAGE_MAX_HEIGHT);
+                    }
                     $width = $img->width();
                     $height = $img->height();
                 }
 
                 // Encode to high-quality JPEG for size efficiency
-                $encoded = $img->toJpeg(quality: self::IMAGE_QUALITY);
+                if (method_exists($img, 'toJpeg')) {
+                    $binary = (string) $img->toJpeg(quality: self::IMAGE_QUALITY);
+                } elseif (method_exists($img, 'encodeUsingMediaType')) {
+                    $binary = (string) $img->encodeUsingMediaType('image/jpeg', quality: self::IMAGE_QUALITY);
+                } elseif (method_exists($img, 'encodeUsingFileExtension')) {
+                    $binary = (string) $img->encodeUsingFileExtension('jpg', quality: self::IMAGE_QUALITY);
+                } else {
+                    $binary = (string) $img->encode();
+                }
+
                 $storedFilename = "{$uuid}.jpg";
                 $path = self::BASE_PATH . "/{$year}/{$month}/{$application->id}/{$storedFilename}";
                 $mimeType = 'image/jpeg';
 
-                $binary = (string) $encoded;
                 $finalSize = strlen($binary);
                 $isCompressed = true;
 
                 Storage::disk(self::DISK)->put($path, $binary);
             } catch (\Throwable $e) {
-                Log::warning("Queue document compression fallback: " . $e->getMessage());
+                Log::warning("Queue document compression fallback [{$file->getClientOriginalName()}]: " . $e->getMessage());
                 // Fallback: store raw uploaded file safely
                 Storage::disk(self::DISK)->putFileAs(
                     dirname($path),
