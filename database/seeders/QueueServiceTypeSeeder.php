@@ -201,7 +201,6 @@ class QueueServiceTypeSeeder extends Seeder
                 'sort_order' => 3,
                 'is_active' => true,
                 'documents' => [
-                    $f102Doc,
                     [
                         'label' => 'KTP-el Lama Asli',
                         'description' => 'Foto fisik KTP-el sebelum perubahan data.',
@@ -211,8 +210,9 @@ class QueueServiceTypeSeeder extends Seeder
                         'max_size_kb' => 5120,
                         'capture_hint' => 'Foto kartu KTP-el lama secara utuh dan jelas.',
                         'capture_mode' => 'environment',
-                        'sort_order' => 2,
+                        'sort_order' => 1,
                     ],
+                    array_merge($f102Doc, ['sort_order' => 2]),
                     [
                         'label' => 'Kartu Keluarga (KK) Terbaru',
                         'description' => 'Kartu Keluarga yang sudah memuat elemen data baru (misal status kawin, alamat, pekerjaan baru).',
