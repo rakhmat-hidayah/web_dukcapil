@@ -77,6 +77,50 @@
         </div>
       </div>
 
+      <!-- Operator Urgency Reminder Banner -->
+      <div
+        v-if="application.verification_urgency === 'overdue'"
+        class="p-4 rounded-2xl bg-gradient-to-r from-rose-50 to-rose-100/80 dark:from-rose-950/40 dark:to-rose-900/25 border-2 border-rose-300 dark:border-rose-800 shadow-sm flex items-start gap-3.5"
+      >
+        <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-600/30">
+          <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="text-sm font-black text-rose-900 dark:text-rose-200">
+              ⚠️ PENGINGAT OPERATOR: Permohonan Ini Belum Diverifikasi Lebih Dari 1x24 Jam!
+            </h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white animate-pulse">
+              Prioritas Utama
+            </span>
+          </div>
+          <p class="text-xs text-rose-700 dark:text-rose-300/90 mt-1">
+            Pemohon telah mengajukan berkas sejak <strong class="text-rose-900 dark:text-rose-100">{{ formatDate(application.submitted_at || application.created_at) }}</strong> ({{ application.waiting_time_human }}). Telah melewati batas waktu standar pelayanan (SLA 24 jam). Harap segera periksa kelengkapan dokumen pemohon dan berikan keputusan verifikasi.
+          </p>
+        </div>
+      </div>
+      <div
+        v-else-if="application.verification_urgency === 'new'"
+        class="p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100/80 dark:from-amber-950/40 dark:to-amber-900/25 border-2 border-amber-300 dark:border-amber-800 shadow-sm flex items-start gap-3.5"
+      >
+        <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="text-sm font-black text-amber-900 dark:text-amber-200">
+              ⚡ PERMOHONAN BARU MASUK: Membutuhkan Segera Diverifikasi
+            </h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white">
+              Menunggu Respon
+            </span>
+          </div>
+          <p class="text-xs text-amber-800 dark:text-amber-300/90 mt-1">
+            Didaftarkan pada <strong class="text-amber-950 dark:text-amber-100">{{ formatDate(application.submitted_at || application.created_at) }}</strong> ({{ application.waiting_time_human }}). Silakan teliti keabsahan dan kelengkapan dokumen digital pemohon pada panel verifikasi di sebelah kanan.
+          </p>
+        </div>
+      </div>
+
       <!-- Main Split Grid: Left Details & Right Verification Console -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- LEFT 1 COLUMN: Applicant Identity & Bio -->

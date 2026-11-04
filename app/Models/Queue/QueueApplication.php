@@ -141,6 +141,9 @@ class QueueApplication extends Model
         'selfie_url',
         'tracking_url',
         'qr_code_svg',
+        'verification_urgency',
+        'verification_urgency_label',
+        'waiting_time_human',
     ];
 
     protected static function booted(): void
@@ -393,5 +396,63 @@ class QueueApplication extends Model
         } catch (\Throwable $e) {
             return '';
         }
+    }
+
+    /**
+     * Determine urgency level for operator verification:
+     * - 'overdue': Unverified for more than 24 hours (> 1x24 jam)
+     * - 'new': Unverified for 24 hours or less (baru masuk)
+     * - null: Already past initial online verification or in draft/cancelled state
+     */
+    public function getVerificationUrgencyAttribute(): ?string
+    {
+        if (!in_array($this->status, [self::STATUS_SUBMITTED, self::STATUS_RESUBMITTED, self::STATUS_UNDER_REVIEW])) {
+            return null;
+        }
+
+        $referenceTime = $this->submitted_at ?? $this->created_at;
+        if (!$referenceTime) {
+            return 'new';
+        }
+
+        return $referenceTime->lte(now()->subHours(24)) ? 'overdue' : 'new';
+    }
+
+    /**
+     * Get readable label for verification urgency.
+     */
+    public function getVerificationUrgencyLabelAttribute(): ?string
+    {
+        $urgency = $this->verification_urgency;
+        if ($urgency === 'overdue') {
+            return 'Belum Diverifikasi >24 Jam (Perlu Penanganan Segera)';
+        }
+        if ($urgency === 'new') {
+            return 'Baru Masuk (Segera Diverifikasi)';
+        }
+        return null;
+    }
+
+    /**
+     * Get human readable waiting time since submission.
+     */
+    public function getWaitingTimeHumanAttribute(): ?string
+    {
+        if (!$this->verification_urgency) {
+            return null;
+        }
+
+        $referenceTime = $this->submitted_at ?? $this->created_at;
+        if (!$referenceTime) {
+            return null;
+        }
+
+        \Carbon\Carbon::setLocale('id');
+        $duration = $referenceTime->diffForHumans(now(), [
+            'syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE,
+            'parts' => 2,
+        ]);
+
+        return 'Menunggu ' . $duration;
     }
 }

@@ -1076,4 +1076,94 @@ class QueueWorkflowTest extends TestCase
 
         $application->delete();
     }
+
+    public function test_application_verification_urgency_attributes_and_filtering()
+    {
+        $admin = User::first() ?? User::factory()->create();
+        $service = ServiceType::first();
+
+        $appService = app(\App\Services\Queue\QueueApplicationService::class);
+
+        // App 1: Overdue unverified application (>24 hours)
+        $app1 = $appService->createDraft([
+            'applicant_nik' => '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT),
+            'applicant_name' => 'Pemohon Terlambat SLA',
+            'applicant_phone' => '081234567891',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+        $app1->update([
+            'status' => QueueApplication::STATUS_SUBMITTED,
+            'submitted_at' => now()->subHours(26),
+        ]);
+
+        // App 2: New incoming unverified application (<24 hours)
+        $app2 = $appService->createDraft([
+            'applicant_nik' => '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT),
+            'applicant_name' => 'Pemohon Baru Masuk',
+            'applicant_phone' => '081234567892',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+        $app2->update([
+            'status' => QueueApplication::STATUS_SUBMITTED,
+            'submitted_at' => now()->subMinutes(15),
+        ]);
+
+        // App 3: Already pre-verified (no longer needs initial review)
+        $app3 = $appService->createDraft([
+            'applicant_nik' => '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT),
+            'applicant_name' => 'Pemohon Sudah Lolos',
+            'applicant_phone' => '081234567893',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+        $app3->update([
+            'status' => QueueApplication::STATUS_PRE_VERIFIED,
+            'submitted_at' => now()->subHours(30),
+        ]);
+
+        // Assert model attributes and accessors
+        $this->assertEquals('overdue', $app1->verification_urgency);
+        $this->assertStringContainsString('24 Jam', $app1->verification_urgency_label);
+        $this->assertNotNull($app1->waiting_time_human);
+
+        $this->assertEquals('new', $app2->verification_urgency);
+        $this->assertStringContainsString('Baru Masuk', $app2->verification_urgency_label);
+        $this->assertNotNull($app2->waiting_time_human);
+
+        $this->assertNull($app3->verification_urgency);
+        $this->assertNull($app3->verification_urgency_label);
+        $this->assertNull($app3->waiting_time_human);
+
+        // Test filtering by overdue
+        $resOverdue = $this->actingAs($admin)->get(route('admin.queue.applications.index', ['urgency' => 'overdue']));
+        $resOverdue->assertStatus(200);
+        $resOverdue->assertInertia(fn ($page) => 
+            $page->component('Admin/Queue/Applications/Index')
+                ->has('urgencyCounts.overdue')
+                ->has('urgencyCounts.new')
+                ->where('filters.urgency', 'overdue')
+        );
+
+        // Test filtering by new
+        $resNew = $this->actingAs($admin)->get(route('admin.queue.applications.index', ['urgency' => 'new']));
+        $resNew->assertStatus(200);
+        $resNew->assertInertia(fn ($page) => 
+            $page->component('Admin/Queue/Applications/Index')
+                ->where('filters.urgency', 'new')
+        );
+
+        // Test show page includes verification_urgency
+        $resShow = $this->actingAs($admin)->get(route('admin.queue.applications.show', $app1->id));
+        $resShow->assertStatus(200);
+        $resShow->assertInertia(fn ($page) => 
+            $page->component('Admin/Queue/Applications/Show')
+                ->where('application.verification_urgency', 'overdue')
+        );
+
+        $app1->forceDelete();
+        $app2->forceDelete();
+        $app3->forceDelete();
+    }
 }

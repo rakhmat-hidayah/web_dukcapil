@@ -36,16 +36,48 @@ class ApplicationVerificationController extends Controller
         }
 
         $status = $request->query('status');
+        $urgency = $request->query('urgency');
         $serviceId = $request->query('service_id');
         $search = $request->query('search');
         if ($search && preg_match('/(REG-[A-Za-z0-9-]+)/i', $search, $matches)) {
             $search = strtoupper($matches[1]);
         }
 
-        $query = QueueApplication::with(['serviceType', 'slot.schedule'])
-            ->latest('submitted_at');
+        $unverifiedStatuses = [
+            QueueApplication::STATUS_SUBMITTED,
+            QueueApplication::STATUS_RESUBMITTED,
+            QueueApplication::STATUS_UNDER_REVIEW,
+        ];
+        $cutoff24h = now()->subHours(24);
 
-        if ($status) {
+        $query = QueueApplication::with(['serviceType', 'slot.schedule']);
+
+        if ($urgency === 'overdue') {
+            $query->whereIn('status', $unverifiedStatuses)
+                ->where(function ($q) use ($cutoff24h) {
+                    $q->where('submitted_at', '<=', $cutoff24h)
+                      ->orWhere(function ($sub) use ($cutoff24h) {
+                          $sub->whereNull('submitted_at')->where('created_at', '<=', $cutoff24h);
+                      });
+                })
+                ->orderBy('submitted_at', 'asc');
+        } elseif ($urgency === 'new') {
+            $query->whereIn('status', $unverifiedStatuses)
+                ->where(function ($q) use ($cutoff24h) {
+                    $q->where('submitted_at', '>', $cutoff24h)
+                      ->orWhere(function ($sub) use ($cutoff24h) {
+                          $sub->whereNull('submitted_at')->where('created_at', '>', $cutoff24h);
+                      });
+                })
+                ->latest('submitted_at');
+        } elseif ($urgency === 'unverified') {
+            $query->whereIn('status', $unverifiedStatuses)
+                ->latest('submitted_at');
+        } else {
+            $query->latest('submitted_at');
+        }
+
+        if ($status && empty($urgency)) {
             $query->where('status', $status);
         }
 
@@ -85,14 +117,39 @@ class ApplicationVerificationController extends Controller
             'EXPIRED'               => QueueApplication::where('status', QueueApplication::STATUS_EXPIRED)->count(),
         ];
 
+        // Specific urgent counts for operator verification reminders
+        $overdueCount = QueueApplication::whereIn('status', $unverifiedStatuses)
+            ->where(function ($q) use ($cutoff24h) {
+                $q->where('submitted_at', '<=', $cutoff24h)
+                  ->orWhere(function ($sub) use ($cutoff24h) {
+                      $sub->whereNull('submitted_at')->where('created_at', '<=', $cutoff24h);
+                  });
+            })->count();
+
+        $newCount = QueueApplication::whereIn('status', $unverifiedStatuses)
+            ->where(function ($q) use ($cutoff24h) {
+                $q->where('submitted_at', '>', $cutoff24h)
+                  ->orWhere(function ($sub) use ($cutoff24h) {
+                      $sub->whereNull('submitted_at')->where('created_at', '>', $cutoff24h);
+                  });
+            })->count();
+
+        $urgencyCounts = [
+            'overdue'          => $overdueCount,
+            'new'              => $newCount,
+            'total_unverified' => $overdueCount + $newCount,
+        ];
+
         $services = ServiceType::active()->get(['id', 'name', 'color']);
 
         return Inertia::render('Admin/Queue/Applications/Index', [
-            'applications' => $applications,
-            'statusCounts' => $statusCounts,
-            'services'     => $services,
-            'filters'      => [
+            'applications'  => $applications,
+            'statusCounts'  => $statusCounts,
+            'urgencyCounts' => $urgencyCounts,
+            'services'      => $services,
+            'filters'       => [
                 'status'     => $status,
+                'urgency'    => $urgency,
                 'service_id' => $serviceId,
                 'search'     => $search,
             ],

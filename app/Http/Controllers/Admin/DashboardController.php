@@ -811,7 +811,64 @@ class DashboardController extends Controller
         // -------------------------------------------------------------
         // SECTION 8: PENDING TASKS & ACTIONABLE ALERTS
         // -------------------------------------------------------------
-        $pendingTasks = [
+        $queueOverdueCount = 0;
+        $queueNewCount = 0;
+        if (\Illuminate\Support\Facades\Schema::hasTable('queue_applications')) {
+            $unverifiedStatuses = [
+                \App\Models\Queue\QueueApplication::STATUS_SUBMITTED,
+                \App\Models\Queue\QueueApplication::STATUS_RESUBMITTED,
+                \App\Models\Queue\QueueApplication::STATUS_UNDER_REVIEW,
+            ];
+            $cutoff24h = now()->subHours(24);
+
+            $queueOverdueCount = DB::table('queue_applications')
+                ->whereNull('deleted_at')
+                ->whereIn('status', $unverifiedStatuses)
+                ->where(function ($q) use ($cutoff24h) {
+                    $q->where('submitted_at', '<=', $cutoff24h)
+                      ->orWhere(function ($sub) use ($cutoff24h) {
+                          $sub->whereNull('submitted_at')->where('created_at', '<=', $cutoff24h);
+                      });
+                })->count();
+
+            $queueNewCount = DB::table('queue_applications')
+                ->whereNull('deleted_at')
+                ->whereIn('status', $unverifiedStatuses)
+                ->where(function ($q) use ($cutoff24h) {
+                    $q->where('submitted_at', '>', $cutoff24h)
+                      ->orWhere(function ($sub) use ($cutoff24h) {
+                          $sub->whereNull('submitted_at')->where('created_at', '>', $cutoff24h);
+                      });
+                })->count();
+        }
+
+        $pendingTasks = [];
+
+        if ($queueOverdueCount > 0) {
+            $pendingTasks[] = [
+                'id' => 'queue_overdue_24h',
+                'title' => 'Permohonan KTP-el Belum Diverifikasi >1x24 Jam',
+                'count' => $queueOverdueCount,
+                'severity' => 'danger',
+                'route' => 'admin.queue.applications.index',
+                'url' => route('admin.queue.applications.index', ['urgency' => 'overdue']),
+                'action_label' => 'Segera Verifikasi',
+            ];
+        }
+
+        if ($queueNewCount > 0) {
+            $pendingTasks[] = [
+                'id' => 'queue_new_unverified',
+                'title' => 'Permohonan KTP-el Baru Masuk (Perlu Verifikasi)',
+                'count' => $queueNewCount,
+                'severity' => 'warning',
+                'route' => 'admin.queue.applications.index',
+                'url' => route('admin.queue.applications.index', ['urgency' => 'new']),
+                'action_label' => 'Tinjau Berkas',
+            ];
+        }
+
+        $pendingTasks = array_merge($pendingTasks, [
             [
                 'id' => 'draft_news',
                 'title' => 'Draft Berita Belum Dipublikasi',
@@ -844,7 +901,7 @@ class DashboardController extends Controller
                 'route' => 'admin.banners.index',
                 'action_label' => 'Kelola Banner',
             ],
-        ];
+        ]);
 
         // -------------------------------------------------------------
         // SECTION 9: QUICK ACTIONS

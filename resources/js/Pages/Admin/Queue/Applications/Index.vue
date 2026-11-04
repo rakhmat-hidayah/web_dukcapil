@@ -25,15 +25,155 @@
         </div>
       </div>
 
-      <!-- Filter Tabs by Status -->
+      <!-- Operator Special Reminders Banner -->
+      <div
+        v-if="(urgencyCounts?.overdue || 0) > 0 || (urgencyCounts?.new || 0) > 0"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        <!-- Overdue > 24 Hours Alert -->
+        <div
+          v-if="(urgencyCounts?.overdue || 0) > 0"
+          class="p-4 rounded-2xl bg-gradient-to-r from-rose-50 to-rose-100/80 dark:from-rose-950/40 dark:to-rose-900/20 border-2 border-rose-300 dark:border-rose-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
+        >
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-600/30">
+              <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-xs sm:text-sm font-black text-rose-900 dark:text-rose-200">
+                  {{ urgencyCounts.overdue }} Permohonan Belum Diverifikasi >1x24 Jam!
+                </h4>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white animate-pulse">
+                  Prioritas Utama
+                </span>
+              </div>
+              <p class="text-[11px] text-rose-700 dark:text-rose-300/90 mt-0.5">
+                Melewati batas waktu standar pelayanan (SLA 24 jam). Harap segera selesaikan verifikasi berkas.
+              </p>
+            </div>
+          </div>
+          <button
+            @click="selectUrgency('overdue')"
+            class="px-3.5 py-2 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-600/20 transition whitespace-nowrap self-start sm:self-auto cursor-pointer flex items-center gap-1.5"
+          >
+            <span>Verifikasi Sekarang ({{ urgencyCounts.overdue }})</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- New Incoming Unverified Alert -->
+        <div
+          v-if="(urgencyCounts?.new || 0) > 0"
+          class="p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100/80 dark:from-amber-950/40 dark:to-amber-900/20 border-2 border-amber-300 dark:border-amber-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
+        >
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-xs sm:text-sm font-black text-amber-900 dark:text-amber-200">
+                  {{ urgencyCounts.new }} Permohonan Baru Masuk
+                </h4>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white">
+                  Segera Diverifikasi
+                </span>
+              </div>
+              <p class="text-[11px] text-amber-800 dark:text-amber-300/90 mt-0.5">
+                Dokumen digital baru diunggah oleh pemohon dan menunggu pra-verifikasi operator.
+              </p>
+            </div>
+          </div>
+          <button
+            @click="selectUrgency('new')"
+            class="px-3.5 py-2 rounded-xl text-xs font-black bg-amber-500 hover:bg-amber-400 text-white shadow-md shadow-amber-500/20 transition whitespace-nowrap self-start sm:self-auto cursor-pointer flex items-center gap-1.5"
+          >
+            <span>Tinjau Berkas ({{ urgencyCounts.new }})</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Tabs by Status & Urgency -->
       <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+        <!-- All Status Tab -->
+        <button
+          @click="selectStatus('')"
+          :class="[
+            'px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 cursor-pointer',
+            activeStatus === '' && !activeUrgency
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700'
+          ]"
+        >
+          <span>Semua Status</span>
+          <span
+            :class="[
+              'px-2 py-0.5 rounded-full text-[10px] font-mono',
+              activeStatus === '' && !activeUrgency ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+            ]"
+          >
+            {{ statusCounts?.all || 0 }}
+          </span>
+        </button>
+
+        <!-- Overdue >24h Tab -->
+        <button
+          @click="selectUrgency('overdue')"
+          :class="[
+            'px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 cursor-pointer',
+            activeUrgency === 'overdue'
+              ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20 ring-2 ring-rose-300 dark:ring-rose-800'
+              : 'bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50'
+          ]"
+        >
+          <span class="flex items-center gap-1.5">
+            <span v-if="(urgencyCounts?.overdue || 0) > 0" class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+            <span>⚠️ Belum Diverifikasi >24 Jam</span>
+          </span>
+          <span
+            :class="[
+              'px-2 py-0.5 rounded-full text-[10px] font-mono font-bold',
+              activeUrgency === 'overdue' ? 'bg-rose-500 text-white' : 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300'
+            ]"
+          >
+            {{ urgencyCounts?.overdue || 0 }}
+          </span>
+        </button>
+
+        <!-- New Incoming Tab -->
+        <button
+          @click="selectUrgency('new')"
+          :class="[
+            'px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 cursor-pointer',
+            activeUrgency === 'new'
+              ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20 ring-2 ring-amber-300 dark:ring-amber-800'
+              : 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50'
+          ]"
+        >
+          <span class="flex items-center gap-1.5">
+            <span v-if="(urgencyCounts?.new || 0) > 0" class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>⚡ Baru Masuk (&lt;24 Jam)</span>
+          </span>
+          <span
+            :class="[
+              'px-2 py-0.5 rounded-full text-[10px] font-mono font-bold',
+              activeUrgency === 'new' ? 'bg-amber-400 text-white' : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
+            ]"
+          >
+            {{ urgencyCounts?.new || 0 }}
+          </span>
+        </button>
+
+        <!-- Standard Status Tabs -->
         <button
           v-for="tab in statusTabs"
           :key="tab.value"
           @click="selectStatus(tab.value)"
           :class="[
             'px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 cursor-pointer',
-            activeStatus === tab.value
+            activeStatus === tab.value && !activeUrgency
               ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
               : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700'
           ]"
@@ -42,7 +182,7 @@
           <span
             :class="[
               'px-2 py-0.5 rounded-full text-[10px] font-mono',
-              activeStatus === tab.value ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+              activeStatus === tab.value && !activeUrgency ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
             ]"
           >
             {{ tab.count }}
@@ -86,7 +226,7 @@
             Terapkan Filter
           </button>
           <button
-            v-if="searchQuery || selectedService || activeStatus"
+            v-if="searchQuery || selectedService || activeStatus || activeUrgency"
             @click="resetFilters"
             class="px-3 py-2.5 text-xs text-slate-500 hover:text-rose-600 font-bold transition"
           >
@@ -113,7 +253,14 @@
               <tr
                 v-for="app in applications.data"
                 :key="app.id"
-                class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition group"
+                :class="[
+                  'transition group border-b border-slate-100 dark:border-slate-700/60',
+                  app.verification_urgency === 'overdue'
+                    ? 'bg-rose-50/70 dark:bg-rose-950/25 border-l-4 border-l-rose-500 hover:bg-rose-100/60 dark:hover:bg-rose-900/40'
+                    : (app.verification_urgency === 'new'
+                      ? 'bg-amber-50/50 dark:bg-amber-950/15 border-l-4 border-l-amber-500 hover:bg-amber-100/50 dark:hover:bg-amber-900/30'
+                      : 'hover:bg-slate-50/80 dark:hover:bg-slate-700/30')
+                ]"
               >
                 <!-- Reg & Queue Number -->
                 <td class="px-5 py-4 whitespace-nowrap">
@@ -129,6 +276,26 @@
                   <p class="text-[10px] text-slate-400 mt-0.5">
                     Didaftarkan: {{ formatDate(app.submitted_at || app.created_at) }}
                   </p>
+
+                  <!-- Urgent Reminder Badges -->
+                  <div v-if="app.verification_urgency === 'overdue'" class="mt-1.5 flex items-center gap-1.5">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white shadow-sm animate-pulse">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                      Belum Diverifikasi >24 Jam
+                    </span>
+                    <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                      ({{ app.waiting_time_human }})
+                    </span>
+                  </div>
+                  <div v-else-if="app.verification_urgency === 'new'" class="mt-1.5 flex items-center gap-1.5">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white shadow-sm">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                      Baru Masuk
+                    </span>
+                    <span class="text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                      ({{ app.waiting_time_human }})
+                    </span>
+                  </div>
                 </td>
 
                 <!-- Applicant & NIK -->
@@ -168,11 +335,38 @@
                 <!-- Status Badge -->
                 <td class="px-5 py-4 text-center whitespace-nowrap">
                   <StatusBadge :status="app.status" />
+                  <div v-if="app.verification_urgency === 'overdue'" class="mt-1">
+                    <span class="inline-block text-[10px] font-extrabold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-950/80 px-2 py-0.5 rounded-full">
+                      ⚠️ Terlambat SLA 1x24 Jam
+                    </span>
+                  </div>
+                  <div v-else-if="app.verification_urgency === 'new'" class="mt-1">
+                    <span class="inline-block text-[10px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 px-2 py-0.5 rounded-full">
+                      ⚡ Butuh Verifikasi Segera
+                    </span>
+                  </div>
                 </td>
 
                 <!-- Actions -->
                 <td class="px-5 py-4 text-right whitespace-nowrap">
                   <Link
+                    v-if="app.verification_urgency === 'overdue'"
+                    :href="route('admin.queue.applications.show', app.id)"
+                    class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md shadow-rose-600/30 transition animate-pulse"
+                  >
+                    <span>Verifikasi Sekarang ⚠️</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  </Link>
+                  <Link
+                    v-else-if="app.verification_urgency === 'new'"
+                    :href="route('admin.queue.applications.show', app.id)"
+                    class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs shadow-md shadow-amber-500/30 transition"
+                  >
+                    <span>Tinjau Berkas ⚡</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  </Link>
+                  <Link
+                    v-else
                     :href="route('admin.queue.applications.show', app.id)"
                     class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm transition"
                   >
@@ -235,16 +429,17 @@ import StatusBadge from '@/Components/Queue/StatusBadge.vue'
 const props = defineProps({
   applications: Object,
   statusCounts: Object,
+  urgencyCounts: Object,
   services: Array,
   filters: Object,
 })
 
-const activeStatus = ref(props.filters.status || '')
-const searchQuery = ref(props.filters.search || '')
-const selectedService = ref(props.filters.service_id || '')
+const activeStatus = ref(props.filters?.status || '')
+const activeUrgency = ref(props.filters?.urgency || '')
+const searchQuery = ref(props.filters?.search || '')
+const selectedService = ref(props.filters?.service_id || '')
 
 const statusTabs = computed(() => [
-  { label: 'Semua Status', value: '', count: props.statusCounts?.all || 0 },
   { label: 'Menunggu Verifikasi', value: 'SUBMITTED', count: props.statusCounts?.SUBMITTED || 0 },
   { label: 'Sedang Diperiksa', value: 'UNDER_REVIEW', count: props.statusCounts?.UNDER_REVIEW || 0 },
   { label: 'Perlu Perbaikan', value: 'REVISION_REQUIRED', count: props.statusCounts?.REVISION_REQUIRED || 0 },
@@ -256,6 +451,13 @@ const statusTabs = computed(() => [
 
 const selectStatus = (status) => {
   activeStatus.value = status
+  activeUrgency.value = ''
+  applyFilters()
+}
+
+const selectUrgency = (urgency) => {
+  activeUrgency.value = urgency
+  activeStatus.value = ''
   applyFilters()
 }
 
@@ -264,6 +466,7 @@ const applyFilters = () => {
     route('admin.queue.applications.index'),
     {
       status: activeStatus.value || undefined,
+      urgency: activeUrgency.value || undefined,
       search: searchQuery.value || undefined,
       service_id: selectedService.value || undefined,
     },
@@ -273,6 +476,7 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   activeStatus.value = ''
+  activeUrgency.value = ''
   searchQuery.value = ''
   selectedService.value = ''
   router.get(route('admin.queue.applications.index'), {}, { preserveState: true, replace: true })

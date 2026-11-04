@@ -45,7 +45,7 @@
           </div>
 
           <Link 
-            :href="route(task.route)"
+            :href="task.url || route(task.route)"
             class="px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0 whitespace-nowrap"
             :class="[
               task.severity === 'danger' ? 'bg-rose-600 hover:bg-rose-500 text-white' : (task.severity === 'warning' ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-blue-600 hover:bg-blue-500 text-white')
