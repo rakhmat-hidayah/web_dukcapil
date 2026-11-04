@@ -43,7 +43,11 @@ class AppServiceProvider extends ServiceProvider
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('queue_service_documents') &&
                 !\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
-                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                \Illuminate\Support\Facades\Schema::table('queue_service_documents', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
+                        $table->boolean('is_active')->default(true)->after('is_required');
+                    }
+                });
             }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('Queue auto-migrate warning: ' . $e->getMessage());

@@ -31,6 +31,29 @@ class QueueApplicationService
     }
 
     /**
+     * Memastikan kolom is_active tersedia secara aman pada tabel queue_service_documents.
+     */
+    public static function ensureIsActiveColumn(): bool
+    {
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('queue_service_documents')) {
+                if (!\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
+                    \Illuminate\Support\Facades\Schema::table('queue_service_documents', function (\Illuminate\Database\Schema\Blueprint $table) {
+                        if (!\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
+                            $table->boolean('is_active')->default(true)->after('is_required');
+                        }
+                    });
+                }
+                return \Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active');
+            }
+            return false;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("ensureIsActiveColumn warning: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Persyaratan dokumen dikelola secara dinamis melalui Database / Panel Admin CMS.
      */
     public static function ensureSelfieRequirementForPerekaman(): void
@@ -223,7 +246,12 @@ class QueueApplicationService
         }
 
         // Determine required documents taking into account representation policy
-        $allDocs = $application->serviceType->documents()->where('is_active', true)->get();
+        $hasIsActive = static::ensureIsActiveColumn();
+        $docsQuery = $application->serviceType->documents();
+        if ($hasIsActive) {
+            $docsQuery->where('is_active', true);
+        }
+        $allDocs = $docsQuery->get();
         $isRepresented = $application->is_represented;
 
         $uploadedDocIds = $application->documents()->pluck('service_document_id')->toArray();

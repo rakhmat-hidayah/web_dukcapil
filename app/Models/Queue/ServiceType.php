@@ -79,8 +79,12 @@ class ServiceType extends Model
     public function requiredDocuments()
     {
         $relation = $this->documents()->where('is_required', true);
-        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
-            $relation->where('is_active', true);
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
+                $relation->where('is_active', true);
+            }
+        } catch (\Throwable) {
+            // Safe fallback
         }
         return $relation;
     }
@@ -88,8 +92,12 @@ class ServiceType extends Model
     public function activeDocuments()
     {
         $relation = $this->documents();
-        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
-            $relation->where('is_active', true);
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
+                $relation->where('is_active', true);
+            }
+        } catch (\Throwable) {
+            // Safe fallback
         }
         return $relation;
     }
