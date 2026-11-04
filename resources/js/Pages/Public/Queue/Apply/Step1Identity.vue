@@ -210,10 +210,11 @@
                 </label>
                 <input
                   id="field_applicant_name"
-                  v-model="form.applicant_name"
+                  :value="form.applicant_name"
+                  @input="onUppercaseInput('applicant_name', $event)"
                   type="text"
-                  placeholder="Nama lengkap pemilik dokumen..."
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+                  placeholder="NAMA LENGKAP PEMILIK DOKUMEN..."
+                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
                   required
                 />
                 <p v-if="form.errors.applicant_name" class="text-xs text-rose-500 font-medium mt-1">
@@ -228,10 +229,11 @@
                 </label>
                 <input
                   id="field_applicant_birth_place"
-                  v-model="form.applicant_birth_place"
+                  :value="form.applicant_birth_place"
+                  @input="onUppercaseInput('applicant_birth_place', $event)"
                   type="text"
-                  placeholder="Contoh: Dompu"
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="CONTOH: DOMPU"
+                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
                   required
                 />
                 <p v-if="form.errors.applicant_birth_place" class="text-xs text-rose-500 font-medium mt-1">
@@ -541,10 +543,11 @@
                 </label>
                 <textarea
                   id="field_applicant_address"
-                  v-model="form.applicant_address"
+                  :value="form.applicant_address"
+                  @input="onUppercaseInput('applicant_address', $event)"
                   rows="2"
-                  placeholder="Nama jalan, RT/RW, Dusun, atau patokan tempat tinggal..."
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="NAMA JALAN, RT/RW, DUSUN, ATAU PATOKAN TEMPAT TINGGAL..."
+                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
                   required
                 ></textarea>
                 <p v-if="form.errors.applicant_address" class="text-xs text-rose-500 font-medium mt-1">
@@ -727,10 +730,11 @@
                   </label>
                   <input
                     id="field_representative_name"
-                    v-model="form.representative_name"
+                    :value="form.representative_name"
+                    @input="onUppercaseInput('representative_name', $event)"
                     type="text"
-                    placeholder="Nama orang yang mewakili..."
-                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+                    placeholder="NAMA LENGKAP ORANG YANG MEWAKILI..."
+                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
                     required
                   />
                   <p v-if="form.errors.representative_name" class="text-xs text-rose-500 font-medium mt-1">
@@ -1153,6 +1157,24 @@ function onRepresentativePhoneInput(e) {
   handlePhoneInput(e, 'representative_phone');
 }
 
+// Uppercase Auto-converter for Demographic Text Fields
+function onUppercaseInput(field, e) {
+  const el = e.target;
+  const start = el.selectionStart;
+  const end = el.selectionEnd;
+  const upper = (el.value || '').toUpperCase();
+  form[field] = upper;
+  el.value = upper;
+  if (start !== null && end !== null && typeof el.setSelectionRange === 'function') {
+    requestAnimationFrame(() => {
+      el.setSelectionRange(start, end);
+    });
+  }
+  if (form.errors[field] && upper.trim().length > 0) {
+    delete form.errors[field];
+  }
+}
+
 // Applicant Email Helpers & Auto-domain (@gmail.com as Default)
 const emailUsernameOnly = computed(() => {
   const val = (form.applicant_email || '').trim();
@@ -1548,6 +1570,12 @@ function submitStep1() {
 
   form.transform((data) => ({
     ...data,
+    applicant_name: data.applicant_name ? data.applicant_name.trim().toUpperCase() : '',
+    applicant_birth_place: data.applicant_birth_place ? data.applicant_birth_place.trim().toUpperCase() : '',
+    applicant_address: data.applicant_address ? data.applicant_address.trim().toUpperCase() : '',
+    applicant_district: data.applicant_district ? data.applicant_district.trim().toUpperCase() : '',
+    applicant_village: data.applicant_village ? data.applicant_village.trim().toUpperCase() : '',
+    representative_name: data.representative_name ? data.representative_name.trim().toUpperCase() : '',
     applicant_email: data.applicant_email ? data.applicant_email.trim() : null,
     applicant_phone: rawPhoneDigits(data.applicant_phone),
     representative_phone: data.representative_phone ? rawPhoneDigits(data.representative_phone) : '',

@@ -115,7 +115,7 @@ class QueueWorkflowTest extends TestCase
 
         $this->assertEquals(QueueApplication::STATUS_DRAFT, $draft->status);
         $this->assertEquals('family_in_kk', $draft->attendance_type);
-        $this->assertEquals('Istri Sah', $draft->representative_name);
+        $this->assertEquals('ISTRI SAH', $draft->representative_name);
         $this->assertTrue($draft->is_represented);
     }
 
@@ -1269,5 +1269,44 @@ class QueueWorkflowTest extends TestCase
         $app1->forceDelete();
         $app2->forceDelete();
         $app3->forceDelete();
+    }
+
+    public function test_demographic_text_fields_are_automatically_converted_to_uppercase()
+    {
+        $service = ServiceType::where('is_biometric_first_recording', false)->first() ?? ServiceType::first();
+        $this->assertNotNull($service);
+
+        $nik = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $res = $this->post(route('queue.apply.store'), [
+            'service_type_id'             => $service->id,
+            'applicant_nik'               => $nik,
+            'applicant_name'              => 'muhammad ihsan ramadhan', // huruf kecil
+            'applicant_birth_place'       => 'kabupaten dompu', // huruf kecil
+            'applicant_birth_date'        => '1998-05-15',
+            'applicant_phone'             => '0853-9988-7766',
+            'applicant_district'          => 'kecamatan dompu', // huruf kecil
+            'applicant_village'           => 'kelurahan bali satu', // huruf kecil
+            'applicant_address'           => 'dusun suka maju, rt 02 / rw 01', // huruf kecil
+            'attendance_type'             => 'family_in_kk',
+            'representative_nik'          => '5205123456789012',
+            'representative_name'         => 'ayah kandung pemohon', // huruf kecil
+            'representative_phone'        => '0852-1122-3344',
+            'representative_relationship' => 'Orang Tua (Ayah / Ibu)',
+            'absence_reason'              => 'Pemohon sedang dinas',
+        ]);
+
+        $res->assertSessionHasNoErrors();
+        $app = QueueApplication::where('applicant_nik', $nik)->first();
+        $this->assertNotNull($app);
+
+        // Verifikasi semua field teks otomatis tersimpan dalam HURUF BESAR (UPPERCASE)
+        $this->assertEquals('MUHAMMAD IHSAN RAMADHAN', $app->applicant_name);
+        $this->assertEquals('KABUPATEN DOMPU', $app->applicant_birth_place);
+        $this->assertEquals('DUSUN SUKA MAJU, RT 02 / RW 01', $app->applicant_address);
+        $this->assertEquals('KECAMATAN DOMPU', $app->applicant_district);
+        $this->assertEquals('KELURAHAN BALI SATU', $app->applicant_village);
+        $this->assertEquals('AYAH KANDUNG PEMOHON', $app->representative_name);
+
+        $app->forceDelete();
     }
 }

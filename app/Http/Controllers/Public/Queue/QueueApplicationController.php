@@ -122,6 +122,13 @@ class QueueApplicationController extends Controller
             }
         }
 
+        // Sanitize demographic text fields to uppercase
+        foreach (['applicant_name', 'applicant_birth_place', 'applicant_address', 'applicant_village', 'applicant_district', 'representative_name'] as $field) {
+            if ($request->has($field) && $request->input($field) !== null) {
+                $request->merge([$field => mb_strtoupper(trim((string) $request->input($field)))]);
+            }
+        }
+
         $service = ServiceType::find($request->service_type_id);
         $isBiometric = $service ? (bool) $service->is_biometric_first_recording : false;
         $minAge = $isBiometric ? 16 : 17;
