@@ -241,7 +241,7 @@
                 </p>
               </div>
 
-              <!-- Tanggal Lahir -->
+              <!-- Tanggal Lahir (Dapat Diketik Manual & Auto-Koreksi Cerdas) -->
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
@@ -251,16 +251,57 @@
                     Min. {{ minRequiredAge }} Tahun ({{ isBiometric ? 'Perekaman' : 'Pencetakan' }})
                   </span>
                 </div>
-                <input
-                  id="field_applicant_birth_date"
-                  v-model="form.applicant_birth_date"
-                  type="date"
-                  :max="maxBirthDate"
-                  :min="minBirthDate"
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                  :class="{'border-rose-500 ring-1 ring-rose-500': ageErrorMessage || form.errors.applicant_birth_date}"
-                  required
-                />
+
+                <div class="relative">
+                  <!-- Input Teks Manual: Bisa diketik langsung (contoh: 17/08/1998 atau 17081998) -->
+                  <input
+                    id="field_applicant_birth_date"
+                    :value="birthDateInputText"
+                    @input="onBirthDateManualInput"
+                    @blur="onBirthDateBlur"
+                    @keypress="filterBirthDateKeypress"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="10"
+                    placeholder="HH/BB/TTTT (Contoh: 17/08/1998)"
+                    class="w-full pl-4 pr-12 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider transition"
+                    :class="{'border-rose-500 ring-1 ring-rose-500': ageErrorMessage || form.errors.applicant_birth_date}"
+                    required
+                  />
+
+                  <!-- Tombol Ikon Kalender untuk Opsi Pemilih Visual (Datepicker) -->
+                  <button
+                    type="button"
+                    @click="triggerNativeDatePicker"
+                    title="Buka pemilih kalender"
+                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition cursor-pointer"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </button>
+
+                  <!-- Hidden Native Datepicker untuk Popup Kalender -->
+                  <input
+                    ref="nativeDatePickerRef"
+                    type="date"
+                    :value="form.applicant_birth_date"
+                    :max="maxBirthDate"
+                    :min="minBirthDate"
+                    @change="onNativeDatePicked"
+                    tabindex="-1"
+                    aria-hidden="true"
+                    class="sr-only pointer-events-none absolute right-4 top-3 opacity-0 w-0 h-0"
+                  />
+                </div>
+
+                <!-- Notifikasi / Feedback Otomatis jika Terjadi Perbaikan Kesalahan Input -->
+                <div v-if="autoCorrectedNotice" class="mt-1.5 flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-xl border border-amber-200/60 dark:border-amber-800/60">
+                  <svg class="w-3.5 h-3.5 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span>{{ autoCorrectedNotice }}</span>
+                </div>
 
                 <!-- Usia info badge -->
                 <div v-if="applicantAge !== null" class="mt-1.5 flex items-center justify-between text-xs">
@@ -280,6 +321,9 @@
 
                 <p v-if="form.errors.applicant_birth_date" class="text-xs text-rose-500 font-medium mt-1">
                   {{ form.errors.applicant_birth_date }}
+                </p>
+                <p v-else class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                  Bisa diketik manual angka tanggal/bulan/tahun (contoh: <span class="font-mono text-slate-600 dark:text-slate-300 font-semibold">17081995</span> atau <span class="font-mono text-slate-600 dark:text-slate-300 font-semibold">17/08/1995</span>). Sistem otomatis mengoreksi jika ada salah input.
                 </p>
               </div>
 
@@ -981,6 +1025,217 @@ const selectedVillageMode = ref('');
 const customDistrict = ref('');
 const customVillage = ref('');
 
+// Manual Birth Date Input & Smart Auto-Correction State
+const birthDateInputText = ref('');
+const nativeDatePickerRef = ref(null);
+const autoCorrectedNotice = ref('');
+
+function getDaysInMonth(year, month) {
+  const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+  const daysMap = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return daysMap[month - 1] || 31;
+}
+
+function filterBirthDateKeypress(e) {
+  if (!/[0-9\/\-\.]/.test(e.key)) {
+    e.preventDefault();
+  }
+}
+
+function formatBirthDateMask(value) {
+  if (!value) return '';
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 2) {
+    return digits;
+  }
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  }
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+function onBirthDateManualInput(e) {
+  const el = e.target;
+  const raw = el.value || '';
+
+  let formatted = '';
+  if (raw.includes('/') || raw.includes('-') || raw.includes('.')) {
+    const parts = raw.split(/[\/\-\.]/);
+    if (parts.length > 3) {
+      parts.length = 3;
+    }
+    const d = parts[0] ? parts[0].replace(/\D/g, '').slice(0, 2) : '';
+    const m = parts[1] ? parts[1].replace(/\D/g, '').slice(0, 2) : '';
+    const y = parts[2] ? parts[2].replace(/\D/g, '').slice(0, 4) : '';
+    formatted = d;
+    if (parts.length > 1 || raw.endsWith('/') || raw.endsWith('-') || raw.endsWith('.')) {
+      formatted += '/' + m;
+    }
+    if (parts.length > 2 || (parts[1] && (raw.endsWith('/') || raw.endsWith('-') || raw.endsWith('.')))) {
+      formatted += '/' + y;
+    }
+  } else {
+    formatted = formatBirthDateMask(raw);
+  }
+
+  birthDateInputText.value = formatted;
+  el.value = formatted;
+
+  // Jika sudah 10 karakter lengkap (DD/MM/YYYY), coba normalisasi dan sinkronkan tanpa pop notice
+  if (formatted.length === 10) {
+    correctAndNormalizeBirthDate(false);
+  }
+}
+
+function triggerNativeDatePicker() {
+  if (nativeDatePickerRef.value) {
+    if (typeof nativeDatePickerRef.value.showPicker === 'function') {
+      try {
+        nativeDatePickerRef.value.showPicker();
+      } catch (err) {
+        nativeDatePickerRef.value.focus();
+        nativeDatePickerRef.value.click();
+      }
+    } else {
+      nativeDatePickerRef.value.focus();
+      nativeDatePickerRef.value.click();
+    }
+  }
+}
+
+function onNativeDatePicked(e) {
+  const val = e.target.value; // YYYY-MM-DD
+  if (val) {
+    form.applicant_birth_date = val;
+    const parts = val.split('-');
+    if (parts.length === 3) {
+      birthDateInputText.value = `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    autoCorrectedNotice.value = '';
+    if (form.errors.applicant_birth_date) {
+      delete form.errors.applicant_birth_date;
+    }
+  }
+}
+
+function correctAndNormalizeBirthDate(showNotice = true) {
+  const raw = (birthDateInputText.value || '').trim();
+  if (!raw) {
+    form.applicant_birth_date = '';
+    autoCorrectedNotice.value = '';
+    return;
+  }
+
+  let d = 0;
+  let m = 0;
+  let y = 0;
+
+  if (raw.includes('/') || raw.includes('-') || raw.includes('.')) {
+    const parts = raw.split(/[\/\-\.]/).map(p => p.trim());
+    d = parseInt(parts[0] || '0', 10);
+    m = parseInt(parts[1] || '0', 10);
+    y = parseInt(parts[2] || '0', 10);
+  } else {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length >= 8) {
+      d = parseInt(digits.slice(0, 2), 10);
+      m = parseInt(digits.slice(2, 4), 10);
+      y = parseInt(digits.slice(4, 8), 10);
+    } else if (digits.length >= 6) {
+      d = parseInt(digits.slice(0, 2), 10);
+      m = parseInt(digits.slice(2, 4), 10);
+      y = parseInt(digits.slice(4), 10);
+    } else if (digits.length > 0) {
+      d = parseInt(digits.slice(0, 2), 10);
+    }
+  }
+
+  if (isNaN(d)) d = 0;
+  if (isNaN(m)) m = 0;
+  if (isNaN(y)) y = 0;
+
+  const currentYear = new Date().getFullYear();
+  const corrections = [];
+
+  // 1. KOREKSI TAHUN
+  if (y > 0 && y < 100) {
+    const twoDigitCutoff = currentYear % 100; // 26 untuk tahun 2026
+    const oldY = y;
+    if (y <= twoDigitCutoff) {
+      y = 2000 + y;
+    } else {
+      y = 1900 + y;
+    }
+    corrections.push(`Tahun "${oldY}" disesuaikan ke ${y}`);
+  } else if (y > 0 && y < 1900) {
+    y = 1900;
+    corrections.push(`Tahun disesuaikan ke minimal 1900`);
+  } else if (y > currentYear) {
+    corrections.push(`Tahun ${y} melebihi tahun sekarang (${currentYear}), disesuaikan ke ${currentYear}`);
+    y = currentYear;
+  } else if (!y && (d > 0 || m > 0)) {
+    y = currentYear - minRequiredAge.value;
+    corrections.push(`Tahun otomatis diset ke ${y}`);
+  }
+
+  // 2. KOREKSI BULAN & DETEKSI TERTUKAR HARI/BULAN
+  if (m <= 0 && (d > 0 || y > 0)) {
+    corrections.push(`Bulan diperbaiki ke 01 (Januari)`);
+    m = 1;
+  } else if (m > 12) {
+    if (d >= 1 && d <= 12 && m <= 31) {
+      corrections.push(`Format tanggal dan bulan terbalik disesuaikan (Tanggal: ${m}, Bulan: ${d})`);
+      const temp = d;
+      d = m;
+      m = temp;
+    } else {
+      corrections.push(`Bulan ${m} melebihi 12, disesuaikan ke 12 (Desember)`);
+      m = 12;
+    }
+  }
+
+  // 3. KOREKSI HARI TERHADAP BULAN DAN TAHUN
+  if (d <= 0 && (m > 0 || y > 0)) {
+    corrections.push(`Tanggal hari diperbaiki ke 01`);
+    d = 1;
+  } else if (d > 0 && m > 0 && y > 0) {
+    const maxDays = getDaysInMonth(y, m);
+    if (d > maxDays) {
+      corrections.push(`Tanggal ${d} disesuaikan ke ${maxDays} (maksimal hari bulan tersebut)`);
+      d = maxDays;
+    }
+  }
+
+  if (d > 0 && m > 0 && y > 0) {
+    const dStr = String(d).padStart(2, '0');
+    const mStr = String(m).padStart(2, '0');
+    const yStr = String(y).padStart(4, '0');
+
+    const formattedDisplay = `${dStr}/${mStr}/${yStr}`;
+    const formattedIso = `${yStr}-${mStr}-${dStr}`;
+
+    birthDateInputText.value = formattedDisplay;
+    form.applicant_birth_date = formattedIso;
+
+    if (showNotice && corrections.length > 0) {
+      autoCorrectedNotice.value = `Otomatis diperbaiki: ${corrections.join(', ')}`;
+      setTimeout(() => {
+        autoCorrectedNotice.value = '';
+      }, 7000);
+    } else if (corrections.length === 0) {
+      autoCorrectedNotice.value = '';
+    }
+
+    if (form.errors.applicant_birth_date) {
+      delete form.errors.applicant_birth_date;
+    }
+  }
+}
+
+function onBirthDateBlur() {
+  correctAndNormalizeBirthDate(true);
+}
+
 const availableVillages = computed(() => {
   if (!selectedDistrictMode.value || selectedDistrictMode.value === '__OTHER__') {
     return [];
@@ -1020,6 +1275,12 @@ function handleCustomVillageInput() {
 }
 
 onMounted(() => {
+  if (form.applicant_birth_date) {
+    const parts = form.applicant_birth_date.split('-');
+    if (parts.length === 3) {
+      birthDateInputText.value = `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+  }
   if (form.applicant_phone) {
     form.applicant_phone = formatPhoneChunked(form.applicant_phone);
   }
@@ -1308,6 +1569,7 @@ const showIncompleteModal = ref(false);
 const incompleteErrors = ref([]);
 
 function validateForm() {
+  correctAndNormalizeBirthDate(false);
   const errors = [];
   form.clearErrors();
 
@@ -1560,6 +1822,7 @@ function scrollToError(elementId) {
 }
 
 function submitStep1() {
+  correctAndNormalizeBirthDate(false);
   normalizeApplicantEmail();
   const errors = validateForm();
   if (errors.length > 0) {

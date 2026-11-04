@@ -1309,4 +1309,72 @@ class QueueWorkflowTest extends TestCase
 
         $app->forceDelete();
     }
+
+    public function test_manual_birth_date_input_with_auto_correction()
+    {
+        $service = ServiceType::first();
+        $this->assertNotNull($service);
+
+        // 1. Input manual DD/MM/YYYY dengan tanggal 31 di bulan April (30 hari)
+        $nik1 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $res1 = $this->post(route('queue.apply.store'), [
+            'service_type_id'       => $service->id,
+            'applicant_nik'         => $nik1,
+            'applicant_name'        => 'Koreksi April Tiga Puluh Satu',
+            'applicant_birth_place' => 'DOMPU',
+            'applicant_birth_date'  => '31/04/1998', // 31 April tidak ada, dikoreksi jadi 30 April
+            'applicant_phone'       => '0853-1111-2222',
+            'applicant_district'    => 'DOMPU',
+            'applicant_village'     => 'BADA',
+            'applicant_address'     => 'JL. SOEKARNO HATTA',
+            'attendance_type'       => 'self',
+        ]);
+        $res1->assertSessionHasNoErrors();
+        $app1 = QueueApplication::where('applicant_nik', $nik1)->first();
+        $this->assertNotNull($app1);
+        $this->assertEquals('1998-04-30', $app1->applicant_birth_date->format('Y-m-d'));
+
+        // 2. Input manual DD-MM-YYYY dengan tanggal 29 Februari di tahun bukan kabisat (2001)
+        $nik2 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $res2 = $this->post(route('queue.apply.store'), [
+            'service_type_id'       => $service->id,
+            'applicant_nik'         => $nik2,
+            'applicant_name'        => 'Koreksi Februari Bukan Kabisat',
+            'applicant_birth_place' => 'DOMPU',
+            'applicant_birth_date'  => '29-02-2001', // 2001 bukan kabisat, dikoreksi jadi 28 Feb
+            'applicant_phone'       => '0853-3333-4444',
+            'applicant_district'    => 'DOMPU',
+            'applicant_village'     => 'BADA',
+            'applicant_address'     => 'JL. BHAYANGKARA',
+            'attendance_type'       => 'self',
+        ]);
+        $res2->assertSessionHasNoErrors();
+        $app2 = QueueApplication::where('applicant_nik', $nik2)->first();
+        $this->assertNotNull($app2);
+        $this->assertEquals('2001-02-28', $app2->applicant_birth_date->format('Y-m-d'));
+
+        // 3. Input manual tahun 2 digit (misal 17/08/98 -> 1998-08-17)
+        $nik3 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $res3 = $this->post(route('queue.apply.store'), [
+            'service_type_id'       => $service->id,
+            'applicant_nik'         => $nik3,
+            'applicant_name'        => 'Koreksi Tahun Dua Digit',
+            'applicant_birth_place' => 'DOMPU',
+            'applicant_birth_date'  => '17/08/98', // 98 dikoreksi jadi 1998
+            'applicant_phone'       => '0853-5555-6666',
+            'applicant_district'    => 'DOMPU',
+            'applicant_village'     => 'BADA',
+            'applicant_address'     => 'JL. KARTINI',
+            'attendance_type'       => 'self',
+        ]);
+        $res3->assertSessionHasNoErrors();
+        $app3 = QueueApplication::where('applicant_nik', $nik3)->first();
+        $this->assertNotNull($app3);
+        $this->assertEquals('1998-08-17', $app3->applicant_birth_date->format('Y-m-d'));
+
+        // Cleanup
+        $app1->forceDelete();
+        $app2->forceDelete();
+        $app3->forceDelete();
+    }
 }

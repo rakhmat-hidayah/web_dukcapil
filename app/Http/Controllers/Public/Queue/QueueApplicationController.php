@@ -129,6 +129,45 @@ class QueueApplicationController extends Controller
             }
         }
 
+        // Auto-correct and normalize applicant birth date (supports DD/MM/YYYY and corrects invalid day/month/2-digit year)
+        if ($request->has('applicant_birth_date') && $request->input('applicant_birth_date') !== null) {
+            $rawDate = trim((string) $request->input('applicant_birth_date'));
+            if ($rawDate !== '') {
+                $d = 0; $mo = 0; $y = 0;
+                if (preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/', $rawDate, $matches)) {
+                    $d = (int) $matches[1];
+                    $mo = (int) $matches[2];
+                    $y = (int) $matches[3];
+                } elseif (preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $rawDate, $matches)) {
+                    $y = (int) $matches[1];
+                    $mo = (int) $matches[2];
+                    $d = (int) $matches[3];
+                }
+
+                if ($d > 0 || $mo > 0 || $y > 0) {
+                    $currentYear = (int) date('Y');
+                    if ($y > 0 && $y < 100) {
+                        $twoDigit = (int) date('y');
+                        $y = ($y <= $twoDigit) ? 2000 + $y : 1900 + $y;
+                    }
+                    if ($mo <= 0) $mo = 1;
+                    if ($mo > 12) {
+                        if ($d >= 1 && $d <= 12 && $mo <= 31) {
+                            $tmp = $d; $d = $mo; $mo = $tmp;
+                        } else {
+                            $mo = 12;
+                        }
+                    }
+                    if ($d <= 0) $d = 1;
+                    $maxDays = cal_days_in_month(CAL_GREGORIAN, $mo, $y > 0 ? $y : 2000);
+                    if ($d > $maxDays) $d = $maxDays;
+                    if ($y > 0 && $mo > 0 && $d > 0) {
+                        $request->merge(['applicant_birth_date' => sprintf('%04d-%02d-%02d', $y, $mo, $d)]);
+                    }
+                }
+            }
+        }
+
         $service = ServiceType::find($request->service_type_id);
         $isBiometric = $service ? (bool) $service->is_biometric_first_recording : false;
         $minAge = $isBiometric ? 16 : 17;
