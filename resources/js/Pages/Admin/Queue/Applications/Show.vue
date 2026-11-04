@@ -1765,6 +1765,43 @@ const formatStatusName = (code) => {
   return statusNames[code] || code
 }
 
+const formatRejectionText = (notes) => {
+  if (!notes) return '-'
+  const str = String(notes).trim()
+  const match = str.match(/(?:pengajuan ditolak\.?\s*alasan:\s*|alasan:\s*)(.*)/i)
+  if (match && match[1]) {
+    return match[1].trim()
+  }
+  return str
+}
+
+const isRejectionLog = (log) => {
+  if (!log) return false
+  const toStatus = String(log.to_status || '').toUpperCase()
+  const action = String(log.action || '').toUpperCase()
+  const title = String(log.action_title || '').toLowerCase()
+  const notes = String(log.notes || '').toLowerCase()
+
+  return toStatus === 'REJECTED' ||
+         action === 'REJECTED' ||
+         action === 'APPLICATION_REJECTED' ||
+         title.includes('ditolak') ||
+         notes.startsWith('pengajuan ditolak') ||
+         notes.includes('alasan:')
+}
+
+const getLatestRejectionReason = () => {
+  if (props.application?.rejection_reason) {
+    return formatRejectionText(props.application.rejection_reason)
+  }
+  const history = props.application?.verification_history || []
+  const rejectLog = [...history].reverse().find(l => isRejectionLog(l) && l.notes)
+  if (rejectLog?.notes) {
+    return formatRejectionText(rejectLog.notes)
+  }
+  return 'Dokumen / berkas pengajuan tidak memenuhi persyaratan administrasi kependudukan.'
+}
+
 const previewSelfie = () => {
   if (!selfieDocument.value) return
   if (selfieDocument.value.status === 'PENDING') {
