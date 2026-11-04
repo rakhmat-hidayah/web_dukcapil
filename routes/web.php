@@ -413,7 +413,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // -------------------------------------------------------------
         // Online Queue Management & Pre-Verification (Admin CMS)
         // -------------------------------------------------------------
-        Route::middleware('role_or_permission:Super Administrator|Administrator Utama|Website Administrator|Administrator Website|Supervisor Layanan KTP-el|supervisor_layanan_ktpel|Petugas Verifikasi / Registrasi KTP-el|Queue Officer|Queue Verifier|manage_online_queue|manage_queue_verification|view_queue_reports')
+        Route::middleware('role_or_permission:Super Administrator|Administrator Utama|Website Administrator|Administrator Website|Supervisor Layanan KTP-el|supervisor_layanan_ktpel|Petugas Verifikasi / Registrasi KTP-el|Queue Officer|Queue Verifier|Petugas Pengambilan KTP-el|petugas_pengambilan_ktpel|manage_online_queue|manage_queue_verification|view_queue_reports')
             ->prefix('queue')->name('queue.')->group(function () {
 
             Route::get('/dashboard', [\App\Http\Controllers\Admin\Queue\QueueDashboardController::class, 'index'])->name('dashboard');
@@ -476,6 +476,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->prefix('handover')->name('handover.')->group(function () {
 
             Route::get('/dashboard', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'dashboard'])->name('dashboard');
+            Route::get('/registrations', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'registrations'])->name('registrations');
             Route::get('/pending', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'pending'])->name('pending');
             Route::get('/ready', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'ready'])->name('ready');
             Route::get('/history', [\App\Http\Controllers\Admin\Queue\KtpHandoverController::class, 'history'])->name('history');

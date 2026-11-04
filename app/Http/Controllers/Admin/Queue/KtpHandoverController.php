@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin\Queue;
 
 use App\Http\Controllers\Controller;
 use App\Models\Queue\KtpHandover;
+use App\Models\Queue\QueueApplication;
+use App\Models\Queue\ServiceType;
 use App\Services\Queue\KtpHandoverService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,6 +29,95 @@ class KtpHandoverController extends Controller
 
         return Inertia::render('Admin/Handover/Dashboard', [
             'stats' => $stats,
+        ]);
+    }
+
+    /**
+     * Display all registered applicants (Pemohon Sudah Registrasi)
+     * with full verification, queue, and handover tracking.
+     */
+    public function registrations(Request $request): Response
+    {
+        $search = $request->query('search');
+        if ($search && preg_match('/(REG-[A-Za-z0-9-]+)/i', $search, $matches)) {
+            $search = strtoupper($matches[1]);
+        }
+
+        $serviceId = $request->query('service_id');
+        $status = $request->query('status');
+
+        $query = QueueApplication::with([
+            'serviceType',
+            'slot.schedule',
+            'handover.handoverUser',
+            'documents.serviceDocument',
+        ])->latest('created_at');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('reg_number', 'like', "%{$search}%")
+                  ->orWhere('queue_number', 'like', "%{$search}%")
+                  ->orWhere('applicant_name', 'like', "%{$search}%")
+                  ->orWhere('applicant_nik', 'like', "%{$search}%")
+                  ->orWhere('representative_name', 'like', "%{$search}%")
+                  ->orWhere('representative_nik', 'like', "%{$search}%")
+                  ->orWhere('applicant_phone', 'like', "%{$search}%");
+            });
+        }
+
+        if ($serviceId) {
+            $query->where('service_type_id', $serviceId);
+        }
+
+        if ($status) {
+            if ($status === 'MENUNGGU_VERIFIKASI') {
+                $query->whereIn('status', [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED, QueueApplication::STATUS_UNDER_REVIEW]);
+            } elseif ($status === 'LOLOS_VERIFIKASI') {
+                $query->whereIn('status', [QueueApplication::STATUS_PRE_VERIFIED, QueueApplication::STATUS_QUEUE_BOOKED]);
+            } elseif ($status === 'PROSES_LOKET') {
+                $query->whereIn('status', [QueueApplication::STATUS_ARRIVED, QueueApplication::STATUS_PHYSICAL_VERIFICATION, QueueApplication::STATUS_PROCESSING]);
+            } elseif ($status === 'MENUNGGU_KETERSEDIAAN') {
+                $query->where('status', QueueApplication::STATUS_APPROVED_FOR_SERVICE)
+                      ->orWhereHas('handover', fn($h) => $h->where('status', KtpHandover::STATUS_PENDING));
+            } elseif ($status === 'SIAP_DIAMBIL') {
+                $query->where('status', QueueApplication::STATUS_READY_FOR_PICKUP)
+                      ->orWhereHas('handover', fn($h) => $h->where('status', KtpHandover::STATUS_READY));
+            } elseif ($status === 'SUDAH_DISERAHKAN') {
+                $query->where('status', QueueApplication::STATUS_COMPLETED)
+                      ->orWhereHas('handover', fn($h) => $h->where('status', KtpHandover::STATUS_HANDED_OVER));
+            } elseif ($status === 'KENDALA') {
+                $query->whereHas('handover', fn($h) => $h->where('status', KtpHandover::STATUS_EXCEPTION));
+            } elseif ($status === 'DITOLAK') {
+                $query->whereIn('status', [QueueApplication::STATUS_REJECTED, QueueApplication::STATUS_EXPIRED]);
+            } else {
+                $query->where('status', $status);
+            }
+        }
+
+        $applications = $query->paginate(15)->withQueryString();
+
+        $services = ServiceType::active()->orderBy('sort_order')->get(['id', 'name']);
+
+        $counts = [
+            'total'                 => QueueApplication::count(),
+            'menunggu_verifikasi'   => QueueApplication::whereIn('status', [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED, QueueApplication::STATUS_UNDER_REVIEW])->count(),
+            'lolos_verifikasi'      => QueueApplication::whereIn('status', [QueueApplication::STATUS_PRE_VERIFIED, QueueApplication::STATUS_QUEUE_BOOKED])->count(),
+            'proses_loket'          => QueueApplication::whereIn('status', [QueueApplication::STATUS_ARRIVED, QueueApplication::STATUS_PHYSICAL_VERIFICATION, QueueApplication::STATUS_PROCESSING])->count(),
+            'menunggu_ketersediaan' => KtpHandover::pending()->count(),
+            'siap_diambil'          => KtpHandover::ready()->count(),
+            'sudah_diserahkan'      => KtpHandover::handedOver()->count(),
+            'kendala'               => KtpHandover::exception()->count(),
+        ];
+
+        return Inertia::render('Admin/Handover/Registrations', [
+            'applications' => $applications,
+            'services'     => $services,
+            'counts'       => $counts,
+            'filters'      => [
+                'search'     => $search,
+                'service_id' => $serviceId,
+                'status'     => $status,
+            ],
         ]);
     }
 

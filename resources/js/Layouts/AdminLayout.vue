@@ -363,7 +363,7 @@ const menuGroups = [
     title: 'Antrian Online KTP-el',
     items: [
       { label: 'Dashboard Antrian', route: 'admin.queue.dashboard', icon: LayoutDashboard },
-      { label: 'Verifikasi Dokumen', route: 'admin.queue.applications.index', icon: FileCheck },
+      { label: 'Pemohon Registrasi & Verifikasi', route: 'admin.queue.applications.index', icon: FileCheck },
       { label: 'Jenis Layanan KTP-el', route: 'admin.queue.service-types.index', icon: FileText },
       { label: 'Jadwal & Kuota', route: 'admin.queue.schedules.index', icon: CalendarDays },
       { label: 'Pengaturan Antrian', route: 'admin.queue.settings.index', icon: Settings },
@@ -373,6 +373,7 @@ const menuGroups = [
     title: 'Serah Terima KTP-el',
     items: [
       { label: 'Dashboard Serah Terima', route: 'admin.handover.dashboard', icon: LayoutDashboard },
+      { label: 'Pemohon Sudah Registrasi', route: 'admin.handover.registrations', icon: UserCheck },
       { label: 'Menunggu Ketersediaan KTP-el', route: 'admin.handover.pending', icon: Clock },
       { label: 'Siap Diambil', route: 'admin.handover.ready', icon: CheckCircle2 },
       { label: 'Riwayat Penyerahan', route: 'admin.handover.history', icon: History },
