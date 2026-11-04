@@ -78,12 +78,20 @@ class ServiceType extends Model
 
     public function requiredDocuments()
     {
-        return $this->documents()->where('is_active', true)->where('is_required', true);
+        $relation = $this->documents()->where('is_required', true);
+        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
+            $relation->where('is_active', true);
+        }
+        return $relation;
     }
 
     public function activeDocuments()
     {
-        return $this->documents()->where('is_active', true);
+        $relation = $this->documents();
+        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
+            $relation->where('is_active', true);
+        }
+        return $relation;
     }
 
     public function slots()

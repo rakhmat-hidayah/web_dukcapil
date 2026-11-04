@@ -18,10 +18,14 @@ class QueueSetting extends Model
 
     public static function get(string $key, mixed $default = null): mixed
     {
-        return Cache::remember("queue_setting_{$key}", 3600, function () use ($key, $default) {
-            $val = static::where('key', $key)->value('value');
-            return $val !== null ? $val : $default;
-        });
+        try {
+            return Cache::remember("queue_setting_{$key}", 3600, function () use ($key, $default) {
+                $val = static::where('key', $key)->value('value');
+                return $val !== null ? $val : $default;
+            });
+        } catch (\Throwable $e) {
+            return $default;
+        }
     }
 
     public static function set(string $key, mixed $value, ?string $group = null, ?string $description = null): void

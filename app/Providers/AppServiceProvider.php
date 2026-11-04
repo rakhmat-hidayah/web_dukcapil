@@ -35,6 +35,16 @@ class AppServiceProvider extends ServiceProvider
         \App\Services\AutoMediaSync::sync();
         \App\Services\AutoRoleSync::sync();
 
+        // Self-heal queue migrations if column is_active is pending in production
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('queue_service_documents') &&
+                !\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Queue auto-migrate warning: ' . $e->getMessage());
+        }
+
         // Super Administrator has implicit full permissions override
         Gate::before(function ($user, $ability) {
             return ($user->hasRole('Super Administrator') || $user->hasRole('Administrator Utama')) ? true : null;

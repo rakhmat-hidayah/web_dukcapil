@@ -32,7 +32,10 @@ class ServiceDocument extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
+            return $query->where('is_active', true);
+        }
+        return $query;
     }
 
     protected $appends = ['accepted_formats_array', 'max_size_bytes', 'template_url'];

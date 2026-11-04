@@ -17,10 +17,31 @@ use Inertia\Response;
 class QueueInfoController extends Controller
 {
     /**
+     * Ensure database migrations are executed and schema is up-to-date.
+     */
+    public static function ensureDatabaseSchema(): void
+    {
+        static $checked = false;
+        if ($checked) return;
+        $checked = true;
+
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('queue_service_documents') &&
+                !\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Queue auto-migrate warning: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Display the online queue public portal / landing page.
      */
     public function index(): Response
     {
+        self::ensureDatabaseSchema();
+
         // Auto-seed initial queue services & settings if table is empty in production
         if (ServiceType::count() === 0) {
             try {
@@ -33,15 +54,19 @@ class QueueInfoController extends Controller
         }
 
         $today = Carbon::today()->format('Y-m-d');
+        $hasIsActive = \Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active');
 
         // Fetch active service types with their requirement counts
         $services = ServiceType::active()
             ->withCount([
-                'documents as documents_count' => fn($q) => $q->where('is_active', true),
+                'documents as documents_count' => fn($q) => $hasIsActive ? $q->where('is_active', true) : $q,
                 'requiredDocuments'
             ])
-            ->with(['documents' => function ($q) {
-                $q->where('is_active', true)->orderBy('sort_order');
+            ->with(['documents' => function ($q) use ($hasIsActive) {
+                if ($hasIsActive) {
+                    $q->where('is_active', true);
+                }
+                $q->orderBy('sort_order');
             }])
             ->get();
 
@@ -53,8 +78,8 @@ class QueueInfoController extends Controller
             'is_open' => $todaySchedule ? $todaySchedule->isAvailable() : false,
             'is_holiday' => $todaySchedule ? $todaySchedule->is_holiday : false,
             'holiday_note' => $todaySchedule ? $todaySchedule->holiday_note : null,
-            'open_time' => $todaySchedule ? substr($todaySchedule->open_time, 0, 5) : '08:00',
-            'close_time' => $todaySchedule ? substr($todaySchedule->close_time, 0, 5) : '15:30',
+            'open_time' => $todaySchedule ? substr((string)$todaySchedule->open_time, 0, 5) : '08:00',
+            'close_time' => $todaySchedule ? substr((string)$todaySchedule->close_time, 0, 5) : '15:30',
             'total_quota' => $todaySlots->sum('quota'),
             'total_booked' => $todaySlots->sum('booked_count'),
             'total_remaining' => max(0, $todaySlots->sum('quota') - $todaySlots->sum('booked_count')),
@@ -68,13 +93,19 @@ class QueueInfoController extends Controller
             ->orderBy('schedule_date')
             ->limit(7)
             ->get()
-            ->map(fn($s) => [
-                'date' => $s->schedule_date->format('Y-m-d'),
-                'date_label' => $s->schedule_date->locale('id')->translatedFormat('D, d M'),
-                'total_quota' => $s->slots->sum('quota'),
-                'total_booked' => $s->slots->sum('booked_count'),
-                'remaining' => max(0, $s->slots->sum('quota') - $s->slots->sum('booked_count')),
-            ]);
+            ->map(function ($s) use ($today) {
+                $dateObj = $s->schedule_date instanceof \Carbon\CarbonInterface 
+                    ? $s->schedule_date 
+                    : ($s->schedule_date ? \Carbon\Carbon::parse($s->schedule_date) : \Carbon\Carbon::parse($today));
+                $slots = $s->slots ?? collect();
+                return [
+                    'date' => $dateObj->format('Y-m-d'),
+                    'date_label' => $dateObj->locale('id')->translatedFormat('D, d M'),
+                    'total_quota' => $slots->sum('quota'),
+                    'total_booked' => $slots->sum('booked_count'),
+                    'remaining' => max(0, $slots->sum('quota') - $slots->sum('booked_count')),
+                ];
+            });
 
         $settings = [
             'office_address' => ConfigurationService::get('office_address') ?: QueueSetting::get('queue.office_address', 'Jl. Soekarno-Hatta No. 09 Dompu, NTB 84211'),

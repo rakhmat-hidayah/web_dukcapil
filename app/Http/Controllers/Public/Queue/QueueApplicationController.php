@@ -34,6 +34,8 @@ class QueueApplicationController extends Controller
      */
     public function create(Request $request): Response
     {
+        QueueInfoController::ensureDatabaseSchema();
+
         // Self-heal: ensure mandatory selfie photo exists for Perekaman KTP-el
         \App\Services\Queue\QueueApplicationService::ensureSelfieRequirementForPerekaman();
 
@@ -51,15 +53,23 @@ class QueueApplicationController extends Controller
         $serviceSlug = $request->query('layanan');
         $selectedService = null;
 
+        $hasIsActive = \Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active');
+        $docFilter = function ($q) use ($hasIsActive) {
+            if ($hasIsActive) {
+                $q->where('is_active', true);
+            }
+            $q->orderBy('sort_order');
+        };
+
         if ($serviceSlug) {
             $selectedService = ServiceType::active()
                 ->where('slug', $serviceSlug)
-                ->with(['documents' => fn($q) => $q->where('is_active', true)->orderBy('sort_order')])
+                ->with(['documents' => $docFilter])
                 ->first();
         }
 
         $services = ServiceType::active()
-            ->with(['documents' => fn($q) => $q->where('is_active', true)->orderBy('sort_order')])
+            ->with(['documents' => $docFilter])
             ->get();
 
         // Ensure Dompu Kecamatan and Desa are seeded
@@ -305,9 +315,17 @@ class QueueApplicationController extends Controller
      */
     public function showDocuments(string $regNumber): Response|RedirectResponse
     {
+        $hasIsActive = \Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active');
+        $docFilter = function ($q) use ($hasIsActive) {
+            if ($hasIsActive) {
+                $q->where('is_active', true);
+            }
+            $q->orderBy('sort_order');
+        };
+
         $application = QueueApplication::where('reg_number', $regNumber)
             ->with([
-                'serviceType.documents' => fn($q) => $q->where('is_active', true)->orderBy('sort_order'),
+                'serviceType.documents' => $docFilter,
                 'documents.serviceDocument',
             ])
             ->first();
