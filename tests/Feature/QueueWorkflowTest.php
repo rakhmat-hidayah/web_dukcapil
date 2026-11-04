@@ -363,6 +363,14 @@ class QueueWorkflowTest extends TestCase
     {
         $perekamanService = ServiceType::where('is_biometric_first_recording', true)->first();
         $this->assertNotNull($perekamanService);
+        $this->assertTrue($perekamanService->requires_face_photo);
+
+        $selfieDoc = $perekamanService->documents()->where(function ($q) {
+            $q->where('label', 'like', '%Selfie%')->orWhere('label', 'like', '%Foto Wajah%');
+        })->first();
+        $this->assertNotNull($selfieDoc);
+        $this->assertTrue($selfieDoc->is_required);
+        $this->assertEquals('user', $selfieDoc->capture_mode);
 
         // 15-year-old must be rejected for Perekaman
         $responseUnder16 = $this->post(route('queue.apply.store'), [
