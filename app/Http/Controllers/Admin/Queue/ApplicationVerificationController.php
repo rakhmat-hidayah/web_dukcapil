@@ -162,6 +162,7 @@ class ApplicationVerificationController extends Controller
             'statusCounts'  => $statusCounts,
             'urgencyCounts' => $urgencyCounts,
             'services'      => $services,
+            'can_delete'    => Auth::user()?->isSuperAdmin() ?? false,
             'filters'       => [
                 'status'     => $status,
                 'urgency'    => $urgency,
@@ -266,7 +267,32 @@ class ApplicationVerificationController extends Controller
         return Inertia::render('Admin/Queue/Applications/Show', [
             'application'    => $application,
             'availableSlots' => $availableSlots,
+            'can_delete'     => Auth::user()?->isSuperAdmin() ?? false,
         ]);
+    }
+
+    /**
+     * Delete an application permanently (Super Administrator only).
+     */
+    public function destroy(Request $request, int $id): RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || !$user->isSuperAdmin()) {
+            abort(403, 'Aksi ini hanya dapat dilakukan oleh Super Administrator.');
+        }
+
+        $application = QueueApplication::withTrashed()->findOrFail($id);
+        $regNumber = $application->reg_number;
+        $name = $application->applicant_name;
+
+        app(\App\Services\Queue\QueueApplicationService::class)->deleteApplicationByAdmin($application, $user);
+
+        if (str_contains(url()->previous(), "/admin/queue/applications/{$id}")) {
+            return redirect()->route('admin.queue.applications.index')
+                ->with('success', "Permohonan {$regNumber} ({$name}) berhasil dihapus permanen oleh Super Admin.");
+        }
+
+        return redirect()->back()->with('success', "Permohonan {$regNumber} ({$name}) berhasil dihapus permanen oleh Super Admin.");
     }
 
     /**

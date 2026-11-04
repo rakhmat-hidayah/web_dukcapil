@@ -7,6 +7,8 @@ use App\Models\Queue\QueueApplication;
 use App\Models\Queue\ServiceDocument;
 use App\Models\Queue\ServiceType;
 use App\Models\Queue\VerificationHistory;
+use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -437,5 +439,73 @@ class QueueApplicationService
         }
 
         return $count;
+    }
+
+    /**
+     * Delete an application permanently by Super Admin.
+     * Releases booked quota, cleans up storage, removes related records, and logs the action.
+     */
+    public function deleteApplicationByAdmin(QueueApplication $application, User $admin): bool
+    {
+        // 1. Release queue slot quota if booked
+        if ($application->queue_slot_id) {
+            try {
+                $this->slotService->releaseSlot($application);
+            } catch (\Throwable $e) {
+                Log::warning("Slot release error on admin delete [{$application->reg_number}]: " . $e->getMessage());
+            }
+        }
+
+        // 2. Delete all physical files and their database records
+        foreach ($application->documents as $doc) {
+            try {
+                QueueDocumentStorage::delete($doc);
+            } catch (\Throwable $e) {
+                Log::warning("Document file deletion error [{$doc->id}]: " . $e->getMessage());
+            }
+            $doc->forceDelete();
+        }
+
+        // 3. Delete physical storage folder
+        $year = $application->created_at ? $application->created_at->format('Y') : date('Y');
+        $month = $application->created_at ? $application->created_at->format('m') : date('m');
+        $dirPath = QueueDocumentStorage::BASE_PATH . "/{$year}/{$month}/{$application->id}";
+        try {
+            Storage::disk(QueueDocumentStorage::DISK)->deleteDirectory($dirPath);
+        } catch (\Throwable $e) {
+            Log::warning("Application directory deletion error: " . $e->getMessage());
+        }
+
+        // 4. Delete related logs & handover
+        try {
+            $application->verificationHistory()->delete();
+            $application->notificationLogs()->delete();
+            if ($application->handover()->exists()) {
+                $handover = $application->handover;
+                if ($handover) {
+                    $handover->logs()->delete();
+                    $handover->delete();
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Related records deletion error: " . $e->getMessage());
+        }
+
+        // 5. Activity log
+        ActivityLogger::log(
+            "Super Admin ({$admin->username}) menghapus permanen permohonan antrian {$application->reg_number} ({$application->applicant_name})",
+            null,
+            'delete_queue_application',
+            [
+                'reg_number'     => $application->reg_number,
+                'queue_number'   => $application->queue_number,
+                'applicant_name' => $application->applicant_name,
+                'applicant_nik'  => $application->applicant_nik,
+                'deleted_by'     => $admin->username,
+            ]
+        );
+
+        // 6. Force delete
+        return (bool) $application->forceDelete();
     }
 }

@@ -240,4 +240,13 @@ class User extends Authenticatable
 
         return false;
     }
+
+    /**
+     * Check if user is a Super Administrator.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->username === 'superadmin'
+            || $this->hasAnyRole(['Administrator Utama', 'Super Administrator']);
+    }
 }

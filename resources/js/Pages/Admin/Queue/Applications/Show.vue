@@ -33,6 +33,18 @@
 
         <!-- Quick Status Control -->
         <div class="flex items-center gap-2">
+          <!-- Super Admin Delete Button -->
+          <button
+            v-if="isSuperAdmin"
+            type="button"
+            @click="deleteModalOpen = true"
+            class="px-3.5 py-2 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+            title="Hapus Permohonan (Khusus Super Admin)"
+          >
+            <Trash2 class="w-3.5 h-3.5 shrink-0" />
+            <span class="hidden sm:inline">Hapus Permohonan</span>
+          </button>
+
           <!-- QR Code Badge -->
           <div
             v-if="application.qr_code_svg"
@@ -1197,21 +1209,104 @@
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal (Super Admin) -->
+    <transition name="fade">
+      <div
+        v-if="deleteModalOpen"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      >
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-md shadow-2xl p-6 relative text-center">
+          <div class="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-4 border border-rose-100 dark:border-rose-900/40 shadow-inner">
+            <Trash2 class="w-7 h-7" />
+          </div>
+
+          <h3 class="text-lg font-black text-slate-900 dark:text-white mb-2">
+            Hapus Permohonan Antrian Ini?
+          </h3>
+
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
+            Anda akan menghapus permanen data permohonan nomor
+            <strong class="text-slate-800 dark:text-slate-200 font-mono font-bold block text-sm mt-1 mb-1">
+              {{ application.reg_number }} ({{ application.applicant_name }})
+            </strong>
+            Layanan: <span class="font-medium text-slate-700 dark:text-slate-300">{{ application.service_type?.name }}</span>.<br/>
+            Seluruh berkas dokumen foto fisik yang telah diunggah dan nomor antrian yang dibooking akan dibatalkan & dibersihkan dari server.
+          </p>
+
+          <div class="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-2xl text-[11px] text-amber-700 dark:text-amber-300 font-medium mb-6 text-left flex items-start gap-2">
+            <span class="text-base leading-none shrink-0">⚠️</span>
+            <span><strong>Aksi Super Admin:</strong> Tindakan ini bersifat permanen dan tidak dapat dibatalkan.</span>
+          </div>
+
+          <div class="flex items-center justify-center gap-3">
+            <button
+              type="button"
+              @click="deleteModalOpen = false"
+              :disabled="isDeleting"
+              class="px-5 py-2.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              @click="executeDelete"
+              :disabled="isDeleting"
+              class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl shadow-md shadow-rose-600/30 active:scale-95 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <Trash2 class="w-4 h-4 shrink-0" />
+              <span v-if="isDeleting">Menghapus...</span>
+              <span v-else>Ya, Hapus Permanen</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </AdminLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import axios from 'axios'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import StatusBadge from '@/Components/Queue/StatusBadge.vue'
 import DocumentViewerModal from '@/Components/Queue/DocumentViewerModal.vue'
+import { Trash2 } from '@lucide/vue'
 
 const props = defineProps({
   application: Object,
   availableSlots: Array,
+  can_delete: Boolean,
 })
+
+const page = usePage()
+const isSuperAdmin = computed(() => {
+  return props.can_delete 
+    || page.props.auth?.is_super_admin 
+    || page.props.auth?.roles?.includes('Administrator Utama') 
+    || page.props.auth?.roles?.includes('Super Administrator') 
+    || page.props.auth?.user?.username === 'superadmin'
+})
+
+const deleteModalOpen = ref(false)
+const isDeleting = ref(false)
+
+const executeDelete = () => {
+  isDeleting.value = true
+  router.delete(route('admin.queue.applications.destroy', props.application.id), {
+    onSuccess: () => {
+      deleteModalOpen.value = false
+      isDeleting.value = false
+    },
+    onError: () => {
+      isDeleting.value = false
+    },
+    onFinish: () => {
+      isDeleting.value = false
+    }
+  })
+}
 
 const isOnlineReviewPhase = computed(() => ['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW'].includes(props.application.status))
 const isPastOnlineVerification = computed(() => !['SUBMITTED', 'RESUBMITTED', 'UNDER_REVIEW', 'DRAFT'].includes(props.application.status))

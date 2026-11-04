@@ -1429,4 +1429,69 @@ class QueueWorkflowTest extends TestCase
 
         $submitted->forceDelete();
     }
+
+    public function test_non_superadmin_cannot_delete_queue_application()
+    {
+        $service = ServiceType::first();
+        $appService = app(\App\Services\Queue\QueueApplicationService::class);
+        $nik = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+
+        $app = $appService->createDraft([
+            'applicant_nik'         => $nik,
+            'applicant_name'        => 'Uji Hak Akses Hapus Non-Superadmin',
+            'applicant_birth_place' => 'DOMPU',
+            'applicant_birth_date'  => '1995-08-17',
+            'applicant_phone'       => '0853-9999-8888',
+            'applicant_district'    => 'DOMPU',
+            'applicant_village'     => 'BADA',
+            'applicant_address'     => 'JL. SOEKARNO HATTA',
+            'attendance_type'       => 'self',
+        ], $service->id);
+
+        // 1. Regular operator (Petugas Verifikasi)
+        $operator = User::whereHas('roles', fn($q) => $q->where('name', 'Petugas Verifikasi / Registrasi KTP-el'))->first();
+        if (!$operator) {
+            $operator = User::factory()->create();
+            $operator->assignRole('Petugas Verifikasi / Registrasi KTP-el');
+        }
+
+        $response = $this->actingAs($operator)->delete(route('admin.queue.applications.destroy', $app->id));
+        $response->assertForbidden();
+
+        // Application must still exist
+        $this->assertNotNull(QueueApplication::find($app->id));
+
+        $app->forceDelete();
+    }
+
+    public function test_superadmin_can_delete_queue_application_permanently()
+    {
+        $service = ServiceType::first();
+        $appService = app(\App\Services\Queue\QueueApplicationService::class);
+        $nik = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+
+        $app = $appService->createDraft([
+            'applicant_nik'         => $nik,
+            'applicant_name'        => 'Uji Hapus Permanen Superadmin',
+            'applicant_birth_place' => 'DOMPU',
+            'applicant_birth_date'  => '1995-08-17',
+            'applicant_phone'       => '0853-9999-8888',
+            'applicant_district'    => 'DOMPU',
+            'applicant_village'     => 'BADA',
+            'applicant_address'     => 'JL. SOEKARNO HATTA',
+            'attendance_type'       => 'self',
+        ], $service->id);
+
+        $superAdmin = User::whereHas('roles', fn($q) => $q->whereIn('name', ['Administrator Utama', 'Super Administrator']))->first();
+        if (!$superAdmin) {
+            $superAdmin = User::where('username', 'superadmin')->first();
+        }
+        $this->assertNotNull($superAdmin);
+
+        $response = $this->actingAs($superAdmin)->delete(route('admin.queue.applications.destroy', $app->id));
+        $response->assertSessionHas('success');
+
+        // Application must be permanently removed
+        $this->assertNull(QueueApplication::withTrashed()->find($app->id));
+    }
 }

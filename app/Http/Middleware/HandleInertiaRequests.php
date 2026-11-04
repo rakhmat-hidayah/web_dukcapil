@@ -80,6 +80,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user ? $user->only('id', 'username', 'name', 'email', 'is_active', 'last_login_at') : null,
                 'roles' => $user ? $user->getRoleNames() : [],
                 'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                'is_super_admin' => $user ? $user->isSuperAdmin() : false,
             ],
             
             // Cached branding and site settings
