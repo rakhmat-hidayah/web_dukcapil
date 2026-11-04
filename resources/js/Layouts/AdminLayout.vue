@@ -69,14 +69,14 @@
           title="Kelola Keamanan Akun & 2FA"
         >
           <div class="w-9 h-9 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-            {{ $page.props.auth.user ? $page.props.auth.user.name.charAt(0) : 'A' }}
+            {{ $page.props.auth?.user ? $page.props.auth.user.name.charAt(0) : 'A' }}
           </div>
           <div v-if="sidebarOpen" class="min-w-0 text-left">
             <p class="text-xs font-semibold text-gray-800 dark:text-zinc-200 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-              {{ $page.props.auth.user ? $page.props.auth.user.name : 'Administrator' }}
+              {{ $page.props.auth?.user ? $page.props.auth.user.name : 'Administrator' }}
             </p>
             <p class="text-[10px] text-gray-400 dark:text-zinc-500 truncate flex items-center gap-1">
-              <span>{{ $page.props.auth.roles[0] || 'Operator' }}</span>
+              <span>{{ $page.props.auth?.roles?.[0] || 'Operator' }}</span>
               <span class="text-zinc-300 dark:text-zinc-700">•</span>
               <span class="text-blue-500 font-semibold underline">2FA</span>
             </p>
@@ -700,7 +700,7 @@ onMounted(() => {
   }
 
   // Load Notifications
-  if (page.props.auth.user) {
+  if (page.props.auth?.user) {
     fetchNotifications();
   }
 

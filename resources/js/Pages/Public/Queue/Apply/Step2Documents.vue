@@ -370,6 +370,15 @@
           <p class="text-[11px] text-slate-400 dark:text-slate-500 italic mt-2">
             Mohon jangan menutup halaman ini selama proses kompresi dan pengiriman berlangsung.
           </p>
+          <div class="pt-2">
+            <button
+              type="button"
+              @click="cancelUploadProgress"
+              class="text-[11px] text-slate-400 hover:text-rose-500 underline transition cursor-pointer"
+            >
+              Kendala sinyal / lama? Klik untuk batalkan & coba lagi
+            </button>
+          </div>
         </div>
 
         <!-- Action Buttons when Error Occurs -->
@@ -383,7 +392,7 @@
           </button>
           <button
             type="button"
-            @click="handleSubmit"
+            @click="handleSubmitApplication"
             class="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-blue-600/30 transition cursor-pointer"
           >
             Coba Kirim Ulang
@@ -498,6 +507,11 @@ const allRequiredUploaded = computed(() => {
   const stagedIds = new Set(Object.keys(stagedFiles.value).map(Number));
   return required.every((r) => serverIds.has(r.id) || stagedIds.has(r.id));
 });
+
+function cancelUploadProgress() {
+  uploadProgress.value.active = false;
+  isSubmitting.value = false;
+}
 
 const canSubmit = computed(() => {
   return allRequiredUploaded.value && statementAgreed.value;
@@ -737,6 +751,7 @@ async function handleSubmitApplication() {
           route('queue.apply.upload-doc', { regNumber: props.application.reg_number }),
           formData,
           {
+            timeout: 60000,
             headers: {
               'Content-Type': 'multipart/form-data',
               'Accept': 'application/json',

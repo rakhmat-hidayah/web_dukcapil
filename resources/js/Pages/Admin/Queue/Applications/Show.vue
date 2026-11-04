@@ -89,7 +89,7 @@
             class="px-3.5 py-2 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
             title="Hapus Permohonan (Khusus Super Admin)"
           >
-            <Trash2 class="w-3.5 h-3.5 shrink-0" />
+            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             <span class="hidden sm:inline">Hapus Permohonan</span>
           </button>
 
@@ -1442,7 +1442,7 @@
       >
         <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-md shadow-2xl p-6 relative text-center">
           <div class="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-4 border border-rose-100 dark:border-rose-900/40 shadow-inner">
-            <Trash2 class="w-7 h-7" />
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
           </div>
 
           <h3 class="text-lg font-black text-slate-900 dark:text-white mb-2">
@@ -1478,7 +1478,7 @@
               :disabled="isDeleting"
               class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl shadow-md shadow-rose-600/30 active:scale-95 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
-              <Trash2 class="w-4 h-4 shrink-0" />
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
               <span v-if="isDeleting">Menghapus...</span>
               <span v-else>Ya, Hapus Permanen</span>
             </button>
@@ -1641,7 +1641,6 @@ import axios from 'axios'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import StatusBadge from '@/Components/Queue/StatusBadge.vue'
 import DocumentViewerModal from '@/Components/Queue/DocumentViewerModal.vue'
-import { Trash2 } from '@lucide/vue'
 
 const props = defineProps({
   application: {
@@ -2300,7 +2299,7 @@ const formatPhoneChunked = (phone) => {
 
 const cleanPhone = (phone) => {
   if (!phone) return ''
-  let cleaned = phone.replace(/[^0-9]/g, '')
+  let cleaned = String(phone).replace(/[^0-9]/g, '')
   if (cleaned.startsWith('0')) {
     cleaned = '62' + cleaned.substring(1)
   }

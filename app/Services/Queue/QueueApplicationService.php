@@ -117,7 +117,7 @@ class QueueApplicationService
             'applicant_birth_date'         => !empty($data['applicant_birth_date']) ? $data['applicant_birth_date'] : null,
             'applicant_phone'              => trim($data['applicant_phone']),
             'applicant_email'              => !empty($data['applicant_email']) ? trim($data['applicant_email']) : null,
-            'applicant_address'            => mb_strtoupper(trim($data['applicant_address'])),
+            'applicant_address'            => !empty($data['applicant_address']) ? mb_strtoupper(trim($data['applicant_address'])) : 'Kabupaten Dompu',
             'applicant_village'            => !empty($data['applicant_village']) ? mb_strtoupper(trim($data['applicant_village'])) : null,
             'applicant_district'           => !empty($data['applicant_district']) ? mb_strtoupper(trim($data['applicant_district'])) : null,
             'attendance_type'              => $attendanceType,

@@ -437,23 +437,24 @@
             class="w-full md:w-auto flex items-center justify-start sm:justify-center md:justify-end gap-1.5 overflow-x-auto max-w-full pb-2 md:pb-0 pt-1 px-1 scrollbar-thin"
           >
             <template v-for="(link, i) in logs.links" :key="i">
-              <Link 
+              <button 
                 v-if="link.url"
-                :href="formatPageUrl(link.url)"
-                preserve-scroll
-                preserve-state
-                class="min-w-[38px] h-9.5 px-3 rounded-xl font-bold transition text-xs flex items-center justify-center shrink-0 cursor-pointer active:scale-95"
+                type="button"
+                @click.stop="goToPage(link.url)"
+                style="touch-action: manipulation;"
+                class="min-w-[40px] h-10 px-3 rounded-xl font-bold transition text-xs flex items-center justify-center shrink-0 cursor-pointer active:scale-95 select-none"
                 :class="[
                   link.active 
-                    ? 'active-page-btn bg-primary-600 text-white shadow-md shadow-primary-600/30 ring-2 ring-primary-600/30 font-black' 
+                    ? 'active-page-btn bg-primary-600 text-white shadow-md shadow-primary-600/30 ring-2 ring-primary-600/30 font-black pointer-events-none' 
                     : 'bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-700 shadow-xs'
                 ]"
               >
                 <span v-html="cleanLabel(link.label)"></span>
-              </Link>
+              </button>
               <span 
                 v-else
-                class="min-w-[38px] h-9.5 px-3 rounded-xl font-medium text-xs flex items-center justify-center shrink-0 text-gray-400 dark:text-zinc-600 bg-gray-100/50 dark:bg-zinc-800/30 border border-gray-100 dark:border-zinc-800/50 opacity-50 cursor-not-allowed"
+                style="touch-action: manipulation;"
+                class="min-w-[40px] h-10 px-3 rounded-xl font-medium text-xs flex items-center justify-center shrink-0 text-gray-400 dark:text-zinc-600 bg-gray-100/50 dark:bg-zinc-800/30 border border-gray-100 dark:border-zinc-800/50 opacity-50 cursor-not-allowed select-none"
                 v-html="cleanLabel(link.label)"
               ></span>
             </template>
@@ -878,18 +879,24 @@ const formatPageUrl = (url) => {
   return targetUrl;
 };
 
+const isNavigatingPage = ref(false);
+
 const goToPage = (url) => {
-  if (!url) return;
+  if (!url || isNavigatingPage.value) return;
   let targetUrl = url;
   if (typeof window !== 'undefined' && window.location.protocol === 'https:' && targetUrl.startsWith('http://')) {
     targetUrl = targetUrl.replace(/^http:\/\//, 'https://');
   }
 
+  isNavigatingPage.value = true;
   router.visit(targetUrl, {
     preserveState: true,
     preserveScroll: true,
     onSuccess: () => {
       scrollToActivePage();
+    },
+    onFinish: () => {
+      isNavigatingPage.value = false;
     }
   });
 };

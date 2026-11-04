@@ -2,16 +2,17 @@
  * ImageCompressor.js
  * Client-side canvas-based image compression and EXIF correction for government documents.
  * Ensures strict readability of small text and stamps while optimizing file size.
+ * Resilient against non-canvas decodable formats (HEIC, HEIF, WebP, SVG, raw camera) with auto-fallback.
  */
 
 export async function compressImage(file, options = {}) {
   // If file is PDF, do not compress via canvas
-  if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+  if (!file || file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
     return {
       file,
       blob: file,
-      originalSize: file.size,
-      compressedSize: file.size,
+      originalSize: file?.size || 0,
+      compressedSize: file?.size || 0,
       isCompressed: false,
       width: null,
       height: null,
@@ -21,14 +22,34 @@ export async function compressImage(file, options = {}) {
   const maxWidth = options.maxWidth || 1920;
   const maxHeight = options.maxHeight || 1920;
   const quality = options.quality || 0.82;
-
   const originalSize = file.size;
 
   return new Promise((resolve) => {
+    let resolved = false;
+    const safeResolve = (payload) => {
+      if (resolved) return;
+      resolved = true;
+      if (timer) clearTimeout(timer);
+      resolve(payload);
+    };
+
+    // Safety timeout: 8 seconds max for client compression before falling back to original file
+    const timer = setTimeout(() => {
+      safeResolve({
+        file,
+        blob: file,
+        originalSize,
+        compressedSize: originalSize,
+        isCompressed: false,
+        width: null,
+        height: null,
+      });
+    }, 8000);
+
     const reader = new FileReader();
 
     reader.onerror = () => {
-      resolve({
+      safeResolve({
         file,
         blob: file,
         originalSize,
@@ -43,7 +64,8 @@ export async function compressImage(file, options = {}) {
       const img = new Image();
 
       img.onerror = () => {
-        resolve({
+        // Fallback gracefully to original file (e.g. HEIC or formats unsupported by canvas Image)
+        safeResolve({
           file,
           blob: file,
           originalSize,
@@ -55,91 +77,108 @@ export async function compressImage(file, options = {}) {
       };
 
       img.onload = () => {
-        let width = img.width;
-        let height = img.height;
+        try {
+          let width = img.width;
+          let height = img.height;
 
-        // Proportional scale down
-        if (width > maxWidth || height > maxHeight) {
-          const ratio = Math.min(maxWidth / width, maxHeight / height);
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
+          // Proportional scale down
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
 
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
 
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve({
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            safeResolve({
+              file,
+              blob: file,
+              originalSize,
+              compressedSize: originalSize,
+              isCompressed: false,
+              width: img.width,
+              height: img.height,
+            });
+            return;
+          }
+
+          // High quality smoothing
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+
+          // Draw image onto canvas
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert to Blob
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                safeResolve({
+                  file,
+                  blob: file,
+                  originalSize,
+                  compressedSize: originalSize,
+                  isCompressed: false,
+                  width,
+                  height,
+                });
+                return;
+              }
+
+              // Create a File object from Blob
+              const baseName = file.name.replace(/\.[^/.]+$/, "");
+              const compressedFile = new File([blob], `${baseName}.jpg`, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+
+              safeResolve({
+                file: compressedFile,
+                blob,
+                originalSize,
+                compressedSize: blob.size,
+                isCompressed: blob.size < originalSize,
+                width,
+                height,
+                reductionPercent: originalSize > 0 ? Math.round(((originalSize - blob.size) / originalSize) * 100) : 0,
+              });
+            },
+            'image/jpeg',
+            quality
+          );
+        } catch (canvasErr) {
+          safeResolve({
             file,
             blob: file,
             originalSize,
             compressedSize: originalSize,
             isCompressed: false,
-            width: img.width,
-            height: img.height,
+            width: null,
+            height: null,
           });
-          return;
         }
-
-        // High quality smoothing
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-
-        // Draw image onto canvas
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Convert to Blob
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              resolve({
-                file,
-                blob: file,
-                originalSize,
-                compressedSize: originalSize,
-                isCompressed: false,
-                width,
-                height,
-              });
-              return;
-            }
-
-            // Create a File object from Blob
-            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
-              type: "image/jpeg",
-              lastModified: Date.now(),
-            });
-
-            resolve({
-              file: compressedFile,
-              blob,
-              originalSize,
-              compressedSize: blob.size,
-              isCompressed: blob.size < originalSize,
-              width,
-              height,
-              reductionPercent: originalSize > 0 ? Math.round(((originalSize - blob.size) / originalSize) * 100) : 0,
-            });
-          },
-          'image/jpeg',
-          quality
-        );
-      };
-
-      img.onerror = () => {
-        reject(new Error('Gagal memuat gambar untuk dikompresi.'));
       };
 
       img.src = e.target.result;
     };
 
-    reader.onerror = () => {
-      reject(new Error('Gagal membaca file gambar.'));
-    };
-
-    reader.readAsDataURL(file);
+    try {
+      reader.readAsDataURL(file);
+    } catch (readErr) {
+      safeResolve({
+        file,
+        blob: file,
+        originalSize,
+        compressedSize: originalSize,
+        isCompressed: false,
+        width: null,
+        height: null,
+      });
+    }
   });
 }
 

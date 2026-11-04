@@ -130,7 +130,13 @@ class ApplicantDashboardController extends Controller
                 ->with('info', $message);
         }
 
-        // 2. Hanya permohonan aktif pra-kehadiran fisik yang diizinkan untuk memilih / mengubah jadwal
+        // 2. Jika berkas masih dalam tahap verifikasi awal tanpa jadwal resmi yang sudah disahkan
+        if (in_array($application->status, [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_UNDER_REVIEW]) && !$application->queue_number) {
+            return redirect()->route('queue.status', ['token' => $token])
+                ->with('info', 'Berkas pengajuan Anda saat ini sedang dalam pemeriksaan petugas verifikator. Pemilihan atau perubahan jadwal dapat dilakukan setelah berkas disetujui.');
+        }
+
+        // 3. Hanya permohonan aktif pra-kehadiran fisik yang diizinkan untuk memilih / mengubah jadwal
         $allowedStatuses = [
             QueueApplication::STATUS_SUBMITTED,
             QueueApplication::STATUS_UNDER_REVIEW,
