@@ -436,6 +436,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/applications/{id}/start-processing', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'startProcessing'])->name('applications.start-processing');
             Route::post('/applications/{id}/ready-for-pickup', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'markReadyForPickup'])->name('applications.ready-pickup');
             Route::post('/applications/{id}/complete', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'complete'])->name('applications.complete');
+            Route::post('/applications/{id}/update-status', [\App\Http\Controllers\Admin\Queue\ApplicationVerificationController::class, 'updateStatus'])->name('applications.update-status');
 
             // Document stream & actions
             Route::get('/documents/{documentId}/serve', [\App\Http\Controllers\Admin\Queue\ApplicationDocumentController::class, 'serve'])->name('documents.serve');

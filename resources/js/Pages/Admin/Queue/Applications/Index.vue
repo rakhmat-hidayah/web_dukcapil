@@ -393,6 +393,17 @@
                       <span class="hidden sm:inline">Hapus</span>
                     </button>
 
+                    <!-- Quick Status Escalation / Sync Button -->
+                    <button
+                      type="button"
+                      @click="openEscalateModal(app)"
+                      class="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white text-indigo-700 dark:text-indigo-300 font-bold text-xs shadow-2xs transition cursor-pointer"
+                      title="Eskalasi / Update Status Permohonan"
+                    >
+                      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                      <span>Update Status</span>
+                    </button>
+
                     <Link
                       v-if="app.verification_urgency === 'overdue'"
                       :href="route('admin.queue.applications.show', app.id)"
@@ -603,13 +614,158 @@
           </div>
         </div>
       </transition>
+
+      <!-- Modal Eskalasi & Sinkronisasi Status -->
+      <transition name="fade">
+        <div
+          v-if="escalateModalOpen && escalateTargetApp"
+          class="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto"
+          @click.self="escalateModalOpen = false"
+        >
+          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+            <!-- Header -->
+            <div class="p-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-gradient-to-r from-indigo-50/80 to-white dark:from-slate-800 dark:to-slate-800">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-600/30">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                </div>
+                <div>
+                  <h3 class="font-black text-slate-900 dark:text-white text-base">
+                    Eskalasi & Update Status
+                  </h3>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Sinkronkan status permohonan ke tahapan pelayanan yang sesuai
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                @click="escalateModalOpen = false"
+                class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form @submit.prevent="submitEscalate" class="p-5 space-y-4">
+              <!-- Info Pemohon -->
+              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 text-xs space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <span class="font-mono font-bold text-slate-700 dark:text-slate-300">{{ escalateTargetApp.reg_number }}</span>
+                  <StatusBadge :status="escalateTargetApp.status" size="sm" />
+                </div>
+                <div class="font-black text-slate-900 dark:text-white text-sm">
+                  {{ escalateTargetApp.applicant_name }}
+                  <span class="font-mono text-xs font-normal text-slate-500">({{ maskNik(escalateTargetApp.applicant_nik) }})</span>
+                </div>
+                <div class="text-slate-500 dark:text-slate-400">
+                  Layanan: <strong class="text-slate-700 dark:text-slate-200">{{ escalateTargetApp.service_type?.name }}</strong>
+                </div>
+              </div>
+
+              <!-- Warning Banner if in Draft -->
+              <div
+                v-if="escalateTargetApp.status === 'DRAFT'"
+                class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5"
+              >
+                <span class="text-base shrink-0">⚠️</span>
+                <p class="leading-relaxed">
+                  Permohonan ini saat ini berstatus <strong>Draf</strong>. Jika warga terkendala jaringan saat kirim berkas, pilih <strong>Menunggu Verifikasi</strong> atau <strong>Jadwal Antrean Terbit</strong> untuk meloloskan permohonan ke proses pelayanan aktif.
+                </p>
+              </div>
+
+              <!-- Pilihan Status Target -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Target Status Eskalasi <span class="text-rose-500">*</span>
+                </label>
+                <select
+                  v-model="escalateForm.status"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                >
+                  <optgroup label="Tahap Pengajuan & Verifikasi Online">
+                    <option value="SUBMITTED">Menunggu Verifikasi (SUBMITTED)</option>
+                    <option value="UNDER_REVIEW">Sedang Diverifikasi Petugas (UNDER_REVIEW)</option>
+                    <option value="PRE_VERIFIED">Lolos Pra-Verifikasi (PRE_VERIFIED)</option>
+                    <option value="REVISION_REQUIRED">Perlu Perbaikan Berkas (REVISION_REQUIRED)</option>
+                    <option value="REJECTED">Pengajuan Ditolak (REJECTED)</option>
+                  </optgroup>
+                  <optgroup label="Tahap Loket & Pelayanan Fisik">
+                    <option value="QUEUE_BOOKED">Jadwal & Nomor Antrean Terbit (QUEUE_BOOKED)</option>
+                    <option value="ARRIVED">Hadir di Loket Offline (ARRIVED)</option>
+                    <option value="PROCESSING">Perekaman / Pencetakan Diproses (PROCESSING)</option>
+                    <option value="READY_FOR_PICKUP">KTP Siap Diambil di Loket (READY_FOR_PICKUP)</option>
+                    <option value="COMPLETED">Pelayanan Selesai Diserahkan (COMPLETED)</option>
+                  </optgroup>
+                  <optgroup label="Status Lainnya">
+                    <option value="DRAFT">Draf (Belum Dikirim)</option>
+                    <option value="CANCELLED">Dibatalkan (CANCELLED)</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <!-- Auto issue queue checkbox -->
+              <div v-if="!escalateTargetApp.queue_number && ['SUBMITTED', 'UNDER_REVIEW', 'PRE_VERIFIED', 'QUEUE_BOOKED', 'ARRIVED', 'PROCESSING', 'READY_FOR_PICKUP', 'COMPLETED'].includes(escalateForm.status)">
+                <label class="flex items-start gap-2.5 p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/60 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    v-model="escalateForm.auto_issue_queue"
+                    class="rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                  />
+                  <div class="text-xs">
+                    <span class="font-bold text-indigo-900 dark:text-indigo-200 block">
+                      Otomatis Terbitkan Nomor Antrean & Jadwal Terdekat
+                    </span>
+                    <span class="text-indigo-700 dark:text-indigo-400 text-[11px]">
+                      Jika dicentang dan belum memiliki nomor antrean, sistem akan langsung mengalokasikan nomor antrean resmi dan jadwal loket terdekat.
+                    </span>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Catatan / Alasan Eskalasi -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Catatan / Alasan Eskalasi <span class="text-slate-400 font-normal">(Opsional)</span>
+                </label>
+                <textarea
+                  v-model="escalateForm.reason"
+                  rows="3"
+                  placeholder="Contoh: Pemohon melapor status macet di Draf, berkas dicek lengkap / eskalasi status ke loket."
+                  class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                ></textarea>
+              </div>
+
+              <!-- Buttons -->
+              <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
+                <button
+                  type="button"
+                  @click="escalateModalOpen = false"
+                  class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  :disabled="escalateForm.processing"
+                  class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <span v-if="escalateForm.processing">Menyimpan...</span>
+                  <span v-else>Simpan & Eskalasi Status</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </transition>
     </div>
   </AdminLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import StatusBadge from '@/Components/Queue/StatusBadge.vue'
 import { Trash2 } from '@lucide/vue'
@@ -670,6 +826,34 @@ const executeDelete = () => {
   })
 }
 
+// Status Escalation & Manual Sync
+const escalateModalOpen = ref(false)
+const escalateTargetApp = ref(null)
+const escalateForm = useForm({
+  status: '',
+  reason: '',
+  auto_issue_queue: true,
+})
+
+const openEscalateModal = (app) => {
+  escalateTargetApp.value = app
+  escalateForm.status = app.status === 'DRAFT' ? 'SUBMITTED' : app.status
+  escalateForm.reason = ''
+  escalateForm.auto_issue_queue = true
+  escalateModalOpen.value = true
+}
+
+const submitEscalate = () => {
+  if (!escalateTargetApp.value) return
+  escalateForm.post(route('admin.queue.applications.update-status', escalateTargetApp.value.id), {
+    preserveScroll: true,
+    onSuccess: () => {
+      escalateModalOpen.value = false
+      escalateTargetApp.value = null
+    },
+  })
+}
+
 const activeStatus = ref(props.filters?.status || '')
 const activeUrgency = ref(props.filters?.urgency || '')
 const searchQuery = ref(props.filters?.search || '')
@@ -687,6 +871,7 @@ const statusTabs = computed(() => [
   { label: 'KTP Siap Diambil', value: 'READY_FOR_PICKUP', count: props.statusCounts?.READY_FOR_PICKUP || 0 },
   { label: 'Pelayanan Selesai', value: 'COMPLETED', count: props.statusCounts?.COMPLETED || 0 },
   { label: 'Pengajuan Ditolak', value: 'REJECTED', count: props.statusCounts?.REJECTED || 0 },
+  { label: 'Draf (Belum Terkirim)', value: 'DRAFT', count: props.statusCounts?.DRAFT || 0 },
   { label: 'Batal / Kedaluwarsa', value: 'EXPIRED', count: props.statusCounts?.EXPIRED || 0 },
 ])
 

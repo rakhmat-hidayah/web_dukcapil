@@ -8,11 +8,14 @@ use App\Models\Queue\KtpHandover;
 use App\Models\Queue\QueueApplication;
 use App\Models\Queue\QueueSlot;
 use App\Models\Queue\ServiceType;
+use App\Models\Queue\VerificationHistory;
 use App\Services\Queue\QueueSlotService;
 use App\Services\Queue\QueueVerificationService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -129,6 +132,7 @@ class ApplicationVerificationController extends Controller
             'READY_FOR_PICKUP'      => QueueApplication::where('status', QueueApplication::STATUS_READY_FOR_PICKUP)->count(),
             'COMPLETED'             => QueueApplication::where('status', QueueApplication::STATUS_COMPLETED)->count(),
             'REJECTED'              => QueueApplication::where('status', QueueApplication::STATUS_REJECTED)->count(),
+            'DRAFT'                 => QueueApplication::where('status', QueueApplication::STATUS_DRAFT)->count(),
             'EXPIRED'               => QueueApplication::whereIn('status', [QueueApplication::STATUS_EXPIRED, QueueApplication::STATUS_CANCELLED])->count(),
         ];
 
@@ -494,5 +498,162 @@ class ApplicationVerificationController extends Controller
         $this->verificationService->completeHandover($application, $request->all(), Auth::user());
 
         return back()->with('success', "Pelayanan untuk {$application->applicant_name} ({$application->queue_number}) telah selesai.");
+    }
+
+    /**
+     * Escalate / manually update & synchronize application status.
+     * Useful when applications get stuck in DRAFT or need manual status advancement/recovery.
+     */
+    public function updateStatus(Request $request, int $id): RedirectResponse|JsonResponse
+    {
+        $application = QueueApplication::with(['serviceType', 'documents'])->findOrFail($id);
+
+        $validated = $request->validate([
+            'status'           => ['required', 'string', 'in:' . implode(',', QueueApplication::STATUSES)],
+            'reason'           => ['nullable', 'string', 'max:1000'],
+            'auto_issue_queue' => ['nullable', 'boolean'],
+        ], [
+            'status.required' => 'Target status wajib dipilih.',
+            'status.in'       => 'Target status tidak valid.',
+        ]);
+
+        $fromStatus = $application->status;
+        $toStatus = $validated['status'];
+        $officer = Auth::user();
+        $notes = $validated['reason'] ?: "Eskalasi / sinkronisasi status manual oleh petugas (" . ($officer?->name ?? 'Petugas') . ")";
+        $autoIssueQueue = $request->boolean('auto_issue_queue', true);
+
+        DB::transaction(function () use ($application, $fromStatus, $toStatus, $officer, $notes, $autoIssueQueue) {
+            $updates = [
+                'status' => $toStatus,
+            ];
+
+            // If moving out of DRAFT or into active pipeline
+            if ($fromStatus === QueueApplication::STATUS_DRAFT || in_array($toStatus, [
+                QueueApplication::STATUS_SUBMITTED,
+                QueueApplication::STATUS_UNDER_REVIEW,
+                QueueApplication::STATUS_PRE_VERIFIED,
+                QueueApplication::STATUS_QUEUE_BOOKED,
+                QueueApplication::STATUS_ARRIVED,
+                QueueApplication::STATUS_PROCESSING,
+                QueueApplication::STATUS_READY_FOR_PICKUP,
+                QueueApplication::STATUS_COMPLETED,
+            ])) {
+                if (!$application->submitted_at) {
+                    $updates['submitted_at'] = now();
+                }
+                if (!$application->statement_agreed) {
+                    $updates['statement_agreed'] = true;
+                    $updates['statement_agreed_at'] = now();
+                }
+
+                // Auto issue queue number & earliest slot if application doesn't have one
+                if ($autoIssueQueue && !$application->queue_number) {
+                    try {
+                        $slot = app(\App\Services\Queue\QueueSlotService::class)->getEarliestAvailableSlot($application->service_type_id);
+                        if ($slot) {
+                            app(\App\Services\Queue\QueueSlotService::class)->bookSlot($slot->id, $application);
+                            $application->refresh();
+                        }
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::warning("Escalation queue booking warning [{$application->reg_number}]: " . $e->getMessage());
+                    }
+                }
+            }
+
+            // Status-specific timestamp and state tracking
+            if ($toStatus === QueueApplication::STATUS_PRE_VERIFIED || $toStatus === QueueApplication::STATUS_QUEUE_BOOKED) {
+                if (!$application->approved_at) {
+                    $updates['approved_at'] = now();
+                }
+                // Automatically approve pending documents
+                $application->documents()
+                    ->where('status', ApplicationDocument::STATUS_PENDING)
+                    ->update([
+                        'status'      => ApplicationDocument::STATUS_APPROVED,
+                        'reviewed_by' => $officer?->id,
+                        'reviewed_at' => now(),
+                    ]);
+            }
+
+            if ($toStatus === QueueApplication::STATUS_ARRIVED) {
+                $updates['checked_in_at'] = now();
+            }
+
+            if ($toStatus === QueueApplication::STATUS_COMPLETED) {
+                $updates['completed_at'] = now();
+            }
+
+            if ($toStatus === QueueApplication::STATUS_REJECTED) {
+                $updates['rejected_at'] = now();
+                $updates['rejection_reason'] = $notes;
+            }
+
+            if ($toStatus === QueueApplication::STATUS_REVISION_REQUIRED) {
+                $updates['notes'] = $notes;
+            }
+
+            $application->update($updates);
+
+            // Sync with KTP Handover if status is in later stages
+            if (in_array($toStatus, [
+                QueueApplication::STATUS_PRE_VERIFIED,
+                QueueApplication::STATUS_QUEUE_BOOKED,
+                QueueApplication::STATUS_ARRIVED,
+                QueueApplication::STATUS_PROCESSING,
+                QueueApplication::STATUS_READY_FOR_PICKUP,
+                QueueApplication::STATUS_COMPLETED
+            ])) {
+                $handoverStatus = match ($toStatus) {
+                    QueueApplication::STATUS_READY_FOR_PICKUP => \App\Models\Queue\KtpHandover::STATUS_READY,
+                    QueueApplication::STATUS_COMPLETED => \App\Models\Queue\KtpHandover::STATUS_HANDED_OVER,
+                    default => \App\Models\Queue\KtpHandover::STATUS_PENDING,
+                };
+
+                $handover = \App\Models\Queue\KtpHandover::firstOrCreate(
+                    ['application_id' => $application->id],
+                    [
+                        'status'          => $handoverStatus,
+                        'ready_marked_at' => ($handoverStatus === \App\Models\Queue\KtpHandover::STATUS_READY) ? now() : null,
+                        'ready_marked_by' => ($handoverStatus === \App\Models\Queue\KtpHandover::STATUS_READY) ? $officer?->id : null,
+                    ]
+                );
+
+                if (!$handover->wasRecentlyCreated && $handover->status !== $handoverStatus) {
+                    $handoverUpdates = ['status' => $handoverStatus];
+                    if ($handoverStatus === \App\Models\Queue\KtpHandover::STATUS_READY && !$handover->ready_marked_at) {
+                        $handoverUpdates['ready_marked_at'] = now();
+                        $handoverUpdates['ready_marked_by'] = $officer?->id;
+                    }
+                    $handover->update($handoverUpdates);
+                }
+            }
+
+            // Record verification history for full audit trail
+            VerificationHistory::create([
+                'application_id' => $application->id,
+                'user_id'        => $officer?->id,
+                'from_status'    => $fromStatus,
+                'to_status'      => $toStatus,
+                'notes'          => "Eskalasi Status: {$notes}",
+                'metadata'       => [
+                    'ip'         => request()->ip(),
+                    'user_agent' => substr(request()->userAgent() ?? '', 0, 150),
+                    'action'     => 'MANUAL_STATUS_ESCALATION',
+                ],
+            ]);
+        });
+
+        $message = "Status permohonan {$application->reg_number} berhasil diperbarui dari '{$fromStatus}' ke '{$toStatus}'.";
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success'     => true,
+                'message'     => $message,
+                'application' => $application->fresh(),
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

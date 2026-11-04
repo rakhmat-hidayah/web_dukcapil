@@ -1494,4 +1494,66 @@ class QueueWorkflowTest extends TestCase
         // Application must be permanently removed
         $this->assertNull(QueueApplication::withTrashed()->find($app->id));
     }
+
+    public function test_officer_can_escalate_and_synchronize_application_status_manually()
+    {
+        $service = ServiceType::first();
+        $appService = app(\App\Services\Queue\QueueApplicationService::class);
+        $nik = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+
+        // 1. Create an application in DRAFT status
+        $app = $appService->createDraft([
+            'applicant_nik'         => $nik,
+            'applicant_name'        => 'Uji Eskalasi Status Draf',
+            'applicant_birth_place' => 'DOMPU',
+            'applicant_birth_date'  => '1995-08-17',
+            'applicant_phone'       => '0853-9999-8888',
+            'applicant_district'    => 'DOMPU',
+            'applicant_village'     => 'BADA',
+            'applicant_address'     => 'JL. SOEKARNO HATTA',
+            'attendance_type'       => 'self',
+        ], $service->id);
+
+        $this->assertEquals(QueueApplication::STATUS_DRAFT, $app->status);
+        $this->assertNull($app->queue_number);
+
+        $officer = User::whereHas('roles', fn($q) => $q->whereIn('name', ['Petugas Verifikasi', 'Super Administrator', 'Administrator Utama']))->first()
+            ?: User::first();
+
+        // 2. Escalate status from DRAFT to SUBMITTED with auto_issue_queue
+        $response = $this->actingAs($officer)->post(route('admin.queue.applications.update-status', $app->id), [
+            'status'           => QueueApplication::STATUS_SUBMITTED,
+            'reason'           => 'Eskalasi manual permohonan yang macet di draf',
+            'auto_issue_queue' => true,
+        ]);
+
+        $response->assertSessionHas('success');
+        $app->refresh();
+        $this->assertEquals(QueueApplication::STATUS_SUBMITTED, $app->status);
+        $this->assertNotNull($app->submitted_at, 'submitted_at must not be null');
+        $this->assertNotNull($app->queue_number, 'queue_number must not be null');
+
+        // 3. Verify history audit log was recorded
+        $history = \App\Models\Queue\VerificationHistory::where('application_id', $app->id)
+            ->where('to_status', QueueApplication::STATUS_SUBMITTED)
+            ->first();
+        $this->assertNotNull($history, 'history must not be null');
+        $this->assertStringContainsString('Eskalasi manual', $history->notes);
+
+        // 4. Escalate to READY_FOR_PICKUP and ensure handover is synchronized
+        $response2 = $this->actingAs($officer)->post(route('admin.queue.applications.update-status', $app->id), [
+            'status' => QueueApplication::STATUS_READY_FOR_PICKUP,
+            'reason' => 'KTP fisik sudah dicetak di loket',
+        ]);
+        $response2->assertSessionHas('success');
+        $app->refresh();
+        $this->assertEquals(QueueApplication::STATUS_READY_FOR_PICKUP, $app->status);
+
+        $handover = \App\Models\Queue\KtpHandover::where('application_id', $app->id)->first();
+        $this->assertNotNull($handover, 'handover must not be null');
+        $this->assertEquals(\App\Models\Queue\KtpHandover::STATUS_READY, $handover->status);
+        $this->assertNotNull($handover->ready_marked_at, 'handover ready_marked_at must not be null');
+
+        $app->forceDelete();
+    }
 }
