@@ -266,8 +266,8 @@ class QueueApplicationController extends Controller
             ->first();
 
         if ($existing) {
-            // Check if existing application is an expired draft (>24 hours)
-            if ($existing->status === QueueApplication::STATUS_DRAFT && $existing->isExpiredDraft(24)) {
+            // Check if existing application is an expired draft
+            if ($existing->status === QueueApplication::STATUS_DRAFT && $existing->isExpiredDraft()) {
                 $this->applicationService->deleteDraft($existing);
                 $existing = null;
             }
@@ -312,19 +312,21 @@ class QueueApplicationController extends Controller
             ])
             ->first();
 
+        $timeoutMinutes = (int) \App\Models\Queue\QueueSetting::get('queue.draft_timeout_minutes', 15);
+
         if (!$application) {
             session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
             return redirect()->route('queue.apply.create')
-                ->with('error', 'Permohonan draft tidak ditemukan atau telah kedaluwarsa dan dihapus otomatis (batas waktu 1x24 jam). Sesi Anda telah ditutup.');
+                ->with('error', "Permohonan draf tidak ditemukan atau telah kedaluwarsa dan dibersihkan otomatis (batas waktu {$timeoutMinutes} menit). Sesi Anda telah ditutup.");
         }
 
-        // Check if draft has expired (older than 24 hours from creation)
-        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft(24)) {
+        // Check if draft has expired based on configured waiting time
+        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft()) {
             $this->applicationService->deleteDraft($application);
             session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
 
             return redirect()->route('queue.apply.create')
-                ->with('error', 'Sesi permohonan draft Anda telah kedaluwarsa karena telah melewati batas waktu 1x24 jam sejak dibuat. Sesi telah ditutup otomatis. Silakan lakukan pendaftaran baru.');
+                ->with('error', "Sesi permohonan draf Anda telah kedaluwarsa karena telah melewati batas waktu tunggu {$timeoutMinutes} menit sejak dibuat. Silakan lakukan pendaftaran baru.");
         }
 
         if (!$application->isEditable()) {
@@ -343,11 +345,18 @@ class QueueApplicationController extends Controller
             return true;
         })->values();
 
+        $createdAt = $application->created_at ?: now();
+        $expiresAt = $createdAt->copy()->addMinutes($timeoutMinutes);
+        $remainingSeconds = max(0, (int) now()->diffInSeconds($expiresAt, false));
+
         return Inertia::render('Public/Queue/Apply/Step2Documents', [
-            'application' => $application,
-            'serviceType' => $application->serviceType,
-            'requirements' => $filteredRequirements,
-            'uploadedDocs' => $application->documents,
+            'application'           => $application,
+            'serviceType'           => $application->serviceType,
+            'requirements'          => $filteredRequirements,
+            'uploadedDocs'          => $application->documents,
+            'draftTimeoutMinutes'   => $timeoutMinutes,
+            'draftRemainingSeconds' => $remainingSeconds,
+            'draftExpiresAt'        => $expiresAt->toISOString(),
         ]);
     }
 
@@ -363,10 +372,12 @@ class QueueApplicationController extends Controller
             return response()->json(['success' => false, 'session_expired' => true, 'message' => 'Sesi permohonan draft telah kedaluwarsa atau tidak ditemukan.'], 404);
         }
 
-        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft(24)) {
+        $timeoutMinutes = (int) \App\Models\Queue\QueueSetting::get('queue.draft_timeout_minutes', 15);
+
+        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft()) {
             $this->applicationService->deleteDraft($application);
             session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
-            return response()->json(['success' => false, 'session_expired' => true, 'message' => 'Sesi permohonan draft Anda telah kedaluwarsa (1x24 jam). Sesi ditutup otomatis.'], 419);
+            return response()->json(['success' => false, 'session_expired' => true, 'message' => "Sesi permohonan draf Anda telah kedaluwarsa ({$timeoutMinutes} menit). Sesi ditutup otomatis."], 419);
         }
 
         $request->validate([
@@ -408,10 +419,12 @@ class QueueApplicationController extends Controller
             return response()->json(['success' => false, 'session_expired' => true, 'message' => 'Sesi permohonan draft telah kedaluwarsa atau tidak ditemukan.'], 404);
         }
 
-        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft(24)) {
+        $timeoutMinutes = (int) \App\Models\Queue\QueueSetting::get('queue.draft_timeout_minutes', 15);
+
+        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft()) {
             $this->applicationService->deleteDraft($application);
             session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
-            return response()->json(['success' => false, 'session_expired' => true, 'message' => 'Sesi permohonan draft Anda telah kedaluwarsa (1x24 jam). Sesi ditutup otomatis.'], 419);
+            return response()->json(['success' => false, 'session_expired' => true, 'message' => "Sesi permohonan draf Anda telah kedaluwarsa ({$timeoutMinutes} menit). Sesi ditutup otomatis."], 419);
         }
 
         $this->applicationService->removeDocument($application, $documentId);
@@ -437,18 +450,20 @@ class QueueApplicationController extends Controller
             ->with(['serviceType.documents', 'documents'])
             ->first();
 
+        $timeoutMinutes = (int) \App\Models\Queue\QueueSetting::get('queue.draft_timeout_minutes', 15);
+
         if (!$application) {
             session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
             return redirect()->route('queue.apply.create')
-                ->with('error', 'Permohonan draft tidak ditemukan atau telah kedaluwarsa (batas waktu 1x24 jam). Sesi Anda telah ditutup.');
+                ->with('error', "Permohonan draf tidak ditemukan atau telah kedaluwarsa (batas waktu {$timeoutMinutes} menit). Sesi Anda telah ditutup.");
         }
 
-        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft(24)) {
+        if ($application->status === QueueApplication::STATUS_DRAFT && $application->isExpiredDraft()) {
             $this->applicationService->deleteDraft($application);
             session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
 
             return redirect()->route('queue.apply.create')
-                ->with('error', 'Sesi permohonan draft Anda telah kedaluwarsa karena telah melewati batas waktu 1x24 jam. Sesi telah ditutup otomatis. Silakan lakukan pendaftaran baru.');
+                ->with('error', "Sesi permohonan draf Anda telah kedaluwarsa karena telah melewati batas waktu {$timeoutMinutes} menit. Sesi telah ditutup otomatis. Silakan lakukan pendaftaran baru.");
         }
 
         $request->validate([

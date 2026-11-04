@@ -17,9 +17,9 @@ Schedule::command('visitor:cleanup', ['--triggered-by' => 'scheduler'])
     ->withoutOverlapping(30);
 
 /**
- * Purge Expired Online Registration Drafts (> 1x24 Jam)
+ * Purge Expired Online Registration Drafts
  * Runs hourly to clean up abandoned drafts, delete physical files, and expire user sessions
  */
-Schedule::command('queue:purge-expired-drafts')
+Schedule::command(\App\Console\Commands\PurgeExpiredDraftApplicationsCommand::class)
     ->hourly()
     ->withoutOverlapping(15);

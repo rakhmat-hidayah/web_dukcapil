@@ -26,9 +26,9 @@
             <span v-if="application.attendance_type !== 'self'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/20 text-amber-200 border border-amber-400/30">
               Perwakilan: {{ application.representative_name }} ({{ application.representative_relationship }})
             </span>
-            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-400/20 text-amber-200 border border-amber-400/30" title="Draft yang tidak diselesaikan dalam 1x24 jam sejak dibuat akan dihapus otomatis">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-400/20 text-amber-200 border border-amber-400/30" :title="`Draf yang tidak diselesaikan dalam ${draftTimeoutMinutes} menit akan dihapus otomatis`">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              Batas Sesi: 1x24 Jam
+              Batas Sesi: {{ draftTimeoutMinutes }} Menit
             </span>
           </div>
         </div>
@@ -37,6 +37,54 @@
           Kelengkapan Berkas:
           <span class="font-bold text-white ml-1">
             {{ uploadedCount }} / {{ requirements.length }} Dokumen
+          </span>
+        </div>
+      </div>
+
+      <!-- Live Waiting Countdown Banner -->
+      <div
+        :class="[
+          'mb-6 p-4 rounded-3xl border transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md',
+          remainingSeconds <= 120
+            ? 'bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-700 text-rose-900 dark:text-rose-200 animate-pulse'
+            : (remainingSeconds <= 300
+              ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200'
+              : 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200')
+        ]"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            :class="[
+              'w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm font-black',
+              remainingSeconds <= 120
+                ? 'bg-rose-600 text-white'
+                : (remainingSeconds <= 300 ? 'bg-amber-500 text-white' : 'bg-blue-600 text-white')
+            ]"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div>
+            <h4 class="text-xs sm:text-sm font-bold flex items-center gap-2">
+              <span>Waktu Tunggu Pengisian Berkas:</span>
+              <span class="font-mono font-black text-sm sm:text-base underline decoration-2">{{ formattedRemainingTime }}</span>
+            </h4>
+            <p class="text-[11px] opacity-80 mt-0.5">
+              Jeda waktu pengisian berkas Anda adalah <strong>{{ draftTimeoutMinutes }} menit</strong> sebelum draf dibersihkan otomatis demi mencegah kuota menggantung.
+            </p>
+          </div>
+        </div>
+
+        <div class="sm:text-right shrink-0">
+          <span
+            :class="[
+              'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono shadow-xs',
+              remainingSeconds <= 120
+                ? 'bg-rose-600 text-white'
+                : (remainingSeconds <= 300 ? 'bg-amber-500 text-white' : 'bg-blue-600 text-white')
+            ]"
+          >
+            <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+            <span>Sisa Waktu: {{ formattedRemainingTime }}</span>
           </span>
         </div>
       </div>
@@ -312,7 +360,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
@@ -339,6 +387,18 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  draftTimeoutMinutes: {
+    type: Number,
+    default: 15,
+  },
+  draftRemainingSeconds: {
+    type: Number,
+    default: 900,
+  },
+  draftExpiresAt: {
+    type: String,
+    default: null,
+  },
 });
 
 const docs = ref([...props.uploadedDocs]);
@@ -355,6 +415,39 @@ const uploadProgress = ref({
   total: 0,
   label: '',
   percent: 0,
+});
+
+// Countdown Timer Logic
+const remainingSeconds = ref(props.draftRemainingSeconds ?? (props.draftTimeoutMinutes * 60));
+let timerInterval = null;
+
+const formattedRemainingTime = computed(() => {
+  const totalSec = Math.max(0, remainingSeconds.value);
+  const mins = Math.floor(totalSec / 60);
+  const secs = totalSec % 60;
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+});
+
+onMounted(() => {
+  if (props.draftExpiresAt) {
+    const expiresTime = new Date(props.draftExpiresAt).getTime();
+    const now = Date.now();
+    remainingSeconds.value = Math.max(0, Math.floor((expiresTime - now) / 1000));
+  }
+
+  timerInterval = setInterval(() => {
+    if (remainingSeconds.value > 0) {
+      remainingSeconds.value--;
+    } else {
+      clearInterval(timerInterval);
+      alert(`Waktu tunggu pengisian berkas (${props.draftTimeoutMinutes} menit) telah berakhir. Sesi draf Anda telah kedaluwarsa.`);
+      window.location.href = route('queue.apply.create');
+    }
+  }, 1000);
+});
+
+onBeforeUnmount(() => {
+  if (timerInterval) clearInterval(timerInterval);
 });
 
 const uploadedCount = computed(() => {
@@ -619,7 +712,7 @@ async function handleSubmitApplication() {
         isSubmitting.value = false;
         uploadProgress.value.active = false;
         if (uploadErr.response?.status === 419 || uploadErr.response?.data?.session_expired) {
-          alert('Sesi draft permohonan telah kedaluwarsa (1x24 jam) dan dihapus otomatis. Sesi telah ditutup.');
+          alert(`Sesi draft permohonan telah kedaluwarsa (${props.draftTimeoutMinutes} menit) dan dihapus otomatis. Sesi telah ditutup.`);
           window.location.href = route('queue.apply.create');
           return;
         }

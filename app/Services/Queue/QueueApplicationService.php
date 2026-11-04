@@ -401,14 +401,18 @@ class QueueApplicationService
     }
 
     /**
-     * Purge all draft applications older than 24 hours from creation.
+     * Purge all draft applications older than configured waiting time from creation.
      *
-     * @param int $hours Maximum age in hours (default: 24)
+     * @param int|null $minutes Maximum age in minutes (default from queue.draft_timeout_minutes setting)
      * @return int Number of purged drafts
      */
-    public function purgeExpiredDrafts(int $hours = 24): int
+    public function purgeExpiredDrafts(?int $minutes = null): int
     {
-        $cutoff = now()->subHours($hours);
+        if ($minutes === null) {
+            $minutes = (int) \App\Models\Queue\QueueSetting::get('queue.draft_timeout_minutes', 15);
+        }
+
+        $cutoff = now()->subMinutes($minutes);
 
         $expiredDrafts = QueueApplication::where('status', QueueApplication::STATUS_DRAFT)
             ->where('created_at', '<=', $cutoff)
@@ -427,7 +431,7 @@ class QueueApplicationService
         }
 
         if ($count > 0) {
-            Log::info("Purged {$count} expired draft application(s) older than {$hours} hours.");
+            Log::info("Purged {$count} expired draft application(s) older than {$minutes} minutes.");
         }
 
         return $count;

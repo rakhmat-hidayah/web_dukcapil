@@ -1556,4 +1556,77 @@ class QueueWorkflowTest extends TestCase
 
         $app->forceDelete();
     }
+
+    /**
+     * Test configurable draft waiting timeout and auto-purge workflow.
+     */
+    public function test_draft_timeout_setting_and_auto_purge_workflow(): void
+    {
+        // 1. Set configurable timeout to 15 minutes
+        \App\Models\Queue\QueueSetting::set('queue.draft_timeout_minutes', '15');
+        $this->assertEquals('15', \App\Models\Queue\QueueSetting::get('queue.draft_timeout_minutes'));
+
+        $service = ServiceType::first();
+        $this->assertNotNull($service);
+
+        $appService = app(\App\Services\Queue\QueueApplicationService::class);
+
+        // 2. Create a fresh draft
+        $freshApp = $appService->createDraft([
+            'applicant_nik' => '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT),
+            'applicant_name' => 'Warga Draf Baru',
+            'applicant_phone' => '081234567890',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+
+        $this->assertFalse($freshApp->isExpiredDraft());
+        $this->assertGreaterThan(0, $freshApp->draft_remaining_seconds);
+        $this->assertLessThanOrEqual(15, $freshApp->draft_remaining_minutes);
+
+        // 3. Create an abandoned draft (older than 15 minutes, e.g. 20 minutes ago)
+        $staleApp = $appService->createDraft([
+            'applicant_nik' => '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT),
+            'applicant_name' => 'Warga Draf Usang',
+            'applicant_phone' => '081234567891',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+
+        // Manually age the draft beyond 15 minutes
+        $staleApp->created_at = now()->subMinutes(20);
+        $staleApp->saveQuietly();
+
+        $this->assertTrue($staleApp->isExpiredDraft());
+        $this->assertEquals(0, $staleApp->draft_remaining_seconds);
+
+        // 4. Accessing documents page for stale app triggers automatic cleanup & redirect
+        $response = $this->get(route('queue.apply.documents', ['regNumber' => $staleApp->reg_number]));
+        $response->assertRedirect(route('queue.apply.create'));
+        $this->assertNull(QueueApplication::find($staleApp->id));
+
+        // 5. Verify service purgeExpiredDrafts automatically cleans up stale drafts
+        $staleApp2 = $appService->createDraft([
+            'applicant_nik' => '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT),
+            'applicant_name' => 'Warga Draf Usang 2',
+            'applicant_phone' => '081234567892',
+            'applicant_address' => 'Dompu',
+            'attendance_type' => 'self',
+        ], $service->id);
+        $staleApp2->created_at = now()->subMinutes(30);
+        $staleApp2->saveQuietly();
+
+        $purgedCount = $appService->purgeExpiredDrafts();
+        $this->assertGreaterThanOrEqual(1, $purgedCount);
+        $this->assertNull(QueueApplication::find($staleApp2->id));
+
+        // Fresh draft should still exist
+        $this->assertNotNull(QueueApplication::find($freshApp->id));
+
+        // 6. Test Console Command respects dynamic timeout
+        \Illuminate\Support\Facades\Artisan::registerCommand(app(\App\Console\Commands\PurgeExpiredDraftApplicationsCommand::class));
+        $this->artisan('queue:purge-expired-drafts')->assertSuccessful();
+
+        $freshApp->forceDelete();
+    }
 }

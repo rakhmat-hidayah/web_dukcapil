@@ -117,6 +117,22 @@
                 class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Jeda Waktu Tunggu Draf Dokumen (Menit)
+              </label>
+              <input
+                v-model.number="form['queue.draft_timeout_minutes']"
+                type="number"
+                min="5"
+                max="1440"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p class="text-[10px] text-slate-400 mt-1">
+                Batas waktu tunggu pemohon mengunggah berkas sebelum draf kedaluwarsa & dibersihkan otomatis.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -231,6 +247,7 @@ const form = ref({
   'queue.registration_open_days_ahead': parseInt(getVal('schedule', 'queue.registration_open_days_ahead', '14')),
   'queue.allow_cancellation_hours': parseInt(getVal('policy', 'queue.allow_cancellation_hours', '12')),
   'queue.revision_deadline_days': parseInt(getVal('policy', 'queue.revision_deadline_days', '3')),
+  'queue.draft_timeout_minutes': parseInt(getVal('policy', 'queue.draft_timeout_minutes', '15')),
   'queue.notify_on_submit': getVal('notification', 'queue.notify_on_submit', '1') === '1',
   'queue.notify_on_revision': getVal('notification', 'queue.notify_on_revision', '1') === '1',
   'queue.notify_on_approved': getVal('notification', 'queue.notify_on_approved', '1') === '1',

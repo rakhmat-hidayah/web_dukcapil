@@ -31,9 +31,9 @@ class ApplicationVerificationController extends Controller
      */
     public function index(Request $request): Response
     {
-        // Automatically purge any abandoned drafts older than 24 hours so CMS table stays clean
+        // Automatically purge any abandoned drafts older than configured timeout so CMS table stays clean
         try {
-            app(\App\Services\Queue\QueueApplicationService::class)->purgeExpiredDrafts(24);
+            app(\App\Services\Queue\QueueApplicationService::class)->purgeExpiredDrafts();
         } catch (\Throwable $e) {
             \Log::warning('Auto purge expired drafts warning: ' . $e->getMessage());
         }
@@ -162,12 +162,13 @@ class ApplicationVerificationController extends Controller
         $services = ServiceType::active()->get(['id', 'name', 'color']);
 
         return Inertia::render('Admin/Queue/Applications/Index', [
-            'applications'  => $applications,
-            'statusCounts'  => $statusCounts,
-            'urgencyCounts' => $urgencyCounts,
-            'services'      => $services,
-            'can_delete'    => Auth::user()?->isSuperAdmin() ?? false,
-            'filters'       => [
+            'applications'        => $applications,
+            'statusCounts'        => $statusCounts,
+            'urgencyCounts'       => $urgencyCounts,
+            'services'            => $services,
+            'can_delete'          => Auth::user()?->isSuperAdmin() ?? false,
+            'draftTimeoutMinutes' => (int) \App\Models\Queue\QueueSetting::get('queue.draft_timeout_minutes', 15),
+            'filters'             => [
                 'status'     => $status,
                 'urgency'    => $urgency,
                 'service_id' => $serviceId,

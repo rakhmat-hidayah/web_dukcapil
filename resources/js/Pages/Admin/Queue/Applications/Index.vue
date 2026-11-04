@@ -365,7 +365,11 @@
 
                 <!-- Status Badge -->
                 <td class="px-5 py-4 text-center whitespace-nowrap">
-                  <StatusBadge :status="app.status" />
+                  <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping shrink-0"></span>
+                    <span>Draf (Sisa {{ app.draft_remaining_minutes !== undefined ? app.draft_remaining_minutes : (draftTimeoutMinutes || 15) }} mnt)</span>
+                  </div>
+                  <StatusBadge v-else :status="app.status" />
                   <div v-if="app.verification_urgency === 'overdue'" class="mt-1">
                     <span class="inline-block text-[10px] font-extrabold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-950/80 px-2 py-0.5 rounded-full">
                       ⚠️ Terlambat SLA 1x24 Jam
@@ -777,6 +781,10 @@ const props = defineProps({
   services: Array,
   filters: Object,
   can_delete: Boolean,
+  draftTimeoutMinutes: {
+    type: Number,
+    default: 15,
+  },
 })
 
 const page = usePage()
@@ -871,7 +879,7 @@ const statusTabs = computed(() => [
   { label: 'KTP Siap Diambil', value: 'READY_FOR_PICKUP', count: props.statusCounts?.READY_FOR_PICKUP || 0 },
   { label: 'Pelayanan Selesai', value: 'COMPLETED', count: props.statusCounts?.COMPLETED || 0 },
   { label: 'Pengajuan Ditolak', value: 'REJECTED', count: props.statusCounts?.REJECTED || 0 },
-  { label: 'Draf (Belum Terkirim)', value: 'DRAFT', count: props.statusCounts?.DRAFT || 0 },
+  { label: `Draf (Masa Tunggu ≤${props.draftTimeoutMinutes || 15} mnt)`, value: 'DRAFT', count: props.statusCounts?.DRAFT || 0 },
   { label: 'Batal / Kedaluwarsa', value: 'EXPIRED', count: props.statusCounts?.EXPIRED || 0 },
 ])
 

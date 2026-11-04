@@ -17,6 +17,7 @@ class QueueSettingsSeeder extends Seeder
             ['key' => 'queue.default_daily_quota', 'value' => '70', 'group' => 'quota', 'description' => 'Total kuota harian default seluruh layanan'],
             ['key' => 'queue.allow_cancellation_hours', 'value' => '12', 'group' => 'policy', 'description' => 'Batas jam sebelum waktu jadwal di mana pemohon masih dapat membatalkan'],
             ['key' => 'queue.revision_deadline_days', 'value' => '3', 'group' => 'policy', 'description' => 'Batas hari bagi pemohon untuk memperbaiki dokumen sebelum ditolak otomatis'],
+            ['key' => 'queue.draft_timeout_minutes', 'value' => '15', 'group' => 'policy', 'description' => 'Jeda waktu tunggu bagi pemohon untuk melengkapi & mengirimkan berkas digital sebelum draf permohonan kedaluwarsa (dalam menit)'],
             ['key' => 'queue.notify_on_submit', 'value' => '1', 'group' => 'notification', 'description' => 'Kirim notifikasi email saat pendaftaran berhasil diterima'],
             ['key' => 'queue.notify_on_revision', 'value' => '1', 'group' => 'notification', 'description' => 'Kirim notifikasi email saat dokumen membutuhkan perbaikan'],
             ['key' => 'queue.notify_on_approved', 'value' => '1', 'group' => 'notification', 'description' => 'Kirim notifikasi email saat dokumen disetujui & nomor antrian terbit'],

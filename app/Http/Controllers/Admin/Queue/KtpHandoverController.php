@@ -38,6 +38,9 @@ class KtpHandoverController extends Controller
      */
     public function registrations(Request $request): Response
     {
+        // Auto-purge stale drafts older than configured timeout to keep registration records clean
+        app(\App\Services\Queue\QueueApplicationService::class)->purgeExpiredDrafts();
+
         $search = $request->query('search');
         if ($search && preg_match('/(REG-[A-Za-z0-9-]+)/i', $search, $matches)) {
             $search = strtoupper($matches[1]);
@@ -89,6 +92,8 @@ class KtpHandoverController extends Controller
                 $query->whereHas('handover', fn($h) => $h->where('status', KtpHandover::STATUS_EXCEPTION));
             } elseif ($status === 'DITOLAK') {
                 $query->whereIn('status', [QueueApplication::STATUS_REJECTED, QueueApplication::STATUS_EXPIRED]);
+            } elseif ($status === 'DRAFT') {
+                $query->where('status', QueueApplication::STATUS_DRAFT);
             } else {
                 $query->where('status', $status);
             }
@@ -100,6 +105,7 @@ class KtpHandoverController extends Controller
 
         $counts = [
             'total'                 => QueueApplication::count(),
+            'draft'                 => QueueApplication::where('status', QueueApplication::STATUS_DRAFT)->count(),
             'menunggu_verifikasi'   => QueueApplication::whereIn('status', [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED, QueueApplication::STATUS_UNDER_REVIEW])->count(),
             'lolos_verifikasi'      => QueueApplication::whereIn('status', [QueueApplication::STATUS_PRE_VERIFIED, QueueApplication::STATUS_QUEUE_BOOKED])->count(),
             'proses_loket'          => QueueApplication::whereIn('status', [QueueApplication::STATUS_ARRIVED, QueueApplication::STATUS_PHYSICAL_VERIFICATION, QueueApplication::STATUS_PROCESSING])->count(),
@@ -110,10 +116,11 @@ class KtpHandoverController extends Controller
         ];
 
         return Inertia::render('Admin/Handover/Registrations', [
-            'applications' => $applications,
-            'services'     => $services,
-            'counts'       => $counts,
-            'filters'      => [
+            'applications'        => $applications,
+            'services'            => $services,
+            'counts'              => $counts,
+            'draftTimeoutMinutes' => (int) \App\Models\Queue\QueueSetting::get('queue.draft_timeout_minutes', 15),
+            'filters'             => [
                 'search'     => $search,
                 'service_id' => $serviceId,
                 'status'     => $status,

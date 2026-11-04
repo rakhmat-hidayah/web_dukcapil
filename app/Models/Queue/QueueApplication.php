@@ -145,6 +145,8 @@ class QueueApplication extends Model
         'verification_urgency',
         'verification_urgency_label',
         'waiting_time_human',
+        'draft_remaining_seconds',
+        'draft_remaining_minutes',
     ];
 
     protected static function booted(): void
@@ -196,13 +198,41 @@ class QueueApplication extends Model
         return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_REVISION_REQUIRED]);
     }
 
-    public function isExpiredDraft(int $hours = 24): bool
+    public function isExpiredDraft(?int $minutes = null): bool
     {
         if ($this->status !== self::STATUS_DRAFT) {
             return false;
         }
 
-        return $this->created_at ? $this->created_at->lt(now()->subHours($hours)) : false;
+        if ($minutes === null) {
+            $minutes = (int) QueueSetting::get('queue.draft_timeout_minutes', 15);
+        }
+
+        return $this->created_at ? $this->created_at->lt(now()->subMinutes($minutes)) : false;
+    }
+
+    public function getDraftRemainingSecondsAttribute(): int
+    {
+        if ($this->status !== self::STATUS_DRAFT || !$this->created_at) {
+            return 0;
+        }
+
+        $timeoutMinutes = (int) QueueSetting::get('queue.draft_timeout_minutes', 15);
+        $expiresAt = $this->created_at->copy()->addMinutes($timeoutMinutes);
+
+        return max(0, (int) now()->diffInSeconds($expiresAt, false));
+    }
+
+    public function getDraftRemainingMinutesAttribute(): int
+    {
+        if ($this->status !== self::STATUS_DRAFT || !$this->created_at) {
+            return 0;
+        }
+
+        $timeoutMinutes = (int) QueueSetting::get('queue.draft_timeout_minutes', 15);
+        $expiresAt = $this->created_at->copy()->addMinutes($timeoutMinutes);
+
+        return max(0, (int) ceil(now()->diffInSeconds($expiresAt, false) / 60));
     }
 
     public function getMaskedNikAttribute(): string

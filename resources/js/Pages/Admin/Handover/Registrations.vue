@@ -30,7 +30,7 @@
       </div>
 
       <!-- Quick Stats Overview -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         <div 
           @click="selectStatus('')"
           :class="[
@@ -42,6 +42,22 @@
         >
           <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Terdaftar</p>
           <p class="text-xl font-black text-slate-900 dark:text-white mt-1">{{ counts.total || 0 }}</p>
+        </div>
+
+        <div 
+          @click="selectStatus('DRAFT')"
+          :class="[
+            'p-4 rounded-2xl border transition cursor-pointer',
+            activeStatus === 'DRAFT'
+              ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 shadow-sm'
+              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+          ]"
+        >
+          <div class="flex items-center justify-between">
+            <p class="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Draf Tunggu</p>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold font-mono">≤{{ draftTimeoutMinutes }}m</span>
+          </div>
+          <p class="text-xl font-black text-amber-600 dark:text-amber-400 mt-1">{{ counts.draft || 0 }}</p>
         </div>
 
         <div 
@@ -281,12 +297,21 @@
 
                 <!-- Status Berkas Administrasi -->
                 <td class="px-5 py-3.5 whitespace-nowrap">
-                  <StatusBadge :status="app.status" />
+                  <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping shrink-0"></span>
+                    <span>Draf (Sisa {{ app.draft_remaining_minutes !== undefined ? app.draft_remaining_minutes : draftTimeoutMinutes }} mnt)</span>
+                  </div>
+                  <StatusBadge v-else :status="app.status" />
                 </td>
 
                 <!-- Status Fisik KTP-el di Loket Serah Terima -->
                 <td class="px-5 py-3.5 whitespace-nowrap">
-                  <div v-if="app.handover">
+                  <div v-if="app.status === 'DRAFT'">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                      Masa Pengisian Berkas
+                    </span>
+                  </div>
+                  <div v-else-if="app.handover">
                     <span
                       v-if="app.handover.status === 'SUDAH_DISERAHKAN'"
                       class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
@@ -531,6 +556,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  draftTimeoutMinutes: {
+    type: Number,
+    default: 15,
+  },
   filters: {
     type: Object,
     default: () => ({ search: '', service_id: '', status: '' }),
@@ -545,6 +574,7 @@ const previewPhotoApp = ref(null);
 
 const filterTabs = computed(() => [
   { label: 'Semua Registrasi', value: '', count: props.counts?.total || 0 },
+  { label: `Draf (Masa Tunggu ≤${props.draftTimeoutMinutes || 15} mnt)`, value: 'DRAFT', count: props.counts?.draft || 0 },
   { label: 'Menunggu Verifikasi', value: 'MENUNGGU_VERIFIKASI', count: props.counts?.menunggu_verifikasi || 0 },
   { label: 'Lolos Verifikasi / Antrean', value: 'LOLOS_VERIFIKASI', count: props.counts?.lolos_verifikasi || 0 },
   { label: 'Menunggu Fisik KTP', value: 'MENUNGGU_KETERSEDIAAN', count: props.counts?.menunggu_ketersediaan || 0 },
