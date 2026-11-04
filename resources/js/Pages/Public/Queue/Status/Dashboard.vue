@@ -363,13 +363,26 @@
           <!-- 11. REJECTED -->
           <div
             v-else-if="application.status === 'REJECTED'"
-            class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-xs text-rose-900 dark:text-rose-200 flex items-start gap-3"
+            class="p-5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/50 border-2 border-rose-300 dark:border-rose-800 text-xs space-y-3"
           >
-            <svg class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <div>
-              <p class="font-bold text-sm text-rose-900 dark:text-rose-200">Pengajuan Ditolak</p>
-              <p class="mt-1 leading-relaxed">
-                Alasan: <em>{{ application.rejection_reason || 'Dokumen tidak memenuhi ketentuan hukum atau persyaratan yang berlaku.' }}</em>
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+              </div>
+              <div class="flex-1">
+                <p class="font-black text-sm text-rose-900 dark:text-rose-100">Status Permohonan: Pengajuan Ditolak</p>
+                <p class="text-xs text-rose-700 dark:text-rose-300 mt-0.5">
+                  Permohonan Anda tidak dapat diproses lebih lanjut oleh petugas verifikator Dukcapil.
+                </p>
+              </div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-900 shadow-xs">
+              <div class="flex items-center gap-1.5 text-xs font-bold text-rose-700 dark:text-rose-400 mb-1">
+                <svg class="w-4 h-4 shrink-0 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>Alasan Penolakan Petugas:</span>
+              </div>
+              <p class="text-xs sm:text-sm font-black text-rose-600 dark:text-rose-400 font-sans leading-relaxed tracking-wide">
+                "{{ application.rejection_reason || 'Dokumen persyaratan tidak memenuhi ketentuan hukum atau persyaratan yang berlaku.' }}"
               </p>
             </div>
           </div>

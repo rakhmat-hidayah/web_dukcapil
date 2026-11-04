@@ -79,6 +79,35 @@
         </div>
       </div>
 
+      <!-- Top Alert: Permohonan Ditolak -->
+      <div
+        v-if="application.status === 'REJECTED'"
+        class="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-rose-50 via-rose-100/60 to-rose-50 dark:from-rose-950/50 dark:via-rose-900/30 dark:to-rose-950/50 border-2 border-rose-300 dark:border-rose-800 shadow-sm flex items-start gap-3.5"
+      >
+        <div class="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-600/30">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="text-sm sm:text-base font-black text-rose-900 dark:text-rose-200">
+              STATUS PERMOHONAN: PENGAJUAN DITOLAK
+            </h3>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white">
+              Ditolak
+            </span>
+          </div>
+          <p class="text-xs text-rose-700 dark:text-rose-300 mt-0.5">
+            Permohonan KTP-el ini telah diputuskan ditolak oleh petugas verifikator.
+          </p>
+          <div class="mt-2.5 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-900 shadow-xs">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">Alasan Penolakan Petugas:</span>
+            <p class="text-sm font-black text-rose-600 dark:text-rose-400 font-sans leading-relaxed">
+              "{{ application.rejection_reason || getLatestRejectionReason() }}"
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Operator Urgency Reminder Banner -->
       <div
         v-if="application.verification_urgency === 'overdue'"
@@ -570,9 +599,41 @@
               </span>
             </div>
 
-            <!-- Banner info if online verification has already finished -->
+            <!-- Banner info if application is REJECTED -->
             <div
-              v-if="isPastOnlineVerification"
+              v-if="application.status === 'REJECTED'"
+              class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border-2 border-rose-300 dark:border-rose-800 text-xs space-y-2.5"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-full bg-rose-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-sm">✕</span>
+                  <div>
+                    <span class="text-rose-900 dark:text-rose-200 font-black text-sm block">
+                      Tahap Verifikasi: Pengajuan Ditolak
+                    </span>
+                    <span class="text-[11px] text-rose-700 dark:text-rose-300">
+                      Permohonan tidak dapat diproses lebih lanjut karena alasan di bawah.
+                    </span>
+                  </div>
+                </div>
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-200 text-rose-900 dark:bg-rose-900 dark:text-rose-200 uppercase tracking-wider shrink-0">
+                  Pengajuan Ditolak
+                </span>
+              </div>
+              <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-900/80 shadow-xs">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-rose-700 dark:text-rose-400 mb-1">
+                  <svg class="w-4 h-4 shrink-0 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <span>Alasan Penolakan Petugas:</span>
+                </div>
+                <p class="text-sm font-black text-rose-600 dark:text-rose-400 font-sans leading-relaxed">
+                  "{{ application.rejection_reason || getLatestRejectionReason() }}"
+                </p>
+              </div>
+            </div>
+
+            <!-- Banner info if online verification has already finished (Non-Rejected) -->
+            <div
+              v-else-if="isPastOnlineVerification"
               class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-between text-xs"
             >
               <div class="flex items-center gap-2.5">
@@ -648,22 +709,47 @@
 
           <!-- Verification History -->
           <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-            <h3 class="text-xs font-black uppercase tracking-wider text-slate-400">
-              Riwayat Aktivitas
-            </h3>
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-black uppercase tracking-wider text-slate-400">
+                Riwayat Aktivitas
+              </h3>
+              <span v-if="application.status === 'REJECTED'" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400">
+                Catatan Penolakan Tersimpan
+              </span>
+            </div>
 
             <div class="space-y-3">
               <div
                 v-for="log in application.verification_history"
                 :key="log.id"
-                class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-start gap-3 text-xs"
+                :class="[
+                  'p-3.5 rounded-2xl border flex items-start gap-3 text-xs transition',
+                  isRejectionLog(log)
+                    ? 'bg-rose-50/60 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/60 ring-1 ring-rose-500/10'
+                    : 'bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700'
+                ]"
               >
-                <div class="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center shrink-0">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <!-- Icon -->
+                <div
+                  :class="[
+                    'w-8 h-8 rounded-xl flex items-center justify-center shrink-0',
+                    isRejectionLog(log)
+                      ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/60 dark:text-rose-300'
+                      : 'bg-blue-100 dark:bg-blue-950 text-blue-600'
+                  ]"
+                >
+                  <svg v-if="isRejectionLog(log)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                  <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <div class="flex-1">
+
+                <div class="flex-1 min-w-0">
                   <div class="flex items-center justify-between">
-                    <span class="font-bold text-slate-900 dark:text-white">
+                    <span
+                      :class="[
+                        'font-bold',
+                        isRejectionLog(log) ? 'text-rose-900 dark:text-rose-200' : 'text-slate-900 dark:text-white'
+                      ]"
+                    >
                       {{ log.action_title || formatStatusName(log.to_status) }}
                     </span>
                     <span class="text-[10px] text-slate-400 font-mono">
@@ -673,13 +759,32 @@
                   <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                     Oleh: <strong class="text-slate-700 dark:text-slate-300">{{ log.user?.name || 'Sistem' }}</strong> · Status: 
                     <span v-if="log.from_status && log.from_status !== log.to_status" class="font-medium text-slate-700 dark:text-slate-300">
-                      {{ log.from_status_label || formatStatusName(log.from_status) }} &rarr; <span class="font-bold text-blue-600 dark:text-blue-400">{{ log.to_status_label || formatStatusName(log.to_status) }}</span>
+                      {{ log.from_status_label || formatStatusName(log.from_status) }} &rarr; 
+                      <span :class="log.to_status === 'REJECTED' ? 'font-bold text-rose-600 dark:text-rose-400' : 'font-bold text-blue-600 dark:text-blue-400'">
+                        {{ log.to_status_label || formatStatusName(log.to_status) }}
+                      </span>
                     </span>
-                    <span v-else class="font-bold text-blue-600 dark:text-blue-400">
+                    <span v-else :class="log.to_status === 'REJECTED' ? 'font-bold text-rose-600 dark:text-rose-400' : 'font-bold text-blue-600 dark:text-blue-400'">
                       {{ log.to_status_label || formatStatusName(log.to_status) }}
                     </span>
                   </p>
-                  <p v-if="log.notes" class="mt-1 text-slate-600 dark:text-slate-300 italic text-[11px]">
+
+                  <!-- REJECTION REASON: Clear Highlight Box with Red Font -->
+                  <div
+                    v-if="isRejectionLog(log)"
+                    class="mt-2.5 p-3 rounded-xl bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-900/80 shadow-xs"
+                  >
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-rose-700 dark:text-rose-400 mb-1">
+                      <svg class="w-4 h-4 shrink-0 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                      <span>Alasan Penolakan Petugas:</span>
+                    </div>
+                    <p class="text-xs sm:text-sm font-black text-rose-600 dark:text-rose-400 font-sans leading-relaxed tracking-wide">
+                      "{{ formatRejectionText(log.notes) }}"
+                    </p>
+                  </div>
+
+                  <!-- Standard notes for other statuses -->
+                  <p v-else-if="log.notes" class="mt-1 text-slate-600 dark:text-slate-300 italic text-[11px]">
                     "{{ log.notes }}"
                   </p>
                 </div>
