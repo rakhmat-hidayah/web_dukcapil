@@ -313,17 +313,117 @@
                 </p>
               </div>
 
-              <!-- Email (Opsional) -->
+              <!-- Email (Opsional dengan Default @gmail.com) -->
               <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                  Alamat Email <span class="text-slate-400 font-normal lowercase">(opsional)</span>
-                </label>
-                <input
-                  v-model="form.applicant_email"
-                  type="email"
-                  placeholder="pemohon@email.com"
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                    Alamat Email <span class="text-slate-400 font-normal lowercase">(opsional)</span>
+                  </label>
+                  <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-200/80 dark:border-blue-900/50">
+                    <svg class="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Default: @gmail.com
+                  </span>
+                </div>
+
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                  <input
+                    id="field_applicant_email"
+                    v-model="form.applicant_email"
+                    @blur="normalizeApplicantEmail"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="nama.pemohon (otomatis @gmail.com)"
+                    class="w-full pl-10 pr-10 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition font-medium"
+                    :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.applicant_email}"
+                  />
+                  <!-- Tombol Bersihkan / Kosongkan Email jika terisi -->
+                  <button
+                    v-if="form.applicant_email"
+                    type="button"
+                    @click="clearApplicantEmail"
+                    title="Kosongkan email"
+                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-rose-500 transition cursor-pointer"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Live Preview jika pemohon hanya mengetik username tanpa domain @ -->
+                <div v-if="emailUsernameOnly" class="mt-1.5 flex items-center gap-1.5 text-[11px] text-blue-600 dark:text-blue-400 font-medium bg-blue-50/60 dark:bg-blue-950/40 px-2.5 py-1 rounded-xl border border-blue-200/50 dark:border-blue-900/40">
+                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                  <span>Otomatis disimpan: <strong class="font-mono text-blue-700 dark:text-blue-300">{{ emailUsernameOnly }}@gmail.com</strong></span>
+                </div>
+
+                <!-- Quick Domain Selector Pills -->
+                <div class="mt-2 flex items-center flex-wrap gap-1.5">
+                  <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mr-0.5">Pilihan domain:</span>
+                  <button
+                    type="button"
+                    @click="applyEmailDomain('@gmail.com')"
+                    :class="[
+                      'px-2.5 py-1 rounded-xl text-[10px] font-bold transition border cursor-pointer inline-flex items-center gap-1',
+                      currentEmailDomain === '@gmail.com'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-500/20'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
+                    ]"
+                  >
+                    <span>@gmail.com</span>
+                    <span v-if="currentEmailDomain === '@gmail.com'" class="text-[9px] font-normal opacity-90">(aktif)</span>
+                  </button>
+                  <button
+                    type="button"
+                    @click="applyEmailDomain('@yahoo.com')"
+                    :class="[
+                      'px-2.5 py-1 rounded-xl text-[10px] font-bold transition border cursor-pointer inline-flex items-center gap-1',
+                      currentEmailDomain === '@yahoo.com'
+                        ? 'bg-purple-600 text-white border-purple-600 shadow-sm ring-2 ring-purple-500/20'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
+                    ]"
+                  >
+                    <span>@yahoo.com</span>
+                    <span v-if="currentEmailDomain === '@yahoo.com'" class="text-[9px] font-normal opacity-90">(aktif)</span>
+                  </button>
+                  <button
+                    type="button"
+                    @click="applyEmailDomain('@outlook.com')"
+                    :class="[
+                      'px-2.5 py-1 rounded-xl text-[10px] font-bold transition border cursor-pointer inline-flex items-center gap-1',
+                      currentEmailDomain === '@outlook.com'
+                        ? 'bg-sky-600 text-white border-sky-600 shadow-sm ring-2 ring-sky-500/20'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
+                    ]"
+                  >
+                    <span>@outlook.com</span>
+                    <span v-if="currentEmailDomain === '@outlook.com'" class="text-[9px] font-normal opacity-90">(aktif)</span>
+                  </button>
+                  <button
+                    type="button"
+                    @click="applyEmailDomain('@icloud.com')"
+                    :class="[
+                      'px-2.5 py-1 rounded-xl text-[10px] font-bold transition border cursor-pointer inline-flex items-center gap-1',
+                      currentEmailDomain === '@icloud.com'
+                        ? 'bg-slate-700 text-white border-slate-700 shadow-sm ring-2 ring-slate-500/20'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
+                    ]"
+                  >
+                    <span>@icloud.com</span>
+                    <span v-if="currentEmailDomain === '@icloud.com'" class="text-[9px] font-normal opacity-90">(aktif)</span>
+                  </button>
+                </div>
+
+                <p v-if="form.errors.applicant_email" class="text-xs text-rose-500 font-medium mt-1">
+                  {{ form.errors.applicant_email }}
+                </p>
+                <p v-else class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                  Cukup ketik nama pengguna Anda (misal: <span class="font-mono text-slate-600 dark:text-slate-300 font-semibold">budi123</span>). Sistem otomatis melengkapinya ke <strong class="text-slate-700 dark:text-slate-200 font-semibold">@gmail.com</strong>, atau klik tombol pilihan di atas jika menggunakan email lain.
+                </p>
               </div>
 
               <!-- Kecamatan -->
@@ -1053,6 +1153,76 @@ function onRepresentativePhoneInput(e) {
   handlePhoneInput(e, 'representative_phone');
 }
 
+// Applicant Email Helpers & Auto-domain (@gmail.com as Default)
+const emailUsernameOnly = computed(() => {
+  const val = (form.applicant_email || '').trim();
+  if (!val) return '';
+  if (!val.includes('@')) {
+    return val.replace(/\s+/g, '');
+  }
+  return '';
+});
+
+const currentEmailDomain = computed(() => {
+  const val = (form.applicant_email || '').trim().toLowerCase();
+  if (!val) return '@gmail.com';
+  if (!val.includes('@')) return '@gmail.com';
+  const idx = val.indexOf('@');
+  return val.slice(idx);
+});
+
+function normalizeApplicantEmail() {
+  if (!form.applicant_email) return;
+  let val = form.applicant_email.trim();
+  if (!val) {
+    form.applicant_email = '';
+    return;
+  }
+  val = val.replace(/\s+/g, '');
+  if (!val.includes('@')) {
+    val = `${val}@gmail.com`;
+  } else if (val.endsWith('@')) {
+    val = `${val}gmail.com`;
+  }
+  form.applicant_email = val.toLowerCase();
+  if (form.errors.applicant_email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(form.applicant_email)) {
+      delete form.errors.applicant_email;
+    }
+  }
+}
+
+function clearApplicantEmail() {
+  form.applicant_email = '';
+  if (form.errors.applicant_email) {
+    delete form.errors.applicant_email;
+  }
+}
+
+function applyEmailDomain(domain) {
+  const current = (form.applicant_email || '').trim().replace(/\s+/g, '');
+  if (!current) {
+    form.applicant_email = domain;
+    setTimeout(() => {
+      const el = document.getElementById('field_applicant_email');
+      if (el) {
+        el.focus();
+        if (typeof el.setSelectionRange === 'function') {
+          el.setSelectionRange(0, 0);
+        }
+      }
+    }, 50);
+    return;
+  }
+  const parts = current.split('@');
+  const username = parts[0] || '';
+  form.applicant_email = `${username}${domain}`.toLowerCase();
+  if (form.errors.applicant_email) {
+    delete form.errors.applicant_email;
+  }
+}
+
 // Age & Birth Date Validation
 const isBiometric = computed(() => !!selectedServiceObj.value?.is_biometric_first_recording);
 const minRequiredAge = computed(() => isBiometric.value ? 16 : 17);
@@ -1218,6 +1388,22 @@ function validateForm() {
     });
   }
 
+  // 6b. Alamat Email (Opsional - otomatis @gmail.com jika hanya username)
+  normalizeApplicantEmail();
+  if (form.applicant_email && form.applicant_email.trim()) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.applicant_email.trim())) {
+      const msg = 'Format alamat email tidak valid (contoh: nama.pemohon@gmail.com).';
+      form.errors.applicant_email = msg;
+      errors.push({
+        field: 'applicant_email',
+        elementId: 'field_applicant_email',
+        label: 'Alamat Email Pemohon',
+        message: msg,
+      });
+    }
+  }
+
   // 7. Kecamatan
   if (!form.applicant_district || !form.applicant_district.trim()) {
     const msg = 'Kecamatan tempat tinggal wajib dipilih.';
@@ -1352,6 +1538,7 @@ function scrollToError(elementId) {
 }
 
 function submitStep1() {
+  normalizeApplicantEmail();
   const errors = validateForm();
   if (errors.length > 0) {
     incompleteErrors.value = errors;
@@ -1361,6 +1548,7 @@ function submitStep1() {
 
   form.transform((data) => ({
     ...data,
+    applicant_email: data.applicant_email ? data.applicant_email.trim() : null,
     applicant_phone: rawPhoneDigits(data.applicant_phone),
     representative_phone: data.representative_phone ? rawPhoneDigits(data.representative_phone) : '',
   })).post(route('queue.apply.store'), {

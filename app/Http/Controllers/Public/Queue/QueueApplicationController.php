@@ -106,6 +106,22 @@ class QueueApplicationController extends Controller
             $request->merge(['representative_phone' => $cleaned !== '' ? $cleaned : null]);
         }
 
+        // Sanitize applicant email: default to @gmail.com if applicant typed only username without domain
+        if ($request->has('applicant_email') && $request->input('applicant_email') !== null) {
+            $email = trim((string) $request->input('applicant_email'));
+            if ($email !== '') {
+                $email = preg_replace('/\s+/', '', $email);
+                if (!str_contains($email, '@')) {
+                    $email .= '@gmail.com';
+                } elseif (str_ends_with($email, '@')) {
+                    $email .= 'gmail.com';
+                }
+                $request->merge(['applicant_email' => strtolower($email)]);
+            } else {
+                $request->merge(['applicant_email' => null]);
+            }
+        }
+
         $service = ServiceType::find($request->service_type_id);
         $isBiometric = $service ? (bool) $service->is_biometric_first_recording : false;
         $minAge = $isBiometric ? 16 : 17;

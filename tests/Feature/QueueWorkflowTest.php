@@ -1199,4 +1199,75 @@ class QueueWorkflowTest extends TestCase
 
         $appReady->forceDelete();
     }
+
+    public function test_applicant_email_defaults_to_gmail_when_username_only_is_provided_and_supports_custom_email()
+    {
+        $service = ServiceType::first();
+        $this->assertNotNull($service);
+
+        // 1. Kasus input hanya username tanpa domain: harus otomatis menjadi @gmail.com
+        $nik1 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $res1 = $this->post(route('queue.apply.store'), [
+            'service_type_id'       => $service->id,
+            'applicant_nik'         => $nik1,
+            'applicant_name'        => 'Ahmad Otomatis Gmail',
+            'applicant_birth_place' => 'Dompu',
+            'applicant_birth_date'  => '2000-01-01',
+            'applicant_phone'       => '0853-1122-3344',
+            'applicant_email'       => 'ahmad.fauzi', // hanya username
+            'applicant_district'    => 'DOMPU',
+            'applicant_village'     => 'BADA',
+            'applicant_address'     => 'Jl. Soekarno Hatta No. 10',
+            'attendance_type'       => 'self',
+        ]);
+        $res1->assertSessionHasNoErrors();
+        $app1 = QueueApplication::where('applicant_nik', $nik1)->first();
+        $this->assertNotNull($app1);
+        $this->assertEquals('ahmad.fauzi@gmail.com', $app1->applicant_email);
+
+        // 2. Kasus input email kustom (misal @yahoo.com): harus dipertahankan sesuai input
+        $nik2 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $res2 = $this->post(route('queue.apply.store'), [
+            'service_type_id'       => $service->id,
+            'applicant_nik'         => $nik2,
+            'applicant_name'        => 'Budi Yahoo User',
+            'applicant_birth_place' => 'Dompu',
+            'applicant_birth_date'  => '2001-02-02',
+            'applicant_phone'       => '0853-2233-4455',
+            'applicant_email'       => 'budi_dompu@yahoo.com', // kustom domain
+            'applicant_district'    => 'DOMPU',
+            'applicant_village'     => 'BADA',
+            'applicant_address'     => 'Jl. Bhayangkara No. 5',
+            'attendance_type'       => 'self',
+        ]);
+        $res2->assertSessionHasNoErrors();
+        $app2 = QueueApplication::where('applicant_nik', $nik2)->first();
+        $this->assertNotNull($app2);
+        $this->assertEquals('budi_dompu@yahoo.com', $app2->applicant_email);
+
+        // 3. Kasus input email dikosongkan (opsional): harus bernilai null
+        $nik3 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+        $res3 = $this->post(route('queue.apply.store'), [
+            'service_type_id'       => $service->id,
+            'applicant_nik'         => $nik3,
+            'applicant_name'        => 'Citra Tanpa Email',
+            'applicant_birth_place' => 'Dompu',
+            'applicant_birth_date'  => '2002-03-03',
+            'applicant_phone'       => '0853-3344-5566',
+            'applicant_email'       => '', // dikosongkan
+            'applicant_district'    => 'DOMPU',
+            'applicant_village'     => 'BADA',
+            'applicant_address'     => 'Jl. Kartini No. 8',
+            'attendance_type'       => 'self',
+        ]);
+        $res3->assertSessionHasNoErrors();
+        $app3 = QueueApplication::where('applicant_nik', $nik3)->first();
+        $this->assertNotNull($app3);
+        $this->assertNull($app3->applicant_email);
+
+        // Cleanup
+        $app1->forceDelete();
+        $app2->forceDelete();
+        $app3->forceDelete();
+    }
 }
