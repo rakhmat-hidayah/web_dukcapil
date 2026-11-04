@@ -45,16 +45,6 @@
             ></div>
           </div>
 
-          <!-- Check-In Button for physical arrival -->
-          <button
-            v-if="['APPROVED', 'SCHEDULED', 'QUEUE_BOOKED'].includes(application.status)"
-            @click="openCheckInModal"
-            class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            Check-In Kedatangan Loket
-          </button>
-
           <!-- Verifikasi Dokumen Fisik Asli button if arrived -->
           <button
             v-if="['ARRIVED', 'CHECKED_IN', 'PHYSICAL_VERIFICATION'].includes(application.status)"
@@ -1051,85 +1041,6 @@
       </div>
     </div>
 
-    <!-- CHECK-IN MODAL (Konfirmasi Check-In Loket Pelayanan) -->
-    <div v-if="checkInModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
-        <div class="flex items-start justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-lg shrink-0">
-              🎫
-            </div>
-            <div>
-              <h3 class="text-base font-black text-slate-900 dark:text-white">
-                Konfirmasi Check-In Kedatangan
-              </h3>
-              <p class="text-xs text-slate-500 mt-0.5">
-                Tandai kehadiran fisik pemohon di loket pelayanan Disdukcapil
-              </p>
-            </div>
-          </div>
-          <button @click="checkInModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer">✕</button>
-        </div>
-
-        <!-- Details Card -->
-        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs text-slate-500">Nomor Antrean Pelayanan:</span>
-            <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-mono font-black text-sm rounded-xl">
-              {{ application.queue_number || 'Belum Terbit' }}
-            </span>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-200 dark:border-slate-800">
-            <div>
-              <span class="text-[10px] text-slate-400 uppercase font-bold block">Nama Pemohon</span>
-              <span class="font-bold text-slate-900 dark:text-white">{{ application.applicant_name }}</span>
-            </div>
-            <div>
-              <span class="text-[10px] text-slate-400 uppercase font-bold block">Nomor Induk Kependudukan</span>
-              <span class="font-mono text-slate-800 dark:text-slate-200">{{ application.applicant_nik || application.nik }}</span>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-200 dark:border-slate-800">
-            <div>
-              <span class="text-[10px] text-slate-400 uppercase font-bold block">Jadwal Pelayanan</span>
-              <span class="font-medium text-slate-700 dark:text-slate-300">
-                {{ formatScheduleDate(application.slot?.schedule?.schedule_date) }}
-              </span>
-            </div>
-            <div>
-              <span class="text-[10px] text-slate-400 uppercase font-bold block">Status Kehadiran</span>
-              <span class="font-medium text-slate-700 dark:text-slate-300">
-                {{ application.attendance_type === 'PROXY' ? 'Dikuasakan (Surat Kuasa)' : 'Datang Sendiri' }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <p class="text-xs text-slate-500 leading-relaxed">
-          Status permohonan akan diperbarui menjadi <strong>CHECKED_IN / ARRIVED</strong> dan berkas siap diverifikasi secara fisik di loket.
-        </p>
-
-        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
-          <button
-            @click="checkInModalOpen = false"
-            class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
-          >
-            Batal
-          </button>
-          <button
-            @click="submitCheckIn"
-            :disabled="checkInSubmitting"
-            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5 cursor-pointer"
-          >
-            <span v-if="checkInSubmitting">Memproses...</span>
-            <span v-else>Konfirmasi Pemohon Hadir</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- PHYSICAL VERIFICATION MODAL (Pemeriksaan Dokumen Fisik Asli di Loket) -->
     <div v-if="physicalVerifyModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
@@ -1677,29 +1588,6 @@ const submitPreVerify = () => {
       onFinish: () => {
         preVerifySubmitting.value = false
         preVerifyModalOpen.value = false
-      },
-    }
-  )
-}
-
-// Check-In Modal State
-const checkInModalOpen = ref(false)
-const checkInSubmitting = ref(false)
-
-const openCheckInModal = () => {
-  checkInModalOpen.value = true
-}
-const handleCheckIn = openCheckInModal
-
-const submitCheckIn = () => {
-  checkInSubmitting.value = true
-  router.post(
-    route('admin.queue.applications.checkin', props.application.id),
-    {},
-    {
-      onFinish: () => {
-        checkInSubmitting.value = false
-        checkInModalOpen.value = false
       },
     }
   )
