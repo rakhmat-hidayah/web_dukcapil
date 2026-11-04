@@ -49,22 +49,26 @@ class ServiceDocument extends Model
 
     public function getTemplateUrlAttribute($value): ?string
     {
+        if (!empty($value)) {
+            return $value;
+        }
+
         $label = strtolower($this->label ?? '');
 
         if (str_contains($label, 'f-1.06') || str_contains($label, 'f1.06') || str_contains($label, 'perubahan elemen')) {
             $download = \App\Models\Download::where('title', 'like', '%F1.06%')->orWhere('title', 'like', '%F-1.06%')->first();
-            return $download ? url("/downloads/stream/{$download->id}") : ($value ?: 'https://dukcapil.dompukab.go.id/downloads');
+            return $download ? url("/downloads/stream/{$download->id}") : 'https://dukcapil.dompukab.go.id/downloads';
         }
         if (str_contains($label, 'f-1.02') || str_contains($label, 'f1.02') || str_contains($label, 'pendaftaran peristiwa')) {
             $download = \App\Models\Download::where('title', 'like', '%F1.02%')->orWhere('title', 'like', '%F-1.02%')->first();
-            return $download ? url("/downloads/stream/{$download->id}") : ($value ?: 'https://dukcapil.dompukab.go.id/downloads');
+            return $download ? url("/downloads/stream/{$download->id}") : 'https://dukcapil.dompukab.go.id/downloads';
         }
         if (str_contains($label, 'kuasa') || str_contains($label, 'f-1.07') || str_contains($label, 'f1.07') || str_contains($label, 'f.017')) {
             $download = \App\Models\Download::where('title', 'like', '%F1.07%')->orWhere('title', 'like', '%F-1.07%')->first();
-            return $download ? url("/downloads/stream/{$download->id}") : ($value ?: 'https://dukcapil.dompukab.go.id/downloads');
+            return $download ? url("/downloads/stream/{$download->id}") : 'https://dukcapil.dompukab.go.id/downloads';
         }
 
-        return $value;
+        return null;
     }
 
     public function getAcceptedFormatsArrayAttribute(): array

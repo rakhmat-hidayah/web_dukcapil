@@ -23,179 +23,19 @@ class QueueApplicationService
     ) {}
 
     /**
-     * Self-healing: Ensure all core KTP-el services have the mandatory requirements:
-     * 1. Formulir F-1.02 (Pendaftaran Peristiwa Kependudukan) on all active KTP services.
-     * 2. Selfie photo verification on Perekaman KTP-el and Perubahan Elemen Data.
-     * 3. Dokumen Bukti Peristiwa Pendukung on Perubahan Elemen Data.
-     * Guaranteed to execute and self-heal the database on any environment automatically.
+     * Persyaratan dokumen dikelola secara dinamis melalui Database / Panel Admin CMS.
      */
     public static function ensureAllRequiredDocuments(): void
     {
-        try {
-            // 1. Ensure Selfie photo requirement for Perekaman KTP-el
-            self::ensureSelfieRequirementForPerekaman();
-
-            // 2. Ensure Formulir F-1.02 on all active KTP-el services
-            $download = null;
-            if (\Illuminate\Support\Facades\Schema::hasTable('downloads')) {
-                $download = \App\Models\Download::where(function ($q) {
-                    $q->where('title', 'like', '%F1.02%')
-                      ->orWhere('title', 'like', '%F-1.02%')
-                      ->orWhere('title', 'like', '%Pendaftaran Peristiwa%');
-                })->first();
-            }
-            $f102TemplateUrl = $download ? url('/downloads/stream/' . $download->id) : url('/downloads');
-
-            // Find all primary KTP-el services
-            $ktpServices = ServiceType::where(function ($q) {
-                $q->where('slug', 'like', '%perubahan%')
-                  ->orWhere('slug', 'like', '%rusak%')
-                  ->orWhere('slug', 'like', '%hilang%')
-                  ->orWhere('slug', 'like', '%perekaman%')
-                  ->orWhere('slug', 'like', '%rekam%')
-                  ->orWhere('name', 'like', '%KTP%')
-                  ->orWhere('name', 'like', '%Perubahan%');
-            })->get();
-
-            foreach ($ktpServices as $service) {
-                $f102Doc = ServiceDocument::where('service_type_id', $service->id)
-                    ->where(function ($q) {
-                        $q->where('label', 'like', '%F-1.02%')
-                          ->orWhere('label', 'like', '%F1.02%')
-                          ->orWhere('label', 'like', '%Pendaftaran Peristiwa%');
-                    })->first();
-
-                if (!$f102Doc) {
-                    ServiceDocument::create([
-                        'service_type_id'  => $service->id,
-                        'label'            => 'Formulir F-1.02 (Pendaftaran Peristiwa Kependudukan)',
-                        'description'      => 'Formulir resmi permohonan pendaftaran peristiwa kependudukan yang telah diisi lengkap dan ditandatangani. Blanko formulir dapat diunduh pada link di bawah.',
-                        'accepted_formats' => 'jpg,jpeg,png,pdf',
-                        'max_size_kb'      => 5120,
-                        'is_required'      => true,
-                        'is_active'        => true,
-                        'capture_hint'     => 'Foto seluruh lembar Formulir F-1.02 yang telah diisi dan ditandatangani. Pastikan tulisan terbaca jelas dan tidak terpotong.',
-                        'capture_mode'     => 'environment',
-                        'applicable_to'    => 'all',
-                        'template_url'     => $f102TemplateUrl,
-                        'sort_order'       => 2,
-                    ]);
-                } else {
-                    if (!$f102Doc->template_url && $f102TemplateUrl) {
-                        $f102Doc->update([
-                            'template_url'  => $f102TemplateUrl,
-                        ]);
-                    }
-                }
-            }
-
-            // 3. Normalize Perubahan Elemen Data documents specifically
-            $perubahanSvc = ServiceType::where('slug', 'like', '%perubahan%')
-                ->orWhere('name', 'like', '%Perubahan Elemen%')
-                ->first();
-
-            if ($perubahanSvc) {
-                // Ensure Dokumen Bukti Peristiwa Pendukung exists
-                $buktiDoc = ServiceDocument::where('service_type_id', $perubahanSvc->id)
-                    ->where(function ($q) {
-                        $q->where('label', 'like', '%Bukti Peristiwa%')
-                          ->orWhere('label', 'like', '%Pendukung%')
-                          ->orWhere('label', 'like', '%Buku Nikah%');
-                    })->first();
-
-                if (!$buktiDoc) {
-                    ServiceDocument::create([
-                        'service_type_id'  => $perubahanSvc->id,
-                        'label'            => 'Dokumen Bukti Peristiwa Pendukung',
-                        'description'      => 'Buku Nikah / Akta Cerai / Ijazah / Surat Keterangan Pindah / SK Pengangkatan sesuai elemen data yang diubah.',
-                        'accepted_formats' => 'jpg,jpeg,png,pdf',
-                        'max_size_kb'      => 5120,
-                        'is_required'      => true,
-                        'capture_hint'     => 'Foto dokumen pendukung asli yang menjadi dasar perubahan data.',
-                        'capture_mode'     => 'environment',
-                        'applicable_to'    => 'all',
-                        'sort_order'       => 4,
-                    ]);
-                }
-
-                // Ensure Selfie photo exists for Perubahan Elemen Data as well
-                $selfiePerubahan = ServiceDocument::where('service_type_id', $perubahanSvc->id)
-                    ->where(function ($q) {
-                        $q->where('label', 'like', '%Selfie%')
-                          ->orWhere('label', 'like', '%Foto Wajah%');
-                    })->first();
-
-                if (!$selfiePerubahan) {
-                    ServiceDocument::create([
-                        'service_type_id'  => $perubahanSvc->id,
-                        'label'            => 'Foto Wajah Pemohon (Selfie Verifikasi)',
-                        'description'      => 'Foto wajah pemohon terbaru untuk verifikasi identitas pemilik fisik kartu.',
-                        'accepted_formats' => 'jpg,jpeg,png',
-                        'max_size_kb'      => 5120,
-                        'is_required'      => true,
-                        'capture_hint'     => 'Foto wajah tampak depan tanpa kacamata di ruangan terang.',
-                        'capture_mode'     => 'user',
-                        'applicable_to'    => 'all',
-                        'sort_order'       => 5,
-                    ]);
-                }
-            }
-        } catch (\Throwable $e) {
-            Log::warning('ensureAllRequiredDocuments warning: ' . $e->getMessage());
-        }
+        // No-op: Mengikuti data dinamis dari database tanpa hardcode.
     }
 
     /**
-     * Self-healing: Ensure all Perekaman KTP-el services have the mandatory selfie photo requirement.
-     * Guaranteed to execute and heal the database on any environment even if CLI migrations are not run.
+     * Persyaratan dokumen dikelola secara dinamis melalui Database / Panel Admin CMS.
      */
     public static function ensureSelfieRequirementForPerekaman(): void
     {
-        try {
-            $rekamServices = ServiceType::where('slug', 'like', '%perekaman%')
-                ->orWhere('slug', 'like', '%rekam%')
-                ->orWhere('is_biometric_first_recording', true)
-                ->orWhere('name', 'like', '%Perekaman%')
-                ->get();
-
-            foreach ($rekamServices as $rekam) {
-                if (!$rekam->requires_face_photo) {
-                    $rekam->update(['requires_face_photo' => true]);
-                }
-
-                $selfieDoc = ServiceDocument::where('service_type_id', $rekam->id)
-                    ->where(function ($q) {
-                        $q->where('label', 'like', '%Selfie%')
-                          ->orWhere('label', 'like', '%Foto Wajah%');
-                    })->first();
-
-                if (!$selfieDoc) {
-                    ServiceDocument::create([
-                        'service_type_id'  => $rekam->id,
-                        'label'            => 'Foto Wajah Pemohon (Selfie Verifikasi)',
-                        'description'      => 'Foto wajah tampak depan pemohon terbaru tanpa kacamata untuk verifikasi biometrik oleh petugas.',
-                        'accepted_formats' => 'jpg,jpeg,png',
-                        'max_size_kb'      => 5120,
-                        'is_required'      => true,
-                        'is_active'        => true,
-                        'capture_hint'     => 'Gunakan kamera depan, tatap lurus ke kamera di tempat terang, tanpa kacamata hitam, masker, atau penutup wajah.',
-                        'capture_mode'     => 'user',
-                        'applicable_to'    => 'all',
-                        'sort_order'       => 3,
-                    ]);
-                } else {
-                    $updates = [];
-                    if ($selfieDoc->capture_mode !== 'user') {
-                        $updates['capture_mode'] = 'user';
-                    }
-                    if (!empty($updates)) {
-                        $selfieDoc->update($updates);
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            Log::warning('ensureSelfieRequirementForPerekaman warning: ' . $e->getMessage());
-        }
+        // No-op: Mengikuti data dinamis dari database tanpa hardcode.
     }
 
     /**
@@ -382,7 +222,7 @@ class QueueApplicationService
         $missing = [];
 
         foreach ($allDocs as $doc) {
-            // Check if document applies to this application
+            // Check if document applies to this application based on attendance
             if ($doc->applicable_to === 'representative_only' && !$isRepresented) {
                 continue;
             }
@@ -390,31 +230,7 @@ class QueueApplicationService
                 continue;
             }
 
-            // Safety guard: if not represented, skip any F-1.07 or proxy document
-            if (!$isRepresented) {
-                $docLabelLower = strtolower($doc->label ?? '');
-                if (str_contains($docLabelLower, 'kuasa') || str_contains($docLabelLower, 'f-1.07') || str_contains($docLabelLower, 'f1.07') || str_contains($docLabelLower, 'dikuasakan') || str_contains($docLabelLower, 'diwakilkan')) {
-                    continue;
-                }
-            }
-
-            // If representative requires power of attorney specifically
-            if ($doc->applicable_to === 'representative_only' && $isRepresented) {
-                $docLabelLower = strtolower($doc->label);
-                $isKuasaDoc = str_contains($docLabelLower, 'kuasa')
-                    || str_contains($docLabelLower, 'f-1.07')
-                    || str_contains($docLabelLower, 'f1.07')
-                    || str_contains($docLabelLower, 'f.017');
-
-                // If service requires power of attorney and attendance is other or family
-                if ($application->serviceType->require_power_of_attorney && $isKuasaDoc) {
-                    if (!in_array($doc->id, $uploadedDocIds)) {
-                        $missing[] = $doc->label;
-                    }
-                    continue;
-                }
-            }
-
+            // Only required active documents must be uploaded
             if ($doc->is_required && !in_array($doc->id, $uploadedDocIds)) {
                 $missing[] = $doc->label;
             }

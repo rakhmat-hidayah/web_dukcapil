@@ -197,33 +197,14 @@ const isUploaded = computed(() => !!props.uploadedDoc);
 const isRevision = computed(() => props.uploadedDoc && (props.uploadedDoc.status === 'REVISION_REQUIRED' || props.uploadedDoc.status === 'REJECTED'));
 
 const downloadUrl = computed(() => {
-  if (props.requirement.template_url) {
-    return props.requirement.template_url;
-  }
-  const label = (props.requirement.label || '').toLowerCase();
-  if (label.includes('f-1.06') || label.includes('f1.06') || label.includes('perubahan elemen')) {
-    return 'https://dukcapil.dompukab.go.id/downloads';
-  }
-  if (label.includes('f-1.02') || label.includes('f1.02') || label.includes('pendaftaran peristiwa')) {
-    return 'https://dukcapil.dompukab.go.id/downloads';
-  }
-  if (label.includes('kuasa') || label.includes('f-1.07') || label.includes('f.017')) {
-    return 'https://dukcapil.dompukab.go.id/downloads';
-  }
-  return null;
+  return props.requirement.template_url || null;
 });
 
 const downloadFormLabel = computed(() => {
-  const label = (props.requirement.label || '').toLowerCase();
-  if (label.includes('f-1.06') || label.includes('f1.06') || label.includes('perubahan elemen')) {
-    return 'Formulir F-1.06';
+  if (props.requirement.label) {
+    const clean = props.requirement.label.replace(/\(.*?\)/g, '').trim();
+    return clean || props.requirement.label;
   }
-  if (label.includes('f-1.02') || label.includes('f1.02') || label.includes('pendaftaran peristiwa')) {
-    return 'Formulir F-1.02';
-  }
-  if (label.includes('kuasa') || label.includes('f-1.07') || label.includes('f.017')) {
-    return 'Formulir Surat Kuasa F-1.07';
-  }
-  return 'Formulir Resmi';
+  return 'Formulir';
 });
 </script>

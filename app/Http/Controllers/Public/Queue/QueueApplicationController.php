@@ -51,9 +51,6 @@ class QueueApplicationController extends Controller
         $serviceSlug = $request->query('layanan');
         $selectedService = null;
 
-        // Self-heal: ensure mandatory requirements (Formulir F-1.02 and Selfie) are present across all services
-        \App\Services\Queue\QueueApplicationService::ensureAllRequiredDocuments();
-
         if ($serviceSlug) {
             $selectedService = ServiceType::active()
                 ->where('slug', $serviceSlug)
@@ -102,8 +99,6 @@ class QueueApplicationController extends Controller
      */
     public function storeDraft(Request $request): RedirectResponse
     {
-        \App\Services\Queue\QueueApplicationService::ensureAllRequiredDocuments();
-
         // Sanitize phone numbers by removing non-digit characters (e.g. hyphens, spaces)
         if ($request->has('applicant_phone') && $request->input('applicant_phone') !== null) {
             $cleaned = preg_replace('/[^0-9]/', '', (string) $request->input('applicant_phone'));
@@ -310,9 +305,6 @@ class QueueApplicationController extends Controller
      */
     public function showDocuments(string $regNumber): Response|RedirectResponse
     {
-        // Self-heal: ensure mandatory requirements (Formulir F-1.02 and Selfie) exist across all services
-        \App\Services\Queue\QueueApplicationService::ensureAllRequiredDocuments();
-
         $application = QueueApplication::where('reg_number', $regNumber)
             ->with([
                 'serviceType.documents' => fn($q) => $q->where('is_active', true)->orderBy('sort_order'),
@@ -339,7 +331,7 @@ class QueueApplicationController extends Controller
             return redirect()->route('queue.status', ['token' => $application->access_token]);
         }
 
-        // Filter requirements based on attendance type
+        // Filter requirements based on attendance type using database applicable_to field
         $isRepresented = $application->is_represented;
         $filteredRequirements = $application->serviceType->documents->filter(function ($doc) use ($isRepresented) {
             if ($doc->applicable_to === 'representative_only' && !$isRepresented) {
@@ -347,12 +339,6 @@ class QueueApplicationController extends Controller
             }
             if ($doc->applicable_to === 'self_only' && $isRepresented) {
                 return false;
-            }
-            if (!$isRepresented) {
-                $docLabelLower = strtolower($doc->label ?? '');
-                if (str_contains($docLabelLower, 'kuasa') || str_contains($docLabelLower, 'f-1.07') || str_contains($docLabelLower, 'f1.07') || str_contains($docLabelLower, 'dikuasakan') || str_contains($docLabelLower, 'diwakilkan')) {
-                    return false;
-                }
             }
             return true;
         })->values();

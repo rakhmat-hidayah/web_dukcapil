@@ -63,14 +63,7 @@ class AutoRoleSync
             Log::warning('AutoRoleSync migration warning: ' . $e->getMessage());
         }
 
-        // 2. Ensure all mandatory requirements (Formulir F-1.02 and Selfie photo) exist across all services
-        try {
-            \App\Services\Queue\QueueApplicationService::ensureAllRequiredDocuments();
-        } catch (\Throwable $e) {
-            Log::warning('AutoRoleSync ensureAllRequiredDocuments warning: ' . $e->getMessage());
-        }
-
-        // 3. Ensure Indonesian roles and Supervisor Layanan KTP-el exist
+        // 2. Ensure Indonesian roles and Supervisor Layanan KTP-el exist
         try {
             self::ensureIndonesianRoles();
         } catch (\Throwable $e) {
