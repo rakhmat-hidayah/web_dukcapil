@@ -459,7 +459,7 @@ class QueueApplicationController extends Controller
             'statement_agreed.accepted' => 'Anda wajib mencentang persetujuan pernyataan pemohon sebelum mengirim berkas.',
         ]);
 
-        $this->applicationService->submit($application, true);
+        $application = $this->applicationService->submit($application, true);
 
         // Establish verified session for applicant's NIK
         session([
@@ -467,8 +467,10 @@ class QueueApplicationController extends Controller
             'applicant_verified_at'  => now()->timestamp,
         ]);
 
+        $queueInfo = $application->queue_number ? " Nomor antrean resmi Anda telah terbit: {$application->queue_number}." : "";
+
         return redirect()->route('queue.status', ['token' => $application->access_token])
-            ->with('success', 'Permohonan Anda berhasil dikirim! Simpan Nomor Registrasi ini untuk memantau hasil pra-verifikasi berkas oleh petugas.');
+            ->with('success', "Permohonan berkas Anda berhasil dikirim!{$queueInfo} Simpan bukti antrean ini untuk kedatangan Anda ke kantor.");
     }
 
     /**

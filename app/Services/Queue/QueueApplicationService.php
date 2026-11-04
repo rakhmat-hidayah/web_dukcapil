@@ -250,19 +250,35 @@ class QueueApplicationService
 
         $fromStatus = $application->status;
 
+        // Otomatis terbitkan nomor antrean resmi & alokasikan jadwal segera setelah pemohon mengirim berkas verifikasi
+        if (!$application->queue_number) {
+            try {
+                $slot = $this->slotService->getEarliestAvailableSlot($application->service_type_id);
+                if ($slot) {
+                    $this->slotService->bookSlot($slot->id, $application);
+                    $application->refresh();
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Auto-issuing queue number on submit warning [{$application->reg_number}]: " . $e->getMessage());
+            }
+        }
+
         $application->update([
             'status'               => QueueApplication::STATUS_SUBMITTED,
             'submitted_at'         => now(),
+            'scheduled_at'         => $application->scheduled_at ?: now(),
             'statement_agreed'     => true,
             'statement_agreed_at'  => now(),
         ]);
+
+        $queueNote = $application->queue_number ? " Nomor antrean resmi diterbitkan: {$application->queue_number}." : "";
 
         VerificationHistory::create([
             'application_id' => $application->id,
             'user_id'        => null,
             'from_status'    => $fromStatus,
             'to_status'      => QueueApplication::STATUS_SUBMITTED,
-            'notes'          => 'Permohonan layanan dan berkas digital dikirimkan oleh pemohon untuk pra-verifikasi.',
+            'notes'          => "Permohonan layanan dan berkas digital dikirimkan oleh pemohon untuk pra-verifikasi.{$queueNote}",
             'metadata'       => [
                 'ip' => request()->ip(),
             ],

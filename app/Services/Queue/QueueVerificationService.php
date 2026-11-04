@@ -40,9 +40,10 @@ class QueueVerificationService
     {
         DB::transaction(function () use ($application, $officer, $notes) {
             $fromStatus = $application->status;
+            $toStatus = $application->queue_number ? QueueApplication::STATUS_QUEUE_BOOKED : QueueApplication::STATUS_PRE_VERIFIED;
 
             $application->update([
-                'status'       => QueueApplication::STATUS_PRE_VERIFIED,
+                'status'       => $toStatus,
                 'approved_at'  => now(),
                 'notes'        => $notes ?: $application->notes,
             ]);
@@ -56,12 +57,19 @@ class QueueVerificationService
                     'reviewed_at' => now(),
                 ]);
 
+            $historyNote = $application->queue_number
+                ? "Pra-verifikasi berkas digital disetujui oleh petugas. Nomor antrean {$application->queue_number} siap digunakan untuk kedatangan di loket."
+                : 'Pra-verifikasi dokumen online berhasil disetujui. Pemohon dapat memilih jadwal antrean kedatangan.';
+            if ($notes) {
+                $historyNote .= " Catatan: {$notes}";
+            }
+
             $this->recordHistory(
                 $application,
                 $fromStatus,
-                QueueApplication::STATUS_PRE_VERIFIED,
+                $toStatus,
                 $officer,
-                'Pra-verifikasi dokumen online berhasil disetujui. Pemohon dapat memilih jadwal antrean kedatangan.' . ($notes ? " Catatan: {$notes}" : '')
+                $historyNote
             );
 
             // Daftarkan otomatis ke antrean serah terima fisik (MENUNGGU_KETERSEDIAAN)

@@ -89,23 +89,31 @@ class ApplicantDashboardController extends Controller
     }
 
     /**
-     * Show booking calendar interface when application is PRE_VERIFIED.
+     * Show booking calendar interface when application is PRE_VERIFIED or rescheduling.
      */
-    public function showBooking(string $token): Response|RedirectResponse
+    public function showBooking(Request $request, string $token): Response|RedirectResponse
     {
         $application = QueueApplication::where('access_token', $token)
             ->with(['serviceType', 'slot.schedule'])
             ->firstOrFail();
 
-        // If queue number is already issued, redirect directly to status
-        if ($application->queue_number) {
+        // If queue number is already issued and not explicitly rescheduling, redirect directly to status
+        if ($application->queue_number && !$request->has('reschedule')) {
             return redirect()->route('queue.status', ['token' => $token])
                 ->with('info', "Nomor antrean resmi Anda telah diterbitkan: {$application->queue_number}.");
         }
 
-        if (!in_array($application->status, [QueueApplication::STATUS_PRE_VERIFIED, QueueApplication::STATUS_APPROVED])) {
+        $allowedStatuses = [
+            QueueApplication::STATUS_SUBMITTED,
+            QueueApplication::STATUS_RESUBMITTED,
+            QueueApplication::STATUS_PRE_VERIFIED,
+            QueueApplication::STATUS_APPROVED,
+            QueueApplication::STATUS_QUEUE_BOOKED,
+        ];
+
+        if (!in_array($application->status, $allowedStatuses)) {
             return redirect()->route('queue.status', ['token' => $token])
-                ->with('info', 'Pemesanan jadwal antrean hanya dapat dilakukan setelah dokumen dinyatakan lolos pra-verifikasi (PRE_VERIFIED).');
+                ->with('info', 'Pemesanan jadwal antrean hanya dapat dilakukan untuk permohonan yang aktif.');
         }
 
         $availableSchedules = QueueSchedule::where('is_open', true)
@@ -125,11 +133,12 @@ class ApplicantDashboardController extends Controller
         return Inertia::render('Public/Queue/Status/Booking', [
             'application' => $application,
             'schedules'   => $availableSchedules,
+            'isReschedule' => (bool) $request->has('reschedule'),
         ]);
     }
 
     /**
-     * Store chosen queue slot booking.
+     * Store chosen queue slot booking or rescheduling.
      */
     public function storeBooking(Request $request, string $token): RedirectResponse
     {
@@ -142,20 +151,24 @@ class ApplicantDashboardController extends Controller
 
         $application = QueueApplication::where('access_token', $token)->firstOrFail();
 
-        // If queue number is already issued, prevent double-booking
-        if ($application->queue_number) {
+        // If queue number is already issued and not rescheduling, prevent double-booking
+        if ($application->queue_number && !$request->has('reschedule')) {
             return redirect()->route('queue.status', ['token' => $token])
                 ->with('info', "Nomor antrean resmi Anda telah diterbitkan: {$application->queue_number}.");
         }
 
         try {
-            $this->verificationService->bookQueueSlot($application, (int) $request->input('slot_id'));
+            $this->slotService->bookSlot((int) $request->input('slot_id'), $application);
+            $application->update([
+                'scheduled_at' => now(),
+            ]);
         } catch (\Throwable $e) {
             return back()->with('error', $e->getMessage());
         }
 
+        $freshApp = $application->fresh();
         return redirect()->route('queue.status', ['token' => $token])
-            ->with('success', "Jadwal antrean berhasil dipilih! Nomor antrean Anda: {$application->fresh()->queue_number}.");
+            ->with('success', "Jadwal antrean berhasil ditetapkan! Nomor antrean resmi Anda: {$freshApp->queue_number}.");
     }
 
     /**

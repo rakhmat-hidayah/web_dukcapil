@@ -145,7 +145,7 @@
                 {{ canSubmit ? 'Semua Berkas & Pernyataan Lengkap' : 'Lengkapi Berkas & Centang Pernyataan' }}
               </p>
               <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                {{ canSubmit ? 'Klik tombol di samping untuk mengirimkan berkas Anda ke meja verifikator.' : 'Pastikan seluruh dokumen wajib terunggah dan pernyataan pemohon telah dicentang.' }}
+                {{ canSubmit ? 'Klik tombol di samping untuk mengirimkan berkas dan langsung menerbitkan nomor antrean resmi Anda.' : 'Pastikan seluruh dokumen wajib terunggah dan pernyataan pemohon telah dicentang.' }}
               </p>
             </div>
           </div>
@@ -637,7 +637,7 @@ async function handleSubmitApplication() {
     step: 'submitting',
     current: totalStaged,
     total: totalStaged,
-    label: 'Memfinalisasi pendaftaran antrean Anda...',
+    label: 'Memfinalisasi pendaftaran & menerbitkan nomor antrean Anda...',
     percent: 98,
   };
 

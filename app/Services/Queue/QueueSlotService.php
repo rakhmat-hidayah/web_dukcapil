@@ -59,6 +59,87 @@ class QueueSlotService
     }
 
     /**
+     * Get or create the earliest available open schedule slot for a given service type.
+     */
+    public function getEarliestAvailableSlot(int $serviceTypeId): ?QueueSlot
+    {
+        $today = Carbon::today();
+
+        // 1. Find existing open slot with remaining quota starting from today
+        $slot = QueueSlot::with(['schedule', 'serviceType'])
+            ->where('queue_slots.service_type_id', $serviceTypeId)
+            ->whereHas('schedule', function ($q) use ($today) {
+                $q->where('schedule_date', '>=', $today->format('Y-m-d'))
+                  ->where('is_open', true)
+                  ->where('is_holiday', false);
+            })
+            ->whereRaw('queue_slots.booked_count < queue_slots.quota')
+            ->join('queue_schedules', 'queue_slots.schedule_id', '=', 'queue_schedules.id')
+            ->orderBy('queue_schedules.schedule_date', 'asc')
+            ->orderBy('queue_schedules.open_time', 'asc')
+            ->select('queue_slots.*')
+            ->first();
+
+        if ($slot) {
+            return $slot;
+        }
+
+        // 2. If no available slot has remaining quota, check if any upcoming open schedule exists
+        $upcomingSchedule = QueueSchedule::where('schedule_date', '>=', $today->format('Y-m-d'))
+            ->where('is_open', true)
+            ->where('is_holiday', false)
+            ->orderBy('schedule_date', 'asc')
+            ->first();
+
+        if ($upcomingSchedule) {
+            $service = \App\Models\Queue\ServiceType::find($serviceTypeId);
+            $quota = $service ? $service->quota_per_day : 25;
+
+            return QueueSlot::firstOrCreate(
+                [
+                    'schedule_id'     => $upcomingSchedule->id,
+                    'service_type_id' => $serviceTypeId,
+                ],
+                [
+                    'quota'        => $quota,
+                    'booked_count' => 0,
+                ]
+            );
+        }
+
+        // 3. Fallback: create next workday schedule if no schedules exist
+        $nextDate = $today->copy();
+        do {
+            $nextDate->addDay();
+        } while ($nextDate->isWeekend());
+
+        $service = \App\Models\Queue\ServiceType::find($serviceTypeId);
+        $quota = $service ? $service->quota_per_day : 25;
+
+        $newSchedule = QueueSchedule::firstOrCreate(
+            ['schedule_date' => $nextDate->format('Y-m-d')],
+            [
+                'open_time'   => '08:00:00',
+                'close_time'  => '15:30:00',
+                'total_quota' => 100,
+                'is_holiday'  => false,
+                'is_open'     => true,
+            ]
+        );
+
+        return QueueSlot::firstOrCreate(
+            [
+                'schedule_id'     => $newSchedule->id,
+                'service_type_id' => $serviceTypeId,
+            ],
+            [
+                'quota'        => $quota,
+                'booked_count' => 0,
+            ]
+        );
+    }
+
+    /**
      * Securely book a slot using pessimistic row locking to prevent race conditions.
      *
      * @throws QuotaExceededException
@@ -74,9 +155,12 @@ class QueueSlotService
                 return QueueSlot::with(['schedule', 'serviceType'])->findOrFail($slotId);
             }
 
-            // If already booked to another slot, prevent double-booking without release
-            if ($app->queue_number && $app->status === QueueApplication::STATUS_QUEUE_BOOKED) {
-                throw new \InvalidArgumentException("Permohonan ini telah memiliki nomor antrean resmi ({$app->queue_number}).");
+            // If booked to another slot, release old slot quota first
+            if ($app->queue_slot_id && $app->queue_slot_id !== $slotId) {
+                $oldSlot = QueueSlot::lockForUpdate()->find($app->queue_slot_id);
+                if ($oldSlot && $oldSlot->booked_count > 0) {
+                    $oldSlot->decrement('booked_count');
+                }
             }
 
             // lockForUpdate prevents concurrent transactions from reading stale booked_count

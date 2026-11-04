@@ -1044,46 +1044,54 @@ function filterBirthDateKeypress(e) {
 
 function formatBirthDateMask(value) {
   if (!value) return '';
-  const digits = value.replace(/\D/g, '').slice(0, 8);
-  if (digits.length <= 2) {
-    return digits;
+  const parts = value.split(/[\/\-\.]/);
+  if (parts.length === 1) {
+    const digits = parts[0].replace(/\D/g, '').slice(0, 8);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
   }
-  if (digits.length <= 4) {
-    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  const d = (parts[0] || '').replace(/\D/g, '').slice(0, 2);
+  const mRaw = (parts[1] || '').replace(/\D/g, '');
+  const m = mRaw.slice(0, 2);
+  const extraYearFromM = mRaw.slice(2, 6);
+
+  if (parts.length === 2) {
+    if (extraYearFromM) {
+      return `${d}/${m}/${extraYearFromM}`;
+    }
+    if (value.endsWith('/') || value.endsWith('-') || value.endsWith('.')) {
+      return `${d}/${m}/`;
+    }
+    return m ? `${d}/${m}` : (d ? `${d}/` : '');
   }
-  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+
+  const yParts = parts.slice(2);
+  let y = yParts.join('').replace(/\D/g, '').slice(0, 4);
+  if (extraYearFromM && !y) {
+    y = extraYearFromM;
+  }
+  return `${d}/${m}/${y}`;
 }
 
 function onBirthDateManualInput(e) {
   const el = e.target;
   const raw = el.value || '';
-
-  let formatted = '';
-  if (raw.includes('/') || raw.includes('-') || raw.includes('.')) {
-    const parts = raw.split(/[\/\-\.]/);
-    if (parts.length > 3) {
-      parts.length = 3;
-    }
-    const d = parts[0] ? parts[0].replace(/\D/g, '').slice(0, 2) : '';
-    const m = parts[1] ? parts[1].replace(/\D/g, '').slice(0, 2) : '';
-    const y = parts[2] ? parts[2].replace(/\D/g, '').slice(0, 4) : '';
-    formatted = d;
-    if (parts.length > 1 || raw.endsWith('/') || raw.endsWith('-') || raw.endsWith('.')) {
-      formatted += '/' + m;
-    }
-    if (parts.length > 2 || (parts[1] && (raw.endsWith('/') || raw.endsWith('-') || raw.endsWith('.')))) {
-      formatted += '/' + y;
-    }
-  } else {
-    formatted = formatBirthDateMask(raw);
-  }
+  const formatted = formatBirthDateMask(raw);
 
   birthDateInputText.value = formatted;
   el.value = formatted;
 
-  // Jika sudah 10 karakter lengkap (DD/MM/YYYY), coba normalisasi dan sinkronkan tanpa pop notice
   if (formatted.length === 10) {
     correctAndNormalizeBirthDate(false);
+  } else {
+    if (autoCorrectedNotice.value) {
+      autoCorrectedNotice.value = '';
+    }
+    const parts = formatted.split('/');
+    if (parts.length === 3 && parts[2].length === 4) {
+      form.applicant_birth_date = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    }
   }
 }
 

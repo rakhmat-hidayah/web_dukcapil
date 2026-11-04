@@ -148,27 +148,25 @@ class QueueWorkflowTest extends TestCase
             $appService->uploadDocument($application, $docConfig->id, $fakeFile);
         }
 
-        // 3. Submit application with statement agreed
+        // 3. Submit application with statement agreed (Nomor antrean resmi langsung terbit terlebih dahulu)
         $submittedApp = $appService->submit($application, true);
         $this->assertEquals(QueueApplication::STATUS_SUBMITTED, $submittedApp->status);
         $this->assertTrue($submittedApp->statement_agreed);
+        $this->assertNotNull($submittedApp->queue_number);
+        $this->assertNotNull($submittedApp->queue_slot_id);
 
-        // 4. Officer Online Pre-Verification (PRE_VERIFIED)
+        // 4. Officer Online Pre-Verification: Dokumen online disetujui & nomor antrean aktif
         $verifierService = app(QueueVerificationService::class);
         $officer = User::first() ?? User::factory()->create();
 
         $verifierService->preVerify($submittedApp, $officer, 'Dokumen online lengkap dan sah.');
-        $this->assertEquals(QueueApplication::STATUS_PRE_VERIFIED, $submittedApp->fresh()->status);
+        $this->assertEquals(QueueApplication::STATUS_QUEUE_BOOKED, $submittedApp->fresh()->status);
 
-        // Verification of seamless direction: Accessing status page automatically directs applicant to booking
-        $statusDirectResponse = $this->get(route('queue.status', ['token' => $submittedApp->access_token]));
-        $statusDirectResponse->assertRedirect(route('queue.booking', ['token' => $submittedApp->access_token]));
-
-        // Direct view dashboard when explicitly requested
-        $statusDashboardResponse = $this->get(route('queue.status', ['token' => $submittedApp->access_token, 'view_dashboard' => 1]));
+        // Akses halaman status menampilkan tiket & nomor antrean resmi pemohon
+        $statusDashboardResponse = $this->get(route('queue.status', ['token' => $submittedApp->access_token]));
         $statusDashboardResponse->assertOk();
 
-        // 5. Applicant chooses queue schedule slot
+        // 5. Pemohon dapat melakukan ubah jadwal antrean jika berhalangan hadir pada tanggal awal
         $schedule = QueueSchedule::firstOrCreate(
             ['schedule_date' => now()->addDays(3)->format('Y-m-d')],
             [
@@ -195,7 +193,8 @@ class QueueWorkflowTest extends TestCase
         );
         $slot->increment('quota', 50);
 
-        $verifierService->bookQueueSlot($submittedApp, $slot->id);
+        $slotService = app(\App\Services\Queue\QueueSlotService::class);
+        $slotService->bookSlot($slot->id, $submittedApp);
         $bookedApp = $submittedApp->fresh();
         $this->assertEquals(QueueApplication::STATUS_QUEUE_BOOKED, $bookedApp->status);
         $this->assertNotNull($bookedApp->queue_number);
@@ -1376,5 +1375,50 @@ class QueueWorkflowTest extends TestCase
         $app1->forceDelete();
         $app2->forceDelete();
         $app3->forceDelete();
+    }
+
+    public function test_queue_number_is_issued_immediately_upon_submitting_verification_documents()
+    {
+        $service = ServiceType::first();
+        $this->assertNotNull($service);
+
+        $appService = app(\App\Services\Queue\QueueApplicationService::class);
+        $nik = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
+
+        $app = $appService->createDraft([
+            'applicant_nik'         => $nik,
+            'applicant_name'        => 'Uji Terbit Nomor Antrean Dahulu',
+            'applicant_birth_place' => 'DOMPU',
+            'applicant_birth_date'  => '1995-08-17',
+            'applicant_phone'       => '0853-9999-8888',
+            'applicant_district'    => 'DOMPU',
+            'applicant_village'     => 'BADA',
+            'applicant_address'     => 'JL. SOEKARNO HATTA',
+            'attendance_type'       => 'self',
+        ], $service->id);
+
+        $this->assertNull($app->queue_number);
+        $this->assertNull($app->queue_slot_id);
+
+        // Upload berkas persyaratan
+        foreach ($service->documents as $docConfig) {
+            $fakeFile = UploadedFile::fake()->image('doc_' . $docConfig->id . '.jpg', 600, 400);
+            $appService->uploadDocument($app, $docConfig->id, $fakeFile);
+        }
+
+        // Kirim berkas verifikasi (Step 2 submit)
+        $submitted = $appService->submit($app, true);
+
+        // Nomor antrean dan jadwal wajib langsung terbit terlebih dahulu
+        $this->assertEquals(QueueApplication::STATUS_SUBMITTED, $submitted->status);
+        $this->assertNotNull($submitted->queue_number);
+        $this->assertNotNull($submitted->queue_slot_id);
+        $this->assertMatchesRegularExpression('/^[A-Z]-\d{3}$/', $submitted->queue_number);
+
+        // Akses status menampilkan nomor antrean resmi
+        $res = $this->get(route('queue.status', ['token' => $submitted->access_token]));
+        $res->assertOk();
+
+        $submitted->forceDelete();
     }
 }
