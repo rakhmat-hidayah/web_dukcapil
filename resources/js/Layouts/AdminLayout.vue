@@ -42,11 +42,11 @@
             <Link 
               v-for="(item, iIdx) in group.items" 
               :key="iIdx"
-              :href="safeRoute(item.route)"
+              :href="item.url || safeRoute(item.route)"
               preserve-scroll
               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group"
               :class="[
-                isActiveRoute(item.route) 
+                isActiveRoute(item) 
                   ? 'bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400' 
                   : 'text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-gray-50 dark:hover:bg-zinc-800/50'
               ]"
@@ -372,12 +372,12 @@ const menuGroups = [
   {
     title: 'Serah Terima KTP-el',
     items: [
-      { label: 'Dashboard Serah Terima', route: 'admin.handover.dashboard', icon: LayoutDashboard },
-      { label: 'Pemohon Sudah Registrasi', route: 'admin.handover.registrations', icon: UserCheck },
-      { label: 'Menunggu Ketersediaan KTP-el', route: 'admin.handover.pending', icon: Clock },
-      { label: 'Siap Diambil', route: 'admin.handover.ready', icon: CheckCircle2 },
-      { label: 'Riwayat Penyerahan', route: 'admin.handover.history', icon: History },
-      { label: 'Kendala Pengambilan', route: 'admin.handover.exceptions', icon: AlertTriangle },
+      { label: 'Dashboard Serah Terima', route: 'admin.handover.dashboard', url: '/admin/handover/dashboard', icon: LayoutDashboard },
+      { label: 'Pemohon Sudah Registrasi', route: 'admin.handover.registrations', url: '/admin/handover/registrations', icon: UserCheck },
+      { label: 'Menunggu Ketersediaan KTP-el', route: 'admin.handover.pending', url: '/admin/handover/pending', icon: Clock },
+      { label: 'Siap Diambil', route: 'admin.handover.ready', url: '/admin/handover/ready', icon: CheckCircle2 },
+      { label: 'Riwayat Penyerahan', route: 'admin.handover.history', url: '/admin/handover/history', icon: History },
+      { label: 'Kendala Pengambilan', route: 'admin.handover.exceptions', url: '/admin/handover/exceptions', icon: AlertTriangle },
     ]
   },
   {
@@ -601,19 +601,60 @@ const activePageName = computed(() => {
 const safeRoute = (name, params) => {
   if (!name) return '#';
   try {
-    return route().has(name) ? route(name, params) : '#';
-  } catch (e) {
-    return '#';
+    if (typeof route === 'function') {
+      try {
+        if (route().has && route().has(name)) {
+          return route(name, params);
+        }
+      } catch (e) {}
+      try {
+        return route(name, params);
+      } catch (e) {}
+    }
+  } catch (e) {}
+
+  // Fallback for admin routes so links never default to '#'
+  if (name.startsWith('admin.')) {
+    const segments = name.replace(/^admin\./, '').split('.');
+    const lastSeg = segments[segments.length - 1];
+    if (lastSeg === 'index') segments.pop();
+    let url = '/admin/' + segments.join('/');
+    if (params && typeof params === 'object') {
+      const query = new URLSearchParams(params).toString();
+      if (query) url += '?' + query;
+    } else if (params) {
+      url += '/' + params;
+    }
+    return url;
   }
+
+  return '#';
 };
 
-const isActiveRoute = (routeName) => {
-  if (!routeName) return false;
-  try {
-    return route().has(routeName) ? route().current(routeName) : false;
-  } catch (e) {
-    return false;
+const isActiveRoute = (itemOrRouteName) => {
+  const routeName = typeof itemOrRouteName === 'string' ? itemOrRouteName : itemOrRouteName?.route;
+  const itemUrl = typeof itemOrRouteName === 'object' ? itemOrRouteName?.url : null;
+
+  if (routeName) {
+    try {
+      if (typeof route === 'function' && route().has && route().has(routeName)) {
+        if (route().current(routeName)) return true;
+      }
+    } catch (e) {}
   }
+
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : (page.url || '');
+  const targetPath = itemUrl || (routeName ? safeRoute(routeName) : null);
+
+  if (targetPath && targetPath !== '#' && targetPath !== '/admin') {
+    return currentPath === targetPath || currentPath.startsWith(targetPath + '?');
+  }
+
+  if (targetPath === '/admin' && (currentPath === '/admin' || currentPath === '/admin/dashboard')) {
+    return true;
+  }
+
+  return false;
 };
 
 // Sidebar scroll position preservation

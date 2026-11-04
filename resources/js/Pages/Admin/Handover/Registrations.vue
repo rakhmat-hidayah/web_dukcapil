@@ -20,7 +20,7 @@
 
         <div class="flex items-center gap-2">
           <Link
-            :href="route('admin.handover.ready')"
+            href="/admin/handover/ready"
             class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -350,7 +350,7 @@
                     <!-- Direct Serah Terima Action if Handover item exists -->
                     <Link
                       v-if="app.handover?.id"
-                      :href="route('admin.handover.show', { id: app.handover.id })"
+                      :href="'/admin/handover/' + app.handover.id"
                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition"
                       title="Buka Halaman Serah Terima KTP-el"
                     >
@@ -360,7 +360,7 @@
 
                     <!-- View Application Details -->
                     <Link
-                      :href="route('admin.queue.applications.show', { id: app.id })"
+                      :href="'/admin/queue/applications/' + app.id"
                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs transition"
                     >
                       <span>Detail Berkas</span>
@@ -489,7 +489,7 @@
                 </button>
                 <Link
                   v-if="previewPhotoApp.handover?.id"
-                  :href="route('admin.handover.show', { id: previewPhotoApp.handover.id })"
+                  :href="'/admin/handover/' + previewPhotoApp.handover.id"
                   class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center gap-1.5 transition cursor-pointer"
                 >
                   <span>Proses Serah Terima KTP</span>
@@ -497,7 +497,7 @@
                 </Link>
                 <Link
                   v-else
-                  :href="route('admin.queue.applications.show', { id: previewPhotoApp.id })"
+                  :href="'/admin/queue/applications/' + previewPhotoApp.id"
                   class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-600/30 flex items-center gap-1.5 transition cursor-pointer"
                 >
                   <span>Lihat Detail Berkas</span>
@@ -568,7 +568,7 @@ const selectStatus = (statusVal) => {
 
 const applyFilters = () => {
   router.get(
-    route('admin.handover.registrations'),
+    '/admin/handover/registrations',
     {
       search: searchQuery.value || undefined,
       service_id: selectedService.value || undefined,
@@ -586,7 +586,7 @@ const resetFilters = () => {
   searchQuery.value = '';
   selectedService.value = '';
   activeStatus.value = '';
-  router.get(route('admin.handover.registrations'), {}, {
+  router.get('/admin/handover/registrations', {}, {
     preserveState: true,
     preserveScroll: true,
     replace: true,
