@@ -101,30 +101,73 @@
             <span class="text-[10px] uppercase font-bold text-slate-400">Data Master</span>
           </div>
 
-          <div class="space-y-3 text-xs">
-            <div>
-              <span class="text-slate-400 block text-[11px]">Nama Lengkap:</span>
-              <p class="font-bold text-slate-900 dark:text-white text-sm">{{ handover.application?.applicant_name }}</p>
+          <!-- Photo & Primary Details Container -->
+          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 pb-3 border-b border-slate-100 dark:border-slate-700">
+            <!-- Foto Wajah Pemohon (Selfie) -->
+            <div class="flex flex-col items-center shrink-0">
+              <div
+                v-if="applicantPhotoUrl"
+                @click="photoModalOpen = true"
+                class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-blue-500 shadow-md cursor-pointer group relative bg-slate-100 dark:bg-slate-900"
+                title="Klik untuk melihat foto lebih besar"
+              >
+                <img
+                  :src="applicantPhotoUrl"
+                  :alt="handover.application?.applicant_name"
+                  class="w-full h-full object-cover group-hover:scale-105 transition"
+                />
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[10px] font-bold">
+                  Klik Perbesar
+                </div>
+              </div>
+              <div
+                v-else
+                class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-slate-100 dark:bg-slate-700/60 border border-dashed border-slate-300 dark:border-slate-600 flex flex-col items-center justify-center text-slate-400 text-xs text-center p-2"
+              >
+                <svg class="w-8 h-8 mb-1 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span class="text-[9px] font-semibold">Tanpa Foto Wajah</span>
+              </div>
+              <span class="text-[9px] font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider text-center">
+                Foto Pemohon
+              </span>
             </div>
-            <div class="grid grid-cols-2 gap-2">
+
+            <!-- Primary Info -->
+            <div class="space-y-2 text-xs flex-1 w-full min-w-0">
               <div>
-                <span class="text-slate-400 block text-[11px]">NIK:</span>
-                <p class="font-mono font-semibold text-slate-800 dark:text-slate-200">{{ handover.application?.applicant_nik }}</p>
+                <span class="text-slate-400 block text-[11px]">Nama Lengkap:</span>
+                <p class="font-bold text-slate-900 dark:text-white text-base">{{ handover.application?.applicant_name }}</p>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <span class="text-slate-400 block text-[11px]">NIK:</span>
+                  <p class="font-mono font-semibold text-slate-800 dark:text-slate-200">{{ handover.application?.applicant_nik }}</p>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[11px]">No. Telepon / WA:</span>
+                  <p class="font-mono font-semibold text-slate-800 dark:text-slate-200">{{ handover.application?.applicant_phone || '-' }}</p>
+                </div>
               </div>
               <div>
-                <span class="text-slate-400 block text-[11px]">No. Telepon / WA:</span>
-                <p class="font-mono font-semibold text-slate-800 dark:text-slate-200">{{ handover.application?.applicant_phone || '-' }}</p>
+                <span class="text-slate-400 block text-[11px]">Alamat Kependudukan:</span>
+                <p class="text-slate-700 dark:text-slate-300 leading-snug">{{ handover.application?.applicant_address || '-' }}</p>
               </div>
             </div>
-            <div>
-              <span class="text-slate-400 block text-[11px]">Alamat Kependudukan:</span>
-              <p class="text-slate-700 dark:text-slate-300">{{ handover.application?.applicant_address || '-' }}</p>
+          </div>
+
+          <!-- Bottom Meta Info -->
+          <div class="space-y-2 text-xs">
+            <div v-if="handover.application?.applicant_birth_place || handover.application?.applicant_birth_date">
+              <span class="text-slate-400 block text-[11px]">Tempat, Tanggal Lahir:</span>
+              <p class="text-slate-700 dark:text-slate-300 font-medium">
+                {{ handover.application?.applicant_birth_place || '-' }}, {{ handover.application?.applicant_birth_date_formatted || handover.application?.applicant_birth_date || '-' }}
+              </p>
             </div>
             <div class="pt-2 border-t border-slate-100 dark:border-slate-700">
               <span class="text-slate-400 block text-[11px]">Rencana Kehadiran Awal:</span>
               <p class="font-medium text-slate-700 dark:text-slate-300">
                 {{ handover.application?.attendance_label }}
-                <span v-if="handover.application?.representative_name" class="block text-amber-600 dark:text-amber-400">
+                <span v-if="handover.application?.representative_name" class="block text-amber-600 dark:text-amber-400 font-semibold mt-0.5">
                   Dikuasakan ke: {{ handover.application?.representative_name }} (NIK: {{ handover.application?.representative_nik }})
                 </span>
               </p>
@@ -558,6 +601,52 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal Preview Foto Wajah Pemohon (Lightbox) -->
+    <div
+      v-if="photoModalOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      @click.self="photoModalOpen = false"
+    >
+      <div class="relative bg-white dark:bg-slate-900 rounded-3xl p-4 max-w-lg w-full shadow-2xl border border-slate-700 space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">Foto Wajah Pemohon</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">
+              {{ handover.application?.applicant_name }} (NIK: {{ handover.application?.applicant_nik }})
+            </p>
+          </div>
+          <button
+            type="button"
+            @click="photoModalOpen = false"
+            class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <div class="rounded-2xl overflow-hidden bg-slate-950 flex items-center justify-center max-h-[70vh]">
+          <img
+            :src="applicantPhotoUrl"
+            :alt="handover.application?.applicant_name"
+            class="max-w-full max-h-[68vh] object-contain rounded-xl"
+          />
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <span class="text-[11px] text-slate-500 dark:text-slate-400">
+            Pastikan wajah pemohon cocok saat penyerahan KTP-el.
+          </span>
+          <button
+            type="button"
+            @click="photoModalOpen = false"
+            class="px-5 py-2 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold hover:opacity-90 transition"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
   </AdminLayout>
 </template>
 
@@ -578,6 +667,22 @@ const showExceptionModal = ref(false);
 const exceptionReasonText = ref('');
 const showResolveModal = ref(false);
 const resolveNotesText = ref('');
+const photoModalOpen = ref(false);
+
+const applicantPhotoUrl = computed(() => {
+  if (props.handover.application?.selfie_url) {
+    return props.handover.application.selfie_url;
+  }
+  const selfieDoc = props.handover.application?.documents?.find(d => {
+    const s = d.service_document;
+    if (!s) return false;
+    const l = (s.label || '').toLowerCase();
+    return s.capture_mode === 'user' || l.includes('selfie') || l.includes('foto wajah') || l.includes('foto pemohon');
+  });
+  if (selfieDoc?.admin_serve_url) return selfieDoc.admin_serve_url;
+  if (selfieDoc?.id) return route('admin.queue.documents.serve', { documentId: selfieDoc.id });
+  return null;
+});
 
 // Camera & Capture state
 const videoRef = ref(null);
