@@ -608,7 +608,7 @@
                 3. Kehadiran ke Kantor Disdukcapil <span class="text-rose-500">*</span>
               </h3>
               <p class="text-sm font-semibold text-slate-900 dark:text-white">
-                Siapa yang akan datang langsung ke kantor untuk mengurus permohonan atau mengambil KTP el ini?
+                Siapa yang akan datang langsung ke kantor untuk mengambil KTP el ini?
               </p>
             </div>
 
