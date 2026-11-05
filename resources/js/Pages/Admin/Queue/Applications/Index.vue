@@ -239,14 +239,14 @@
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700">
+            <thead class="bg-slate-50 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700 select-none">
               <tr>
-                <th class="px-5 py-4">No. Registrasi / Antrian</th>
-                <th class="px-5 py-4">Foto & Data Pemohon</th>
-                <th class="px-5 py-4">Jenis Layanan</th>
-                <th class="px-5 py-4">Jadwal Pelayanan</th>
-                <th class="px-5 py-4 text-center">Status</th>
-                <th class="px-5 py-4 text-right">Aksi</th>
+                <th class="px-4 py-3.5 whitespace-nowrap">No. Registrasi / Antrian</th>
+                <th class="px-4 py-3.5">Foto & Data Pemohon</th>
+                <th class="px-3.5 py-3.5">Jenis Layanan</th>
+                <th class="px-3.5 py-3.5 whitespace-nowrap">Jadwal Pelayanan</th>
+                <th class="px-3.5 py-3.5 text-center whitespace-nowrap">Status</th>
+                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-4 py-3.5 text-right whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)]">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium text-slate-700 dark:text-slate-200">
@@ -263,8 +263,8 @@
                 ]"
               >
                 <!-- Reg & Queue Number -->
-                <td class="px-5 py-4 whitespace-nowrap">
-                  <div class="font-mono font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <div class="font-mono font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <span>{{ app.reg_number }}</span>
                     <span
                       v-if="app.queue_number"
@@ -278,34 +278,34 @@
                   </p>
 
                   <!-- Urgent Reminder Badges -->
-                  <div v-if="app.verification_urgency === 'overdue'" class="mt-1.5 flex items-center gap-1.5">
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white shadow-sm animate-pulse">
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <div v-if="app.verification_urgency === 'overdue'" class="mt-1 flex items-center gap-1">
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-rose-600 text-white shadow-xs animate-pulse">
+                      <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                       Belum Diverifikasi >24 Jam
                     </span>
-                    <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                    <span class="text-[9px] font-bold text-rose-600 dark:text-rose-400">
                       ({{ app.waiting_time_human }})
                     </span>
                   </div>
-                  <div v-else-if="app.verification_urgency === 'new'" class="mt-1.5 flex items-center gap-1.5">
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white shadow-sm">
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  <div v-else-if="app.verification_urgency === 'new'" class="mt-1 flex items-center gap-1">
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-amber-500 text-white shadow-xs">
+                      <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                       Baru Masuk
                     </span>
-                    <span class="text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                    <span class="text-[9px] font-bold text-amber-700 dark:text-amber-400">
                       ({{ app.waiting_time_human }})
                     </span>
                   </div>
                 </td>
 
                 <!-- Applicant & NIK with Photo Preview -->
-                <td class="px-5 py-3.5">
-                  <div class="flex items-center gap-3.5">
+                <td class="px-4 py-2.5">
+                  <div class="flex items-center gap-3">
                     <!-- Photo Thumbnail -->
                     <div
                       v-if="app.selfie_thumbnail_url || app.selfie_url"
                       @click.stop="openPhotoPreview(app)"
-                      class="relative w-12 h-12 rounded-xl overflow-hidden border border-blue-200 dark:border-blue-900 shadow-sm shrink-0 cursor-pointer group/photo bg-slate-100 dark:bg-slate-800 transition transform hover:scale-105 hover:ring-2 hover:ring-blue-500"
+                      class="relative w-10 h-10 rounded-xl overflow-hidden border border-blue-200 dark:border-blue-900 shadow-xs shrink-0 cursor-pointer group/photo bg-slate-100 dark:bg-slate-800 transition transform hover:scale-105 hover:ring-2 hover:ring-blue-500"
                       title="Klik untuk melihat pratinjau foto pemohon"
                     >
                       <img
@@ -315,25 +315,25 @@
                         loading="lazy"
                       />
                       <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 transition flex items-center justify-center text-white">
-                        <svg class="w-4 h-4 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                        <svg class="w-3.5 h-3.5 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
                       </div>
                     </div>
                     <div
                       v-else
-                      class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700/60 border border-dashed border-slate-300 dark:border-slate-600 flex flex-col items-center justify-center text-slate-400 shrink-0 text-[8px] font-semibold select-none"
+                      class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700/60 border border-dashed border-slate-300 dark:border-slate-600 flex flex-col items-center justify-center text-slate-400 shrink-0 select-none"
                       title="Belum ada foto selfie pemohon"
                     >
-                      <svg class="w-5 h-5 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                      <span class="text-[8px] leading-tight text-slate-400 mt-0.5">No Foto</span>
+                      <svg class="w-4 h-4 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                      <span class="text-[7px] leading-tight text-slate-400">No Foto</span>
                     </div>
 
                     <!-- Applicant Text Info -->
                     <div class="min-w-0">
-                      <div class="font-bold text-slate-900 dark:text-white truncate">
+                      <div class="font-bold text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-[180px]">
                         {{ app.applicant_name }}
                       </div>
-                      <div class="font-mono text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
-                        <span>NIK: {{ maskNik(app.applicant_nik) }}</span>
+                      <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                        <span>{{ maskNik(app.applicant_nik) }}</span>
                         <span>·</span>
                         <span>{{ formatPhoneChunked(app.applicant_phone) }}</span>
                       </div>
@@ -342,16 +342,16 @@
                 </td>
 
                 <!-- Service Type -->
-                <td class="px-5 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold">
+                <td class="px-3.5 py-3">
+                  <span class="inline-block max-w-[170px] leading-snug px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[11px] font-semibold">
                     {{ app.service_type?.name || 'Pelayanan KTP-el' }}
                   </span>
                 </td>
 
                 <!-- Schedule Date -->
-                <td class="px-5 py-4 whitespace-nowrap">
+                <td class="px-3.5 py-3 whitespace-nowrap">
                   <div v-if="app.slot?.schedule?.schedule_date">
-                    <p class="font-bold text-slate-900 dark:text-white">
+                    <p class="font-bold text-slate-900 dark:text-white text-xs">
                       {{ formatScheduleDate(app.slot.schedule.schedule_date) }}
                     </p>
                     <p class="text-[10px] text-slate-400">
@@ -364,74 +364,89 @@
                 </td>
 
                 <!-- Status Badge -->
-                <td class="px-5 py-4 text-center whitespace-nowrap">
-                  <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                <td class="px-3.5 py-3 text-center whitespace-nowrap">
+                  <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping shrink-0"></span>
                     <span>Draf (Sisa {{ app.draft_remaining_minutes !== undefined ? app.draft_remaining_minutes : (draftTimeoutMinutes || 15) }} mnt)</span>
                   </div>
                   <StatusBadge v-else :status="app.status" />
                   <div v-if="app.verification_urgency === 'overdue'" class="mt-1">
-                    <span class="inline-block text-[10px] font-extrabold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-950/80 px-2 py-0.5 rounded-full">
+                    <span class="inline-block text-[9px] font-extrabold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-950/80 px-2 py-0.5 rounded-full">
                       ⚠️ Terlambat SLA 1x24 Jam
                     </span>
                   </div>
                   <div v-else-if="app.verification_urgency === 'new'" class="mt-1">
-                    <span class="inline-block text-[10px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 px-2 py-0.5 rounded-full">
+                    <span class="inline-block text-[9px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 px-2 py-0.5 rounded-full">
                       ⚡ Butuh Verifikasi Segera
                     </span>
                   </div>
                 </td>
 
                 <!-- Actions -->
-                <td class="px-5 py-4 text-right whitespace-nowrap">
+                <td
+                  :class="[
+                    'sticky right-0 z-10 px-3.5 py-3 text-right whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] transition',
+                    app.verification_urgency === 'overdue'
+                      ? 'bg-rose-50/95 dark:bg-rose-950/95 group-hover:bg-rose-100/95 dark:group-hover:bg-rose-900/95'
+                      : (app.verification_urgency === 'new'
+                        ? 'bg-amber-50/95 dark:bg-amber-950/95 group-hover:bg-amber-100/95 dark:group-hover:bg-amber-900/95'
+                        : 'bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/80')
+                  ]"
+                >
                   <div class="flex items-center justify-end gap-1.5">
-                    <!-- Super Admin Delete Button -->
-                    <button
-                      v-if="isSuperAdmin"
-                      type="button"
-                      @click="confirmDelete(app)"
-                      class="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white text-rose-600 dark:text-rose-400 font-bold text-xs shadow-xs transition cursor-pointer"
-                      title="Hapus Permohonan (Khusus Super Admin)"
-                    >
-                      <Trash2 class="w-3.5 h-3.5 shrink-0" />
-                      <span class="hidden sm:inline">Hapus</span>
-                    </button>
-
-                    <!-- Quick Status Escalation / Sync Button -->
-                    <button
-                      type="button"
-                      @click="openEscalateModal(app)"
-                      class="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white text-indigo-700 dark:text-indigo-300 font-bold text-xs shadow-2xs transition cursor-pointer"
-                      title="Eskalasi / Update Status Permohonan"
-                    >
-                      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                      <span>Update Status</span>
-                    </button>
-
+                    <!-- 1. Primary Action: Tinjau Berkas -->
                     <Link
                       v-if="app.verification_urgency === 'overdue'"
                       :href="route('admin.queue.applications.show', app.id)"
-                      class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md shadow-rose-600/30 transition animate-pulse"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-sm shadow-rose-600/30 transition shrink-0 animate-pulse"
+                      title="Verifikasi Permohonan Segera (Lewat SLA)"
                     >
-                      <span>Verifikasi Sekarang ⚠️</span>
+                      <span>Verifikasi</span>
+                      <span class="hidden 2xl:inline">Sekarang</span>
+                      <span>⚠️</span>
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </Link>
                     <Link
                       v-else-if="app.verification_urgency === 'new'"
                       :href="route('admin.queue.applications.show', app.id)"
-                      class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs shadow-md shadow-amber-500/30 transition"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs shadow-sm shadow-amber-500/30 transition shrink-0"
+                      title="Tinjau Berkas Pemohon"
                     >
-                      <span>Tinjau Berkas ⚡</span>
+                      <span>Tinjau Berkas</span>
+                      <span>⚡</span>
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </Link>
                     <Link
                       v-else
                       :href="route('admin.queue.applications.show', app.id)"
-                      class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm transition"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm transition shrink-0"
+                      title="Tinjau Berkas Pemohon"
                     >
-                      <span>Periksa & Verifikasi</span>
+                      <span>Tinjau Berkas</span>
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </Link>
+
+                    <!-- 2. Quick Status Escalation / Sync Button -->
+                    <button
+                      type="button"
+                      @click="openEscalateModal(app)"
+                      class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white text-indigo-700 dark:text-indigo-300 font-bold text-xs shadow-2xs transition cursor-pointer shrink-0"
+                      title="Eskalasi / Update Status Permohonan"
+                    >
+                      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                      <span class="hidden sm:inline">Status</span>
+                    </button>
+
+                    <!-- 3. Super Admin Delete Button -->
+                    <button
+                      v-if="isSuperAdmin"
+                      type="button"
+                      @click="confirmDelete(app)"
+                      class="inline-flex items-center justify-center p-1.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white text-rose-600 dark:text-rose-400 font-bold text-xs shadow-xs transition cursor-pointer shrink-0"
+                      title="Hapus Permohonan (Khusus Super Admin)"
+                    >
+                      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -491,7 +506,7 @@
         >
           <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-md shadow-2xl p-6 relative text-center">
             <div class="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-4 border border-rose-100 dark:border-rose-900/40 shadow-inner">
-              <Trash2 class="w-7 h-7" />
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </div>
 
             <h3 class="text-lg font-black text-slate-900 dark:text-white mb-2">
@@ -527,7 +542,7 @@
                 :disabled="isDeleting"
                 class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl shadow-md shadow-rose-600/30 active:scale-95 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                <Trash2 class="w-4 h-4 shrink-0" />
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 <span v-if="isDeleting">Menghapus...</span>
                 <span v-else>Ya, Hapus Permanen</span>
               </button>
@@ -778,7 +793,6 @@ import { ref, computed } from 'vue'
 import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import StatusBadge from '@/Components/Queue/StatusBadge.vue'
-import { Trash2 } from '@lucide/vue'
 
 const props = defineProps({
   applications: Object,
