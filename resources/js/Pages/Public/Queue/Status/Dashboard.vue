@@ -63,6 +63,49 @@
         </div>
       </div>
 
+      <!-- Massive Urgent Hero Banner when REVISION_REQUIRED -->
+      <div
+        v-if="application.status === 'REVISION_REQUIRED'"
+        class="bg-gradient-to-br from-amber-500 via-orange-600 to-rose-600 text-white rounded-3xl p-5 sm:p-7 shadow-2xl border-2 border-amber-300 ring-4 ring-orange-500/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 print:hidden animate-in fade-in duration-200"
+      >
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center shrink-0 shadow-md">
+            <svg class="w-7 h-7 sm:w-8 sm:h-8 text-white animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          </div>
+          <div class="space-y-1.5 flex-1 min-w-0">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-white text-orange-700 shadow-sm">
+              <span>⚠️</span>
+              <span>Perlu Tindakan Pemohon: Perbaikan / Foto Ulang Berkas</span>
+            </div>
+            <h2 class="text-lg sm:text-2xl font-black text-white leading-tight">
+              Petugas Meminta Perbaikan Berkas Pendaftaran Anda
+            </h2>
+
+            <!-- Bold Highlighted Quote Card -->
+            <div class="mt-2.5 p-4 sm:p-5 rounded-2xl bg-black/30 backdrop-blur-sm border border-white/30 shadow-inner">
+              <span class="text-[11px] font-black uppercase tracking-wider text-amber-200 block">
+                Catatan / Instruksi Petugas Verifikator:
+              </span>
+              <p class="text-base sm:text-xl font-black text-white mt-1 tracking-wide leading-relaxed font-sans">
+                “{{ activeRevisionNote }}”
+              </p>
+            </div>
+
+            <p class="text-xs text-amber-100 max-w-xl leading-relaxed pt-1 font-medium">
+              Mohon segera unggah foto baru yang jelas, terang, dan tidak terpotong agar permohonan Anda dapat langsung disetujui.
+            </p>
+          </div>
+        </div>
+
+        <a
+          href="#unggah-revisi"
+          class="w-full md:w-auto px-6 py-4 rounded-2xl bg-white text-orange-700 hover:bg-amber-50 text-xs sm:text-sm font-black transition shadow-xl hover:scale-105 active:scale-95 text-center shrink-0 flex items-center justify-center gap-2 cursor-pointer ring-2 ring-white/50"
+        >
+          <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span>Foto Ulang Dokumen Sekarang &darr;</span>
+        </a>
+      </div>
+
       <!-- High-Priority Action Banner: Schedule Selection Required -->
       <div
         v-if="['PRE_VERIFIED', 'APPROVED'].includes(application.status) && !application.queue_number"
@@ -368,22 +411,47 @@
           <!-- 10. REVISION REQUIRED -->
           <div
             v-else-if="application.status === 'REVISION_REQUIRED'"
-            class="p-4 sm:p-5 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-800 text-orange-900 dark:text-orange-200"
+            class="p-5 sm:p-6 rounded-3xl bg-amber-500/10 dark:bg-amber-950/40 border-2 border-amber-400 dark:border-amber-700 text-amber-950 dark:text-amber-100 shadow-sm space-y-3"
           >
-            <div class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-orange-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-              <div class="flex-1">
-                <p class="font-bold text-sm">Dokumen Memerlukan Perbaikan</p>
-                <p class="text-xs mt-1 leading-relaxed">
-                  {{ application.revision_notes || 'Terdapat dokumen yang perlu diperbaiki atau diunggah ulang agar memenuhi standar pelayanan.' }}
-                </p>
-                <a
-                  href="#unggah-revisi"
-                  class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition shadow-sm"
-                >
-                  Unggah Ulang Dokumen yang Diminta &darr;
-                </a>
+            <div class="flex items-start gap-3.5">
+              <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
               </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <p class="font-black text-sm sm:text-base text-amber-950 dark:text-amber-100">
+                    Status: Dokumen Memerlukan Perbaikan / Foto Ulang
+                  </p>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white">
+                    Aksi Diperlukan
+                  </span>
+                </div>
+                <p class="text-xs text-amber-800 dark:text-amber-300 mt-0.5 font-medium">
+                  Verifikator telah memeriksa berkas Anda dan meminta perbaikan dengan keterangan berikut:
+                </p>
+              </div>
+            </div>
+
+            <!-- Prominent Instruction Quote Card -->
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-300 dark:border-amber-800 shadow-xs">
+              <span class="text-[11px] font-black text-amber-800 dark:text-amber-400 uppercase tracking-wider block mb-0.5">
+                Keterangan / Instruksi Verifikator:
+              </span>
+              <p class="text-base sm:text-lg font-black text-amber-950 dark:text-amber-100 font-sans leading-relaxed tracking-wide">
+                “{{ activeRevisionNote }}”
+              </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+              <span class="text-xs text-amber-800 dark:text-amber-300 font-medium">
+                Silakan foto ulang dokumen di bawah ini agar petugas dapat segera menyetujui permohonan.
+              </span>
+              <a
+                href="#unggah-revisi"
+                class="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-xl text-xs font-black transition shadow-md shadow-orange-600/20 text-center flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+              >
+                <span>Buka Formulir Unggah Revisi &darr;</span>
+              </a>
             </div>
           </div>
 
@@ -443,6 +511,28 @@
             <span>Nomor Registrasi: <strong class="font-mono text-slate-800 dark:text-slate-200">{{ application.reg_number }}</strong></span>
             <span>·</span>
             <span>Status: <strong class="text-blue-600 dark:text-blue-400">{{ application.status_label }}</strong></span>
+          </div>
+        </div>
+
+        <!-- Revision Warning Banner inside Ticket -->
+        <div
+          v-if="application.status === 'REVISION_REQUIRED'"
+          class="my-4 p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 border-2 border-amber-400 dark:border-amber-700 text-amber-950 dark:text-amber-100 flex items-start gap-3 shadow-xs print:hidden"
+        >
+          <span class="text-xl shrink-0">⚠️</span>
+          <div class="flex-1 text-xs">
+            <span class="font-black text-amber-900 dark:text-amber-300 block text-xs sm:text-sm">
+              Status Berkas: Menunggu Perbaikan / Foto Ulang
+            </span>
+            <p class="font-black text-amber-950 dark:text-amber-100 mt-1 leading-snug text-xs sm:text-sm">
+              Catatan Verifikator: “{{ activeRevisionNote }}”
+            </p>
+            <a
+              href="#unggah-revisi"
+              class="mt-2 inline-flex items-center gap-1 font-black text-amber-800 dark:text-amber-300 underline hover:text-amber-950"
+            >
+              Buka kamera & ambil foto ulang dokumen sekarang &darr;
+            </a>
           </div>
         </div>
 
@@ -705,25 +795,49 @@
           </p>
         </div>
 
+        <!-- Prominent Verifier Instruction Banner inside Form -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 border-2 border-amber-400 dark:border-amber-700 text-amber-950 dark:text-amber-100 space-y-1.5">
+          <div class="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-800 dark:text-amber-300">
+            <svg class="w-4 h-4 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            <span>Keterangan & Petunjuk Verifikator Dukcapil:</span>
+          </div>
+          <p class="text-base sm:text-lg font-black text-amber-950 dark:text-white leading-snug">
+            “{{ activeRevisionNote }}”
+          </p>
+          <p class="text-[11px] text-amber-800 dark:text-amber-300 pt-1 font-medium">
+            Silakan klik tombol <strong>"Buka Kamera Dokumen"</strong> atau <strong>"Foto Ulang"</strong> di samping berkas di bawah untuk mengambil foto dokumen asli Anda.
+          </p>
+        </div>
+
         <form @submit.prevent="submitRevision" class="space-y-4">
           <div
             v-for="doc in revisionDocuments"
             :key="doc.id"
-            class="p-4 rounded-2xl border border-orange-200 dark:border-orange-800/80 bg-orange-50/30 dark:bg-orange-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            class="p-4 sm:p-5 rounded-2xl border-2 border-amber-300 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition hover:border-amber-400"
           >
-            <div>
-              <p class="font-bold text-sm text-slate-900 dark:text-white">
-                {{ doc.service_document?.label }}
-              </p>
-              <p class="text-xs text-orange-700 dark:text-orange-400 mt-0.5">
-                Alasan: "{{ doc.reviewer_note || 'Perlu diperbaiki' }}"
-              </p>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <p class="font-black text-sm sm:text-base text-slate-900 dark:text-white">
+                  {{ doc.service_document?.label }}
+                </p>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200">
+                  Perlu Difoto Ulang
+                </span>
+              </div>
+              <div class="mt-2 p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/60 text-xs">
+                <span class="text-[10px] font-bold text-amber-700 dark:text-amber-400 block uppercase">
+                  Instruksi Petugas:
+                </span>
+                <p class="font-extrabold text-amber-950 dark:text-amber-200 mt-0.5 text-xs sm:text-sm">
+                  "{{ doc.reviewer_note || activeRevisionNote }}"
+                </p>
+              </div>
             </div>
 
-            <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div class="flex items-center gap-3 w-full sm:w-auto shrink-0">
               <span
                 v-if="revisionFiles[doc.service_document_id]"
-                class="px-3 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-1.5"
+                class="px-3 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5 shadow-xs"
               >
                 <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                 Foto Baru Siap
@@ -732,7 +846,7 @@
               <button
                 type="button"
                 @click="openRevisionCamera(doc)"
-                class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center gap-2 cursor-pointer"
+                class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center gap-2 cursor-pointer w-full sm:w-auto justify-center"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span>{{ revisionFiles[doc.service_document_id] ? 'Foto Ulang' : 'Buka Kamera Dokumen' }}</span>
@@ -772,7 +886,27 @@
                 <StatusBadge :status="hist.to_status" size="sm" />
                 <span class="text-[11px] text-slate-400 font-mono">{{ hist.created_at_formatted || formatDate(hist.created_at) }}</span>
               </div>
-              <p class="text-slate-700 dark:text-slate-300 mt-1 leading-relaxed font-medium">
+              <!-- REVISION_REQUIRED HIGHLIGHT in Timeline -->
+              <div
+                v-if="hist.to_status === 'REVISION_REQUIRED'"
+                class="mt-2.5 p-3.5 sm:p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-800 shadow-xs space-y-1.5"
+              >
+                <div class="flex items-center gap-1.5 text-xs font-bold text-amber-800 dark:text-amber-300">
+                  <svg class="w-4 h-4 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <span>Instruksi Petugas Verifikator:</span>
+                </div>
+                <p class="text-xs sm:text-sm font-black text-amber-950 dark:text-amber-100 leading-snug tracking-wide">
+                  "{{ formatTimelineRevisionNote(hist.notes) }}"
+                </p>
+                <a
+                  v-if="application.status === 'REVISION_REQUIRED'"
+                  href="#unggah-revisi"
+                  class="mt-1 inline-flex items-center gap-1 text-[11px] font-black text-amber-800 dark:text-amber-300 underline hover:text-amber-950 cursor-pointer"
+                >
+                  👉 Buka Kamera & Unggah Foto Ulang Dokumen &darr;
+                </a>
+              </div>
+              <p v-else class="text-slate-700 dark:text-slate-300 mt-1 leading-relaxed font-medium">
                 {{ hist.notes || 'Status diperbarui.' }}
               </p>
 
@@ -1109,10 +1243,42 @@ const accentBarColor = computed(() => {
 });
 
 const revisionDocuments = computed(() => {
-  return props.application.documents?.filter(
+  const flagged = props.application.documents?.filter(
     (d) => d.status === 'REVISION_REQUIRED' || d.status === 'REJECTED'
   ) || [];
+  // Fallback: jika status permohonan REVISION_REQUIRED tapi belum ada checklist per dokumen yang spesifik
+  if (flagged.length === 0 && props.application.status === 'REVISION_REQUIRED') {
+    return props.application.documents || [];
+  }
+  return flagged;
 });
+
+const activeRevisionNote = computed(() => {
+  // 1. Catatan langsung dari application.revision_notes
+  if (props.application?.revision_notes && String(props.application.revision_notes).trim()) {
+    return String(props.application.revision_notes).trim();
+  }
+  // 2. Ambil dari riwayat verifikasi terakhir dengan status REVISION_REQUIRED
+  const historyList = props.application?.verification_history || [];
+  for (let i = historyList.length - 1; i >= 0; i--) {
+    const h = historyList[i];
+    if (h.to_status === 'REVISION_REQUIRED' && h.notes) {
+      const clean = String(h.notes).replace(/^Permintaan perbaikan dokumen dikirim:\s*/i, '').trim();
+      if (clean) return clean;
+    }
+  }
+  // 3. Ambil dari catatan dokumen individu
+  const docWithNote = (props.application?.documents || []).find(d => d.reviewer_note && String(d.reviewer_note).trim());
+  if (docWithNote?.reviewer_note) {
+    return String(docWithNote.reviewer_note).trim();
+  }
+  return 'Mohon periksa dan unggah foto ulang berkas persyaratan yang diminta agar sesuai dengan ketentuan.';
+});
+
+const formatTimelineRevisionNote = (notes) => {
+  if (!notes) return 'Catatan perbaikan dikirim oleh petugas verifikator.';
+  return String(notes).replace(/^Permintaan perbaikan dokumen dikirim:\s*/i, '').trim();
+};
 
 function docStatusLabel(status) {
   switch (status) {

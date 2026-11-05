@@ -174,6 +174,41 @@
         </div>
       </div>
 
+      <!-- Top Alert: Permohonan Perlu Perbaikan Dokumen (Revision Required) -->
+      <div
+        v-if="application.status === 'REVISION_REQUIRED'"
+        class="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-50 via-amber-100/60 to-orange-50 dark:from-amber-950/50 dark:via-amber-900/30 dark:to-orange-950/50 border-2 border-amber-400 dark:border-amber-700 shadow-sm flex items-start gap-3.5"
+      >
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="text-sm sm:text-base font-black text-amber-950 dark:text-amber-200">
+              STATUS PERMOHONAN: PERLU PERBAIKAN DOKUMEN
+            </h3>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white shadow-xs">
+              Menunggu Respon Pemohon
+            </span>
+          </div>
+          <p class="text-xs text-amber-800 dark:text-amber-300 mt-0.5">
+            Petugas verifikator telah mengirimkan instruksi perbaikan dokumen kepada pemohon.
+          </p>
+          <div class="mt-2.5 p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-300 dark:border-amber-800 shadow-xs">
+            <span class="text-[11px] font-black text-amber-800 dark:text-amber-400 uppercase tracking-wider block mb-1">
+              Catatan / Instruksi Petugas yang Dikirimkan ke Pemohon:
+            </span>
+            <p class="text-sm sm:text-base font-black text-amber-950 dark:text-amber-100 font-sans leading-relaxed tracking-wide">
+              "{{ getLatestRevisionNote() }}"
+            </p>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1 font-medium">
+              <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+              <span>Instruksi ini terpampang dengan warna mencolok di bagian paling atas portal pelacakan pemohon.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Operator Urgency Reminder Banner -->
       <div
         v-if="application.verification_urgency === 'overdue'"
@@ -750,6 +785,41 @@
               </div>
             </div>
 
+            <!-- Banner info when status is REVISION_REQUIRED -->
+            <div
+              v-else-if="application.status === 'REVISION_REQUIRED'"
+              class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-800 space-y-2.5 text-xs shadow-xs"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-sm">⚠️</span>
+                  <div>
+                    <span class="text-amber-950 dark:text-amber-200 font-black text-sm block">
+                      Tahap Verifikasi: Menunggu Perbaikan Berkas dari Pemohon
+                    </span>
+                    <span class="text-[11px] text-amber-800 dark:text-amber-300">
+                      Permintaan perbaikan berkas telah terkirim. Pemohon dapat mengunggah foto baru melalui tautan status mereka.
+                    </span>
+                  </div>
+                </div>
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-200 text-amber-900 dark:bg-amber-900 dark:text-amber-200 uppercase tracking-wider shrink-0">
+                  Perlu Perbaikan
+                </span>
+              </div>
+              <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800/80 shadow-xs">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-amber-800 dark:text-amber-400 mb-0.5">
+                  <svg class="w-4 h-4 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  <span>Instruksi yang Dikirimkan ke Pemohon:</span>
+                </div>
+                <p class="text-sm font-black text-amber-950 dark:text-amber-100 font-sans leading-relaxed tracking-wide">
+                  "{{ getLatestRevisionNote() }}"
+                </p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  ✓ Keterangan ini terpampang jelas dengan warna menyala pada tiket & portal status pemohon.
+                </p>
+              </div>
+            </div>
+
             <!-- Banner info if online verification has already finished (Non-Rejected) -->
             <div
               v-else-if="isPastOnlineVerification"
@@ -854,10 +924,13 @@
                     'w-8 h-8 rounded-xl flex items-center justify-center shrink-0',
                     isRejectionLog(log)
                       ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/60 dark:text-rose-300'
-                      : 'bg-blue-100 dark:bg-blue-950 text-blue-600'
+                      : isRevisionLog(log)
+                        ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/60 dark:text-amber-300'
+                        : 'bg-blue-100 dark:bg-blue-950 text-blue-600'
                   ]"
                 >
                   <svg v-if="isRejectionLog(log)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                  <svg v-else-if="isRevisionLog(log)" class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                   <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
 
@@ -866,7 +939,7 @@
                     <span
                       :class="[
                         'font-bold',
-                        isRejectionLog(log) ? 'text-rose-900 dark:text-rose-200' : 'text-slate-900 dark:text-white'
+                        isRejectionLog(log) ? 'text-rose-900 dark:text-rose-200' : isRevisionLog(log) ? 'text-amber-900 dark:text-amber-200' : 'text-slate-900 dark:text-white'
                       ]"
                     >
                       {{ log.action_title || formatStatusName(log.to_status) }}
@@ -879,11 +952,11 @@
                     Oleh: <strong class="text-slate-700 dark:text-slate-300">{{ log.user?.name || 'Sistem' }}</strong> · Status: 
                     <span v-if="log.from_status && log.from_status !== log.to_status" class="font-medium text-slate-700 dark:text-slate-300">
                       {{ log.from_status_label || formatStatusName(log.from_status) }} &rarr; 
-                      <span :class="log.to_status === 'REJECTED' ? 'font-bold text-rose-600 dark:text-rose-400' : 'font-bold text-blue-600 dark:text-blue-400'">
+                      <span :class="log.to_status === 'REJECTED' ? 'font-bold text-rose-600 dark:text-rose-400' : log.to_status === 'REVISION_REQUIRED' ? 'font-bold text-amber-600 dark:text-amber-400' : 'font-bold text-blue-600 dark:text-blue-400'">
                         {{ log.to_status_label || formatStatusName(log.to_status) }}
                       </span>
                     </span>
-                    <span v-else :class="log.to_status === 'REJECTED' ? 'font-bold text-rose-600 dark:text-rose-400' : 'font-bold text-blue-600 dark:text-blue-400'">
+                    <span v-else :class="log.to_status === 'REJECTED' ? 'font-bold text-rose-600 dark:text-rose-400' : log.to_status === 'REVISION_REQUIRED' ? 'font-bold text-amber-600 dark:text-amber-400' : 'font-bold text-blue-600 dark:text-blue-400'">
                       {{ log.to_status_label || formatStatusName(log.to_status) }}
                     </span>
                   </p>
@@ -899,6 +972,23 @@
                     </div>
                     <p class="text-xs sm:text-sm font-black text-rose-600 dark:text-rose-400 font-sans leading-relaxed tracking-wide">
                       "{{ formatRejectionText(log.notes) }}"
+                    </p>
+                  </div>
+
+                  <!-- REVISION INSTRUCTION: Clear Highlight Box with Amber / Orange Font -->
+                  <div
+                    v-else-if="isRevisionLog(log)"
+                    class="mt-2.5 p-3 sm:p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-800 shadow-xs"
+                  >
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-amber-800 dark:text-amber-300 mb-1">
+                      <svg class="w-4 h-4 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                      <span>Instruksi Perbaikan Berkas yang Dikirim ke Pemohon:</span>
+                    </div>
+                    <p class="text-xs sm:text-sm font-black text-amber-950 dark:text-amber-100 font-sans leading-relaxed tracking-wide">
+                      "{{ formatRevisionText(log.notes) }}"
+                    </p>
+                    <p class="text-[10px] text-amber-700/80 dark:text-amber-400/80 mt-1 font-medium">
+                      ✓ Keterangan ini tampil jelas & mencolok pada portal status pemohon agar segera difoto ulang.
                     </p>
                   </div>
 
@@ -1877,6 +1967,42 @@ const formatRejectionText = (notes) => {
     return match[1].trim()
   }
   return str
+}
+
+const isRevisionLog = (log) => {
+  if (!log) return false
+  const toStatus = String(log.to_status || '').toUpperCase()
+  const action = String(log.action || '').toUpperCase()
+  const title = String(log.action_title || '').toLowerCase()
+  const notes = String(log.notes || '').toLowerCase()
+
+  return toStatus === 'REVISION_REQUIRED' ||
+         action === 'REVISION_REQUIRED' ||
+         action === 'REVISION_REQUESTED' ||
+         title.includes('perbaikan') ||
+         notes.includes('perbaikan dokumen dikirim') ||
+         notes.includes('minta perbaikan')
+}
+
+const formatRevisionText = (notes) => {
+  if (!notes) return 'Dokumen perlu diperbaiki.'
+  return String(notes).replace(/^Permintaan perbaikan dokumen dikirim:\s*/i, '').trim()
+}
+
+const getLatestRevisionNote = () => {
+  if (props.application?.revision_notes && String(props.application.revision_notes).trim()) {
+    return String(props.application.revision_notes).trim()
+  }
+  const history = props.application?.verification_history || []
+  const revLog = [...history].reverse().find(l => isRevisionLog(l) && l.notes)
+  if (revLog?.notes) {
+    return formatRevisionText(revLog.notes)
+  }
+  const docWithNote = (props.application?.documents || []).find(d => d.reviewer_note && String(d.reviewer_note).trim())
+  if (docWithNote?.reviewer_note) {
+    return String(docWithNote.reviewer_note).trim()
+  }
+  return 'Dokumen persyaratan perlu diperbaiki atau diunggah ulang agar sesuai dengan ketentuan.'
 }
 
 const isRejectionLog = (log) => {
