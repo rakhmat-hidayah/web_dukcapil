@@ -4,10 +4,18 @@
       <!-- Header -->
       <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <div>
-          <h3 class="font-bold text-slate-900 dark:text-white text-base">
-            {{ headerTitle }}
-          </h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">
+              {{ headerTitle }}
+            </h3>
+            <span v-if="isSelfie" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+              Pemohon Asli
+            </span>
+          </div>
+          <p v-if="isSelfie" class="text-xs font-semibold text-amber-700 dark:text-amber-300 mt-0.5">
+            ⚠️ Wajib Foto Wajah Pemohon Asli (Bukan foto pihak yang mewakili/kuasa).
+          </p>
+          <p v-else class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
             {{ documentLabel }}
           </p>
         </div>
@@ -286,6 +294,11 @@
                     POSISI MATA
                   </span>
                 </div>
+
+                <!-- Warning Pill inside Oval -->
+                <div class="absolute bottom-6 px-3 py-1 bg-amber-500/95 text-slate-950 text-[10px] font-black rounded-full shadow text-center max-w-[85%] uppercase tracking-tight">
+                  Wajib Wajah Pemohon Asli
+                </div>
               </div>
 
               <!-- E. BEBAS / PENUH (Full Viewfinder Area) -->
@@ -529,7 +542,7 @@ const headerTitle = computed(() => {
 });
 
 const guideTitle = computed(() => {
-  if (frameMode.value === 'selfie') return 'Posisikan Wajah di Garis Oval';
+  if (frameMode.value === 'selfie') return 'Foto Selfie Pemohon Asli (Bukan Kuasa)';
   if (frameMode.value === 'ktp') return 'Dekatkan KTP Pas di Kotak Hijau';
   if (frameMode.value === 'f4_a4') return 'Paskan Kertas F4 / A4 di Kotak Hijau';
   if (frameMode.value === 'kk_landscape') return 'Paskan Lembar KK Mendatar';

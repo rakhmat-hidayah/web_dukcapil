@@ -99,6 +99,24 @@
         <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         <span class="italic">{{ requirement.capture_hint }}</span>
       </p>
+
+      <!-- Penekanan Foto Selfie Pemohon (Bukan Perwakilan / Kuasa) -->
+      <div
+        v-if="isSelfieRequirement"
+        class="mt-3 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-300 dark:border-amber-700/80 text-xs text-amber-950 dark:text-amber-100 flex items-start gap-2.5 shadow-xs"
+      >
+        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <div class="leading-relaxed">
+          <strong class="font-black text-amber-950 dark:text-amber-200 block text-[11px] uppercase tracking-wide mb-0.5">
+            PENEGASAN PENTING:
+          </strong>
+          <span class="text-[11px] sm:text-xs">
+            Foto selfie ini <strong>wajib Foto Selfie Pemohon (pemilik dokumen/KTP-el)</strong>, <u>bukan foto pihak yang mewakili atau dikuasakan</u>.
+          </span>
+        </div>
+      </div>
     </div>
 
     <!-- Uploaded File Details / Trigger Actions -->
@@ -195,6 +213,12 @@ defineEmits(['open-camera', 'preview', 'delete']);
 
 const isUploaded = computed(() => !!props.uploadedDoc);
 const isRevision = computed(() => props.uploadedDoc && (props.uploadedDoc.status === 'REVISION_REQUIRED' || props.uploadedDoc.status === 'REJECTED'));
+
+const isSelfieRequirement = computed(() => {
+  if (props.requirement?.capture_mode === 'user') return true;
+  const label = (props.requirement?.label || '').toLowerCase();
+  return label.includes('selfie') || label.includes('wajah') || label.includes('face');
+});
 
 const downloadUrl = computed(() => {
   return props.requirement.template_url || null;

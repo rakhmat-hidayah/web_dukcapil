@@ -862,9 +862,14 @@
               </div>
 
               <!-- Notice on Documents Needed for Representative -->
-              <p class="text-[11px] text-blue-700 dark:text-blue-300 italic">
-                * Pada tahap berikutnya, Anda wajib mengunggah foto fisik KTP-el Asli Perwakilan dan Kartu Keluarga / Surat Kuasa.
-              </p>
+              <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-900 dark:text-amber-200 space-y-1">
+                <p class="font-medium">
+                  * Pada tahap berikutnya, Anda wajib mengunggah foto fisik KTP-el Asli Perwakilan dan Kartu Keluarga / Surat Kuasa.
+                </p>
+                <p class="font-bold text-amber-950 dark:text-amber-100">
+                  ⚠️ Penegasan: Foto Selfie Wajah pada tahap berikutnya tetap <strong>wajib Foto Selfie Pemohon (pemilik dokumen asli)</strong>, bukan foto pihak yang mewakili atau dikuasakan.
+                </p>
+              </div>
             </div>
           </div>
 
