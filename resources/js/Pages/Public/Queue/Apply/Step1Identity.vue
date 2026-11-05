@@ -873,11 +873,18 @@
             </div>
           </div>
 
-          <!-- Privacy & Disclaimer Notice -->
-          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-400 flex items-start gap-2.5">
-            <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            <p class="leading-relaxed">
-              <strong>Jaminan Privasi & Legalitas:</strong> Pengurusan oleh perwakilan wajib berdasar pada ketentuan peraturan perundang-undangan kependudukan. Pemeriksaan fisik identitas dan berkas asli akan dilakukan oleh petugas loket Disdukcapil sebelum pelayanan diberikan.
+          <!-- Verification & Service Assurance Notice -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                Verifikasi Online & Jaminan Pelayanan
+              </h4>
+            </div>
+            <p class="leading-relaxed text-xs sm:text-[13px] text-slate-700 dark:text-slate-300">
+              Dokumen persyaratan, data, dan foto selfie Anda telah/akan diperiksa secara online oleh petugas Disdukcapil. Pada saat pengambilan KTP-el, petugas loket tetap melakukan pencocokan identitas penerima serta pemeriksaan dokumen fisik asli yang dipersyaratkan sesuai jenis layanan dan ketentuan yang berlaku.
             </p>
           </div>
 
