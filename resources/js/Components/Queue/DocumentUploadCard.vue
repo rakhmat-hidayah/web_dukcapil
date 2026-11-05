@@ -60,10 +60,6 @@
         {{ requirement.label }}
       </h4>
 
-      <p v-if="requirement.description" class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-        {{ requirement.description }}
-      </p>
-
       <!-- Reviewer Revision Note if returned -->
       <div
         v-if="uploadedDoc && uploadedDoc.reviewer_note"
@@ -91,32 +87,66 @@
         </a>
       </div>
 
-      <!-- Capture Hint -->
-      <p
-        v-if="requirement.capture_hint"
-        class="text-[11px] text-blue-600 dark:text-blue-400 mt-2 flex items-center gap-1.5"
-      >
-        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        <span class="italic">{{ requirement.capture_hint }}</span>
-      </p>
+      <!-- Selfie-specific Detailed Guidelines -->
+      <template v-if="isSelfieRequirement">
+        <p class="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+          Foto wajah terbaru pemohon yang merupakan pemilik NIK dan KTP-el yang diajukan. Foto ini diperlukan sebagai salah satu sarana verifikasi awal oleh petugas untuk memastikan bahwa pemilik identitas mengetahui dan terlibat langsung dalam proses pengajuan permohonan.
+        </p>
 
-      <!-- Penekanan Foto Selfie Pemohon (Bukan Perwakilan / Kuasa) -->
-      <div
-        v-if="isSelfieRequirement"
-        class="mt-3 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-300 dark:border-amber-700/80 text-xs text-amber-950 dark:text-amber-100 flex items-start gap-2.5 shadow-xs"
-      >
-        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-        </svg>
-        <div class="leading-relaxed">
-          <strong class="font-black text-amber-950 dark:text-amber-200 block text-[11px] uppercase tracking-wide mb-0.5">
-            PENEGASAN PENTING:
-          </strong>
-          <span class="text-[11px] sm:text-xs">
-            Foto selfie ini <strong>wajib Foto Selfie Pemohon (pemilik dokumen/KTP-el)</strong>, <u>bukan foto pihak yang mewakili atau dikuasakan</u>.
-          </span>
+        <!-- Petunjuk Pengambilan Foto -->
+        <div class="mt-3 p-3.5 rounded-2xl bg-blue-50/60 dark:bg-slate-900/60 border border-blue-100 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300">
+          <div class="flex items-center gap-1.5 mb-2 font-bold text-slate-900 dark:text-white text-xs">
+            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span>Petunjuk pengambilan foto:</span>
+          </div>
+          <ul class="space-y-1.5 text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 list-disc list-outside pl-4 leading-relaxed">
+            <li>Gunakan kamera depan handphone atau perangkat Anda.</li>
+            <li>Pastikan wajah terlihat jelas, menghadap lurus ke kamera, dan berada di tempat dengan pencahayaan yang cukup.</li>
+            <li>Lepaskan masker, kacamata hitam, atau penutup wajah yang menghalangi tampilan wajah.</li>
+            <li>Foto harus diambil secara langsung melalui kamera pada halaman pengajuan, bukan menggunakan foto lama atau foto yang tersimpan di galeri.</li>
+          </ul>
         </div>
-      </div>
+
+        <!-- Penegasan Penting Box -->
+        <div class="mt-3 p-3.5 sm:p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-300 dark:border-amber-700/80 text-xs text-amber-950 dark:text-amber-100 flex items-start gap-2.5 shadow-xs">
+          <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div class="space-y-2 leading-relaxed text-[11px] sm:text-xs">
+            <strong class="font-black text-amber-950 dark:text-amber-200 block text-xs uppercase tracking-wide">
+              PENEGASAN PENTING
+            </strong>
+            <p>
+              Selfie <strong>wajib merupakan foto pemohon sendiri</strong>, yaitu orang yang memiliki NIK dan KTP-el yang diajukan, bukan foto anggota keluarga, penerima kuasa, biro jasa, atau pihak lain yang membantu pengurusan.
+            </p>
+            <p>
+              Apabila pengisian formulir atau pengurusan administrasi dibantu oleh orang lain, pemilik identitas tetap wajib terlibat dan mengambil foto selfie sendiri. Surat kuasa hanya mengatur bantuan pengurusan administrasi dan tidak menggantikan keterlibatan pemilik identitas dalam permohonan ini.
+            </p>
+            <p class="font-bold pt-1.5 border-t border-amber-200/80 dark:border-amber-800/80 text-amber-900 dark:text-amber-200">
+              Tujuan ketentuan ini adalah melindungi pemilik identitas agar data dan dokumen kependudukannya tidak digunakan untuk mengajukan permohonan tanpa sepengetahuan dan keterlibatannya.
+            </p>
+          </div>
+        </div>
+      </template>
+
+      <!-- Standard Non-Selfie Description & Hint -->
+      <template v-else>
+        <p v-if="requirement.description" class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+          {{ requirement.description }}
+        </p>
+
+        <!-- Capture Hint -->
+        <p
+          v-if="requirement.capture_hint"
+          class="text-[11px] text-blue-600 dark:text-blue-400 mt-2 flex items-center gap-1.5"
+        >
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span class="italic">{{ requirement.capture_hint }}</span>
+        </p>
+      </template>
     </div>
 
     <!-- Uploaded File Details / Trigger Actions -->

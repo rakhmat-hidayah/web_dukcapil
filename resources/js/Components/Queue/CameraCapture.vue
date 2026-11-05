@@ -13,7 +13,7 @@
             </span>
           </div>
           <p v-if="isSelfie" class="text-xs font-semibold text-amber-700 dark:text-amber-300 mt-0.5">
-            ⚠️ Wajib Foto Wajah Pemohon Asli (Bukan foto pihak yang mewakili/kuasa).
+            ⚠️ Wajib Foto Pemohon Sendiri (Pemilik NIK & KTP-el), bukan yang diwakilkan/kuasa.
           </p>
           <p v-else class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
             {{ documentLabel }}
