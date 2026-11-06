@@ -128,6 +128,28 @@
             <p class="font-bold pt-1.5 border-t border-amber-200/80 dark:border-amber-800/80 text-amber-900 dark:text-amber-200">
               Tujuan ketentuan ini adalah melindungi pemilik identitas agar data dan dokumen kependudukannya tidak digunakan untuk mengajukan permohonan tanpa sepengetahuan dan keterlibatannya.
             </p>
+
+            <!-- Dasar Hukum -->
+            <div class="pt-2 border-t border-amber-200/80 dark:border-amber-800/80 text-[10.5px] sm:text-[11px] text-amber-950/90 dark:text-amber-200/90 space-y-1.5">
+              <strong class="font-bold block text-amber-900 dark:text-amber-100 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-amber-700 dark:text-amber-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                Dasar hukum:
+              </strong>
+              <ul class="list-disc list-outside pl-4 space-y-1.5 leading-relaxed">
+                <li>
+                  UU Nomor 24 Tahun 2013 tentang Perubahan atas UU Nomor 23 Tahun 2006 tentang Administrasi Kependudukan, khususnya Pasal 8 ayat (1) huruf e dan f serta Pasal 79.
+                </li>
+                <li>
+                  UU Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi, khususnya Pasal 4, Pasal 5, Pasal 20, Pasal 35, Pasal 36, Pasal 38, dan Pasal 47.
+                </li>
+                <li>
+                  Perpres Nomor 96 Tahun 2018 tentang Persyaratan dan Tata Cara Pendaftaran Penduduk dan Pencatatan Sipil, khususnya Pasal 66.
+                </li>
+                <li>
+                  Permendagri Nomor 109 Tahun 2019 sebagaimana telah diubah dengan Permendagri Nomor 6 Tahun 2026 mengenai formulir pelayanan administrasi kependudukan, termasuk F-1.07.
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </template>
