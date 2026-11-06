@@ -65,13 +65,7 @@ class QueueApplication extends Model
         'status',
         'applicant_name',
         'applicant_nik',
-        'applicant_birth_place',
-        'applicant_birth_date',
-        'applicant_phone',
         'applicant_email',
-        'applicant_address',
-        'applicant_village',
-        'applicant_district',
         'attendance_type',
         'representative_nik',
         'representative_name',
@@ -110,7 +104,6 @@ class QueueApplication extends Model
     ];
 
     protected $casts = [
-        'applicant_birth_date' => 'date',
         'statement_agreed' => 'boolean',
         'statement_agreed_at' => 'datetime',
         'submitted_at' => 'datetime',
@@ -136,7 +129,6 @@ class QueueApplication extends Model
         'handover_recipient_nik',
         'physical_verified_status',
         'physical_verified_notes',
-        'applicant_birth_date_formatted',
         'selfie_document',
         'selfie_url',
         'selfie_thumbnail_url',
@@ -346,15 +338,6 @@ class QueueApplication extends Model
     public function getPhysicalVerifiedNotesAttribute(): ?string
     {
         return $this->physical_verification_notes;
-    }
-
-    public function getApplicantBirthDateFormattedAttribute(): ?string
-    {
-        $raw = $this->getRawOriginal('applicant_birth_date');
-        if (!$raw) {
-            return null;
-        }
-        return \Carbon\Carbon::parse($raw)->translatedFormat('d F Y');
     }
 
     public function getSelfieDocumentAttribute(): ?ApplicationDocument

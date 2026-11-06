@@ -138,31 +138,15 @@
                 <span class="text-slate-400 block text-[11px]">Nama Lengkap:</span>
                 <p class="font-bold text-slate-900 dark:text-white text-base">{{ handover.application?.applicant_name }}</p>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <span class="text-slate-400 block text-[11px]">NIK:</span>
-                  <p class="font-mono font-semibold text-slate-800 dark:text-slate-200">{{ handover.application?.applicant_nik }}</p>
-                </div>
-                <div>
-                  <span class="text-slate-400 block text-[11px]">No. Telepon / WA:</span>
-                  <p class="font-mono font-semibold text-slate-800 dark:text-slate-200">{{ handover.application?.applicant_phone || '-' }}</p>
-                </div>
-              </div>
               <div>
-                <span class="text-slate-400 block text-[11px]">Alamat Kependudukan:</span>
-                <p class="text-slate-700 dark:text-slate-300 leading-snug">{{ handover.application?.applicant_address || '-' }}</p>
+                <span class="text-slate-400 block text-[11px]">NIK:</span>
+                <p class="font-mono font-semibold text-slate-800 dark:text-slate-200">{{ handover.application?.applicant_nik }}</p>
               </div>
             </div>
           </div>
 
           <!-- Bottom Meta Info -->
           <div class="space-y-2 text-xs">
-            <div v-if="handover.application?.applicant_birth_place || handover.application?.applicant_birth_date">
-              <span class="text-slate-400 block text-[11px]">Tempat, Tanggal Lahir:</span>
-              <p class="text-slate-700 dark:text-slate-300 font-medium">
-                {{ handover.application?.applicant_birth_place || '-' }}, {{ handover.application?.applicant_birth_date_formatted || handover.application?.applicant_birth_date || '-' }}
-              </p>
-            </div>
             <div class="pt-2 border-t border-slate-100 dark:border-slate-700">
               <span class="text-slate-400 block text-[11px]">Rencana Kehadiran Awal:</span>
               <p class="font-medium text-slate-700 dark:text-slate-300">
@@ -698,7 +682,7 @@ const handoverForm = reactive({
   actual_receiver_type: props.handover.actual_receiver_type || (props.handover.application?.attendance_type === 'representative' ? 'representative' : 'self'),
   actual_receiver_name: props.handover.actual_receiver_name || (props.handover.application?.attendance_type === 'representative' ? (props.handover.application?.representative_name || '') : props.handover.application?.applicant_name),
   actual_receiver_nik: props.handover.actual_receiver_nik || (props.handover.application?.attendance_type === 'representative' ? (props.handover.application?.representative_nik || '') : props.handover.application?.applicant_nik),
-  actual_receiver_phone: props.handover.actual_receiver_phone || props.handover.application?.applicant_phone,
+  actual_receiver_phone: props.handover.actual_receiver_phone || props.handover.application?.representative_phone || '',
   receiver_relationship: props.handover.receiver_relationship || (props.handover.application?.attendance_type === 'representative' ? 'Kuasa Resmi (Surat Kuasa F-1.07)' : 'Sendiri'),
   handover_notes: '',
 });

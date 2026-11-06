@@ -459,8 +459,6 @@ class ArchiveService
                 'applicant_name' => $app->applicant_name,
                 'applicant_nik' => $app->applicant_nik,
                 'applicant_nik_masked' => $app->masked_nik,
-                'applicant_district' => $app->applicant_district,
-                'applicant_village' => $app->applicant_village,
                 'attendance_type' => $app->attendance_type,
                 'attendance_label' => $app->attendance_label,
                 'is_represented' => $app->is_represented,

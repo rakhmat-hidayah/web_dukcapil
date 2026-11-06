@@ -59,31 +59,6 @@
               </p>
             </div>
 
-            <!-- WhatsApp / Phone Input -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                Nomor WhatsApp / HP Terdaftar
-              </label>
-              <div class="relative">
-                <input
-                  :value="verifyForm.phone"
-                  @input="onHistoryPhoneInput"
-                  type="tel"
-                  inputmode="numeric"
-                  maxlength="16"
-                  placeholder="Contoh: 0853-xxxx-xxxx"
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
-                  required
-                />
-              </div>
-              <p class="text-[11px] text-slate-400">
-                Gunakan nomor kontak yang Anda masukkan saat mengajukan permohonan pertama kali.
-              </p>
-              <p v-if="verifyForm.errors.phone" class="text-xs text-rose-500 font-medium">
-                {{ verifyForm.errors.phone }}
-              </p>
-            </div>
-
             <!-- Remember on Device Option -->
             <div class="flex items-center gap-2.5 pt-1">
               <input
@@ -359,37 +334,14 @@ const props = defineProps({
 
 const verifyForm = useForm({
   nik: props.initialNik || '',
-  phone: '',
   remember: true,
 });
 
 const toastMessage = ref('');
 let toastTimer = null;
 
-function formatPhoneChunked(value) {
-  if (!value) return '';
-  let digits = String(value).replace(/\D/g, '');
-  if (digits.startsWith('62')) {
-    digits = '0' + digits.slice(2);
-  }
-  digits = digits.slice(0, 13);
-  if (!digits) return '';
-  const chunks = digits.match(/.{1,4}/g);
-  return chunks ? chunks.join('-') : digits;
-}
-
-function onHistoryPhoneInput(e) {
-  const el = e.target;
-  const formatted = formatPhoneChunked(el.value || '');
-  verifyForm.phone = formatted;
-  el.value = formatted;
-}
-
 function submitVerify() {
-  verifyForm.transform((data) => ({
-    ...data,
-    phone: (data.phone || '').replace(/\D/g, ''),
-  })).post(route('queue.history.verify'));
+  verifyForm.post(route('queue.history.verify'));
 }
 
 function logoutSession() {

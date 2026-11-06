@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Public\Queue;
 
 use App\Http\Controllers\Controller;
-use App\Models\Desa;
-use App\Models\Kecamatan;
 use App\Models\Queue\ApplicationDocument;
 use App\Models\Queue\QueueApplication;
 use App\Models\Queue\QueueSlot;
@@ -72,35 +70,9 @@ class QueueApplicationController extends Controller
             ->with(['documents' => $docFilter])
             ->get();
 
-        // Ensure Dompu Kecamatan and Desa are seeded
-        if (Kecamatan::count() === 0 || Desa::count() === 0) {
-            try {
-                (new \Database\Seeders\DompuWilayahSeeder())->run();
-            } catch (\Throwable $e) {
-                \Log::warning('DompuWilayahSeeder auto-seed: ' . $e->getMessage());
-            }
-        }
-
-        $districts = Kecamatan::with(['desas' => fn($q) => $q->orderBy('sort_order')->orderBy('name')])
-            ->orderBy('sort_order')
-            ->get(['id', 'name', 'code'])
-            ->map(fn($k) => [
-                'id'       => $k->id,
-                'name'     => $k->name,
-                'code'     => $k->code,
-                'villages' => $k->desas->map(fn($d) => [
-                    'id'         => $d->id,
-                    'name'       => $d->name,
-                    'code'       => $d->code,
-                    'type'       => $d->type,
-                    'type_label' => ucfirst($d->type),
-                ])->values(),
-            ]);
-
         return Inertia::render('Public/Queue/Apply/Step1Identity', [
             'services'        => $services,
             'selectedService' => $selectedService,
-            'districts'       => $districts,
         ]);
     }
 
@@ -109,11 +81,6 @@ class QueueApplicationController extends Controller
      */
     public function storeDraft(Request $request): RedirectResponse
     {
-        // Sanitize phone numbers by removing non-digit characters (e.g. hyphens, spaces)
-        if ($request->has('applicant_phone') && $request->input('applicant_phone') !== null) {
-            $cleaned = preg_replace('/[^0-9]/', '', (string) $request->input('applicant_phone'));
-            $request->merge(['applicant_phone' => $cleaned]);
-        }
         if ($request->has('representative_phone') && $request->input('representative_phone') !== null) {
             $cleaned = preg_replace('/[^0-9]/', '', (string) $request->input('representative_phone'));
             $request->merge(['representative_phone' => $cleaned !== '' ? $cleaned : null]);
@@ -136,55 +103,14 @@ class QueueApplicationController extends Controller
         }
 
         // Sanitize demographic text fields to uppercase
-        foreach (['applicant_name', 'applicant_birth_place', 'applicant_address', 'applicant_village', 'applicant_district', 'representative_name'] as $field) {
+        foreach (['applicant_name', 'representative_name'] as $field) {
             if ($request->has($field) && $request->input($field) !== null) {
                 $request->merge([$field => mb_strtoupper(trim((string) $request->input($field)))]);
             }
         }
 
-        // Auto-correct and normalize applicant birth date (supports DD/MM/YYYY and corrects invalid day/month/2-digit year)
-        if ($request->has('applicant_birth_date') && $request->input('applicant_birth_date') !== null) {
-            $rawDate = trim((string) $request->input('applicant_birth_date'));
-            if ($rawDate !== '') {
-                $d = 0; $mo = 0; $y = 0;
-                if (preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/', $rawDate, $matches)) {
-                    $d = (int) $matches[1];
-                    $mo = (int) $matches[2];
-                    $y = (int) $matches[3];
-                } elseif (preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $rawDate, $matches)) {
-                    $y = (int) $matches[1];
-                    $mo = (int) $matches[2];
-                    $d = (int) $matches[3];
-                }
-
-                if ($d > 0 || $mo > 0 || $y > 0) {
-                    $currentYear = (int) date('Y');
-                    if ($y > 0 && $y < 100) {
-                        $twoDigit = (int) date('y');
-                        $y = ($y <= $twoDigit) ? 2000 + $y : 1900 + $y;
-                    }
-                    if ($mo <= 0) $mo = 1;
-                    if ($mo > 12) {
-                        if ($d >= 1 && $d <= 12 && $mo <= 31) {
-                            $tmp = $d; $d = $mo; $mo = $tmp;
-                        } else {
-                            $mo = 12;
-                        }
-                    }
-                    if ($d <= 0) $d = 1;
-                    $maxDays = cal_days_in_month(CAL_GREGORIAN, $mo, $y > 0 ? $y : 2000);
-                    if ($d > $maxDays) $d = $maxDays;
-                    if ($y > 0 && $mo > 0 && $d > 0) {
-                        $request->merge(['applicant_birth_date' => sprintf('%04d-%02d-%02d', $y, $mo, $d)]);
-                    }
-                }
-            }
-        }
-
         $service = ServiceType::find($request->service_type_id);
         $isBiometric = $service ? (bool) $service->is_biometric_first_recording : false;
-        $minAge = $isBiometric ? 16 : 17;
-        $maxBirthDate = now()->subYears($minAge)->format('Y-m-d');
 
         $validated = $request->validate([
             'service_type_id'              => 'required|exists:queue_service_types,id',
@@ -196,28 +122,7 @@ class QueueApplicationController extends Controller
                 'regex:/^[A-Za-z\s\'\-]+$/',
             ],
             'applicant_nik'                => ['required', 'string', 'regex:/^[0-9]{16}$/'],
-            'applicant_birth_place'        => [
-                'required',
-                'string',
-                'min:2',
-                'max:60',
-                'regex:/^[A-Za-z\s\'\-]+$/',
-            ],
-            'applicant_birth_date'         => [
-                'required',
-                'date',
-                'before_or_equal:' . $maxBirthDate,
-                'after:' . now()->subYears(120)->format('Y-m-d'),
-            ],
-            'applicant_phone'              => [
-                'required',
-                'string',
-                'regex:/^[0-9]{10,13}$/',
-            ],
             'applicant_email'              => 'nullable|email|max:100',
-            'applicant_address'            => 'required|string|min:3|max:300',
-            'applicant_village'            => 'nullable|string|max:100',
-            'applicant_district'           => 'nullable|string|max:100',
             'attendance_type'              => 'required|in:self,family_in_kk,family_out_kk,other',
             'representative_nik'           => [
                 'nullable',
@@ -249,20 +154,7 @@ class QueueApplicationController extends Controller
             'applicant_name.max'                      => 'Nama pemohon maksimal 60 huruf sesuai Permendagri No. 73 Tahun 2022.',
             'applicant_nik.required'                  => 'Nomor Induk Kependudukan (NIK) wajib diisi.',
             'applicant_nik.regex'                     => 'NIK pemilik dokumen harus tepat 16 digit angka (hanya boleh angka, tanpa spasi/huruf).',
-            'applicant_birth_place.required'          => 'Tempat lahir pemohon wajib diisi.',
-            'applicant_birth_place.regex'             => 'Tempat lahir hanya boleh memuat huruf tanpa angka atau simbol.',
-            'applicant_birth_place.max'               => 'Tempat lahir maksimal 60 huruf.',
-            'applicant_birth_date.required'           => 'Tanggal lahir pemohon wajib diisi.',
-            'applicant_birth_date.date'               => 'Format tanggal lahir tidak valid.',
-            'applicant_birth_date.before_or_equal'    => $isBiometric
-                ? 'Usia pemohon untuk layanan perekaman KTP-el pemula minimal 16 tahun (tanggal lahir maksimal ' . now()->subYears(16)->translatedFormat('d F Y') . ').'
-                : 'Usia pemohon untuk layanan pencetakan/penggantian KTP-el minimal 17 tahun (tanggal lahir maksimal ' . now()->subYears(17)->translatedFormat('d F Y') . '). Khusus warga usia 16 tahun, silakan pilih layanan "Perekaman KTP-el Baru".',
-            'applicant_birth_date.after'              => 'Tanggal lahir tidak valid (melebihi batas wajar).',
-            'applicant_phone.required'                => 'Nomor WhatsApp / HP aktif wajib diisi untuk konfirmasi antrean.',
-            'applicant_phone.regex'                   => 'Nomor WhatsApp / HP pemohon harus berupa angka dengan panjang 10 sampai 13 digit.',
             'applicant_email.email'                   => 'Format alamat email tidak valid.',
-            'applicant_address.required'              => 'Alamat tempat tinggal lengkap wajib diisi.',
-            'applicant_address.min'                   => 'Alamat tempat tinggal minimal 3 karakter.',
             'attendance_type.required'                => 'Pilih status kehadiran: datang sendiri atau diwakilkan.',
             'representative_nik.required_if'          => 'NIK orang yang mewakili wajib diisi (16 digit angka).',
             'representative_nik.regex'                => 'NIK orang yang mewakili harus tepat 16 digit angka (hanya boleh angka, tanpa spasi/huruf).',

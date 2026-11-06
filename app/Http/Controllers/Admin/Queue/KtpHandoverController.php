@@ -63,8 +63,7 @@ class KtpHandoverController extends Controller
                   ->orWhere('applicant_name', 'like', "%{$search}%")
                   ->orWhere('applicant_nik', 'like', "%{$search}%")
                   ->orWhere('representative_name', 'like', "%{$search}%")
-                  ->orWhere('representative_nik', 'like', "%{$search}%")
-                  ->orWhere('applicant_phone', 'like', "%{$search}%");
+                  ->orWhere('representative_nik', 'like', "%{$search}%");
             });
         }
 

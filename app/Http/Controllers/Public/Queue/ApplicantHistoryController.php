@@ -89,9 +89,7 @@ class ApplicantHistoryController extends Controller
     }
 
     /**
-     * Verify applicant using Dual Verification Factors:
-     * 1. NIK (16 digits)
-     * 2. Registered WhatsApp / Phone Number
+     * Verify applicant using NIK (16 digits).
      */
     public function verify(Request $request): RedirectResponse
     {
@@ -100,24 +98,19 @@ class ApplicantHistoryController extends Controller
         if (RateLimiter::tooManyAttempts($limiterKey, 6)) {
             $seconds = RateLimiter::availableIn($limiterKey);
             return back()->withErrors([
-                'phone' => "Terlalu banyak percobaan identifikasi. Harap tunggu {$seconds} detik sebelum mencoba kembali.",
+                'nik' => "Terlalu banyak percobaan identifikasi. Harap tunggu {$seconds} detik sebelum mencoba kembali.",
             ])->withInput();
         }
 
         $validated = $request->validate([
             'nik'      => 'required|digits:16',
-            'phone'    => 'required|string|min:8|max:20',
             'remember' => 'nullable|boolean',
         ], [
             'nik.required'    => 'Nomor Induk Kependudukan (NIK) wajib diisi.',
             'nik.digits'      => 'NIK harus berjumlah tepat 16 digit angka.',
-            'phone.required'  => 'Nomor WhatsApp / HP yang didaftarkan wajib diisi.',
-            'phone.min'       => 'Nomor telepon minimal 8 digit.',
         ]);
 
         $cleanNik = preg_replace('/[^0-9]/', '', $validated['nik']);
-        $cleanPhone = preg_replace('/[^0-9]/', '', $validated['phone']);
-        $normalizedInputPhone = ltrim(ltrim($cleanPhone, '0'), '62');
 
         $candidates = QueueApplication::where('applicant_nik', $cleanNik)->get();
 
@@ -125,27 +118,6 @@ class ApplicantHistoryController extends Controller
             RateLimiter::hit($limiterKey, 60);
             return back()->withErrors([
                 'nik' => 'Tidak ditemukan permohonan dengan NIK ini. Periksa kembali NIK yang Anda masukkan.',
-            ])->withInput();
-        }
-
-        // Match against applicant_phone or representative_phone
-        $matched = $candidates->first(function ($app) use ($normalizedInputPhone) {
-            $appPhone = preg_replace('/[^0-9]/', '', (string) $app->applicant_phone);
-            $normApp = ltrim(ltrim($appPhone, '0'), '62');
-
-            $repPhone = preg_replace('/[^0-9]/', '', (string) $app->representative_phone);
-            $normRep = ltrim(ltrim($repPhone, '0'), '62');
-
-            $matchApp = !empty($normApp) && (str_ends_with($normApp, $normalizedInputPhone) || str_ends_with($normalizedInputPhone, $normApp));
-            $matchRep = !empty($normRep) && (str_ends_with($normRep, $normalizedInputPhone) || str_ends_with($normalizedInputPhone, $normRep));
-
-            return $matchApp || $matchRep;
-        });
-
-        if (!$matched) {
-            RateLimiter::hit($limiterKey, 60);
-            return back()->withErrors([
-                'phone' => 'Nomor WhatsApp / HP tidak cocok dengan data pendaftaran untuk NIK ini.',
             ])->withInput();
         }
 

@@ -398,7 +398,7 @@
                   </td>
                   <td class="py-3 font-semibold text-slate-900 dark:text-white">
                     {{ app.applicant_name }}
-                    <span class="block text-[11px] text-slate-400 font-mono">{{ formatPhoneChunked(app.applicant_phone) }}</span>
+                    <span v-if="app.applicant_nik" class="block text-[11px] text-slate-400 font-mono">NIK: {{ app.applicant_nik.slice(0, 6) }}******{{ app.applicant_nik.slice(-4) }}</span>
                   </td>
                   <td class="py-3 text-slate-600 dark:text-slate-300">
                     <span

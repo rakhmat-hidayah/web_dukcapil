@@ -249,154 +249,8 @@
                 </p>
               </div>
 
-              <!-- Tempat Lahir -->
-              <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                  Tempat Lahir <span class="text-rose-500">*</span>
-                </label>
-                <input
-                  id="field_applicant_birth_place"
-                  :value="form.applicant_birth_place"
-                  @input="onPersonNameInput('applicant_birth_place', $event)"
-                  @keydown="onPersonNameKeyDown($event)"
-                  @blur="onPersonNameBlur('applicant_birth_place')"
-                  type="text"
-                  maxlength="60"
-                  autocapitalize="characters"
-                  spellcheck="false"
-                  placeholder="CONTOH: DOMPU"
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-semibold"
-                  required
-                />
-                <p v-if="nameInputWarning['applicant_birth_place']" class="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1 flex items-center gap-1 animate-in fade-in">
-                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                  <span>{{ nameInputWarning['applicant_birth_place'] }}</span>
-                </p>
-                <p v-if="form.errors.applicant_birth_place" class="text-xs text-rose-500 font-medium mt-1">
-                  {{ form.errors.applicant_birth_place }}
-                </p>
-              </div>
-
-              <!-- Tanggal Lahir (Dapat Diketik Manual & Auto-Koreksi Cerdas) -->
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    Tanggal Lahir <span class="text-rose-500">*</span>
-                  </label>
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" :class="isBiometric ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300'">
-                    Min. {{ minRequiredAge }} Tahun ({{ isBiometric ? 'Perekaman' : 'Pencetakan' }})
-                  </span>
-                </div>
-
-                <div class="relative">
-                  <!-- Input Teks Manual: Bisa diketik langsung (contoh: 17/08/1998 atau 17081998) -->
-                  <input
-                    id="field_applicant_birth_date"
-                    :value="birthDateInputText"
-                    @input="onBirthDateManualInput"
-                    @blur="onBirthDateBlur"
-                    @keypress="filterBirthDateKeypress"
-                    type="text"
-                    inputmode="numeric"
-                    maxlength="10"
-                    placeholder="HH/BB/TTTT (Contoh: 17/08/1998)"
-                    class="w-full pl-4 pr-12 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider transition"
-                    :class="{'border-rose-500 ring-1 ring-rose-500': ageErrorMessage || form.errors.applicant_birth_date}"
-                    required
-                  />
-
-                  <!-- Tombol Ikon Kalender untuk Opsi Pemilih Visual (Datepicker) -->
-                  <button
-                    type="button"
-                    @click="triggerNativeDatePicker"
-                    title="Buka pemilih kalender"
-                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition cursor-pointer"
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                  </button>
-
-                  <!-- Hidden Native Datepicker untuk Popup Kalender -->
-                  <input
-                    ref="nativeDatePickerRef"
-                    type="date"
-                    :value="form.applicant_birth_date"
-                    :max="maxBirthDate"
-                    :min="minBirthDate"
-                    @change="onNativeDatePicked"
-                    tabindex="-1"
-                    aria-hidden="true"
-                    class="sr-only pointer-events-none absolute right-4 top-3 opacity-0 w-0 h-0"
-                  />
-                </div>
-
-                <!-- Notifikasi / Feedback Otomatis jika Terjadi Perbaikan Kesalahan Input -->
-                <div v-if="autoCorrectedNotice" class="mt-1.5 flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-xl border border-amber-200/60 dark:border-amber-800/60">
-                  <svg class="w-3.5 h-3.5 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>{{ autoCorrectedNotice }}</span>
-                </div>
-
-                <!-- Usia info badge -->
-                <div v-if="applicantAge !== null" class="mt-1.5 flex items-center justify-between text-xs">
-                  <span class="text-slate-500 text-[11px]">
-                    Usia Pemohon: <strong :class="ageErrorMessage ? 'text-rose-600 font-bold' : 'text-emerald-600 dark:text-emerald-400 font-bold'">{{ applicantAge }} Tahun</strong>
-                  </span>
-                  <span v-if="!ageErrorMessage" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                    ✓ Memenuhi Syarat Usia
-                  </span>
-                </div>
-
-                <!-- Usia error warning -->
-                <div v-if="ageErrorMessage" class="mt-2 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2">
-                  <svg class="w-4 h-4 shrink-0 mt-0.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                  <span>{{ ageErrorMessage }}</span>
-                </div>
-
-                <p v-if="form.errors.applicant_birth_date" class="text-xs text-rose-500 font-medium mt-1">
-                  {{ form.errors.applicant_birth_date }}
-                </p>
-                <p v-else class="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Bisa diketik manual angka tanggal/bulan/tahun (contoh: <span class="font-mono text-slate-600 dark:text-slate-300 font-semibold">17081995</span> atau <span class="font-mono text-slate-600 dark:text-slate-300 font-semibold">17/08/1995</span>). Sistem otomatis mengoreksi jika ada salah input.
-                </p>
-              </div>
-
-              <!-- Nomor WhatsApp / HP -->
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    Nomor WhatsApp / HP Pemohon <span class="text-rose-500">*</span>
-                  </label>
-                  <span class="text-[10px] font-mono" :class="rawPhoneDigits(form.applicant_phone).length >= 10 && rawPhoneDigits(form.applicant_phone).length <= 13 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
-                    {{ rawPhoneDigits(form.applicant_phone).length }}/13 Digit (Min. 10)
-                  </span>
-                </div>
-                <input
-                  id="field_applicant_phone"
-                  :value="form.applicant_phone"
-                  @input="onPhoneInput"
-                  @keypress="filterPhoneKeypress"
-                  type="tel"
-                  inputmode="numeric"
-                  maxlength="16"
-                  autocomplete="tel"
-                  placeholder="Contoh: 0853-xxxx-xxxx"
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
-                  :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.applicant_phone}"
-                  required
-                />
-                <p v-if="form.errors.applicant_phone" class="text-xs text-rose-500 font-medium mt-1">
-                  {{ form.errors.applicant_phone }}
-                </p>
-                <p v-else-if="rawPhoneDigits(form.applicant_phone).length > 0 && rawPhoneDigits(form.applicant_phone).length < 10" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
-                  Kurang {{ 10 - rawPhoneDigits(form.applicant_phone).length }} digit lagi. Nomor HP harus antara 10 sampai 13 digit angka.
-                </p>
-              </div>
-
               <!-- Email (Opsional dengan Default @gmail.com) -->
-              <div>
+              <div class="sm:col-span-2">
                 <div class="flex items-center justify-between mb-1">
                   <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                     Alamat Email <span class="text-slate-400 font-normal lowercase">(opsional)</span>
@@ -505,133 +359,6 @@
                 </p>
                 <p v-else class="text-[11px] text-slate-400 mt-1 leading-relaxed">
                   Cukup ketik nama pengguna Anda (misal: <span class="font-mono text-slate-600 dark:text-slate-300 font-semibold">budi123</span>). Sistem otomatis melengkapinya ke <strong class="text-slate-700 dark:text-slate-200 font-semibold">@gmail.com</strong>, atau klik tombol pilihan di atas jika menggunakan email lain.
-                </p>
-              </div>
-
-              <!-- Kecamatan -->
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    Kecamatan <span class="text-rose-500">*</span>
-                  </label>
-                  <span v-if="selectedDistrictMode && selectedDistrictMode !== '__OTHER__'" class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">
-                    {{ availableVillages.length }} Desa/Kelurahan
-                  </span>
-                </div>
-                <select
-                  id="field_applicant_district"
-                  v-model="selectedDistrictMode"
-                  @change="handleDistrictChange"
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                  required
-                >
-                  <option value="" disabled>-- Pilih Kecamatan di Kab. Dompu --</option>
-                  <option
-                    v-for="dist in districts"
-                    :key="dist.id"
-                    :value="dist.name"
-                  >
-                    Kecamatan {{ dist.name }}
-                  </option>
-                  <option value="__OTHER__">&bull; Lainnya (Luar Kab. Dompu)</option>
-                </select>
-
-                <!-- Input Manual jika Luar Dompu -->
-                <div v-if="selectedDistrictMode === '__OTHER__'" class="mt-2">
-                  <input
-                    v-model="customDistrict"
-                    @input="handleCustomDistrictInput"
-                    type="text"
-                    placeholder="Tuliskan nama kecamatan Anda..."
-                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
-                    required
-                  />
-                </div>
-                <p v-if="form.errors.applicant_district" class="text-xs text-rose-500 font-medium mt-1">
-                  {{ form.errors.applicant_district }}
-                </p>
-              </div>
-
-              <!-- Desa / Kelurahan -->
-              <div id="field_applicant_village">
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                  Kelurahan / Desa <span class="text-rose-500">*</span>
-                </label>
-
-                <!-- Dropdown Desa jika Kecamatan Dompu dipilih -->
-                <div v-if="selectedDistrictMode && selectedDistrictMode !== '__OTHER__'">
-                  <select
-                    v-model="selectedVillageMode"
-                    @change="handleVillageChange"
-                    class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                    required
-                  >
-                    <option value="" disabled>-- Pilih Kelurahan / Desa --</option>
-                    <option
-                      v-for="vil in availableVillages"
-                      :key="vil.id"
-                      :value="vil.name"
-                    >
-                      {{ vil.type === 'kelurahan' ? 'Kel. ' : 'Desa ' }}{{ vil.name }}
-                    </option>
-                    <option value="__OTHER__">&bull; Lainnya (Tulis Manual)</option>
-                  </select>
-
-                  <div v-if="selectedVillageMode === '__OTHER__'" class="mt-2">
-                    <input
-                      v-model="customVillage"
-                      @input="handleCustomVillageInput"
-                      type="text"
-                      placeholder="Tuliskan nama desa / kelurahan..."
-                      class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <!-- Input Manual jika Luar Dompu -->
-                <div v-else-if="selectedDistrictMode === '__OTHER__'">
-                  <input
-                    v-model="customVillage"
-                    @input="handleCustomVillageInput"
-                    type="text"
-                    placeholder="Tuliskan nama kelurahan / desa..."
-                    class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
-                    required
-                  />
-                </div>
-
-                <!-- Belum Pilih Kecamatan -->
-                <div v-else>
-                  <select
-                    disabled
-                    class="w-full px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-sm text-slate-400 dark:text-slate-500 cursor-not-allowed"
-                  >
-                    <option value="">-- Pilih Kecamatan Terlebih Dahulu --</option>
-                  </select>
-                </div>
-
-                <p v-if="form.errors.applicant_village" class="text-xs text-rose-500 font-medium mt-1">
-                  {{ form.errors.applicant_village }}
-                </p>
-              </div>
-
-              <!-- Alamat Lengkap -->
-              <div class="sm:col-span-2">
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                  Alamat Tempat Tinggal Lengkap <span class="text-rose-500">*</span>
-                </label>
-                <textarea
-                  id="field_applicant_address"
-                  :value="form.applicant_address"
-                  @input="onUppercaseInput('applicant_address', $event)"
-                  rows="2"
-                  placeholder="NAMA JALAN, RT/RW, DUSUN, ATAU PATOKAN TEMPAT TINGGAL..."
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
-                  required
-                ></textarea>
-                <p v-if="form.errors.applicant_address" class="text-xs text-rose-500 font-medium mt-1">
-                  {{ form.errors.applicant_address }}
                 </p>
               </div>
             </div>
@@ -1064,23 +791,13 @@ const props = defineProps({
     type: Object,
     default: null,
   },
-  districts: {
-    type: Array,
-    default: () => [],
-  },
 });
 
 const form = useForm({
   service_type_id: props.selectedService ? props.selectedService.id : (props.services[0] ? props.services[0].id : ''),
   applicant_name: '',
   applicant_nik: '',
-  applicant_birth_place: '',
-  applicant_birth_date: '',
-  applicant_phone: '',
   applicant_email: '',
-  applicant_address: '',
-  applicant_village: '',
-  applicant_district: '',
   attendance_type: 'self',
   representative_nik: '',
   representative_name: '',
@@ -1090,305 +807,9 @@ const form = useForm({
   absence_reason: '',
 });
 
-const selectedDistrictMode = ref('');
-const selectedVillageMode = ref('');
-const customDistrict = ref('');
-const customVillage = ref('');
-
-// Manual Birth Date Input & Smart Auto-Correction State
-const birthDateInputText = ref('');
-const nativeDatePickerRef = ref(null);
-const autoCorrectedNotice = ref('');
-
-function getDaysInMonth(year, month) {
-  const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-  const daysMap = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  return daysMap[month - 1] || 31;
-}
-
-function filterBirthDateKeypress(e) {
-  if (!/[0-9\/\-\.]/.test(e.key)) {
-    e.preventDefault();
-  }
-}
-
-function formatBirthDateMask(value) {
-  if (!value) return '';
-  const parts = value.split(/[\/\-\.]/);
-  if (parts.length === 1) {
-    const digits = parts[0].replace(/\D/g, '').slice(0, 8);
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-    return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
-  }
-  const d = (parts[0] || '').replace(/\D/g, '').slice(0, 2);
-  const mRaw = (parts[1] || '').replace(/\D/g, '');
-  const m = mRaw.slice(0, 2);
-  const extraYearFromM = mRaw.slice(2, 6);
-
-  if (parts.length === 2) {
-    if (extraYearFromM) {
-      return `${d}/${m}/${extraYearFromM}`;
-    }
-    if (value.endsWith('/') || value.endsWith('-') || value.endsWith('.')) {
-      return `${d}/${m}/`;
-    }
-    return m ? `${d}/${m}` : (d ? `${d}/` : '');
-  }
-
-  const yParts = parts.slice(2);
-  let y = yParts.join('').replace(/\D/g, '').slice(0, 4);
-  if (extraYearFromM && !y) {
-    y = extraYearFromM;
-  }
-  return `${d}/${m}/${y}`;
-}
-
-function onBirthDateManualInput(e) {
-  const el = e.target;
-  const raw = el.value || '';
-  const formatted = formatBirthDateMask(raw);
-
-  birthDateInputText.value = formatted;
-  el.value = formatted;
-
-  if (formatted.length === 10) {
-    correctAndNormalizeBirthDate(false);
-  } else {
-    if (autoCorrectedNotice.value) {
-      autoCorrectedNotice.value = '';
-    }
-    const parts = formatted.split('/');
-    if (parts.length === 3 && parts[2].length === 4) {
-      form.applicant_birth_date = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-    }
-  }
-}
-
-function triggerNativeDatePicker() {
-  if (nativeDatePickerRef.value) {
-    if (typeof nativeDatePickerRef.value.showPicker === 'function') {
-      try {
-        nativeDatePickerRef.value.showPicker();
-      } catch (err) {
-        nativeDatePickerRef.value.focus();
-        nativeDatePickerRef.value.click();
-      }
-    } else {
-      nativeDatePickerRef.value.focus();
-      nativeDatePickerRef.value.click();
-    }
-  }
-}
-
-function onNativeDatePicked(e) {
-  const val = e.target.value; // YYYY-MM-DD
-  if (val) {
-    form.applicant_birth_date = val;
-    const parts = val.split('-');
-    if (parts.length === 3) {
-      birthDateInputText.value = `${parts[2]}/${parts[1]}/${parts[0]}`;
-    }
-    autoCorrectedNotice.value = '';
-    if (form.errors.applicant_birth_date) {
-      delete form.errors.applicant_birth_date;
-    }
-  }
-}
-
-function correctAndNormalizeBirthDate(showNotice = true) {
-  const raw = (birthDateInputText.value || '').trim();
-  if (!raw) {
-    form.applicant_birth_date = '';
-    autoCorrectedNotice.value = '';
-    return;
-  }
-
-  let d = 0;
-  let m = 0;
-  let y = 0;
-
-  if (raw.includes('/') || raw.includes('-') || raw.includes('.')) {
-    const parts = raw.split(/[\/\-\.]/).map(p => p.trim());
-    d = parseInt(parts[0] || '0', 10);
-    m = parseInt(parts[1] || '0', 10);
-    y = parseInt(parts[2] || '0', 10);
-  } else {
-    const digits = raw.replace(/\D/g, '');
-    if (digits.length >= 8) {
-      d = parseInt(digits.slice(0, 2), 10);
-      m = parseInt(digits.slice(2, 4), 10);
-      y = parseInt(digits.slice(4, 8), 10);
-    } else if (digits.length >= 6) {
-      d = parseInt(digits.slice(0, 2), 10);
-      m = parseInt(digits.slice(2, 4), 10);
-      y = parseInt(digits.slice(4), 10);
-    } else if (digits.length > 0) {
-      d = parseInt(digits.slice(0, 2), 10);
-    }
-  }
-
-  if (isNaN(d)) d = 0;
-  if (isNaN(m)) m = 0;
-  if (isNaN(y)) y = 0;
-
-  const currentYear = new Date().getFullYear();
-  const corrections = [];
-
-  // 1. KOREKSI TAHUN
-  if (y > 0 && y < 100) {
-    const twoDigitCutoff = currentYear % 100; // 26 untuk tahun 2026
-    const oldY = y;
-    if (y <= twoDigitCutoff) {
-      y = 2000 + y;
-    } else {
-      y = 1900 + y;
-    }
-    corrections.push(`Tahun "${oldY}" disesuaikan ke ${y}`);
-  } else if (y > 0 && y < 1900) {
-    y = 1900;
-    corrections.push(`Tahun disesuaikan ke minimal 1900`);
-  } else if (y > currentYear) {
-    corrections.push(`Tahun ${y} melebihi tahun sekarang (${currentYear}), disesuaikan ke ${currentYear}`);
-    y = currentYear;
-  } else if (!y && (d > 0 || m > 0)) {
-    y = currentYear - minRequiredAge.value;
-    corrections.push(`Tahun otomatis diset ke ${y}`);
-  }
-
-  // 2. KOREKSI BULAN & DETEKSI TERTUKAR HARI/BULAN
-  if (m <= 0 && (d > 0 || y > 0)) {
-    corrections.push(`Bulan diperbaiki ke 01 (Januari)`);
-    m = 1;
-  } else if (m > 12) {
-    if (d >= 1 && d <= 12 && m <= 31) {
-      corrections.push(`Format tanggal dan bulan terbalik disesuaikan (Tanggal: ${m}, Bulan: ${d})`);
-      const temp = d;
-      d = m;
-      m = temp;
-    } else {
-      corrections.push(`Bulan ${m} melebihi 12, disesuaikan ke 12 (Desember)`);
-      m = 12;
-    }
-  }
-
-  // 3. KOREKSI HARI TERHADAP BULAN DAN TAHUN
-  if (d <= 0 && (m > 0 || y > 0)) {
-    corrections.push(`Tanggal hari diperbaiki ke 01`);
-    d = 1;
-  } else if (d > 0 && m > 0 && y > 0) {
-    const maxDays = getDaysInMonth(y, m);
-    if (d > maxDays) {
-      corrections.push(`Tanggal ${d} disesuaikan ke ${maxDays} (maksimal hari bulan tersebut)`);
-      d = maxDays;
-    }
-  }
-
-  if (d > 0 && m > 0 && y > 0) {
-    const dStr = String(d).padStart(2, '0');
-    const mStr = String(m).padStart(2, '0');
-    const yStr = String(y).padStart(4, '0');
-
-    const formattedDisplay = `${dStr}/${mStr}/${yStr}`;
-    const formattedIso = `${yStr}-${mStr}-${dStr}`;
-
-    birthDateInputText.value = formattedDisplay;
-    form.applicant_birth_date = formattedIso;
-
-    if (showNotice && corrections.length > 0) {
-      autoCorrectedNotice.value = `Otomatis diperbaiki: ${corrections.join(', ')}`;
-      setTimeout(() => {
-        autoCorrectedNotice.value = '';
-      }, 7000);
-    } else if (corrections.length === 0) {
-      autoCorrectedNotice.value = '';
-    }
-
-    if (form.errors.applicant_birth_date) {
-      delete form.errors.applicant_birth_date;
-    }
-  }
-}
-
-function onBirthDateBlur() {
-  correctAndNormalizeBirthDate(true);
-}
-
-const availableVillages = computed(() => {
-  if (!selectedDistrictMode.value || selectedDistrictMode.value === '__OTHER__') {
-    return [];
-  }
-  const found = props.districts.find(d => d.name === selectedDistrictMode.value);
-  return found ? (found.villages || []) : [];
-});
-
-function handleDistrictChange() {
-  if (selectedDistrictMode.value === '__OTHER__') {
-    form.applicant_district = customDistrict.value ? customDistrict.value.trim().toUpperCase() : '';
-    form.applicant_village = customVillage.value ? customVillage.value.trim().toUpperCase() : '';
-    selectedVillageMode.value = '';
-  } else {
-    form.applicant_district = selectedDistrictMode.value;
-    form.applicant_village = '';
-    selectedVillageMode.value = '';
-    customVillage.value = '';
-  }
-}
-
-function handleCustomDistrictInput() {
-  form.applicant_district = customDistrict.value.trim().toUpperCase();
-}
-
-function handleVillageChange() {
-  if (selectedVillageMode.value === '__OTHER__') {
-    form.applicant_village = customVillage.value ? customVillage.value.trim().toUpperCase() : '';
-  } else {
-    form.applicant_village = selectedVillageMode.value;
-    customVillage.value = '';
-  }
-}
-
-function handleCustomVillageInput() {
-  form.applicant_village = customVillage.value.trim().toUpperCase();
-}
-
 onMounted(() => {
-  if (form.applicant_birth_date) {
-    const parts = form.applicant_birth_date.split('-');
-    if (parts.length === 3) {
-      birthDateInputText.value = `${parts[2]}/${parts[1]}/${parts[0]}`;
-    }
-  }
-  if (form.applicant_phone) {
-    form.applicant_phone = formatPhoneChunked(form.applicant_phone);
-  }
   if (form.representative_phone) {
     form.representative_phone = formatPhoneChunked(form.representative_phone);
-  }
-  if (form.applicant_district) {
-    const matchKec = props.districts.find(
-      d => d.name.toUpperCase() === form.applicant_district.trim().toUpperCase()
-    );
-    if (matchKec) {
-      selectedDistrictMode.value = matchKec.name;
-      form.applicant_district = matchKec.name;
-      if (form.applicant_village) {
-        const matchVil = (matchKec.villages || []).find(
-          v => v.name.toUpperCase() === form.applicant_village.trim().toUpperCase()
-        );
-        if (matchVil) {
-          selectedVillageMode.value = matchVil.name;
-          form.applicant_village = matchVil.name;
-        } else {
-          selectedVillageMode.value = '__OTHER__';
-          customVillage.value = form.applicant_village;
-        }
-      }
-    } else {
-      selectedDistrictMode.value = '__OTHER__';
-      customDistrict.value = form.applicant_district;
-      customVillage.value = form.applicant_village;
-    }
   }
 });
 
@@ -1486,10 +907,6 @@ function handlePhoneInput(e, formKey) {
   if (form.errors[formKey] && digits.length >= 10 && digits.length <= 13) {
     delete form.errors[formKey];
   }
-}
-
-function onPhoneInput(e) {
-  handlePhoneInput(e, 'applicant_phone');
 }
 
 function onRepresentativePhoneInput(e) {
@@ -1660,54 +1077,6 @@ function applyEmailDomain(domain) {
   }
 }
 
-// Age & Birth Date Validation
-const isBiometric = computed(() => !!selectedServiceObj.value?.is_biometric_first_recording);
-const minRequiredAge = computed(() => isBiometric.value ? 16 : 17);
-
-const maxBirthDate = computed(() => {
-  const today = new Date();
-  const age = minRequiredAge.value;
-  const cutoff = new Date(today.getFullYear() - age, today.getMonth(), today.getDate());
-  const y = cutoff.getFullYear();
-  const m = String(cutoff.getMonth() + 1).padStart(2, '0');
-  const d = String(cutoff.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-});
-
-const minBirthDate = computed(() => {
-  const today = new Date();
-  return `${today.getFullYear() - 120}-01-01`;
-});
-
-const applicantAge = computed(() => {
-  if (!form.applicant_birth_date) return null;
-  const parts = form.applicant_birth_date.split('-');
-  if (parts.length !== 3) return null;
-  const birthYear = parseInt(parts[0], 10);
-  const birthMonth = parseInt(parts[1], 10) - 1;
-  const birthDay = parseInt(parts[2], 10);
-
-  const today = new Date();
-  let age = today.getFullYear() - birthYear;
-  const m = today.getMonth() - birthMonth;
-  if (m < 0 || (m === 0 && today.getDate() < birthDay)) {
-    age--;
-  }
-  return age >= 0 ? age : 0;
-});
-
-const ageErrorMessage = computed(() => {
-  if (applicantAge.value === null) return null;
-  if (applicantAge.value < minRequiredAge.value) {
-    if (isBiometric.value) {
-      return `Usia pemohon saat ini ${applicantAge.value} tahun. Perekaman KTP-el Baru diperuntukkan bagi penduduk pemula minimal usia 16 tahun.`;
-    } else {
-      return `Usia pemohon saat ini ${applicantAge.value} tahun. Layanan pencetakan/penggantian KTP-el diperuntukkan bagi warga minimal usia 17 tahun. Bagi pemula usia 16 tahun silakan pilih layanan "Perekaman KTP-el Baru".`;
-    }
-  }
-  return null;
-});
-
 function handleServiceChanged(service) {
   if (service.is_biometric_first_recording) {
     form.attendance_type = 'self';
@@ -1723,7 +1092,6 @@ const showIncompleteModal = ref(false);
 const incompleteErrors = ref([]);
 
 function validateForm() {
-  correctAndNormalizeBirthDate(false);
   const errors = [];
   form.clearErrors();
 
@@ -1809,80 +1177,7 @@ function validateForm() {
     });
   }
 
-  // 4. Tempat Lahir
-  const cleanBirthPlace = (form.applicant_birth_place || '').trim();
-  if (!cleanBirthPlace) {
-    const msg = 'Tempat lahir pemilik dokumen wajib diisi.';
-    form.errors.applicant_birth_place = msg;
-    errors.push({
-      field: 'applicant_birth_place',
-      elementId: 'field_applicant_birth_place',
-      label: 'Tempat Lahir',
-      message: msg,
-    });
-  } else if (/\d/.test(cleanBirthPlace)) {
-    const msg = 'Tempat lahir tidak boleh memuat angka.';
-    form.errors.applicant_birth_place = msg;
-    errors.push({
-      field: 'applicant_birth_place',
-      elementId: 'field_applicant_birth_place',
-      label: 'Tempat Lahir',
-      message: msg,
-    });
-  } else if (!/^[A-Za-z\s'\-]+$/.test(cleanBirthPlace)) {
-    const msg = 'Tempat lahir hanya boleh memuat huruf tanpa angka atau simbol.';
-    form.errors.applicant_birth_place = msg;
-    errors.push({
-      field: 'applicant_birth_place',
-      elementId: 'field_applicant_birth_place',
-      label: 'Tempat Lahir',
-      message: msg,
-    });
-  }
-
-  // 5. Tanggal Lahir & Validasi Usia
-  if (!form.applicant_birth_date) {
-    const msg = 'Tanggal lahir pemilik dokumen wajib diisi.';
-    form.errors.applicant_birth_date = msg;
-    errors.push({
-      field: 'applicant_birth_date',
-      elementId: 'field_applicant_birth_date',
-      label: 'Tanggal Lahir',
-      message: msg,
-    });
-  } else if (ageErrorMessage.value) {
-    form.errors.applicant_birth_date = ageErrorMessage.value;
-    errors.push({
-      field: 'applicant_birth_date',
-      elementId: 'field_applicant_birth_date',
-      label: 'Syarat Usia Pemohon',
-      message: ageErrorMessage.value,
-    });
-  }
-
-  // 6. Nomor HP / WhatsApp
-  const cleanPhone = (form.applicant_phone || '').replace(/\D/g, '');
-  if (!cleanPhone) {
-    const msg = 'Nomor WhatsApp / HP aktif wajib diisi.';
-    form.errors.applicant_phone = msg;
-    errors.push({
-      field: 'applicant_phone',
-      elementId: 'field_applicant_phone',
-      label: 'Nomor WhatsApp / HP',
-      message: msg,
-    });
-  } else if (cleanPhone.length < 10 || cleanPhone.length > 13) {
-    const msg = `Nomor WhatsApp / HP harus berupa angka 10 sampai 13 digit (saat ini ${cleanPhone.length} digit).`;
-    form.errors.applicant_phone = msg;
-    errors.push({
-      field: 'applicant_phone',
-      elementId: 'field_applicant_phone',
-      label: 'Nomor WhatsApp / HP',
-      message: msg,
-    });
-  }
-
-  // 6b. Alamat Email (Opsional - otomatis @gmail.com jika hanya username)
+  // 4. Alamat Email (Opsional - otomatis @gmail.com jika hanya username)
   normalizeApplicantEmail();
   if (form.applicant_email && form.applicant_email.trim()) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -1898,43 +1193,7 @@ function validateForm() {
     }
   }
 
-  // 7. Kecamatan
-  if (!form.applicant_district || !form.applicant_district.trim()) {
-    const msg = 'Kecamatan tempat tinggal wajib dipilih.';
-    form.errors.applicant_district = msg;
-    errors.push({
-      field: 'applicant_district',
-      elementId: 'field_applicant_district',
-      label: 'Kecamatan Domisili',
-      message: msg,
-    });
-  }
-
-  // 8. Kelurahan / Desa
-  if (!form.applicant_village || !form.applicant_village.trim()) {
-    const msg = 'Kelurahan / Desa tempat tinggal wajib dipilih atau diisi.';
-    form.errors.applicant_village = msg;
-    errors.push({
-      field: 'applicant_village',
-      elementId: 'field_applicant_village',
-      label: 'Kelurahan / Desa Domisili',
-      message: msg,
-    });
-  }
-
-  // 9. Alamat Lengkap
-  if (!form.applicant_address || !form.applicant_address.trim()) {
-    const msg = 'Alamat tempat tinggal lengkap (jalan, RT/RW, Dusun) wajib diisi.';
-    form.errors.applicant_address = msg;
-    errors.push({
-      field: 'applicant_address',
-      elementId: 'field_applicant_address',
-      label: 'Alamat Tempat Tinggal Lengkap',
-      message: msg,
-    });
-  }
-
-  // 10. Data Perwakilan (jika diwakilkan)
+  // 5. Data Perwakilan (jika diwakilkan)
   if (form.attendance_type !== 'self') {
     if (!form.representative_nik) {
       const msg = 'NIK orang yang mewakili wajib diisi.';
@@ -2069,7 +1328,6 @@ function scrollToError(elementId) {
 }
 
 function submitStep1() {
-  correctAndNormalizeBirthDate(false);
   normalizeApplicantEmail();
   const errors = validateForm();
   if (errors.length > 0) {
@@ -2081,13 +1339,8 @@ function submitStep1() {
   form.transform((data) => ({
     ...data,
     applicant_name: data.applicant_name ? sanitizePersonName(data.applicant_name).trim() : '',
-    applicant_birth_place: data.applicant_birth_place ? sanitizePersonName(data.applicant_birth_place).trim() : '',
-    applicant_address: data.applicant_address ? data.applicant_address.trim().toUpperCase() : '',
-    applicant_district: data.applicant_district ? data.applicant_district.trim().toUpperCase() : '',
-    applicant_village: data.applicant_village ? data.applicant_village.trim().toUpperCase() : '',
     representative_name: data.representative_name ? sanitizePersonName(data.representative_name).trim() : '',
     applicant_email: data.applicant_email ? data.applicant_email.trim() : null,
-    applicant_phone: rawPhoneDigits(data.applicant_phone),
     representative_phone: data.representative_phone ? rawPhoneDigits(data.representative_phone) : '',
   })).post(route('queue.apply.store'), {
     onError: (serverErrors) => {

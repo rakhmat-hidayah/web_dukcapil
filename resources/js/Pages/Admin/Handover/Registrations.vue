@@ -281,8 +281,6 @@
                       </div>
                       <div class="font-mono text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
                         <span>NIK: {{ maskNik(app.applicant_nik) }}</span>
-                        <span>·</span>
-                        <span>{{ formatPhoneChunked(app.applicant_phone) }}</span>
                       </div>
                     </div>
                   </div>

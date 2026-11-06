@@ -301,30 +301,9 @@
                 <span class="text-slate-400 text-[11px] block">Nomor Induk Kependudukan (NIK)</span>
                 <span class="font-mono font-bold text-slate-900 dark:text-white text-sm">{{ application.applicant_nik }}</span>
               </div>
-              <div v-if="application.applicant_birth_place || application.applicant_birth_date">
-                <span class="text-slate-400 text-[11px] block">Tempat, Tanggal Lahir</span>
-                <span class="font-bold text-slate-900 dark:text-white">
-                  {{ application.applicant_birth_place || '-' }}, {{ formatBirthDate(application.applicant_birth_date) }}
-                </span>
-              </div>
-              <div>
-                <span class="text-slate-400 text-[11px] block">No. WhatsApp / Handphone</span>
-                <a
-                  :href="`https://wa.me/${cleanPhone(application.applicant_phone)}`"
-                  target="_blank"
-                  class="font-mono font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
-                >
-                  {{ formatPhoneChunked(application.applicant_phone) }}
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                </a>
-              </div>
               <div v-if="application.applicant_email">
                 <span class="text-slate-400 text-[11px] block">Email</span>
                 <span class="text-slate-700 dark:text-slate-200">{{ application.applicant_email }}</span>
-              </div>
-              <div>
-                <span class="text-slate-400 text-[11px] block">Alamat Domisili</span>
-                <span class="text-slate-700 dark:text-slate-200 leading-relaxed">{{ application.applicant_address }}</span>
               </div>
               <div>
                 <span class="text-slate-400 text-[11px] block">Status Kehadiran Pelayanan</span>
@@ -1911,23 +1890,6 @@ const selfieDocument = computed(() => {
       sDoc.label?.toLowerCase().includes('foto wajah')
   }) || null
 })
-
-const formatBirthDate = (val) => {
-  if (props.application.applicant_birth_date_formatted) {
-    return props.application.applicant_birth_date_formatted
-  }
-  if (!val) return '-'
-  const raw = String(val).split('T')[0]
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-    const [year, month, day] = raw.split('-')
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-    const mIdx = parseInt(month, 10) - 1
-    if (mIdx >= 0 && mIdx < 12) {
-      return `${parseInt(day, 10)} ${months[mIdx]} ${year}`
-    }
-  }
-  return val
-}
 
 const statusNames = {
   DRAFT: 'Draf',

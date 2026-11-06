@@ -334,8 +334,6 @@
                       </div>
                       <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
                         <span>{{ maskNik(app.applicant_nik) }}</span>
-                        <span>·</span>
-                        <span>{{ formatPhoneChunked(app.applicant_phone) }}</span>
                       </div>
                     </div>
                   </div>
