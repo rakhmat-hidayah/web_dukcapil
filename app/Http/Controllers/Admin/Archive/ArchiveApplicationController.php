@@ -20,7 +20,7 @@ class ArchiveApplicationController extends Controller
 
     public function index(Request $request): Response
     {
-        $filters = $request->only(['period', 'service_type_id', 'search', 'start_date', 'end_date', 'include_archived']);
+        $filters = $request->only(['period', 'service_type_id', 'status', 'search', 'start_date', 'end_date', 'include_archived']);
 
         $query = $this->archiveService->getEligibleApplicationsQuery($filters);
 
@@ -43,8 +43,27 @@ class ArchiveApplicationController extends Controller
             \App\Models\Queue\QueueApplication::STATUS_READY_FOR_PICKUP,
             \App\Models\Queue\QueueApplication::STATUS_COMPLETED,
         ]);
+        if (!is_array($eligibleStatuses)) {
+            $eligibleStatuses = [$eligibleStatuses];
+        }
+        if (!in_array(\App\Models\Queue\QueueApplication::STATUS_READY_FOR_PICKUP, $eligibleStatuses)) {
+            $eligibleStatuses[] = \App\Models\Queue\QueueApplication::STATUS_READY_FOR_PICKUP;
+        }
+        if (!in_array(\App\Models\Queue\QueueApplication::STATUS_COMPLETED, $eligibleStatuses)) {
+            $eligibleStatuses[] = \App\Models\Queue\QueueApplication::STATUS_COMPLETED;
+        }
 
-        $availablePeriods = \App\Models\Queue\QueueApplication::whereIn('status', $eligibleStatuses)
+        $availablePeriods = \App\Models\Queue\QueueApplication::where(function ($q) use ($eligibleStatuses) {
+                $q->whereIn('queue_applications.status', $eligibleStatuses)
+                  ->orWhere('queue_applications.status', \App\Models\Queue\QueueApplication::STATUS_READY_FOR_PICKUP)
+                  ->orWhere('queue_applications.status', \App\Models\Queue\QueueApplication::STATUS_COMPLETED)
+                  ->orWhereHas('handover', function ($hq) {
+                      $hq->whereIn('status', [
+                          \App\Models\Queue\KtpHandover::STATUS_READY,
+                          \App\Models\Queue\KtpHandover::STATUS_HANDED_OVER,
+                      ]);
+                  });
+            })
             ->selectRaw("DATE_FORMAT(COALESCE(completed_at, handover_at, updated_at), '%Y-%m') as period, count(*) as count")
             ->whereNotNull('updated_at')
             ->groupBy('period')

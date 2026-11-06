@@ -42,7 +42,7 @@
 
       <!-- Filters Card -->
       <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-        <form @submit.prevent="applyFilter" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <form @submit.prevent="applyFilter" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
           <!-- Filter Periode Bulan -->
           <div>
             <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Periode Bulan</label>
@@ -68,6 +68,19 @@
               <option v-for="st in serviceTypes" :key="st.id" :value="st.id">
                 {{ st.name }}
               </option>
+            </select>
+          </div>
+
+          <!-- Filter Status Permohonan -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Status Permohonan</label>
+            <select
+              v-model="filterForm.status"
+              class="w-full text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 p-2.5 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Semua Status</option>
+              <option value="READY_FOR_PICKUP">KTP Siap Diambil</option>
+              <option value="COMPLETED">KTP Diserahkan</option>
             </select>
           </div>
 
@@ -174,12 +187,12 @@
                   <div class="space-y-0.5">
                     <span
                       class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold"
-                      :class="app.status === 'READY_FOR_PICKUP' ? 'bg-violet-100 text-violet-800 dark:bg-violet-950/60 dark:text-violet-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'"
+                      :class="(app.status === 'READY_FOR_PICKUP' || app.handover?.status === 'SIAP_DIAMBIL') ? 'bg-violet-100 text-violet-800 dark:bg-violet-950/60 dark:text-violet-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'"
                     >
-                      {{ app.status === 'READY_FOR_PICKUP' ? 'Siap Diambil' : 'KTP Diserahkan' }}
+                      {{ (app.status === 'READY_FOR_PICKUP' || app.handover?.status === 'SIAP_DIAMBIL') ? 'KTP Siap Diambil' : 'KTP Diserahkan' }}
                     </span>
                     <p class="text-[11px] text-slate-500 font-mono">
-                      {{ (app.completed_at || app.updated_at) ? new Date(app.completed_at || app.updated_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-' }}
+                      {{ (app.handover?.ready_marked_at || app.completed_at || app.updated_at) ? new Date(app.handover?.ready_marked_at || app.completed_at || app.updated_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-' }}
                     </p>
                   </div>
                 </td>
@@ -310,6 +323,7 @@ const props = defineProps({
 const filterForm = ref({
   period: props.filters.period || '',
   service_type_id: props.filters.service_type_id || '',
+  status: props.filters.status || '',
   search: props.filters.search || '',
 });
 
@@ -349,7 +363,7 @@ function applyFilter() {
 }
 
 function resetFilter() {
-  filterForm.value = { period: '', service_type_id: '', search: '' };
+  filterForm.value = { period: '', service_type_id: '', status: '', search: '' };
   applyFilter();
 }
 

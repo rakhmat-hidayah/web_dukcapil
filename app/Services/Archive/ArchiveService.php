@@ -32,9 +32,48 @@ class ArchiveService
             QueueApplication::STATUS_READY_FOR_PICKUP,
             QueueApplication::STATUS_COMPLETED,
         ]);
+        if (!is_array($eligibleStatuses)) {
+            $eligibleStatuses = [$eligibleStatuses];
+        }
+        // Pastikan status Siap Diambil dan Selesai selalu diikutsertakan
+        if (!in_array(QueueApplication::STATUS_READY_FOR_PICKUP, $eligibleStatuses)) {
+            $eligibleStatuses[] = QueueApplication::STATUS_READY_FOR_PICKUP;
+        }
+        if (!in_array(QueueApplication::STATUS_COMPLETED, $eligibleStatuses)) {
+            $eligibleStatuses[] = QueueApplication::STATUS_COMPLETED;
+        }
 
-        $query = QueueApplication::with(['serviceType', 'documents.serviceDocument'])
-            ->whereIn('status', $eligibleStatuses);
+        // Eager load serviceType, documents, dan handover untuk sinkronisasi KTP-el Siap Diambil
+        $query = QueueApplication::with(['serviceType', 'documents.serviceDocument', 'handover'])
+            ->where(function ($q) use ($eligibleStatuses) {
+                $q->whereIn('queue_applications.status', $eligibleStatuses)
+                  ->orWhere('queue_applications.status', QueueApplication::STATUS_READY_FOR_PICKUP)
+                  ->orWhere('queue_applications.status', QueueApplication::STATUS_COMPLETED)
+                  ->orWhereHas('handover', function ($hq) {
+                      $hq->whereIn('status', [
+                          \App\Models\Queue\KtpHandover::STATUS_READY,
+                          \App\Models\Queue\KtpHandover::STATUS_HANDED_OVER,
+                      ]);
+                  });
+            });
+
+        // Filter spesifik status jika diminta oleh admin (e.g. READY_FOR_PICKUP atau COMPLETED)
+        if (!empty($filters['status'])) {
+            $st = $filters['status'];
+            if ($st === QueueApplication::STATUS_READY_FOR_PICKUP || $st === 'SIAP_DIAMBIL') {
+                $query->where(function ($q) {
+                    $q->where('queue_applications.status', QueueApplication::STATUS_READY_FOR_PICKUP)
+                      ->orWhereHas('handover', fn($h) => $h->where('status', \App\Models\Queue\KtpHandover::STATUS_READY));
+                });
+            } elseif ($st === QueueApplication::STATUS_COMPLETED || $st === 'SUDAH_DISERAHKAN') {
+                $query->where(function ($q) {
+                    $q->where('queue_applications.status', QueueApplication::STATUS_COMPLETED)
+                      ->orWhereHas('handover', fn($h) => $h->where('status', \App\Models\Queue\KtpHandover::STATUS_HANDED_OVER));
+                });
+            } else {
+                $query->where('queue_applications.status', $st);
+            }
+        }
 
         // Exclude applications that are already part of an active/complete archive package
         $alreadyArchivedIds = ArchivePackageItem::whereHas('package', function ($q) {
@@ -632,9 +671,28 @@ class ArchiveService
             QueueApplication::STATUS_READY_FOR_PICKUP,
             QueueApplication::STATUS_COMPLETED,
         ]);
+        if (!is_array($eligibleStatuses)) {
+            $eligibleStatuses = [$eligibleStatuses];
+        }
+        if (!in_array(QueueApplication::STATUS_READY_FOR_PICKUP, $eligibleStatuses)) {
+            $eligibleStatuses[] = QueueApplication::STATUS_READY_FOR_PICKUP;
+        }
+        if (!in_array(QueueApplication::STATUS_COMPLETED, $eligibleStatuses)) {
+            $eligibleStatuses[] = QueueApplication::STATUS_COMPLETED;
+        }
 
-        // Eligible applications total
-        $totalEligibleApplications = QueueApplication::whereIn('status', $eligibleStatuses)->count();
+        // Eligible applications total (sinkron dengan KTP-el Siap Diambil)
+        $totalEligibleApplications = QueueApplication::where(function ($q) use ($eligibleStatuses) {
+            $q->whereIn('queue_applications.status', $eligibleStatuses)
+              ->orWhere('queue_applications.status', QueueApplication::STATUS_READY_FOR_PICKUP)
+              ->orWhere('queue_applications.status', QueueApplication::STATUS_COMPLETED)
+              ->orWhereHas('handover', function ($hq) {
+                  $hq->whereIn('status', [
+                      \App\Models\Queue\KtpHandover::STATUS_READY,
+                      \App\Models\Queue\KtpHandover::STATUS_HANDED_OVER,
+                  ]);
+              });
+        })->count();
 
         // Already packaged application IDs
         $archivedAppIds = ArchivePackageItem::whereHas('package', function ($q) {

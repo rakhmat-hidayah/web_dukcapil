@@ -40,6 +40,7 @@ class ArchiveSettingsController extends Controller
         }
 
         $allStatuses = [
+            QueueApplication::STATUS_READY_FOR_PICKUP => 'KTP Siap Diambil',
             QueueApplication::STATUS_COMPLETED => 'Pelayanan Selesai (KTP Diserahkan)',
             QueueApplication::STATUS_APPROVED_FOR_SERVICE => 'Fisik Cocok (Disetujui Layanan)',
             QueueApplication::STATUS_PRE_VERIFIED => 'Terverifikasi Online (Siap Pilih Jadwal)',
