@@ -150,30 +150,120 @@
             </div>
           </div>
 
-          <div class="mt-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 space-y-2 leading-relaxed">
-            <p>
-              1. <strong>Keabsahan Data:</strong> Seluruh data identitas dan foto dokumen yang saya unggah adalah benar, sah, dan sesuai dengan dokumen aslinya yang diterbitkan oleh instansi berwenang.
+          <div class="mt-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs sm:text-[13px] text-slate-700 dark:text-slate-300 space-y-4 leading-relaxed">
+            <p class="font-semibold text-slate-900 dark:text-white">
+              Dengan mengirimkan permohonan melalui layanan online KTP-el Disdukcapil Kabupaten Dompu, saya menyatakan bahwa:
             </p>
-            <p>
-              2. <strong>Bukan Pengganti Verifikasi Fisik:</strong> Saya memahami sepenuhnya bahwa verifikasi online ini <em>HANYA</em> merupakan pemeriksaan administrasi awal, dan <em>BUKAN</em> pengganti pemeriksaan identitas serta dokumen fisik di kantor.
-            </p>
-            <p>
-              3. <strong>Kewajiban Kehadiran Fisik:</strong> Saya atau perwakilan yang telah ditunjuk berkomitmen untuk hadir langsung ke Kantor Disdukcapil Kabupaten Dompu sesuai jadwal yang telah ditentukan dengan membawa seluruh dokumen fisik asli untuk diverifikasi oleh petugas di loket.
-            </p>
-            <p>
-              4. <strong>Konsekuensi Hukum:</strong> Apabila di kemudian hari ditemukan ketidaksesuaian data, dokumen palsu, atau pemalsuan identitas, saya bersedia menerima pembatalan permohonan dan dituntut sesuai dengan peraturan perundang-undangan yang berlaku.
+
+            <div class="space-y-1">
+              <h5 class="font-bold text-slate-900 dark:text-white">
+                1. Kebenaran Data dan Dokumen
+              </h5>
+              <p class="text-slate-600 dark:text-slate-300">
+                Saya menyatakan bahwa seluruh data, informasi, dan dokumen persyaratan yang saya sampaikan adalah benar, sesuai dengan keadaan sebenarnya, dan tidak dimanipulasi atau dipalsukan. Saya bertanggung jawab atas kebenaran informasi dan dokumen yang saya ajukan.
+              </p>
+            </div>
+
+            <div class="space-y-1">
+              <h5 class="font-bold text-slate-900 dark:text-white">
+                2. Keterlibatan Pemilik Identitas
+              </h5>
+              <p class="text-slate-600 dark:text-slate-300">
+                Saya menyatakan bahwa permohonan ini diketahui dan diajukan atas kehendak pemilik identitas yang bersangkutan. Foto selfie yang diunggah merupakan foto terbaru pemilik identitas/dokumen, bukan foto orang yang membantu atau mewakili pengurusan.
+              </p>
+              <p class="text-slate-600 dark:text-slate-300">
+                Apabila pengisian atau pengurusan administrasi dibantu oleh pihak lain, bantuan tersebut tidak menghilangkan hak dan keterlibatan pemilik identitas dalam permohonan ini.
+              </p>
+            </div>
+
+            <div class="space-y-1">
+              <h5 class="font-bold text-slate-900 dark:text-white">
+                3. Batas Pemeriksaan Online
+              </h5>
+              <p class="text-slate-600 dark:text-slate-300">
+                Saya memahami bahwa layanan online ini merupakan sarana penerimaan permohonan dan pemeriksaan administrasi awal. Pengiriman berkas melalui website tidak berarti permohonan telah disetujui atau dokumen kependudukan telah diterbitkan.
+              </p>
+              <p class="text-slate-600 dark:text-slate-300">
+                Petugas Disdukcapil tetap berwenang melakukan pemeriksaan, verifikasi, dan validasi lebih lanjut sesuai ketentuan yang berlaku.
+              </p>
+            </div>
+
+            <div class="space-y-1">
+              <h5 class="font-bold text-slate-900 dark:text-white">
+                4. Pemeriksaan Dokumen Fisik dan Kehadiran
+              </h5>
+              <p class="text-slate-600 dark:text-slate-300">
+                Saya bersedia memenuhi panggilan atau jadwal pelayanan dari Disdukcapil Kabupaten Dompu untuk pemeriksaan dokumen fisik dan/atau kehadiran pemohon apabila diperlukan.
+              </p>
+              <p class="text-slate-600 dark:text-slate-300">
+                Apabila tahapan pelayanan mensyaratkan kehadiran langsung pemilik identitas, saya bersedia hadir sendiri. Apabila kehadiran perwakilan diperbolehkan sesuai ketentuan, perwakilan wajib membawa dokumen dan surat kuasa yang dipersyaratkan.
+              </p>
+            </div>
+
+            <div class="space-y-1">
+              <h5 class="font-bold text-slate-900 dark:text-white">
+                5. Konsekuensi Ketidaksesuaian
+              </h5>
+              <p class="text-slate-600 dark:text-slate-300">
+                Saya memahami bahwa apabila ditemukan ketidaksesuaian data, dokumen yang tidak sah, pemalsuan, atau penggunaan identitas tanpa hak, permohonan dapat ditolak atau dihentikan sesuai hasil pemeriksaan. Apabila ditemukan dugaan tindak pidana, permasalahan dapat diteruskan kepada instansi berwenang sesuai ketentuan peraturan perundang-undangan.
+              </p>
+            </div>
+
+            <div class="space-y-1">
+              <h5 class="font-bold text-slate-900 dark:text-white">
+                6. Pemrosesan dan Pelindungan Data Pribadi
+              </h5>
+              <p class="text-slate-600 dark:text-slate-300">
+                Saya telah memperoleh informasi bahwa data identitas, dokumen persyaratan, nomor kontak, dan foto wajah yang saya sampaikan akan diproses oleh Disdukcapil Kabupaten Dompu untuk keperluan penerimaan, pemeriksaan, verifikasi, dan tindak lanjut permohonan administrasi kependudukan.
+              </p>
+              <p class="text-slate-600 dark:text-slate-300">
+                Saya memahami bahwa data tersebut hanya boleh diakses dan digunakan oleh pihak yang berwenang sesuai tujuan pelayanan dan ketentuan pelindungan data pribadi.
+              </p>
+            </div>
+
+            <p class="font-medium pt-3 border-t border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 italic">
+              Dengan mencentang pernyataan ini, saya menyatakan telah membaca, memahami, dan menyetujui pernyataan di atas.
             </p>
           </div>
 
-          <div class="mt-4 flex items-start gap-3">
-            <input
-              id="statement_checkbox"
-              v-model="statementAgreed"
-              type="checkbox"
-              class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 mt-0.5 cursor-pointer"
-            />
-            <label for="statement_checkbox" class="text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
-              Saya telah membaca, memahami, dan menyetujui seluruh ketentuan dan pernyataan di atas dengan penuh tanggung jawab. <span class="text-rose-500">*</span>
+          <!-- Persetujuan Checkboxes (Wajib Dicentang) -->
+          <div class="mt-5 space-y-3">
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              Wajib dicentang sebelum pengajuan dikirim.
+            </p>
+
+            <!-- Checkbox 1 -->
+            <label
+              for="agreement_data_correct"
+              class="flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none"
+              :class="agreementDataCorrect ? 'bg-blue-50/70 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' : 'bg-slate-50/70 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'"
+            >
+              <input
+                id="agreement_data_correct"
+                v-model="agreementDataCorrect"
+                type="checkbox"
+                class="w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 mt-0.5 cursor-pointer shrink-0"
+              />
+              <span class="text-xs sm:text-[13px] text-slate-800 dark:text-slate-200 leading-relaxed">
+                Saya menyatakan data dan dokumen yang saya sampaikan benar, permohonan diketahui oleh pemilik identitas, dan saya bersedia mengikuti proses verifikasi sesuai ketentuan.
+              </span>
+            </label>
+
+            <!-- Checkbox 2 -->
+            <label
+              for="agreement_privacy_read"
+              class="flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none"
+              :class="agreementPrivacyRead ? 'bg-blue-50/70 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' : 'bg-slate-50/70 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'"
+            >
+              <input
+                id="agreement_privacy_read"
+                v-model="agreementPrivacyRead"
+                type="checkbox"
+                class="w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 mt-0.5 cursor-pointer shrink-0"
+              />
+              <span class="text-xs sm:text-[13px] text-slate-800 dark:text-slate-200 leading-relaxed">
+                Saya telah membaca pemberitahuan pemrosesan data pribadi, termasuk tujuan penggunaan, jenis data, jangka waktu penyimpanan, dan hak saya sebagai pemilik data.
+              </span>
             </label>
           </div>
         </div>
@@ -447,7 +537,9 @@ const props = defineProps({
 
 const docs = ref([...props.uploadedDocs]);
 const stagedFiles = ref({});
-const statementAgreed = ref(false);
+const agreementDataCorrect = ref(false);
+const agreementPrivacyRead = ref(false);
+const statementAgreed = computed(() => agreementDataCorrect.value && agreementPrivacyRead.value);
 const activeCameraReq = ref(null);
 const activePreviewDoc = ref(null);
 const errorMessage = ref(null);
@@ -635,11 +727,20 @@ const missingDocsList = computed(() => {
   });
 
   if (!statementAgreed.value) {
-    list.push({
-      label: 'Pernyataan Keabsahan Dokumen',
-      message: 'Anda belum mencentang kotak persetujuan pernyataan keabsahan di bawah formulir.',
-      elementId: 'statement_checkbox',
-    });
+    if (!agreementDataCorrect.value) {
+      list.push({
+        label: 'Pernyataan Kebenaran Data & Verifikasi',
+        message: 'Wajib mencentang pernyataan kebenaran data dan kesediaan mengikuti verifikasi.',
+        elementId: 'agreement_data_correct',
+      });
+    }
+    if (!agreementPrivacyRead.value) {
+      list.push({
+        label: 'Pemberitahuan Pelindungan Data Pribadi',
+        message: 'Wajib mencentang persetujuan pemrosesan dan pelindungan data pribadi.',
+        elementId: 'agreement_privacy_read',
+      });
+    }
   }
 
   return list;
