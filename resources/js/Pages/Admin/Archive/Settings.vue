@@ -238,7 +238,7 @@ const props = defineProps({
 
 const form = ref({
   operation_mode: props.settings.operation_mode || 'ARSIP_SAJA',
-  eligible_statuses: [...(props.settings.eligible_statuses || ['COMPLETED'])],
+  eligible_statuses: [...(props.settings.eligible_statuses || ['READY_FOR_PICKUP', 'COMPLETED'])],
   retention_policy_days: props.settings.retention_policy_days || 365,
   cleaning_grace_period_days: props.settings.cleaning_grace_period_days || 90,
   permanent_storage_driver: props.settings.permanent_storage_driver || 'null',

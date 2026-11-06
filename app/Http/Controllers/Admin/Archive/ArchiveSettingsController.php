@@ -17,7 +17,10 @@ class ArchiveSettingsController extends Controller
     {
         $settings = [
             'operation_mode' => ArchiveSetting::get('operation_mode', 'ARSIP_SAJA'),
-            'eligible_statuses' => ArchiveSetting::get('eligible_statuses', ['COMPLETED']),
+            'eligible_statuses' => ArchiveSetting::get('eligible_statuses', [
+                QueueApplication::STATUS_READY_FOR_PICKUP,
+                QueueApplication::STATUS_COMPLETED,
+            ]),
             'retention_policy_days' => ArchiveSetting::get('retention_policy_days', 365),
             'cleaning_grace_period_days' => ArchiveSetting::get('cleaning_grace_period_days', 90),
             'permanent_storage_driver' => ArchiveSetting::get('permanent_storage_driver', 'null'),

@@ -55,8 +55,8 @@ class ArchiveSetting extends Model
                 'description' => 'Mode operasional pengarsipan (ARSIP_SAJA, ARSIP_DAN_TRANSFER, ARSIP_TRANSFER_DAN_PEMBERSIHAN)',
             ],
             'eligible_statuses' => [
-                'value' => ['COMPLETED'],
-                'description' => 'Daftar status permohonan yang dapat dimasukkan ke paket arsip',
+                'value' => ['READY_FOR_PICKUP', 'COMPLETED'],
+                'description' => 'Daftar status permohonan yang dapat dimasukkan ke paket arsip (Siap Diambil & Selesai)',
             ],
             'retention_policy_days' => [
                 'value' => 365,

@@ -15,7 +15,7 @@
               Permohonan Siap Diarsipkan
             </h1>
             <p class="text-xs sm:text-sm text-sky-200 mt-1 max-w-2xl leading-relaxed">
-              Daftar permohonan yang telah selesai diproses (KTP Diserahkan). Berkas dokumen persyaratan diverifikasi keberadaan fisiknya di storage server sebelum dikemas ke dalam arsip ZIP.
+              Daftar permohonan yang telah siap diambil (KTP Siap Diambil) maupun yang telah selesai diserahkan. Berkas dokumen persyaratan diverifikasi keberadaan fisiknya di storage server sebelum dikemas ke dalam arsip ZIP.
             </p>
           </div>
 
@@ -134,7 +134,7 @@
                 <th class="py-3 px-4">No. Registrasi</th>
                 <th class="py-3 px-4">Nama Pemohon & NIK</th>
                 <th class="py-3 px-4">Jenis Layanan</th>
-                <th class="py-3 px-4">Tanggal Selesai</th>
+                <th class="py-3 px-4">Status & Tanggal</th>
                 <th class="py-3 px-4">Kelengkapan Berkas Fisik</th>
                 <th class="py-3 px-4">Jumlah & Ukuran</th>
               </tr>
@@ -171,7 +171,17 @@
                   {{ app.service_type?.name || 'KTP-el' }}
                 </td>
                 <td class="py-3.5 px-4 text-slate-600 dark:text-slate-300">
-                  {{ app.completed_at ? new Date(app.completed_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-' }}
+                  <div class="space-y-0.5">
+                    <span
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold"
+                      :class="app.status === 'READY_FOR_PICKUP' ? 'bg-violet-100 text-violet-800 dark:bg-violet-950/60 dark:text-violet-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'"
+                    >
+                      {{ app.status === 'READY_FOR_PICKUP' ? 'Siap Diambil' : 'KTP Diserahkan' }}
+                    </span>
+                    <p class="text-[11px] text-slate-500 font-mono">
+                      {{ (app.completed_at || app.updated_at) ? new Date(app.completed_at || app.updated_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-' }}
+                    </p>
+                  </div>
                 </td>
                 <td class="py-3.5 px-4">
                   <span

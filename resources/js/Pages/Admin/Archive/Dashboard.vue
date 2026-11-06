@@ -74,7 +74,7 @@
           </div>
           <p class="text-3xl font-black text-slate-900 dark:text-white">{{ stats.unarchived_applications_count }}</p>
           <p class="text-[11px] text-blue-600 dark:text-blue-400 mt-1 font-semibold group-hover:underline">
-            Dari {{ stats.total_eligible_applications }} permohonan selesai &rarr;
+            Dari {{ stats.total_eligible_applications }} permohonan siap/selesai &rarr;
           </p>
         </Link>
 

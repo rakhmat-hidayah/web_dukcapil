@@ -39,9 +39,14 @@ class ArchiveApplicationController extends Controller
         $serviceTypes = ServiceType::where('is_active', true)->select('id', 'name', 'slug')->get();
 
         // Get monthly periods available for quick selection
-        $availablePeriods = \App\Models\Queue\QueueApplication::whereIn('status', ArchiveSetting::get('eligible_statuses', ['COMPLETED']))
-            ->selectRaw("DATE_FORMAT(completed_at, '%Y-%m') as period, count(*) as count")
-            ->whereNotNull('completed_at')
+        $eligibleStatuses = ArchiveSetting::get('eligible_statuses', [
+            \App\Models\Queue\QueueApplication::STATUS_READY_FOR_PICKUP,
+            \App\Models\Queue\QueueApplication::STATUS_COMPLETED,
+        ]);
+
+        $availablePeriods = \App\Models\Queue\QueueApplication::whereIn('status', $eligibleStatuses)
+            ->selectRaw("DATE_FORMAT(COALESCE(completed_at, handover_at, updated_at), '%Y-%m') as period, count(*) as count")
+            ->whereNotNull('updated_at')
             ->groupBy('period')
             ->orderBy('period', 'desc')
             ->pluck('count', 'period')

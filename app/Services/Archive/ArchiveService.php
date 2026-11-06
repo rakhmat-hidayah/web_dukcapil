@@ -28,7 +28,10 @@ class ArchiveService
      */
     public function getEligibleApplicationsQuery(array $filters = []): Builder
     {
-        $eligibleStatuses = ArchiveSetting::get('eligible_statuses', ['COMPLETED']);
+        $eligibleStatuses = ArchiveSetting::get('eligible_statuses', [
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+            QueueApplication::STATUS_COMPLETED,
+        ]);
 
         $query = QueueApplication::with(['serviceType', 'documents.serviceDocument'])
             ->whereIn('status', $eligibleStatuses);
@@ -46,17 +49,17 @@ class ArchiveService
             $query->whereNotIn('id', $alreadyArchivedIds);
         }
 
-        // Filter by date range (completion date or submission date)
+        // Filter by date range (using COALESCE of completed_at, handover_at, updated_at)
         if (!empty($filters['start_date'])) {
-            $query->whereDate('completed_at', '>=', $filters['start_date']);
+            $query->whereDate(DB::raw('COALESCE(completed_at, handover_at, updated_at)'), '>=', $filters['start_date']);
         }
         if (!empty($filters['end_date'])) {
-            $query->whereDate('completed_at', '<=', $filters['end_date']);
+            $query->whereDate(DB::raw('COALESCE(completed_at, handover_at, updated_at)'), '<=', $filters['end_date']);
         }
 
         // Filter by period (YYYY-MM)
         if (!empty($filters['period'])) {
-            $query->where('completed_at', 'like', $filters['period'] . '%');
+            $query->where(DB::raw("DATE_FORMAT(COALESCE(completed_at, handover_at, updated_at), '%Y-%m')"), '=', $filters['period']);
         }
 
         // Filter by service type
@@ -74,7 +77,7 @@ class ArchiveService
             });
         }
 
-        return $query->orderBy('completed_at', 'desc');
+        return $query->orderBy(DB::raw('COALESCE(completed_at, handover_at, updated_at)'), 'desc');
     }
 
     /**
@@ -398,7 +401,7 @@ class ArchiveService
                     $app->applicant_name,
                     $app->masked_nik,
                     $app->serviceType?->name ?? 'KTP-el',
-                    $app->completed_at ? $app->completed_at->format('Y-m-d H:i:s') : '-',
+                    ($app->completed_at ?? $app->handover_at ?? $app->updated_at)?->format('Y-m-d H:i:s') ?? '-',
                     $destFileName,
                     $doc->original_filename,
                     $fileSize,
@@ -429,7 +432,8 @@ class ArchiveService
                 'submitted_at' => $app->submitted_at?->toIso8601String(),
                 'approved_at' => $app->approved_at?->toIso8601String(),
                 'physical_verified_at' => $app->physical_verified_at?->toIso8601String(),
-                'completed_at' => $app->completed_at?->toIso8601String(),
+                'ready_at' => $app->handover?->ready_marked_at?->toIso8601String(),
+                'completed_at' => ($app->completed_at ?? $app->handover_at ?? $app->updated_at)?->toIso8601String(),
                 'archived_at' => now()->toIso8601String(),
                 'documents' => $appDocManifests,
             ];
@@ -442,10 +446,12 @@ class ArchiveService
                 'applicant_name' => $app->applicant_name,
                 'applicant_nik' => $app->applicant_nik,
                 'applicant_nik_masked' => $app->masked_nik,
+                'status' => $app->status,
+                'status_label' => $app->status_label,
                 'folder_name' => $appFolderName,
                 'service_type' => $app->serviceType?->name,
                 'document_count' => count($appDocManifests),
-                'completed_at' => $app->completed_at?->toIso8601String(),
+                'completed_at' => ($app->completed_at ?? $app->handover_at ?? $app->updated_at)?->toIso8601String(),
             ];
         }
 
@@ -622,7 +628,10 @@ class ArchiveService
      */
     public function getDashboardStatistics(): array
     {
-        $eligibleStatuses = ArchiveSetting::get('eligible_statuses', ['COMPLETED']);
+        $eligibleStatuses = ArchiveSetting::get('eligible_statuses', [
+            QueueApplication::STATUS_READY_FOR_PICKUP,
+            QueueApplication::STATUS_COMPLETED,
+        ]);
 
         // Eligible applications total
         $totalEligibleApplications = QueueApplication::whereIn('status', $eligibleStatuses)->count();
