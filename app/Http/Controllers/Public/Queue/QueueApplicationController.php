@@ -81,11 +81,6 @@ class QueueApplicationController extends Controller
      */
     public function storeDraft(Request $request): RedirectResponse
     {
-        if ($request->has('representative_phone') && $request->input('representative_phone') !== null) {
-            $cleaned = preg_replace('/[^0-9]/', '', (string) $request->input('representative_phone'));
-            $request->merge(['representative_phone' => $cleaned !== '' ? $cleaned : null]);
-        }
-
         // Sanitize applicant email: default to @gmail.com if applicant typed only username without domain
         if ($request->has('applicant_email') && $request->input('applicant_email') !== null) {
             $email = trim((string) $request->input('applicant_email'));
@@ -137,11 +132,6 @@ class QueueApplicationController extends Controller
                 'max:60',
                 'regex:/^[A-Za-z\s\'\-]+$/',
             ],
-            'representative_phone'         => [
-                'nullable',
-                'required_if:attendance_type,family_in_kk,family_out_kk,other',
-                'regex:/^[0-9]{10,13}$/',
-            ],
             'representative_relationship'  => 'nullable|required_if:attendance_type,family_in_kk,family_out_kk,other|string|max:100',
             'representative_kk_status'     => 'nullable|string|max:100',
             'absence_reason'               => 'nullable|required_if:attendance_type,family_in_kk,family_out_kk,other|string|min:5|max:500',
@@ -162,8 +152,6 @@ class QueueApplicationController extends Controller
             'representative_name.regex'               => 'Kaidah penulisan nama: Nama orang yang mewakili hanya boleh memuat huruf kapital, spasi, tanda petik (\'), atau tanda hubung (-) tanpa angka (0-9) atau simbol sesuai Permendagri No. 73/2022.',
             'representative_name.min'                 => 'Nama orang yang mewakili minimal 2 huruf.',
             'representative_name.max'                 => 'Nama orang yang mewakili maksimal 60 huruf sesuai Permendagri No. 73 Tahun 2022.',
-            'representative_phone.required_if'        => 'Nomor kontak orang yang mewakili wajib diisi.',
-            'representative_phone.regex'              => 'Nomor WhatsApp / HP perwakilan harus berupa angka dengan panjang 10 sampai 13 digit.',
             'representative_relationship.required_if' => 'Hubungan orang yang mewakili dengan pemilik dokumen wajib dipilih.',
             'absence_reason.required_if'              => 'Alasan pemilik dokumen tidak dapat hadir langsung wajib dijelaskan.',
         ]);

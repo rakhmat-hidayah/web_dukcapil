@@ -339,10 +339,6 @@
                   <span class="text-slate-400 text-[10px] block">Hubungan & Status KK</span>
                   <span class="font-semibold text-slate-800 dark:text-slate-200">{{ application.representative_relationship }} ({{ application.representative_family_in_kk ? 'Satu KK' : 'Beda KK / Pihak Luar' }})</span>
                 </div>
-                <div v-if="application.representative_phone">
-                  <span class="text-slate-400 text-[10px] block">No. HP Perwakilan</span>
-                  <span class="font-mono text-slate-800 dark:text-slate-200">{{ formatPhoneChunked(application.representative_phone) }}</span>
-                </div>
                 <div v-if="application.representative_reason">
                   <span class="text-slate-400 text-[10px] block">Alasan Pemilik Dokumen Tidak Hadir</span>
                   <span class="text-slate-700 dark:text-slate-300 italic text-[11px]">"{{ application.representative_reason }}"</span>

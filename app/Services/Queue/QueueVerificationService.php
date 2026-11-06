@@ -488,7 +488,7 @@ class QueueVerificationService
         $receiverType = $data['received_by_type'] ?? 'self';
         $receiverName = $data['receiver_name'] ?? ($receiverType === 'self' ? $application->applicant_name : ($application->representative_name ?: ''));
         $receiverNik = $data['receiver_nik'] ?? ($receiverType === 'self' ? $application->applicant_nik : ($application->representative_nik ?: ''));
-        $receiverPhone = $data['receiver_phone'] ?? ($receiverType === 'self' ? '' : ($application->representative_phone ?: ''));
+        $receiverPhone = $data['receiver_phone'] ?? '';
         $notes = $data['handover_notes'] ?? null;
 
         $fromStatus = $application->status;

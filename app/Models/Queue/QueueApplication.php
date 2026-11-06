@@ -69,7 +69,6 @@ class QueueApplication extends Model
         'attendance_type',
         'representative_nik',
         'representative_name',
-        'representative_phone',
         'representative_relationship',
         'representative_kk_status',
         'absence_reason',

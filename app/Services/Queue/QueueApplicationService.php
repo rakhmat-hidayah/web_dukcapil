@@ -114,12 +114,6 @@ class QueueApplicationService
                 ]);
             }
 
-            if (empty($data['representative_phone'])) {
-                throw ValidationException::withMessages([
-                    'representative_phone' => 'Nomor WhatsApp / telepon orang yang mewakili wajib diisi.',
-                ]);
-            }
-
             $absenceReason = $data['absence_reason'] ?? $data['representative_reason'] ?? null;
             if ($serviceType->require_absence_reason && empty($absenceReason)) {
                 throw ValidationException::withMessages([
@@ -140,7 +134,6 @@ class QueueApplicationService
             'attendance_type'              => $attendanceType,
             'representative_nik'           => $attendanceType !== 'self' ? trim($data['representative_nik']) : null,
             'representative_name'          => $attendanceType !== 'self' ? mb_strtoupper(trim($data['representative_name'])) : null,
-            'representative_phone'         => $attendanceType !== 'self' ? trim($data['representative_phone']) : null,
             'representative_relationship'  => $attendanceType !== 'self' ? ($data['representative_relationship'] ?? null) : null,
             'representative_kk_status'     => $attendanceType !== 'self' ? ($data['representative_kk_status'] ?? null) : null,
             'absence_reason'               => $absenceReason,

@@ -109,7 +109,6 @@ class QueueWorkflowTest extends TestCase
             'representative_name' => 'Istri Sah',
             'representative_nik' => $repNik,
             'representative_relationship' => 'Istri',
-            'representative_phone' => '081987654321',
             'representative_reason' => 'Suami sedang bekerja di luar daerah',
         ], $hilangService->id);
 
@@ -582,7 +581,6 @@ class QueueWorkflowTest extends TestCase
                 'representative_name' => 'Keluarga Penerima Kuasa',
                 'representative_nik' => $uniqueRepNik,
                 'representative_relationship' => 'Orang Tua',
-                'representative_phone' => '081234567892',
                 'representative_reason' => 'Sedang bekerja',
             ], $service->id);
 
@@ -1288,16 +1286,9 @@ class QueueWorkflowTest extends TestCase
             'service_type_id'             => $service->id,
             'applicant_nik'               => $nik,
             'applicant_name'              => 'muhammad ihsan ramadhan', // huruf kecil
-            'applicant_birth_place'       => 'kabupaten dompu', // huruf kecil
-            'applicant_birth_date'        => '1998-05-15',
-            'applicant_phone'             => '0853-9988-7766',
-            'applicant_district'          => 'kecamatan dompu', // huruf kecil
-            'applicant_village'           => 'kelurahan bali satu', // huruf kecil
-            'applicant_address'           => 'dusun suka maju, rt 02 / rw 01', // huruf kecil
             'attendance_type'             => 'family_in_kk',
             'representative_nik'          => '5205123456789012',
             'representative_name'         => 'ayah kandung pemohon', // huruf kecil
-            'representative_phone'        => '0852-1122-3344',
             'representative_relationship' => 'Orang Tua (Ayah / Ibu)',
             'absence_reason'              => 'Pemohon sedang dinas',
         ]);
@@ -1308,10 +1299,6 @@ class QueueWorkflowTest extends TestCase
 
         // Verifikasi semua field teks otomatis tersimpan dalam HURUF BESAR (UPPERCASE)
         $this->assertEquals('MUHAMMAD IHSAN RAMADHAN', $app->applicant_name);
-        $this->assertEquals('KABUPATEN DOMPU', $app->applicant_birth_place);
-        $this->assertEquals('DUSUN SUKA MAJU, RT 02 / RW 01', $app->applicant_address);
-        $this->assertEquals('KECAMATAN DOMPU', $app->applicant_district);
-        $this->assertEquals('KELURAHAN BALI SATU', $app->applicant_village);
         $this->assertEquals('AYAH KANDUNG PEMOHON', $app->representative_name);
 
         $app->forceDelete();

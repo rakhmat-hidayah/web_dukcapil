@@ -571,40 +571,8 @@
                   </p>
                 </div>
 
-                <!-- Kontak Perwakilan -->
-                <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                      Nomor WhatsApp / HP Perwakilan <span class="text-rose-500">*</span>
-                    </label>
-                    <span class="text-[10px] font-mono" :class="rawPhoneDigits(form.representative_phone).length >= 10 && rawPhoneDigits(form.representative_phone).length <= 13 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
-                      {{ rawPhoneDigits(form.representative_phone).length }}/13 Digit (Min. 10)
-                    </span>
-                  </div>
-                  <input
-                    id="field_representative_phone"
-                    :value="form.representative_phone"
-                    @input="onRepresentativePhoneInput"
-                    @keypress="filterPhoneKeypress"
-                    type="tel"
-                    inputmode="numeric"
-                    maxlength="16"
-                    autocomplete="tel"
-                    placeholder="Contoh: 0853-xxxx-xxxx"
-                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
-                    :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.representative_phone}"
-                    required
-                  />
-                  <p v-if="form.errors.representative_phone" class="text-xs text-rose-500 font-medium mt-1">
-                    {{ form.errors.representative_phone }}
-                  </p>
-                  <p v-else-if="rawPhoneDigits(form.representative_phone).length > 0 && rawPhoneDigits(form.representative_phone).length < 10" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
-                    Kurang {{ 10 - rawPhoneDigits(form.representative_phone).length }} digit lagi. Nomor HP harus antara 10 sampai 13 digit angka.
-                  </p>
-                </div>
-
                 <!-- Hubungan Perwakilan -->
-                <div>
+                <div class="sm:col-span-2">
                   <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                     Hubungan dengan Pemilik Dokumen <span class="text-rose-500">*</span>
                   </label>
@@ -777,7 +745,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import ProgressWizard from '@/Components/Queue/ProgressWizard.vue';
@@ -801,16 +769,9 @@ const form = useForm({
   attendance_type: 'self',
   representative_nik: '',
   representative_name: '',
-  representative_phone: '',
   representative_relationship: '',
   representative_kk_status: '',
   absence_reason: '',
-});
-
-onMounted(() => {
-  if (form.representative_phone) {
-    form.representative_phone = formatPhoneChunked(form.representative_phone);
-  }
 });
 
 const selectedServiceObj = computed(() => {
@@ -841,76 +802,6 @@ function onRepresentativeNikInput(e) {
   if (form.errors.representative_nik && digits.length === 16) {
     delete form.errors.representative_nik;
   }
-}
-
-// Phone Number Formatter & Sanitizer (chunked by 4 digits: e.g. 0853-3344-7003)
-function formatPhoneChunked(value) {
-  if (!value) return '';
-  let digits = String(value).replace(/\D/g, '');
-  if (digits.startsWith('62')) {
-    digits = '0' + digits.slice(2);
-  }
-  digits = digits.slice(0, 13);
-  if (!digits) return '';
-  const chunks = digits.match(/.{1,4}/g);
-  return chunks ? chunks.join('-') : digits;
-}
-
-function rawPhoneDigits(value) {
-  if (!value) return '';
-  let digits = String(value).replace(/\D/g, '');
-  if (digits.startsWith('62')) {
-    digits = '0' + digits.slice(2);
-  }
-  return digits.slice(0, 13);
-}
-
-// Phone Keypress filter (only numbers 0-9 and hyphen)
-function filterPhoneKeypress(e) {
-  if (!/[0-9\-]/.test(e.key)) {
-    e.preventDefault();
-  }
-}
-
-function handlePhoneInput(e, formKey) {
-  const el = e.target;
-  const oldVal = el.value || '';
-  const cursorPos = el.selectionEnd || oldVal.length;
-  const digitsBeforeCursor = oldVal.slice(0, cursorPos).replace(/\D/g, '').length;
-
-  const formatted = formatPhoneChunked(oldVal);
-  form[formKey] = formatted;
-  el.value = formatted;
-
-  let newCursorPos = 0;
-  let digitCount = 0;
-  for (let i = 0; i < formatted.length; i++) {
-    if (formatted[i] !== '-') {
-      digitCount++;
-    }
-    if (digitCount === digitsBeforeCursor) {
-      newCursorPos = i + 1;
-      break;
-    }
-  }
-  if (digitCount < digitsBeforeCursor) {
-    newCursorPos = formatted.length;
-  }
-
-  requestAnimationFrame(() => {
-    if (el === document.activeElement && typeof el.setSelectionRange === 'function') {
-      el.setSelectionRange(newCursorPos, newCursorPos);
-    }
-  });
-
-  const digits = rawPhoneDigits(formatted);
-  if (form.errors[formKey] && digits.length >= 10 && digits.length <= 13) {
-    delete form.errors[formKey];
-  }
-}
-
-function onRepresentativePhoneInput(e) {
-  handlePhoneInput(e, 'representative_phone');
 }
 
 // -------------------------------------------------------------
@@ -1082,7 +973,6 @@ function handleServiceChanged(service) {
     form.attendance_type = 'self';
     form.representative_nik = '';
     form.representative_name = '';
-    form.representative_phone = '';
     form.representative_relationship = '';
     form.absence_reason = '';
   }
@@ -1263,27 +1153,6 @@ function validateForm() {
       });
     }
 
-    const cleanRepPhone = (form.representative_phone || '').replace(/\D/g, '');
-    if (!cleanRepPhone) {
-      const msg = 'Nomor HP / WhatsApp perwakilan wajib diisi.';
-      form.errors.representative_phone = msg;
-      errors.push({
-        field: 'representative_phone',
-        elementId: 'field_representative_phone',
-        label: 'Nomor HP Perwakilan',
-        message: msg,
-      });
-    } else if (cleanRepPhone.length < 10 || cleanRepPhone.length > 13) {
-      const msg = `Nomor WhatsApp / HP perwakilan harus berupa angka 10 sampai 13 digit (saat ini ${cleanRepPhone.length} digit).`;
-      form.errors.representative_phone = msg;
-      errors.push({
-        field: 'representative_phone',
-        elementId: 'field_representative_phone',
-        label: 'Nomor HP Perwakilan',
-        message: msg,
-      });
-    }
-
     if (!form.representative_relationship || !form.representative_relationship.trim()) {
       const msg = 'Hubungan perwakilan dengan pemilik dokumen wajib dipilih.';
       form.errors.representative_relationship = msg;
@@ -1341,7 +1210,6 @@ function submitStep1() {
     applicant_name: data.applicant_name ? sanitizePersonName(data.applicant_name).trim() : '',
     representative_name: data.representative_name ? sanitizePersonName(data.representative_name).trim() : '',
     applicant_email: data.applicant_email ? data.applicant_email.trim() : null,
-    representative_phone: data.representative_phone ? rawPhoneDigits(data.representative_phone) : '',
   })).post(route('queue.apply.store'), {
     onError: (serverErrors) => {
       const serverList = [];

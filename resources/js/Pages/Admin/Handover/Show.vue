@@ -682,7 +682,7 @@ const handoverForm = reactive({
   actual_receiver_type: props.handover.actual_receiver_type || (props.handover.application?.attendance_type === 'representative' ? 'representative' : 'self'),
   actual_receiver_name: props.handover.actual_receiver_name || (props.handover.application?.attendance_type === 'representative' ? (props.handover.application?.representative_name || '') : props.handover.application?.applicant_name),
   actual_receiver_nik: props.handover.actual_receiver_nik || (props.handover.application?.attendance_type === 'representative' ? (props.handover.application?.representative_nik || '') : props.handover.application?.applicant_nik),
-  actual_receiver_phone: props.handover.actual_receiver_phone || props.handover.application?.representative_phone || '',
+  actual_receiver_phone: props.handover.actual_receiver_phone || '',
   receiver_relationship: props.handover.receiver_relationship || (props.handover.application?.attendance_type === 'representative' ? 'Kuasa Resmi (Surat Kuasa F-1.07)' : 'Sendiri'),
   handover_notes: '',
 });
