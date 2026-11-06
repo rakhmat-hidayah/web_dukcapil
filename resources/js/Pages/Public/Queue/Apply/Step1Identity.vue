@@ -203,22 +203,49 @@
                 </p>
               </div>
 
-              <!-- Nama Lengkap -->
+              <!-- Nama Lengkap Sesuai KK -->
               <div>
-                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                  Nama Lengkap Sesuai KK <span class="text-rose-500">*</span>
-                </label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                    Nama Lengkap Sesuai KK <span class="text-rose-500">*</span>
+                  </label>
+                  <span
+                    class="text-[10px] font-mono font-semibold"
+                    :class="(form.applicant_name || '').length >= 55 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'"
+                  >
+                    {{ (form.applicant_name || '').length }}/60 Huruf
+                  </span>
+                </div>
                 <input
                   id="field_applicant_name"
                   :value="form.applicant_name"
-                  @input="onUppercaseInput('applicant_name', $event)"
+                  @input="onPersonNameInput('applicant_name', $event)"
+                  @keydown="onPersonNameKeyDown($event)"
+                  @blur="onPersonNameBlur('applicant_name')"
                   type="text"
-                  placeholder="NAMA LENGKAP PEMILIK DOKUMEN..."
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
+                  maxlength="60"
+                  autocomplete="name"
+                  autocapitalize="characters"
+                  spellcheck="false"
+                  placeholder="CONTOH: AHMAD SUBARJO"
+                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-semibold"
                   required
                 />
+
+                <!-- Notice if numbers/symbols were stripped -->
+                <p v-if="nameInputWarning['applicant_name']" class="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1 flex items-center gap-1 animate-in fade-in">
+                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <span>{{ nameInputWarning['applicant_name'] }}</span>
+                </p>
+
                 <p v-if="form.errors.applicant_name" class="text-xs text-rose-500 font-medium mt-1">
                   {{ form.errors.applicant_name }}
+                </p>
+
+                <!-- Guidance for proper name writing rules -->
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-start gap-1.5 leading-snug">
+                  <svg class="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span>Kaidah Penulisan: Wajib huruf kapital sesuai KK, tanpa angka (0-9), gelar, atau singkatan yang tidak resmi (Permendagri No. 73/2022).</span>
                 </p>
               </div>
 
@@ -230,12 +257,21 @@
                 <input
                   id="field_applicant_birth_place"
                   :value="form.applicant_birth_place"
-                  @input="onUppercaseInput('applicant_birth_place', $event)"
+                  @input="onPersonNameInput('applicant_birth_place', $event)"
+                  @keydown="onPersonNameKeyDown($event)"
+                  @blur="onPersonNameBlur('applicant_birth_place')"
                   type="text"
+                  maxlength="60"
+                  autocapitalize="characters"
+                  spellcheck="false"
                   placeholder="CONTOH: DOMPU"
-                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
+                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-semibold"
                   required
                 />
+                <p v-if="nameInputWarning['applicant_birth_place']" class="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1 flex items-center gap-1 animate-in fade-in">
+                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <span>{{ nameInputWarning['applicant_birth_place'] }}</span>
+                </p>
                 <p v-if="form.errors.applicant_birth_place" class="text-xs text-rose-500 font-medium mt-1">
                   {{ form.errors.applicant_birth_place }}
                 </p>
@@ -769,20 +805,42 @@
 
                 <!-- Nama Perwakilan -->
                 <div>
-                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-                    Nama Lengkap Perwakilan <span class="text-rose-500">*</span>
-                  </label>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      Nama Lengkap Perwakilan <span class="text-rose-500">*</span>
+                    </label>
+                    <span
+                      class="text-[10px] font-mono font-semibold"
+                      :class="(form.representative_name || '').length >= 55 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'"
+                    >
+                      {{ (form.representative_name || '').length }}/60 Huruf
+                    </span>
+                  </div>
                   <input
                     id="field_representative_name"
                     :value="form.representative_name"
-                    @input="onUppercaseInput('representative_name', $event)"
+                    @input="onPersonNameInput('representative_name', $event)"
+                    @keydown="onPersonNameKeyDown($event)"
+                    @blur="onPersonNameBlur('representative_name')"
                     type="text"
-                    placeholder="NAMA LENGKAP ORANG YANG MEWAKILI..."
-                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-medium"
+                    maxlength="60"
+                    autocomplete="name"
+                    autocapitalize="characters"
+                    spellcheck="false"
+                    placeholder="CONTOH: SITI NURHALIZA"
+                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-semibold"
                     required
                   />
+                  <!-- Notice if numbers/symbols were stripped -->
+                  <p v-if="nameInputWarning['representative_name']" class="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1 flex items-center gap-1 animate-in fade-in">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>{{ nameInputWarning['representative_name'] }}</span>
+                  </p>
                   <p v-if="form.errors.representative_name" class="text-xs text-rose-500 font-medium mt-1">
                     {{ form.errors.representative_name }}
+                  </p>
+                  <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                    Wajib huruf kapital sesuai KTP-el perwakilan, tanpa angka (0-9) atau simbol.
                   </p>
                 </div>
 
@@ -1438,6 +1496,82 @@ function onRepresentativePhoneInput(e) {
   handlePhoneInput(e, 'representative_phone');
 }
 
+// -------------------------------------------------------------
+// Kaidah Penulisan Nama (Permendagri No. 73 Tahun 2022)
+// 1. Wajib huruf latin kapital (UPPERCASE)
+// 2. Dilarang angka (0-9) dan simbol/karakter selain (') dan (-)
+// 3. Maksimal 60 karakter
+// -------------------------------------------------------------
+const nameInputWarning = ref({});
+let nameWarningTimer = null;
+
+function sanitizePersonName(val) {
+  if (!val) return '';
+  // Ubah ke huruf besar
+  let upper = String(val).toUpperCase();
+  // Filter karakter ilegal: hanya perbolehkan huruf A-Z, spasi, apostrof ('), dan tanda hubung (-)
+  let cleaned = upper.replace(/[^A-Z\s'\-]/g, '');
+  // Cegah spasi ganda
+  cleaned = cleaned.replace(/\s{2,}/g, ' ');
+  // Cegah spasi di awal kata
+  cleaned = cleaned.replace(/^\s+/, '');
+  // Batas maksimal 60 karakter
+  if (cleaned.length > 60) {
+    cleaned = cleaned.slice(0, 60);
+  }
+  return cleaned;
+}
+
+function onPersonNameInput(field, e) {
+  const el = e.target;
+  const raw = el.value || '';
+  const start = el.selectionStart;
+
+  // Deteksi jika pemohon mengetik/menempelkan angka atau simbol
+  const hadNumbersOrIllegal = /[^A-Za-z\s'\-]/.test(raw);
+  const sanitized = sanitizePersonName(raw);
+
+  form[field] = sanitized;
+  el.value = sanitized;
+
+  if (start !== null && typeof el.setSelectionRange === 'function') {
+    const diff = raw.length - sanitized.length;
+    const newPos = Math.max(0, start - diff);
+    requestAnimationFrame(() => {
+      el.setSelectionRange(newPos, newPos);
+    });
+  }
+
+  if (hadNumbersOrIllegal) {
+    nameInputWarning.value[field] = 'Angka atau simbol dihapus otomatis. Sesuai aturan kependudukan, penulisan nama wajib huruf kapital tanpa angka.';
+    if (nameWarningTimer) clearTimeout(nameWarningTimer);
+    nameWarningTimer = setTimeout(() => {
+      nameInputWarning.value[field] = '';
+    }, 4000);
+  } else if (nameInputWarning.value[field]) {
+    nameInputWarning.value[field] = '';
+  }
+
+  if (form.errors[field] && sanitized.trim().length >= 2) {
+    delete form.errors[field];
+  }
+}
+
+function onPersonNameKeyDown(e) {
+  // Blokir langsung pengetikan angka 0-9 dari keyboard biasa atau numpad
+  if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+    if ((e.key >= '0' && e.key <= '9') || (e.code && e.code.startsWith('Numpad') && e.key >= '0' && e.key <= '9')) {
+      e.preventDefault();
+    }
+  }
+}
+
+function onPersonNameBlur(field) {
+  if (form[field]) {
+    form[field] = form[field].trim();
+  }
+}
+
 // Uppercase Auto-converter for Demographic Text Fields
 function onUppercaseInput(field, e) {
   const el = e.target;
@@ -1627,8 +1761,45 @@ function validateForm() {
   }
 
   // 3. Nama Lengkap
-  if (!form.applicant_name || !form.applicant_name.trim()) {
+  const cleanApplicantName = (form.applicant_name || '').trim();
+  if (!cleanApplicantName) {
     const msg = 'Nama lengkap sesuai Kartu Keluarga (KK) wajib diisi.';
+    form.errors.applicant_name = msg;
+    errors.push({
+      field: 'applicant_name',
+      elementId: 'field_applicant_name',
+      label: 'Nama Lengkap Sesuai KK',
+      message: msg,
+    });
+  } else if (/\d/.test(cleanApplicantName)) {
+    const msg = 'Kaidah penulisan nama: Nama tidak boleh memuat angka (0-9).';
+    form.errors.applicant_name = msg;
+    errors.push({
+      field: 'applicant_name',
+      elementId: 'field_applicant_name',
+      label: 'Nama Lengkap Sesuai KK',
+      message: msg,
+    });
+  } else if (!/^[A-Za-z\s'\-]+$/.test(cleanApplicantName)) {
+    const msg = 'Kaidah penulisan nama: Hanya huruf kapital, spasi, tanda petik (\') atau tanda hubung (-) yang diperbolehkan.';
+    form.errors.applicant_name = msg;
+    errors.push({
+      field: 'applicant_name',
+      elementId: 'field_applicant_name',
+      label: 'Nama Lengkap Sesuai KK',
+      message: msg,
+    });
+  } else if (cleanApplicantName.length < 2) {
+    const msg = 'Nama lengkap minimal 2 huruf.';
+    form.errors.applicant_name = msg;
+    errors.push({
+      field: 'applicant_name',
+      elementId: 'field_applicant_name',
+      label: 'Nama Lengkap Sesuai KK',
+      message: msg,
+    });
+  } else if (cleanApplicantName.length > 60) {
+    const msg = 'Nama lengkap maksimal 60 huruf sesuai Permendagri No. 73 Tahun 2022.';
     form.errors.applicant_name = msg;
     errors.push({
       field: 'applicant_name',
@@ -1639,8 +1810,27 @@ function validateForm() {
   }
 
   // 4. Tempat Lahir
-  if (!form.applicant_birth_place || !form.applicant_birth_place.trim()) {
+  const cleanBirthPlace = (form.applicant_birth_place || '').trim();
+  if (!cleanBirthPlace) {
     const msg = 'Tempat lahir pemilik dokumen wajib diisi.';
+    form.errors.applicant_birth_place = msg;
+    errors.push({
+      field: 'applicant_birth_place',
+      elementId: 'field_applicant_birth_place',
+      label: 'Tempat Lahir',
+      message: msg,
+    });
+  } else if (/\d/.test(cleanBirthPlace)) {
+    const msg = 'Tempat lahir tidak boleh memuat angka.';
+    form.errors.applicant_birth_place = msg;
+    errors.push({
+      field: 'applicant_birth_place',
+      elementId: 'field_applicant_birth_place',
+      label: 'Tempat Lahir',
+      message: msg,
+    });
+  } else if (!/^[A-Za-z\s'\-]+$/.test(cleanBirthPlace)) {
+    const msg = 'Tempat lahir hanya boleh memuat huruf tanpa angka atau simbol.';
     form.errors.applicant_birth_place = msg;
     errors.push({
       field: 'applicant_birth_place',
@@ -1766,8 +1956,45 @@ function validateForm() {
       });
     }
 
-    if (!form.representative_name || !form.representative_name.trim()) {
+    const cleanRepName = (form.representative_name || '').trim();
+    if (!cleanRepName) {
       const msg = 'Nama lengkap perwakilan sesuai KTP wajib diisi.';
+      form.errors.representative_name = msg;
+      errors.push({
+        field: 'representative_name',
+        elementId: 'field_representative_name',
+        label: 'Nama Lengkap Perwakilan',
+        message: msg,
+      });
+    } else if (/\d/.test(cleanRepName)) {
+      const msg = 'Kaidah penulisan nama: Nama perwakilan tidak boleh memuat angka (0-9).';
+      form.errors.representative_name = msg;
+      errors.push({
+        field: 'representative_name',
+        elementId: 'field_representative_name',
+        label: 'Nama Lengkap Perwakilan',
+        message: msg,
+      });
+    } else if (!/^[A-Za-z\s'\-]+$/.test(cleanRepName)) {
+      const msg = 'Kaidah penulisan nama: Hanya huruf kapital, spasi, tanda petik (\') atau strip (-) yang diperbolehkan.';
+      form.errors.representative_name = msg;
+      errors.push({
+        field: 'representative_name',
+        elementId: 'field_representative_name',
+        label: 'Nama Lengkap Perwakilan',
+        message: msg,
+      });
+    } else if (cleanRepName.length < 2) {
+      const msg = 'Nama perwakilan minimal 2 huruf.';
+      form.errors.representative_name = msg;
+      errors.push({
+        field: 'representative_name',
+        elementId: 'field_representative_name',
+        label: 'Nama Lengkap Perwakilan',
+        message: msg,
+      });
+    } else if (cleanRepName.length > 60) {
+      const msg = 'Nama perwakilan maksimal 60 huruf sesuai Permendagri No. 73 Tahun 2022.';
       form.errors.representative_name = msg;
       errors.push({
         field: 'representative_name',
@@ -1853,12 +2080,12 @@ function submitStep1() {
 
   form.transform((data) => ({
     ...data,
-    applicant_name: data.applicant_name ? data.applicant_name.trim().toUpperCase() : '',
-    applicant_birth_place: data.applicant_birth_place ? data.applicant_birth_place.trim().toUpperCase() : '',
+    applicant_name: data.applicant_name ? sanitizePersonName(data.applicant_name).trim() : '',
+    applicant_birth_place: data.applicant_birth_place ? sanitizePersonName(data.applicant_birth_place).trim() : '',
     applicant_address: data.applicant_address ? data.applicant_address.trim().toUpperCase() : '',
     applicant_district: data.applicant_district ? data.applicant_district.trim().toUpperCase() : '',
     applicant_village: data.applicant_village ? data.applicant_village.trim().toUpperCase() : '',
-    representative_name: data.representative_name ? data.representative_name.trim().toUpperCase() : '',
+    representative_name: data.representative_name ? sanitizePersonName(data.representative_name).trim() : '',
     applicant_email: data.applicant_email ? data.applicant_email.trim() : null,
     applicant_phone: rawPhoneDigits(data.applicant_phone),
     representative_phone: data.representative_phone ? rawPhoneDigits(data.representative_phone) : '',
