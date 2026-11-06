@@ -146,29 +146,12 @@
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div class="flex items-start gap-4 flex-1">
-            <!-- Applicant Photo Thumbnail in Top Card (Visible on Mobile & Desktop) -->
+            <!-- Official Identity Initial Badge (Privacy Safe) -->
             <div class="shrink-0">
               <div
-                v-if="application.selfie_url"
-                @click="showSelfieModal = true"
-                class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-blue-500/40 dark:border-blue-500/40 shadow-sm bg-white dark:bg-slate-800 p-0.5 cursor-pointer group relative"
-                title="Klik untuk memperbesar Foto Pemohon"
+                class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center shadow-md font-black text-xl sm:text-3xl select-none"
               >
-                <img
-                  :src="application.selfie_url"
-                  :alt="application.applicant_name"
-                  class="w-full h-full object-cover rounded-xl group-hover:scale-105 transition"
-                  @error="selfieImgFailed = true"
-                />
-                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-xl flex items-center justify-center text-white text-[9px] font-bold">
-                  Lihat
-                </div>
-              </div>
-              <div
-                v-else
-                class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex flex-col items-center justify-center shadow-md font-black text-lg sm:text-2xl"
-              >
-                {{ (application.applicant_name || 'A').charAt(0).toUpperCase() }}
+                {{ (application.applicant_name || 'P').charAt(0).toUpperCase() }}
               </div>
             </div>
             <div class="space-y-1 flex-1">
@@ -579,78 +562,43 @@
               </template>
             </div>
 
-            <!-- Center & Right: Applicant Photo & Official QR Code Group -->
-            <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 flex-wrap sm:flex-nowrap shrink-0">
-              <!-- Applicant Photo Box on Printable Ticket -->
-              <div class="shrink-0 flex flex-col items-center text-center">
+            <!-- Right Side: Official QR Code Box for Scanner Device & Phone -->
+            <div class="shrink-0 flex flex-col items-center text-center">
+              <div
+                @click="showQrModal = true"
+                class="w-32 h-32 sm:w-36 sm:h-36 p-2 bg-white rounded-2xl border-2 border-slate-300 dark:border-slate-600 shadow-md flex items-center justify-center cursor-pointer hover:scale-105 transition group relative"
+                title="Klik untuk memperbesar QR Code"
+              >
+                <!-- SVG QR Code rendered crisp and clean -->
                 <div
-                  v-if="application.selfie_url && !selfieImgFailed"
-                  @click="showSelfieModal = true"
-                  class="w-28 h-32 sm:w-32 sm:h-36 p-1 bg-white dark:bg-slate-800 rounded-2xl border-2 border-blue-400 dark:border-blue-600 shadow-md overflow-hidden cursor-pointer group relative hover:scale-105 transition"
-                  title="Klik untuk memperbesar Foto Pemohon"
-                >
-                  <img
-                    :src="application.selfie_url"
-                    :alt="application.applicant_name"
-                    class="w-full h-full object-cover rounded-xl"
-                    @error="selfieImgFailed = true"
-                  />
-                  <div class="absolute inset-0 bg-blue-900/20 opacity-0 group-hover:opacity-100 transition rounded-xl flex items-center justify-center text-white text-[10px] font-bold print:hidden">
-                    Perbesar
-                  </div>
+                  v-if="application.qr_code_svg"
+                  v-html="application.qr_code_svg"
+                  class="w-full h-full flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:block [&_svg]:max-w-full [&_svg]:max-h-full"
+                ></div>
+                <div v-else class="text-slate-400 text-xs">Memuat QR Code...</div>
+
+                <!-- Hover hint for desktop -->
+                <div class="absolute inset-0 bg-blue-900/10 rounded-2xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center print:hidden">
+                  <span class="px-2 py-1 rounded-lg bg-black/75 text-white text-[10px] font-bold">Perbesar</span>
                 </div>
-                <div
-                  v-else
-                  class="w-28 h-32 sm:w-32 sm:h-36 p-2 bg-slate-100 dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-center text-slate-400"
-                >
-                  <svg class="w-10 h-10 mb-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                  <span class="text-[10px] font-bold text-slate-500 uppercase">Pasfoto</span>
-                  <span class="text-[9px] text-slate-400">Verifikasi Fisik</span>
-                </div>
-                <p class="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mt-1.5 flex items-center gap-1">
-                  <span>Foto Pemohon</span>
-                  <span v-if="application.selfie_url && !selfieImgFailed" class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
-                </p>
               </div>
 
-              <!-- Right Side: Official QR Code Box for Scanner Device & Phone -->
-              <div class="shrink-0 flex flex-col items-center text-center">
-                <div
+              <!-- QR Code Subtext & Scanner Guidance -->
+              <div class="mt-1.5 space-y-0.5">
+                <p class="text-[11px] font-mono font-bold text-slate-800 dark:text-slate-200 tracking-wider">
+                  {{ application.reg_number }}
+                </p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
+                  <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                  Scan QR Loket
+                </p>
+                <button
+                  type="button"
                   @click="showQrModal = true"
-                  class="w-28 h-32 sm:w-36 sm:h-36 p-2 bg-white rounded-2xl border-2 border-slate-300 dark:border-slate-600 shadow-md flex items-center justify-center cursor-pointer hover:scale-105 transition group relative"
-                  title="Klik untuk memperbesar QR Code"
+                  class="text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:underline print:hidden cursor-pointer"
                 >
-                  <!-- SVG QR Code rendered crisp and clean -->
-                  <div
-                    v-if="application.qr_code_svg"
-                    v-html="application.qr_code_svg"
-                    class="w-full h-full flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:block [&_svg]:max-w-full [&_svg]:max-h-full"
-                  ></div>
-                  <div v-else class="text-slate-400 text-xs">Memuat QR Code...</div>
-
-                  <!-- Hover hint for desktop -->
-                  <div class="absolute inset-0 bg-blue-900/10 rounded-2xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center print:hidden">
-                    <span class="px-2 py-1 rounded-lg bg-black/75 text-white text-[10px] font-bold">Perbesar</span>
-                  </div>
-                </div>
-
-                <!-- QR Code Subtext & Scanner Guidance -->
-                <div class="mt-1.5 space-y-0.5">
-                  <p class="text-[11px] font-mono font-bold text-slate-800 dark:text-slate-200 tracking-wider">
-                    {{ application.reg_number }}
-                  </p>
-                  <p class="text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
-                    <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
-                    Scan QR Loket
-                  </p>
-                  <button
-                    type="button"
-                    @click="showQrModal = true"
-                    class="text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:underline print:hidden cursor-pointer"
-                  >
-                    Perbesar QR
-                  </button>
-                </div>
+                  Perbesar QR
+                </button>
               </div>
             </div>
 
@@ -672,34 +620,22 @@
           </div>
         </div>
 
-        <!-- Attendance & Representative Details on Ticket -->
+        <!-- Attendance & Representative Details on Ticket (Privacy Safe - No Photo) -->
         <div class="mt-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-700 text-xs">
-          <div class="flex items-start gap-3.5">
-            <div v-if="application.selfie_url" class="shrink-0">
-              <img
-                :src="application.selfie_url"
-                :alt="application.applicant_name"
-                class="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-slate-600 shadow-xs cursor-pointer hover:opacity-80 transition"
-                title="Klik untuk memperbesar foto pemohon"
-                @click="showSelfieModal = true"
-                @error="selfieImgFailed = true"
-              />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <span class="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Pemilik Dokumen</span>
+              <p class="font-bold text-slate-900 dark:text-white mt-0.5">{{ application.applicant_name }}</p>
+              <p class="text-slate-500 font-mono">NIK: {{ application.masked_nik }}</p>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
-              <div>
-                <span class="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Pemilik Dokumen</span>
-                <p class="font-bold text-slate-900 dark:text-white mt-0.5">{{ application.applicant_name }}</p>
-                <p class="text-slate-500 font-mono">NIK: {{ application.masked_nik }}</p>
-              </div>
-              <div>
-                <span class="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Yang Hadir ke Kantor</span>
-                <p class="font-bold text-slate-900 dark:text-white mt-0.5">
-                  {{ application.attendance_type === 'self' ? application.applicant_name + ' (Pemohon Sendiri)' : application.representative_name + ' (Perwakilan / Kuasa)' }}
-                </p>
-                <p v-if="application.attendance_type !== 'self'" class="text-slate-500 font-mono">
-                  NIK Perwakilan: {{ application.representative_nik }} ({{ application.representative_relationship }})
-                </p>
-              </div>
+            <div>
+              <span class="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Yang Hadir ke Kantor</span>
+              <p class="font-bold text-slate-900 dark:text-white mt-0.5">
+                {{ application.attendance_type === 'self' ? application.applicant_name + ' (Pemohon Sendiri)' : application.representative_name + ' (Perwakilan / Kuasa)' }}
+              </p>
+              <p v-if="application.attendance_type !== 'self'" class="text-slate-500 font-mono">
+                NIK Perwakilan: {{ application.representative_nik }} ({{ application.representative_relationship }})
+              </p>
             </div>
           </div>
         </div>
@@ -1036,46 +972,6 @@
       </div>
     </div>
 
-    <!-- Fullscreen / High-Res Applicant Photo Lightbox Modal -->
-    <div
-      v-if="showSelfieModal && application.selfie_url"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm print:hidden animate-in fade-in duration-150"
-      @click.self="showSelfieModal = false"
-    >
-      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 max-w-sm w-full text-center shadow-2xl relative space-y-4 border border-slate-200 dark:border-slate-800">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-          <div>
-            <h3 class="font-black text-sm text-slate-900 dark:text-white">Foto Wajah Pemohon</h3>
-            <p class="text-[11px] text-slate-500">{{ application.applicant_name }} ({{ application.reg_number }})</p>
-          </div>
-          <button
-            type="button"
-            @click="showSelfieModal = false"
-            class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center cursor-pointer text-sm font-bold"
-          >
-            ✕
-          </button>
-        </div>
-        <div class="w-full aspect-3/4 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-blue-500/30 shadow-inner">
-          <img
-            :src="application.selfie_url"
-            :alt="application.applicant_name"
-            class="w-full h-full object-cover"
-          />
-        </div>
-        <p class="text-[10px] text-slate-400">
-          Foto biometrik resmi untuk verifikasi fisik di loket pelayanan Disdukcapil Dompu
-        </p>
-        <button
-          type="button"
-          @click="showSelfieModal = false"
-          class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer"
-        >
-          Tutup Pratinjau
-        </button>
-      </div>
-    </div>
-
     <!-- Copy Toast Notification -->
     <transition
       enter-active-class="transition duration-200 ease-out"
@@ -1125,8 +1021,6 @@ const revisionFiles = ref({});
 const revisionForm = useForm({});
 const toastMessage = ref('');
 const showQrModal = ref(false);
-const showSelfieModal = ref(false);
-const selfieImgFailed = ref(false);
 let toastTimer = null;
 
 function copyText(text, label) {
