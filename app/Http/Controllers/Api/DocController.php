@@ -518,7 +518,7 @@ class DocController extends Controller
 
     <!-- FOOTER -->
     <div class="api-footer">
-        Dukcapil Dompu REST API &bull; Powered by <a href="https://swagger.io/tools/swagger-ui/" target="_blank">Swagger UI 5.11</a> &amp; <a href="https://zircote.github.io/swagger-php/" target="_blank">swagger-php 6</a>
+        Dukcapil Dompu REST API &bull; Powered by <a href="https://swagger.io/tools/swagger-ui/" target="_blank">Swagger UI 5.11</a> &amp; OpenAPI Generator (PHP 8)
         &bull; <a href="mailto:admin@dukcapil.dompukab.go.id">Hubungi Tim IT</a>
     </div>
 
