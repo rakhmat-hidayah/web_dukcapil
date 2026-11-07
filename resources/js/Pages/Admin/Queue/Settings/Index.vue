@@ -106,8 +106,31 @@
 
             <div class="flex items-center p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 text-xs text-blue-900 dark:text-blue-200">
               <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              <span>Saat aktif, pendaftaran baru akan dialihkan ke halaman pemeliharaan resmi dengan kontak helpdesk WhatsApp dan informasi loket fisik.</span>
+              <span>Saat aktif, pendaftaran baru akan dialihkan ke halaman pemeliharaan resmi dengan informasi loket pelayanan fisik kantor.</span>
             </div>
+          </div>
+
+          <!-- Quick Action Bar specifically for Maintenance Mode -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-dashed" :class="form['queue.maintenance_mode'] ? 'border-amber-200 dark:border-amber-900/60' : 'border-slate-200 dark:border-slate-700'">
+            <div class="flex items-center gap-2 text-xs">
+              <span class="inline-block w-2.5 h-2.5 rounded-full" :class="form['queue.maintenance_mode'] ? 'bg-amber-500 animate-ping' : 'bg-emerald-500'"></span>
+              <span class="font-medium text-slate-600 dark:text-slate-300">
+                Status saat ini:
+                <strong :class="form['queue.maintenance_mode'] ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'">
+                  {{ form['queue.maintenance_mode'] ? 'Mode Maintenance Dipilih (Layanan Ditutup)' : 'Layanan Normal Dipilih' }}
+                </strong>
+              </span>
+            </div>
+            <button
+              type="button"
+              @click="quickSaveMaintenance"
+              :disabled="submitting"
+              class="px-4 py-2 rounded-xl text-xs font-bold transition shadow-md flex items-center justify-center gap-1.5 shrink-0"
+              :class="form['queue.maintenance_mode'] ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-600/30' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>{{ form['queue.maintenance_mode'] ? 'Simpan & Aktifkan Mode Maintenance' : 'Simpan & Buka Layanan Normal' }}</span>
+            </button>
           </div>
         </div>
 
@@ -321,24 +344,46 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Head, router } from '@inertiajs/vue3'
+import { ref, watch } from 'vue'
+import { Head, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps({
   settings: Object,
 })
 
+const page = usePage()
+
 const getVal = (group, key, fallback = '') => {
-  const item = props.settings?.[group]?.[key]
-  return item ? item.value : fallback
+  // 1. Direct group lookup
+  if (props.settings?.[group]?.[key]?.value !== undefined) {
+    return props.settings[group][key].value
+  }
+  // 2. Search across all groups in case group name is different
+  if (props.settings && typeof props.settings === 'object') {
+    for (const g in props.settings) {
+      if (props.settings[g]?.[key]?.value !== undefined) {
+        return props.settings[g][key].value
+      }
+    }
+  }
+  return fallback
+}
+
+const resolveMaintenanceActive = () => {
+  // Primary source of truth: shared page prop (same as AdminLayout banner)
+  if (page.props.queue_maintenance && typeof page.props.queue_maintenance.is_active === 'boolean') {
+    return page.props.queue_maintenance.is_active
+  }
+  const val = getVal('maintenance', 'queue.maintenance_mode', '0')
+  return val === '1' || val === 1 || val === true || val === 'true'
 }
 
 const form = ref({
-  'queue.maintenance_mode': getVal('maintenance', 'queue.maintenance_mode', '0') === '1',
-  'queue.maintenance_title': getVal('maintenance', 'queue.maintenance_title', 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem'),
-  'queue.maintenance_message': getVal('maintenance', 'queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan dan pembaruan sistem. Layanan akan segera dibuka kembali setelah proses selesai. Bagi masyarakat yang membutuhkan pelayanan mendesak, silakan datang langsung ke loket kantor Disdukcapil Kabupaten Dompu.'),
-  'queue.maintenance_estimated_end': getVal('maintenance', 'queue.maintenance_estimated_end', ''),
+  'queue.maintenance_mode': resolveMaintenanceActive(),
+  'queue.maintenance_title': page.props.queue_maintenance?.title || getVal('maintenance', 'queue.maintenance_title', 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem'),
+  'queue.maintenance_message': page.props.queue_maintenance?.message || getVal('maintenance', 'queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan dan pembaruan sistem. Layanan akan segera dibuka kembali setelah proses selesai. Bagi masyarakat yang membutuhkan pelayanan mendesak, silakan datang langsung ke loket kantor Disdukcapil Kabupaten Dompu.'),
+  'queue.maintenance_estimated_end': page.props.queue_maintenance?.estimated_end ?? getVal('maintenance', 'queue.maintenance_estimated_end', ''),
   'queue.office_address': getVal('general', 'queue.office_address', 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211'),
   'queue.helpdesk_phone': getVal('general', 'queue.helpdesk_phone', '6282124824114'),
   'queue.open_time': getVal('schedule', 'queue.open_time', '08:00'),
@@ -354,11 +399,47 @@ const form = ref({
   'queue.notify_on_ready_for_pickup': getVal('notification', 'queue.notify_on_ready_for_pickup', '1') === '1',
 })
 
+// Keep form synchronized whenever props refresh
+watch(
+  () => [props.settings, page.props.queue_maintenance],
+  () => {
+    if (!submitting.value) {
+      form.value['queue.maintenance_mode'] = resolveMaintenanceActive()
+      if (page.props.queue_maintenance?.title) {
+        form.value['queue.maintenance_title'] = page.props.queue_maintenance.title
+      }
+      if (page.props.queue_maintenance?.message) {
+        form.value['queue.maintenance_message'] = page.props.queue_maintenance.message
+      }
+      if (page.props.queue_maintenance?.estimated_end !== undefined) {
+        form.value['queue.maintenance_estimated_end'] = page.props.queue_maintenance.estimated_end || ''
+      }
+    }
+  },
+  { deep: true }
+)
+
 const submitting = ref(false)
 
 const submitSettings = () => {
   submitting.value = true
   router.post(route('admin.queue.settings.update'), { settings: form.value }, {
+    preserveScroll: true,
+    onFinish: () => { submitting.value = false },
+  })
+}
+
+// Quick dedicated save specifically for maintenance mode
+const quickSaveMaintenance = () => {
+  submitting.value = true
+  router.post(route('admin.queue.settings.update'), {
+    settings: {
+      'queue.maintenance_mode': form.value['queue.maintenance_mode'],
+      'queue.maintenance_title': form.value['queue.maintenance_title'],
+      'queue.maintenance_message': form.value['queue.maintenance_message'],
+      'queue.maintenance_estimated_end': form.value['queue.maintenance_estimated_end'],
+    }
+  }, {
     preserveScroll: true,
     onFinish: () => { submitting.value = false },
   })
