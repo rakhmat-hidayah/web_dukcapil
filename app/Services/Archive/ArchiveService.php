@@ -238,11 +238,10 @@ class ArchiveService
             throw new \InvalidArgumentException('Tidak ada permohonan yang memenuhi syarat untuk dibuatkan paket arsip.');
         }
 
-        // Determine package code: if single application, include reg_number & applicant_nik
+        // Determine package code: if single application, use reg_number (do not include NIK to protect citizen privacy)
         if ($applications->count() === 1) {
             $singleApp = $applications->first();
-            $nikPart = !empty($singleApp->applicant_nik) ? "_{$singleApp->applicant_nik}" : '';
-            $baseCode = "ARSIP_{$period}_{$singleApp->reg_number}{$nikPart}";
+            $baseCode = "ARSIP_{$period}_{$singleApp->reg_number}";
             $packageCode = $baseCode;
             $c = 1;
             while (ArchivePackage::where('package_code', $packageCode)->exists()) {
@@ -387,9 +386,8 @@ class ArchiveService
         foreach ($applications as $app) {
             $analysis = $appAnalysis[$app->id] ?? null;
 
-            $appFolderName = !empty($app->applicant_nik)
-                ? "{$app->reg_number}_{$app->applicant_nik}"
-                : $app->reg_number;
+            // Subfolder per application inside the ZIP: use registration number only (no NIK for citizen privacy)
+            $appFolderName = $app->reg_number;
             $appFolderRelative = "permohonan/{$appFolderName}";
             $appFolderFull = "{$tempDir}/{$appFolderRelative}";
             File::makeDirectory($appFolderFull, 0755, true);
@@ -628,16 +626,8 @@ class ArchiveService
 
         $downloadFileName = basename($zipFullPath);
 
-        // If package is for a single application and filename does not yet have NIK, dynamically include it
-        if ($package->total_applications === 1) {
-            $item = $package->items()->with('application')->first();
-            $app = $item?->application;
-            if ($app && !empty($app->applicant_nik) && !str_contains($downloadFileName, $app->applicant_nik)) {
-                $ext = pathinfo($downloadFileName, PATHINFO_EXTENSION);
-                $nameWithoutExt = pathinfo($downloadFileName, PATHINFO_FILENAME);
-                $downloadFileName = "{$nameWithoutExt}_{$app->applicant_nik}.{$ext}";
-            }
-        }
+        // Sanitize download filename to ensure no NIK (_16 digits) is exposed in archive/zip file names
+        $downloadFileName = preg_replace('/_\d{16}/', '', $downloadFileName);
 
         return response()->download($zipFullPath, $downloadFileName, [
             'Content-Type' => 'application/zip',
