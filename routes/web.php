@@ -48,6 +48,7 @@ Route::get('/media-file/{path}', function ($path) {
 
 // Public User-Facing routes
 Route::get('/', [\App\Http\Controllers\Public\HomeController::class, 'index'])->name('public.home');
+Route::redirect('/beranda', '/')->name('home');
 
 // Enterprise Profile Module Public Routes
 Route::get('/profil', [\App\Http\Controllers\Public\ProfilePageController::class, 'index'])->name('public.profile.index');

@@ -65,7 +65,7 @@
           </a>
 
           <Link
-            :href="route('queue.history')"
+            :href="route().has('queue.history') ? route('queue.history') : '/layanan/antrian/riwayat'"
             class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 text-blue-700 dark:text-blue-300 font-bold text-xs border border-blue-200 dark:border-blue-900 transition flex items-center justify-center gap-2"
           >
             <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
@@ -73,7 +73,7 @@
           </Link>
 
           <Link
-            :href="route('home')"
+            :href="route().has('public.home') ? route('public.home') : '/'"
             class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5"
           >
             <span>Beranda Utama</span>
@@ -97,7 +97,8 @@ const props = defineProps({
 const whatsappUrl = computed(() => {
   const phone = props.maintenance?.helpdesk_phone;
   if (!phone) return null;
-  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  const cleanPhone = String(phone).replace(/[^0-9]/g, '');
+  if (!cleanPhone) return null;
   const target = cleanPhone.startsWith('0') ? '62' + cleanPhone.substring(1) : cleanPhone;
   const message = encodeURIComponent('Halo Admin Disdukcapil Kab. Dompu, saya ingin menanyakan terkait informasi layanan KTP-el.');
   return `https://wa.me/${target}?text=${message}`;
