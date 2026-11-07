@@ -540,6 +540,8 @@ class ArchiveService
             'institution' => 'Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu',
             'generated_at' => now()->toIso8601String(),
             'archive_period' => $package->archive_period,
+            'archive_period_label' => $package->period_label,
+            'archive_period_date_range' => $package->period_date_range,
             'summary' => [
                 'total_applications' => count($manifestApplications),
                 'total_document_files' => $totalFiles,

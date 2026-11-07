@@ -52,7 +52,7 @@
             >
               <option value="">Semua Periode</option>
               <option v-for="(cnt, p) in availablePeriods" :key="p" :value="p">
-                {{ p }} ({{ cnt }} permohonan)
+                {{ formatPeriodWithDates(p) }} ({{ cnt }} permohonan)
               </option>
             </select>
           </div>
@@ -269,7 +269,7 @@
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Periode Arsip:</span>
-            <span class="font-bold text-slate-800 dark:text-slate-200">{{ filterForm.period || 'Bulan Berjalan (' + currentYearMonth + ')' }}</span>
+            <span class="font-bold text-slate-800 dark:text-slate-200">{{ formatPeriodWithDates(filterForm.period || currentYearMonth) }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Mode Operasional:</span>
@@ -390,6 +390,23 @@ function submitCreatePackage() {
       selectedIds.value = [];
     },
   });
+}
+
+function formatPeriodWithDates(periodStr) {
+  if (!periodStr) return '-';
+  const parts = periodStr.split('-');
+  if (parts.length === 2) {
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const months = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    const monthName = months[month] || periodStr;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${monthName} ${year} (01 - ${String(lastDay).padStart(2, '0')} ${monthName.substring(0, 3)} ${year})`;
+  }
+  return periodStr;
 }
 
 function formatBytes(bytes) {

@@ -47,11 +47,10 @@
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Periode (YYYY-MM)</label>
+            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Periode (Bulan / Tahun)</label>
             <input
               v-model="filterForm.period"
-              type="text"
-              placeholder="Contoh: 2026-10"
+              type="month"
               class="w-full text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 p-2.5"
             />
           </div>
@@ -92,7 +91,7 @@
             <thead class="bg-slate-50 dark:bg-slate-900/60 text-slate-500 uppercase tracking-wider font-bold border-y border-slate-100 dark:border-slate-700/60">
               <tr>
                 <th class="py-3 px-4">Kode Paket</th>
-                <th class="py-3 px-4">Periode</th>
+                <th class="py-3 px-4">Periode Arsip</th>
                 <th class="py-3 px-4 text-center">Permohonan</th>
                 <th class="py-3 px-4 text-center">Berkas</th>
                 <th class="py-3 px-4">Ukuran & SHA-256</th>
@@ -115,8 +114,18 @@
                   </Link>
                   <span class="text-[10px] text-slate-400">Dibuat {{ new Date(pkg.created_at).toLocaleString('id-ID') }}</span>
                 </td>
-                <td class="py-4 px-4 font-medium text-slate-600 dark:text-slate-300">
-                  {{ pkg.archive_period || '-' }}
+                <td class="py-4 px-4">
+                  <div class="space-y-0.5">
+                    <span class="font-bold text-slate-800 dark:text-slate-100 block text-xs">
+                      {{ pkg.period_label || pkg.archive_period || '-' }}
+                    </span>
+                    <span v-if="pkg.period_date_range" class="text-[11px] text-slate-500 dark:text-slate-400 font-mono block">
+                      {{ pkg.period_date_range }}
+                    </span>
+                    <span v-if="pkg.archive_period" class="inline-flex items-center text-[10px] text-slate-400 font-mono bg-slate-100 dark:bg-slate-700/60 px-1.5 py-0.5 rounded">
+                      Kode: {{ pkg.archive_period }}
+                    </span>
+                  </div>
                 </td>
                 <td class="py-4 px-4 text-center font-bold text-slate-800 dark:text-slate-200">
                   {{ pkg.total_applications }}

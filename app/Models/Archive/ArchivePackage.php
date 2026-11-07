@@ -75,6 +75,8 @@ class ArchivePackage extends Model
         'status_label',
         'permanent_storage_label',
         'download_url',
+        'period_label',
+        'period_date_range',
     ];
 
     public function serviceType()
@@ -145,5 +147,62 @@ class ArchivePackage extends Model
     public function getDownloadUrlAttribute(): string
     {
         return route('admin.archive.packages.download', ['id' => $this->id]);
+    }
+
+    public function getPeriodLabelAttribute(): string
+    {
+        if (empty($this->archive_period)) {
+            return '-';
+        }
+
+        try {
+            $parts = explode('-', $this->archive_period);
+            if (count($parts) === 2) {
+                $year = (int) $parts[0];
+                $month = (int) $parts[1];
+                $months = [
+                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                ];
+                if (isset($months[$month])) {
+                    return $months[$month] . ' ' . $year;
+                }
+            } elseif (count($parts) === 3) {
+                return \Carbon\Carbon::parse($this->archive_period)->locale('id')->isoFormat('D MMMM Y');
+            }
+            return \Carbon\Carbon::parse($this->archive_period)->locale('id')->isoFormat('MMMM Y');
+        } catch (\Throwable) {
+            return $this->archive_period;
+        }
+    }
+
+    public function getPeriodDateRangeAttribute(): string
+    {
+        if (empty($this->archive_period)) {
+            return '-';
+        }
+
+        try {
+            $parts = explode('-', $this->archive_period);
+            if (count($parts) === 2) {
+                $year = (int) $parts[0];
+                $month = (int) $parts[1];
+                $start = \Carbon\Carbon::createFromDate($year, $month, 1)->startOfDay();
+                $end = $start->copy()->endOfMonth();
+                $months = [
+                    1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+                    5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu',
+                    9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+                ];
+                $m = $months[$month] ?? $start->format('M');
+                return sprintf('%02d %s %d - %02d %s %d', 1, $m, $year, $end->day, $m, $year);
+            } elseif (count($parts) === 3) {
+                return \Carbon\Carbon::parse($this->archive_period)->locale('id')->isoFormat('D MMM Y');
+            }
+            return $this->archive_period;
+        } catch (\Throwable) {
+            return $this->archive_period;
+        }
     }
 }

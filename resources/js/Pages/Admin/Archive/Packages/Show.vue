@@ -39,6 +39,13 @@
               >
                 {{ package.permanent_storage_label }}
               </span>
+
+              <span
+                class="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 inline-flex items-center gap-1.5"
+              >
+                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Periode: <strong class="font-bold">{{ package.period_label || package.archive_period }}</strong> ({{ package.period_date_range }})
+              </span>
             </div>
 
             <h1 class="text-2xl sm:text-3xl font-black font-mono tracking-tight text-slate-900 dark:text-white">
@@ -113,8 +120,13 @@
           </p>
         </div>
 
-        <!-- 4 Summary Metrics -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+        <!-- 5 Summary Metrics -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 pt-2">
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+            <span class="text-slate-400 text-xs font-semibold block">Periode Tanggal Arsip</span>
+            <span class="text-base font-black text-slate-800 dark:text-slate-100 block mt-1">{{ package.period_label || package.archive_period }}</span>
+            <span class="text-[11px] text-slate-500 font-mono block mt-0.5">{{ package.period_date_range }}</span>
+          </div>
           <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
             <span class="text-slate-400 text-xs font-semibold block">Total Permohonan</span>
             <span class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ package.total_applications }}</span>
