@@ -216,7 +216,7 @@
             <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700">
               <tr>
                 <th class="px-5 py-4">No. Registrasi / Antrean</th>
-                <th class="px-5 py-4">Foto & Data Pemohon</th>
+                <th class="px-5 py-4">Data Pemohon</th>
                 <th class="px-5 py-4">Jenis Layanan</th>
                 <th class="px-5 py-4">Status Berkas</th>
                 <th class="px-5 py-4">Status Fisik KTP (Loket)</th>
@@ -245,43 +245,14 @@
                   </p>
                 </td>
 
-                <!-- Foto & Data Pemohon -->
+                <!-- Data Pemohon -->
                 <td class="px-5 py-3.5">
-                  <div class="flex items-center gap-3">
-                    <!-- Thumbnail with Lightbox trigger -->
-                    <div
-                      v-if="app.selfie_thumbnail_url || app.selfie_url"
-                      @click.stop="openPhotoPreview(app)"
-                      class="relative w-12 h-12 rounded-xl overflow-hidden border border-blue-200 dark:border-blue-900 shadow-sm shrink-0 cursor-pointer group/photo bg-slate-100 dark:bg-slate-800 transition transform hover:scale-105 hover:ring-2 hover:ring-blue-500"
-                      title="Klik untuk melihat pratinjau foto pemohon"
-                    >
-                      <img
-                        :src="app.selfie_thumbnail_url || app.selfie_url"
-                        :alt="app.applicant_name"
-                        class="w-full h-full object-cover transition duration-200"
-                        loading="lazy"
-                      />
-                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 transition flex items-center justify-center text-white">
-                        <svg class="w-4 h-4 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
-                      </div>
+                  <div class="min-w-0">
+                    <div class="font-bold text-slate-900 dark:text-white truncate max-w-xs">
+                      {{ app.applicant_name }}
                     </div>
-                    <div
-                      v-else
-                      class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700/60 border border-dashed border-slate-300 dark:border-slate-600 flex flex-col items-center justify-center text-slate-400 shrink-0 text-[8px] font-semibold select-none"
-                      title="Belum ada foto selfie pemohon"
-                    >
-                      <svg class="w-5 h-5 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                      <span class="text-[8px] leading-tight text-slate-400 mt-0.5">No Foto</span>
-                    </div>
-
-                    <!-- Applicant Name & NIK -->
-                    <div class="min-w-0">
-                      <div class="font-bold text-slate-900 dark:text-white truncate max-w-xs">
-                        {{ app.applicant_name }}
-                      </div>
-                      <div class="font-mono text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
-                        <span>NIK: {{ maskNik(app.applicant_nik) }}</span>
-                      </div>
+                    <div class="font-mono text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                      <span>NIK: {{ maskNik(app.applicant_nik) }}</span>
                     </div>
                   </div>
                 </td>
