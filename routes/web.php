@@ -157,9 +157,11 @@ Route::get('/pengaduan/status/{ticket}', [\App\Http\Controllers\Public\Complaint
 Route::get('/captcha/math', [CaptchaController::class, 'math'])->name('captcha.math');
 Route::get('/captcha/image', [CaptchaController::class, 'image'])->name('captcha.image');
 
-// API Documentation routes
-Route::get('/api/docs', [\App\Http\Controllers\Api\DocController::class, 'docs'])->name('api.docs');
-Route::get('/api/docs/json', [\App\Http\Controllers\Api\DocController::class, 'json'])->name('api.docs.json');
+// API Documentation routes (Protected: Authenticated Admin / Operators Only)
+Route::middleware('auth')->group(function () {
+    Route::get('/api/docs', [\App\Http\Controllers\Api\DocController::class, 'docs'])->name('api.docs');
+    Route::get('/api/docs/json', [\App\Http\Controllers\Api\DocController::class, 'json'])->name('api.docs.json');
+});
 
 // Fallback named route for standard Laravel login route() calls
 Route::get('/login', function () {

@@ -18,25 +18,25 @@ Route::middleware(['throttle:api', 'api.log'])->prefix('v1')->group(function () 
     Route::get('/pages/{slug}', [\App\Http\Controllers\Api\V1\PageController::class, 'show'])->name('api.v1.pages.show');
     Route::get('/menus/{location}', [\App\Http\Controllers\Api\V1\MenuController::class, 'show'])->name('api.v1.menus.show');
 
-    // Demographics V1 Endpoints
-    Route::prefix('demographics')->name('api.v1.demographics.')->group(function () {
-        Route::get('/summary',       [\App\Http\Controllers\Api\V1\DemographicController::class, 'summary'])->name('summary');
-        Route::get('/kecamatans',    [\App\Http\Controllers\Api\V1\DemographicController::class, 'kecamatans'])->name('kecamatans');
-        Route::get('/datasets',      [\App\Http\Controllers\Api\V1\DemographicController::class, 'datasets'])->name('datasets');
-        Route::get('/chart/{type}',  [\App\Http\Controllers\Api\V1\DemographicController::class, 'chartData'])->name('chart');
-    });
-
-    // Survei Kepuasan Masyarakat (IKM) V1 Endpoints
-    Route::prefix('survey')->name('api.v1.survey.')->group(function () {
-        Route::get('/current',     [\App\Http\Controllers\Api\SurveyApiController::class, 'current'])->name('current');
-        Route::get('/results',     [\App\Http\Controllers\Api\SurveyApiController::class, 'results'])->name('results');
-        Route::get('/archive',     [\App\Http\Controllers\Api\SurveyApiController::class, 'archive'])->name('archive');
-        Route::get('/statistics',  [\App\Http\Controllers\Api\SurveyApiController::class, 'statistics'])->name('statistics');
-    });
-
     // Protected V1 Endpoints (requires X-API-KEY header validation)
     Route::middleware('api.auth')->group(function () {
         Route::get('/test-auth', [TestApiController::class, 'testAuth'])->name('api.v1.test-auth');
+
+        // Demographics V1 Endpoints (Protected by API Key)
+        Route::prefix('demographics')->name('api.v1.demographics.')->group(function () {
+            Route::get('/summary',       [\App\Http\Controllers\Api\V1\DemographicController::class, 'summary'])->name('summary');
+            Route::get('/kecamatans',    [\App\Http\Controllers\Api\V1\DemographicController::class, 'kecamatans'])->name('kecamatans');
+            Route::get('/datasets',      [\App\Http\Controllers\Api\V1\DemographicController::class, 'datasets'])->name('datasets');
+            Route::get('/chart/{type}',  [\App\Http\Controllers\Api\V1\DemographicController::class, 'chartData'])->name('chart');
+        });
+
+        // Survei Kepuasan Masyarakat (IKM) V1 Endpoints (Protected by API Key)
+        Route::prefix('survey')->name('api.v1.survey.')->group(function () {
+            Route::get('/current',     [\App\Http\Controllers\Api\SurveyApiController::class, 'current'])->name('current');
+            Route::get('/results',     [\App\Http\Controllers\Api\SurveyApiController::class, 'results'])->name('results');
+            Route::get('/archive',     [\App\Http\Controllers\Api\SurveyApiController::class, 'archive'])->name('archive');
+            Route::get('/statistics',  [\App\Http\Controllers\Api\SurveyApiController::class, 'statistics'])->name('statistics');
+        });
     });
     
 });

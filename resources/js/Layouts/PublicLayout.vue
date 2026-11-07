@@ -12,7 +12,6 @@
           <a v-if="websiteSettings.social_facebook" :href="websiteSettings.social_facebook" target="_blank" rel="noopener noreferrer" class="hidden md:inline hover:text-amber-300 transition font-bold">🌐 Facebook</a>
         </div>
         <div class="flex items-center gap-4">
-          <a href="/api/docs" target="_blank" class="hover:underline text-amber-400 font-bold">API INTEGRATION (OpenAPI)</a>
           <a href="/admin/login" class="hover:underline">Operator Portal</a>
         </div>
       </div>

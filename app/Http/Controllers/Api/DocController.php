@@ -38,6 +38,10 @@ class DocController extends Controller
      */
     public function docs(): HttpResponse
     {
+        if (!auth()->check()) {
+            abort(403, 'Akses ke dokumentasi API OpenAPI hanya diperbolehkan untuk Administrator yang telah login.');
+        }
+
         $html = <<<HTML
 <!DOCTYPE html>
 <html lang="id">
@@ -555,6 +559,10 @@ HTML;
      */
     public function json(): HttpResponse
     {
+        if (!auth()->check()) {
+            abort(403, 'Akses ke spesifikasi OpenAPI hanya diperbolehkan untuk Administrator yang telah login.');
+        }
+
         // swagger-php v6 natively reads PHP 8 #[OA\*] Attributes
         // All V1 controllers have been converted to Attributes format
         $openapi = (new Generator())->generate(

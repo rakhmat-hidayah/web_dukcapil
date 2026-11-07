@@ -11,13 +11,23 @@
             Buat dan kelola API Key untuk integrasi aplikasi pihak ketiga / instansi pemerintah eksternal.
           </p>
         </div>
-        <button 
-          @click="openCreateModal"
-          class="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold rounded-xl shadow-md shadow-primary-500/10 active:scale-95 transition"
-        >
-          <Plus class="w-4 h-4" />
-          Generate API Key
-        </button>
+        <div class="flex items-center gap-2.5">
+          <a 
+            href="/api/docs" 
+            target="_blank"
+            class="flex items-center gap-2 px-3.5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 text-xs font-semibold rounded-xl border border-gray-200 dark:border-zinc-700 transition"
+          >
+            <BookOpen class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+            Dokumentasi OpenAPI
+          </a>
+          <button 
+            @click="openCreateModal"
+            class="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold rounded-xl shadow-md shadow-primary-500/10 active:scale-95 transition"
+          >
+            <Plus class="w-4 h-4" />
+            Generate API Key
+          </button>
+        </div>
       </div>
 
       <!-- Keys Table Card -->
@@ -230,7 +240,7 @@
 import { ref } from 'vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Plus, Trash2, RefreshCw, Copy, Eye, EyeOff } from '@lucide/vue';
+import { Plus, Trash2, RefreshCw, Copy, Eye, EyeOff, BookOpen } from '@lucide/vue';
 
 const props = defineProps({
   apiKeys: Array,
