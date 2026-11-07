@@ -81,6 +81,8 @@ class QueueApplicationController extends Controller
      */
     public function storeDraft(Request $request): RedirectResponse
     {
+        QueueInfoController::ensureDatabaseSchema();
+
         // Sanitize applicant email: default to @gmail.com if applicant typed only username without domain
         if ($request->has('applicant_email') && $request->input('applicant_email') !== null) {
             $email = trim((string) $request->input('applicant_email'));
@@ -205,7 +207,14 @@ class QueueApplicationController extends Controller
                 ->with('info', 'Anda telah memiliki permohonan aktif untuk jenis layanan ini.');
         }
 
-        $draft = $this->applicationService->createDraft($validated, (int) $validated['service_type_id']);
+        try {
+            $draft = $this->applicationService->createDraft($validated, (int) $validated['service_type_id']);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Queue storeDraft error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return back()->withErrors([
+                'service_type_id' => 'Terjadi kendala sistem saat memproses draf permohonan (' . $e->getMessage() . '). Silakan coba kembali.',
+            ])->withInput();
+        }
 
         // Establish verified session for applicant's NIK
         session([

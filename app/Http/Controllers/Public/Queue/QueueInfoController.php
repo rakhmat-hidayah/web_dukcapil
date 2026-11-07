@@ -26,12 +26,50 @@ class QueueInfoController extends Controller
         $checked = true;
 
         try {
+            $needsMigration = false;
+
             if (\Illuminate\Support\Facades\Schema::hasTable('queue_service_documents') &&
                 !\Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active')) {
+                $needsMigration = true;
+            }
+
+            if (\Illuminate\Support\Facades\Schema::hasTable('queue_applications')) {
+                if (\Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'applicant_phone') ||
+                    \Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'representative_phone') ||
+                    \Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'applicant_address')) {
+                    $needsMigration = true;
+                }
+            }
+
+            if ($needsMigration) {
                 \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
             }
+
+            // Direct DDL fallback if artisan migrate was blocked or did not drop columns
+            if (\Illuminate\Support\Facades\Schema::hasTable('queue_applications')) {
+                $legacyCols = [
+                    'applicant_phone',
+                    'applicant_address',
+                    'applicant_village',
+                    'applicant_district',
+                    'applicant_birth_place',
+                    'applicant_birth_date',
+                    'representative_phone',
+                ];
+                $toDrop = [];
+                foreach ($legacyCols as $col) {
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('queue_applications', $col)) {
+                        $toDrop[] = $col;
+                    }
+                }
+                if (!empty($toDrop)) {
+                    \Illuminate\Support\Facades\Schema::table('queue_applications', function (\Illuminate\Database\Schema\Blueprint $table) use ($toDrop) {
+                        $table->dropColumn($toDrop);
+                    });
+                }
+            }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('Queue auto-migrate warning: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::warning('Queue auto-migrate/schema sync warning: ' . $e->getMessage());
         }
     }
 

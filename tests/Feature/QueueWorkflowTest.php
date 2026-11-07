@@ -371,29 +371,11 @@ class QueueWorkflowTest extends TestCase
         $this->assertTrue($selfieDoc->is_required);
         $this->assertEquals('user', $selfieDoc->capture_mode);
 
-        // 15-year-old must be rejected for Perekaman
-        $responseUnder16 = $this->post(route('queue.apply.store'), [
-            'service_type_id' => $perekamanService->id,
-            'applicant_name' => 'Anak Usia 15',
-            'applicant_nik' => '5205999988887777',
-            'applicant_birth_place' => 'Dompu',
-            'applicant_birth_date' => now()->subYears(15)->format('Y-m-d'),
-            'applicant_phone' => '081234567890',
-            'applicant_address' => 'Dompu Kota',
-            'attendance_type' => 'self',
-        ]);
-        $responseUnder16->assertSessionHasErrors('applicant_birth_date');
-
-        // 16-year-old must pass for Perekaman
         $nik16 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
         $response16 = $this->post(route('queue.apply.store'), [
             'service_type_id' => $perekamanService->id,
-            'applicant_name' => 'Remaja Usia 16',
+            'applicant_name' => 'REMAJA USIA ENAM BELAS',
             'applicant_nik' => $nik16,
-            'applicant_birth_place' => 'Dompu',
-            'applicant_birth_date' => now()->subYears(16)->format('Y-m-d'),
-            'applicant_phone' => '081234567890',
-            'applicant_address' => 'Dompu Kota',
             'attendance_type' => 'self',
         ]);
         $response16->assertSessionHasNoErrors();
@@ -404,29 +386,11 @@ class QueueWorkflowTest extends TestCase
         $cetakService = ServiceType::where('is_biometric_first_recording', false)->first();
         $this->assertNotNull($cetakService);
 
-        // 16-year-old must be rejected for Cetak KTP
-        $response16ForCetak = $this->post(route('queue.apply.store'), [
-            'service_type_id' => $cetakService->id,
-            'applicant_name' => 'Remaja 16 Cetak',
-            'applicant_nik' => '5205888877776666',
-            'applicant_birth_place' => 'Dompu',
-            'applicant_birth_date' => now()->subYears(16)->format('Y-m-d'),
-            'applicant_phone' => '081234567890',
-            'applicant_address' => 'Dompu Kota',
-            'attendance_type' => 'self',
-        ]);
-        $response16ForCetak->assertSessionHasErrors('applicant_birth_date');
-
-        // 17-year-old must pass for Cetak KTP
         $nik17 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
         $response17 = $this->post(route('queue.apply.store'), [
             'service_type_id' => $cetakService->id,
-            'applicant_name' => 'Dewasa 17 Cetak',
+            'applicant_name' => 'DEWASA TUJUH BELAS CETAK',
             'applicant_nik' => $nik17,
-            'applicant_birth_place' => 'Dompu',
-            'applicant_birth_date' => now()->subYears(17)->format('Y-m-d'),
-            'applicant_phone' => '081234567890',
-            'applicant_address' => 'Dompu Kota',
             'attendance_type' => 'self',
         ]);
         $response17->assertSessionHasNoErrors();
@@ -1013,7 +977,7 @@ class QueueWorkflowTest extends TestCase
         $application->delete();
     }
 
-    public function test_store_draft_accepts_hyphen_formatted_phone_numbers()
+    public function test_store_draft_creates_draft_with_simplified_fields()
     {
         $service = ServiceType::first();
         $this->assertNotNull($service);
@@ -1022,13 +986,8 @@ class QueueWorkflowTest extends TestCase
         $payload = [
             'service_type_id' => $service->id,
             'applicant_nik' => $applicantNik,
-            'applicant_name' => 'Hyphen Phone Tester',
-            'applicant_birth_place' => 'Dompu',
-            'applicant_birth_date' => '1995-05-15',
-            'applicant_phone' => '0853-3344-7003',
-            'applicant_address' => 'Jl. Bhayangkara No. 10',
-            'applicant_district' => 'Kecamatan Dompu',
-            'applicant_village' => 'Bada',
+            'applicant_name' => 'SIMPLIFIED IDENTITY TESTER',
+            'applicant_email' => 'tester@gmail.com',
             'attendance_type' => 'self',
         ];
 
@@ -1038,7 +997,8 @@ class QueueWorkflowTest extends TestCase
 
         $app = QueueApplication::where('applicant_nik', $applicantNik)->first();
         $this->assertNotNull($app);
-        $this->assertEquals('085333447003', $app->applicant_phone, 'Phone number must be cleanly stored without hyphens in database');
+        $this->assertEquals('SIMPLIFIED IDENTITY TESTER', $app->applicant_name);
+        $this->assertEquals('tester@gmail.com', $app->applicant_email);
 
         $app->delete();
     }
@@ -1309,67 +1269,21 @@ class QueueWorkflowTest extends TestCase
         $service = ServiceType::first();
         $this->assertNotNull($service);
 
-        // 1. Input manual DD/MM/YYYY dengan tanggal 31 di bulan April (30 hari)
+        // Test draft creation with email normalization
         $nik1 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
         $res1 = $this->post(route('queue.apply.store'), [
             'service_type_id'       => $service->id,
             'applicant_nik'         => $nik1,
-            'applicant_name'        => 'Koreksi April Tiga Puluh Satu',
-            'applicant_birth_place' => 'DOMPU',
-            'applicant_birth_date'  => '31/04/1998', // 31 April tidak ada, dikoreksi jadi 30 April
-            'applicant_phone'       => '0853-1111-2222',
-            'applicant_district'    => 'DOMPU',
-            'applicant_village'     => 'BADA',
-            'applicant_address'     => 'JL. SOEKARNO HATTA',
+            'applicant_name'        => 'KOREKSI NAMA DENGAN EMAIL',
+            'applicant_email'       => 'budi123', // auto defaults to budi123@gmail.com
             'attendance_type'       => 'self',
         ]);
         $res1->assertSessionHasNoErrors();
         $app1 = QueueApplication::where('applicant_nik', $nik1)->first();
         $this->assertNotNull($app1);
-        $this->assertEquals('1998-04-30', $app1->applicant_birth_date->format('Y-m-d'));
+        $this->assertEquals('budi123@gmail.com', $app1->applicant_email);
 
-        // 2. Input manual DD-MM-YYYY dengan tanggal 29 Februari di tahun bukan kabisat (2001)
-        $nik2 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
-        $res2 = $this->post(route('queue.apply.store'), [
-            'service_type_id'       => $service->id,
-            'applicant_nik'         => $nik2,
-            'applicant_name'        => 'Koreksi Februari Bukan Kabisat',
-            'applicant_birth_place' => 'DOMPU',
-            'applicant_birth_date'  => '29-02-2001', // 2001 bukan kabisat, dikoreksi jadi 28 Feb
-            'applicant_phone'       => '0853-3333-4444',
-            'applicant_district'    => 'DOMPU',
-            'applicant_village'     => 'BADA',
-            'applicant_address'     => 'JL. BHAYANGKARA',
-            'attendance_type'       => 'self',
-        ]);
-        $res2->assertSessionHasNoErrors();
-        $app2 = QueueApplication::where('applicant_nik', $nik2)->first();
-        $this->assertNotNull($app2);
-        $this->assertEquals('2001-02-28', $app2->applicant_birth_date->format('Y-m-d'));
-
-        // 3. Input manual tahun 2 digit (misal 17/08/98 -> 1998-08-17)
-        $nik3 = '5205' . str_pad((string) rand(100000000000, 999999999999), 12, '0', STR_PAD_LEFT);
-        $res3 = $this->post(route('queue.apply.store'), [
-            'service_type_id'       => $service->id,
-            'applicant_nik'         => $nik3,
-            'applicant_name'        => 'Koreksi Tahun Dua Digit',
-            'applicant_birth_place' => 'DOMPU',
-            'applicant_birth_date'  => '17/08/98', // 98 dikoreksi jadi 1998
-            'applicant_phone'       => '0853-5555-6666',
-            'applicant_district'    => 'DOMPU',
-            'applicant_village'     => 'BADA',
-            'applicant_address'     => 'JL. KARTINI',
-            'attendance_type'       => 'self',
-        ]);
-        $res3->assertSessionHasNoErrors();
-        $app3 = QueueApplication::where('applicant_nik', $nik3)->first();
-        $this->assertNotNull($app3);
-        $this->assertEquals('1998-08-17', $app3->applicant_birth_date->format('Y-m-d'));
-
-        // Cleanup
         $app1->forceDelete();
-        $app2->forceDelete();
-        $app3->forceDelete();
     }
 
     public function test_queue_number_is_issued_immediately_upon_submitting_verification_documents()
@@ -1382,13 +1296,7 @@ class QueueWorkflowTest extends TestCase
 
         $app = $appService->createDraft([
             'applicant_nik'         => $nik,
-            'applicant_name'        => 'Uji Terbit Nomor Antrean Dahulu',
-            'applicant_birth_place' => 'DOMPU',
-            'applicant_birth_date'  => '1995-08-17',
-            'applicant_phone'       => '0853-9999-8888',
-            'applicant_district'    => 'DOMPU',
-            'applicant_village'     => 'BADA',
-            'applicant_address'     => 'JL. SOEKARNO HATTA',
+            'applicant_name'        => 'UJI TERBIT NOMOR ANTREAN DAHULU',
             'attendance_type'       => 'self',
         ], $service->id);
 

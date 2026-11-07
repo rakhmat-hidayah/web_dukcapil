@@ -124,7 +124,7 @@ class QueueApplicationService
 
         $absenceReason = $attendanceType !== 'self' ? ($data['absence_reason'] ?? $data['representative_reason'] ?? null) : null;
 
-        return QueueApplication::create([
+        $application = new QueueApplication([
             'reg_number'                   => QueueNumberGenerator::generateRegNumber(),
             'service_type_id'              => $serviceType->id,
             'status'                       => QueueApplication::STATUS_DRAFT,
@@ -138,6 +138,33 @@ class QueueApplicationService
             'representative_kk_status'     => $attendanceType !== 'self' ? ($data['representative_kk_status'] ?? null) : null,
             'absence_reason'               => $absenceReason,
         ]);
+
+        // Resilience fallback: If legacy columns still exist in the database table (e.g. pending migration on production)
+        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'applicant_phone')) {
+            $application->applicant_phone = '-';
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'applicant_address')) {
+            $application->applicant_address = '-';
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'applicant_village')) {
+            $application->applicant_village = '-';
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'applicant_district')) {
+            $application->applicant_district = '-';
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'applicant_birth_place')) {
+            $application->applicant_birth_place = '-';
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'applicant_birth_date')) {
+            $application->applicant_birth_date = '2000-01-01';
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'representative_phone')) {
+            $application->representative_phone = '-';
+        }
+
+        $application->save();
+
+        return $application;
     }
 
     /**
