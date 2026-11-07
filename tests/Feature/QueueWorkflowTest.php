@@ -757,6 +757,58 @@ class QueueWorkflowTest extends TestCase
         $this->assertEquals('0', \App\Models\Queue\QueueSetting::get('queue.notify_on_submit'));
     }
 
+    public function test_queue_service_maintenance_mode_toggles_and_renders_maintenance_page(): void
+    {
+        $admin = User::first();
+        $this->assertNotNull($admin);
+
+        // 1. Enable maintenance mode via admin settings
+        $response = $this->actingAs($admin)->post(route('admin.queue.settings.update'), [
+            'settings' => [
+                'queue.maintenance_mode' => '1',
+                'queue.maintenance_title' => 'Pemeliharaan Layanan Online Khusus',
+                'queue.maintenance_message' => 'Layanan antrian sedang diupdate demi peningkatan kualitas pelayanan.',
+                'queue.maintenance_estimated_end' => 'Pukul 17:00 WITA',
+            ]
+        ]);
+        $response->assertRedirect();
+        $this->assertEquals('1', \App\Models\Queue\QueueSetting::get('queue.maintenance_mode'));
+        $this->assertEquals('Pemeliharaan Layanan Online Khusus', \App\Models\Queue\QueueSetting::get('queue.maintenance_title'));
+
+        // 2. Public visits create page -> should render Public/Queue/Maintenance component
+        $publicRes = $this->get(route('queue.apply.create'));
+        $publicRes->assertStatus(200);
+        $publicRes->assertInertia(fn ($page) =>
+            $page->component('Public/Queue/Maintenance')
+                ->has('maintenance')
+                ->where('maintenance.title', 'Pemeliharaan Layanan Online Khusus')
+        );
+
+        // 3. Attempting to submit draft while in maintenance mode -> should be redirected with error
+        $postDraftRes = $this->post(route('queue.apply.store'), [
+            'applicant_name' => 'Fulan Test',
+            'applicant_nik' => '5205012345678901',
+        ]);
+        $postDraftRes->assertRedirect(route('queue.apply.create'));
+        $postDraftRes->assertSessionHas('error');
+
+        // 4. Disable maintenance mode
+        $responseDisable = $this->actingAs($admin)->post(route('admin.queue.settings.update'), [
+            'settings' => [
+                'queue.maintenance_mode' => '0',
+            ]
+        ]);
+        $responseDisable->assertRedirect();
+        $this->assertEquals('0', \App\Models\Queue\QueueSetting::get('queue.maintenance_mode'));
+
+        // 5. Public visits create page -> should render regular application step
+        $publicResNormal = $this->get(route('queue.apply.create'));
+        $publicResNormal->assertStatus(200);
+        $publicResNormal->assertInertia(fn ($page) =>
+            $page->component('Public/Queue/Apply/Step1Identity')
+        );
+    }
+
     public function test_all_four_applicant_email_notifications_are_dispatched_successfully(): void
     {
         Notification::fake();

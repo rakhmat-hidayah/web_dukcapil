@@ -188,6 +188,23 @@
         </div>
       </header>
 
+      <!-- Maintenance Mode Warning Banner in Admin CMS -->
+      <div
+        v-if="$page.props.queue_maintenance?.is_active"
+        class="bg-amber-500 text-slate-950 px-6 py-2.5 text-xs font-bold flex items-center justify-between gap-3 shadow-md border-b border-amber-600"
+      >
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-slate-950 shrink-0 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span>PERINGATAN: Mode Pemeliharaan Layanan Online KTP-el sedang <strong>AKTIF</strong>. Pendaftaran online publik saat ini ditutup sementara.</span>
+        </div>
+        <Link
+          :href="route('admin.queue.settings.index')"
+          class="shrink-0 px-3 py-1 bg-slate-950 hover:bg-slate-800 text-white rounded-lg text-[11px] font-bold transition shadow-xs"
+        >
+          Kelola Pengaturan &rarr;
+        </Link>
+      </div>
+
       <!-- Main Content Area -->
       <main class="flex-1 p-6 md:p-8">
         <slot />

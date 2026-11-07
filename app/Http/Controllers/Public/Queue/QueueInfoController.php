@@ -152,11 +152,19 @@ class QueueInfoController extends Controller
             'close_time' => QueueSetting::get('queue.close_time', '15:30'),
         ];
 
+        $maintenance = [
+            'is_active' => QueueSetting::get('queue.maintenance_mode', '0') === '1',
+            'title' => QueueSetting::get('queue.maintenance_title', 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem'),
+            'message' => QueueSetting::get('queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Dukcapil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan sistem.'),
+            'estimated_end' => QueueSetting::get('queue.maintenance_estimated_end', ''),
+        ];
+
         return Inertia::render('Public/Queue/Index', [
             'services' => $services,
             'todayStats' => $todayStats,
             'upcomingSchedules' => $upcomingSchedules,
             'settings' => $settings,
+            'maintenance' => $maintenance,
         ]);
     }
 

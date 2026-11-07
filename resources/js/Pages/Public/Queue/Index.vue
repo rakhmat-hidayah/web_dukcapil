@@ -3,6 +3,35 @@
 
   <PublicLayout>
     <div class="py-8 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <!-- Maintenance Alert Banner (If Active) -->
+      <div v-if="maintenance?.is_active" class="p-5 sm:p-6 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-200 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-amber-500/5">
+        <div class="flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          </div>
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-600 text-white mb-1">
+              Informasi Pemeliharaan
+            </div>
+            <h3 class="font-black text-sm sm:text-base text-amber-950 dark:text-amber-200">
+              {{ maintenance.title || 'Layanan Pendaftaran Online Sedang Ditutup Sementara' }}
+            </h3>
+            <p class="text-xs text-amber-900/80 dark:text-amber-300/90 mt-1 max-w-2xl leading-relaxed">
+              {{ maintenance.message }}
+            </p>
+            <p v-if="maintenance.estimated_end" class="text-xs text-amber-800 dark:text-amber-400 font-bold mt-1">
+              Estimasi Selesai: {{ maintenance.estimated_end }}
+            </p>
+          </div>
+        </div>
+        <Link
+          :href="route('queue.apply.create')"
+          class="shrink-0 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-md shadow-amber-600/20"
+        >
+          Lihat Informasi Lengkap &rarr;
+        </Link>
+      </div>
+
       <!-- Hero Banner -->
       <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-10 lg:p-12 shadow-2xl border border-blue-800/40">
         <!-- Glow highlights -->
@@ -27,9 +56,14 @@
           <div class="mt-8 flex flex-col sm:flex-row gap-3">
             <Link
               :href="route('queue.apply.create')"
-              class="px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-xl shadow-blue-600/30 transition flex items-center justify-center gap-2 hover:scale-[1.02]"
+              :class="[
+                'px-6 py-3.5 rounded-2xl font-bold text-sm shadow-xl transition flex items-center justify-center gap-2 hover:scale-[1.02]',
+                maintenance?.is_active
+                  ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-600/30'
+                  : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30'
+              ]"
             >
-              <span>Daftar Pelayanan Sekarang</span>
+              <span>{{ maintenance?.is_active ? 'Pendaftaran Ditutup Sementara (Info)' : 'Daftar Pelayanan Sekarang' }}</span>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </Link>
 
@@ -327,6 +361,10 @@ const props = defineProps({
     default: () => [],
   },
   settings: {
+    type: Object,
+    default: () => ({}),
+  },
+  maintenance: {
     type: Object,
     default: () => ({}),
   },

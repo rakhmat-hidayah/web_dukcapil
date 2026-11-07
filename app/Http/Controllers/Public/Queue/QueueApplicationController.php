@@ -34,6 +34,21 @@ class QueueApplicationController extends Controller
     {
         QueueInfoController::ensureDatabaseSchema();
 
+        // Check if queue service is in temporary maintenance / update mode
+        if (\App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0') === '1') {
+            $maintenanceInfo = [
+                'title' => \App\Models\Queue\QueueSetting::get('queue.maintenance_title', 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem'),
+                'message' => \App\Models\Queue\QueueSetting::get('queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Dukcapil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan dan pembaruan sistem.'),
+                'estimated_end' => \App\Models\Queue\QueueSetting::get('queue.maintenance_estimated_end', ''),
+                'office_address' => \App\Services\ConfigurationService::get('office_address') ?: \App\Models\Queue\QueueSetting::get('queue.office_address', 'Jl. Soekarno-Hatta No. 09 Dompu, NTB 84211'),
+                'helpdesk_phone' => \App\Services\ConfigurationService::get('whatsapp_number') ?: \App\Models\Queue\QueueSetting::get('queue.helpdesk_phone', '6282124824114'),
+            ];
+
+            return Inertia::render('Public/Queue/Maintenance', [
+                'maintenance' => $maintenanceInfo,
+            ]);
+        }
+
         // Self-heal: ensure mandatory selfie photo exists for Perekaman KTP-el
         \App\Services\Queue\QueueApplicationService::ensureSelfieRequirementForPerekaman();
 
@@ -82,6 +97,10 @@ class QueueApplicationController extends Controller
     public function storeDraft(Request $request): RedirectResponse
     {
         QueueInfoController::ensureDatabaseSchema();
+
+        if (\App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0') === '1') {
+            return redirect()->route('queue.apply.create')->with('error', 'Layanan pendaftaran online sedang dalam pemeliharaan sistem sementara.');
+        }
 
         // Sanitize applicant email: default to @gmail.com if applicant typed only username without domain
         if ($request->has('applicant_email') && $request->input('applicant_email') !== null) {

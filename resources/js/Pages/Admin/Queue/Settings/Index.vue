@@ -16,6 +16,101 @@
       </div>
 
       <form @submit.prevent="submitSettings" class="space-y-6">
+        <!-- MAINTENANCE / PEMELIHARAAN GROUP (SPECIAL FEATURE) -->
+        <div
+          class="rounded-3xl p-6 border shadow-sm space-y-5 transition-colors"
+          :class="[
+            form['queue.maintenance_mode']
+              ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800 ring-2 ring-amber-500/20'
+              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+          ]"
+        >
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4" :class="form['queue.maintenance_mode'] ? 'border-amber-200 dark:border-amber-900/60' : 'border-slate-100 dark:border-slate-700'">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-12 h-12 rounded-2xl flex items-center justify-center font-bold shadow-sm transition"
+                :class="form['queue.maintenance_mode'] ? 'bg-amber-500 text-white animate-pulse' : 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400'"
+              >
+                <svg v-if="form['queue.maintenance_mode']" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-base font-black text-slate-900 dark:text-white">
+                    Mode Pemeliharaan (Maintenance) Layanan Online
+                  </h3>
+                  <span
+                    class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider"
+                    :class="form['queue.maintenance_mode'] ? 'bg-rose-600 text-white' : 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'"
+                  >
+                    {{ form['queue.maintenance_mode'] ? '● MAINTENANCE AKTIF (LAYANAN DITUTUP SEMENTARA)' : '● LAYANAN ONLINE AKTIF (NORMAL)' }}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Gunakan fitur ini untuk menutup sementara akses pendaftaran permohonan baru KTP-el bagi publik saat server sedang update atau perbaikan.
+                </p>
+              </div>
+            </div>
+
+            <!-- Toggle Switch -->
+            <label class="relative inline-flex items-center cursor-pointer select-none">
+              <input
+                type="checkbox"
+                v-model="form['queue.maintenance_mode']"
+                class="sr-only peer"
+              />
+              <div class="w-14 h-8 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-amber-600"></div>
+              <span class="ml-3 text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                {{ form['queue.maintenance_mode'] ? 'Matikan Layanan (Aktifkan Mode Maintenance)' : 'Layanan Normal' }}
+              </span>
+            </label>
+          </div>
+
+          <!-- Configuration Fields -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Judul Pengumuman Pemeliharaan (Ditampilkan pada Halaman Pendaftaran Publik)
+              </label>
+              <input
+                v-model="form['queue.maintenance_title']"
+                type="text"
+                placeholder="Contoh: Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Pesan & Instruksi Rinci untuk Pemohon
+              </label>
+              <textarea
+                v-model="form['queue.maintenance_message']"
+                rows="3"
+                placeholder="Tuliskan keterangan mengapa layanan ditutup sementara dan apa yang harus dilakukan pemohon..."
+                class="w-full p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Perkiraan Waktu Selesai / Dibuka Kembali (Opsional)
+              </label>
+              <input
+                v-model="form['queue.maintenance_estimated_end']"
+                type="text"
+                placeholder="Contoh: Hari ini pukul 14:00 WITA atau 08 Nov 2026"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+            </div>
+
+            <div class="flex items-center p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 text-xs text-blue-900 dark:text-blue-200">
+              <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Saat aktif, pendaftaran baru akan dialihkan ke halaman pemeliharaan resmi dengan kontak helpdesk WhatsApp dan informasi loket fisik.</span>
+            </div>
+          </div>
+        </div>
+
         <!-- GENERAL GROUP -->
         <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
           <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -240,6 +335,10 @@ const getVal = (group, key, fallback = '') => {
 }
 
 const form = ref({
+  'queue.maintenance_mode': getVal('maintenance', 'queue.maintenance_mode', '0') === '1',
+  'queue.maintenance_title': getVal('maintenance', 'queue.maintenance_title', 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem'),
+  'queue.maintenance_message': getVal('maintenance', 'queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan dan pembaruan sistem. Layanan akan segera dibuka kembali setelah proses selesai. Bagi masyarakat yang membutuhkan pelayanan mendesak, silakan datang langsung ke loket kantor Disdukcapil Kabupaten Dompu.'),
+  'queue.maintenance_estimated_end': getVal('maintenance', 'queue.maintenance_estimated_end', ''),
   'queue.office_address': getVal('general', 'queue.office_address', 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211'),
   'queue.helpdesk_phone': getVal('general', 'queue.helpdesk_phone', '6282124824114'),
   'queue.open_time': getVal('schedule', 'queue.open_time', '08:00'),

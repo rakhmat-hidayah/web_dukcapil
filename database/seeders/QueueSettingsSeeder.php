@@ -24,6 +24,10 @@ class QueueSettingsSeeder extends Seeder
             ['key' => 'queue.notify_on_rejected', 'value' => '1', 'group' => 'notification', 'description' => 'Kirim notifikasi email saat permohonan ditolak'],
             ['key' => 'queue.office_address', 'value' => 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211', 'group' => 'general', 'description' => 'Alamat kantor pelayanan untuk instruksi kehadiran'],
             ['key' => 'queue.helpdesk_phone', 'value' => '0823-4000-0000', 'group' => 'general', 'description' => 'Nomor WhatsApp Helpdesk Pelayanan KTP-el'],
+            ['key' => 'queue.maintenance_mode', 'value' => '0', 'group' => 'maintenance', 'description' => 'Aktifkan mode pemeliharaan untuk menutup sementara pendaftaran online KTP-el'],
+            ['key' => 'queue.maintenance_title', 'value' => 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem', 'group' => 'maintenance', 'description' => 'Judul pengumuman pemeliharaan untuk masyarakat'],
+            ['key' => 'queue.maintenance_message', 'value' => 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan dan pembaruan sistem. Layanan akan segera dibuka kembali setelah proses selesai. Bagi masyarakat yang membutuhkan pelayanan mendesak, silakan datang langsung ke loket kantor Disdukcapil Kabupaten Dompu.', 'group' => 'maintenance', 'description' => 'Pesan rinci informasi pemeliharaan untuk masyarakat'],
+            ['key' => 'queue.maintenance_estimated_end', 'value' => '', 'group' => 'maintenance', 'description' => 'Perkiraan waktu pemeliharaan selesai (opsional)'],
         ];
 
         foreach ($settings as $setting) {

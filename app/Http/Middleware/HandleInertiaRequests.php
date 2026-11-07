@@ -87,6 +87,14 @@ class HandleInertiaRequests extends Middleware
             'theme_settings' => ThemeSetting::getAllCached(),
             'website_settings' => WebsiteSetting::getAllCached(),
 
+            // Queue service maintenance status
+            'queue_maintenance' => [
+                'is_active' => \App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0') === '1',
+                'title' => \App\Models\Queue\QueueSetting::get('queue.maintenance_title', 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem'),
+                'message' => \App\Models\Queue\QueueSetting::get('queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Dukcapil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan sistem.'),
+                'estimated_end' => \App\Models\Queue\QueueSetting::get('queue.maintenance_estimated_end', ''),
+            ],
+
             // Dynamic navigation menus for frontend
             'nav_menus' => Cache::remember('nav_menus', 300, function () {
                 $menus = Menu::where('is_active', true)
