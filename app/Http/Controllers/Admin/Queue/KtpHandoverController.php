@@ -438,6 +438,21 @@ class KtpHandoverController extends Controller
      */
     public function photo(int $id): StreamedResponse
     {
+        $user = Auth::user();
+        $allowedRoles = [
+            'Super Administrator',
+            'Administrator Utama',
+            'Administrator Website',
+            'Supervisor Layanan KTP-el',
+            'Petugas Pengambilan KTP-el',
+            'Petugas Verifikasi / Registrasi KTP-el',
+            'Petugas Pengarsipan',
+        ];
+
+        if (!$user || (!$user->hasAnyRole($allowedRoles) && !$user->can('manage_queue_verification'))) {
+            abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk melihat foto bukti penyerahan ini.');
+        }
+
         $handover = KtpHandover::findOrFail($id);
         return $this->handoverService->servePhoto($handover);
     }

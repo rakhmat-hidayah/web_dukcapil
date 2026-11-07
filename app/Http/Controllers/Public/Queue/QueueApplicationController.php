@@ -281,6 +281,12 @@ class QueueApplicationController extends Controller
                 ->with('error', "Sesi permohonan draf Anda telah kedaluwarsa karena telah melewati batas waktu tunggu {$timeoutMinutes} menit sejak dibuat. Silakan lakukan pendaftaran baru.");
         }
 
+        // Verify applicant session identity to prevent unauthorized BOLA/IDOR access
+        if (session('applicant_verified_nik') !== $application->applicant_nik && !\Illuminate\Support\Facades\Auth::check()) {
+            return redirect()->route('queue.apply.create')
+                ->with('error', 'Sesi pendaftaran tidak valid atau telah berakhir. Silakan masukkan NIK Anda kembali.');
+        }
+
         if (!$application->isEditable()) {
             return redirect()->route('queue.status', ['token' => $application->access_token]);
         }
@@ -330,6 +336,11 @@ class QueueApplicationController extends Controller
             $this->applicationService->deleteDraft($application);
             session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
             return response()->json(['success' => false, 'session_expired' => true, 'message' => "Sesi permohonan draf Anda telah kedaluwarsa ({$timeoutMinutes} menit). Sesi ditutup otomatis."], 419);
+        }
+
+        // Verify session identity
+        if (session('applicant_verified_nik') !== $application->applicant_nik && !\Illuminate\Support\Facades\Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'Sesi tidak valid untuk permohonan ini.'], 403);
         }
 
         try {
@@ -396,6 +407,11 @@ class QueueApplicationController extends Controller
             return response()->json(['success' => false, 'session_expired' => true, 'message' => "Sesi permohonan draf Anda telah kedaluwarsa ({$timeoutMinutes} menit). Sesi ditutup otomatis."], 419);
         }
 
+        // Verify session identity
+        if (session('applicant_verified_nik') !== $application->applicant_nik && !\Illuminate\Support\Facades\Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'Sesi tidak valid untuk permohonan ini.'], 403);
+        }
+
         $this->applicationService->removeDocument($application, $documentId);
 
         if ($request->wantsJson()) {
@@ -435,6 +451,12 @@ class QueueApplicationController extends Controller
                 ->with('error', "Sesi permohonan draf Anda telah kedaluwarsa karena telah melewati batas waktu {$timeoutMinutes} menit. Sesi telah ditutup otomatis. Silakan lakukan pendaftaran baru.");
         }
 
+        // Verify session identity
+        if (session('applicant_verified_nik') !== $application->applicant_nik && !\Illuminate\Support\Facades\Auth::check()) {
+            return redirect()->route('queue.apply.create')
+                ->with('error', 'Sesi pendaftaran tidak valid atau telah berakhir.');
+        }
+
         $request->validate([
             'statement_agreed' => 'required|accepted',
         ], [
@@ -466,11 +488,28 @@ class QueueApplicationController extends Controller
     }
 
     /**
-     * Serve a draft document for preview (authorized by matching regNumber).
+     * Serve a draft document for preview (strictly authorized to matching verified session or authorized officer).
      */
-    public function serveDraftDocument(string $regNumber, int $documentId): StreamedResponse
+    public function serveDraftDocument(Request $request, string $regNumber, int $documentId): StreamedResponse
     {
         $application = QueueApplication::where('reg_number', $regNumber)->firstOrFail();
+
+        $sessionNik = session('applicant_verified_nik');
+        $isAuthorizedApplicant = $sessionNik && $sessionNik === $application->applicant_nik;
+
+        $isAuthorizedOfficer = \Illuminate\Support\Facades\Auth::check() && (
+            \Illuminate\Support\Facades\Auth::user()->hasAnyRole([
+                'Super Administrator', 'Administrator Utama',
+                'Website Administrator', 'Administrator Website',
+                'Queue Officer', 'Petugas Antrean'
+            ])
+            || \Illuminate\Support\Facades\Auth::user()->can('manage_queue_verification')
+        );
+
+        if (!$isAuthorizedApplicant && !$isAuthorizedOfficer) {
+            abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk melihat dokumen ini.');
+        }
+
         $doc = ApplicationDocument::where('id', $documentId)
             ->where('application_id', $application->id)
             ->firstOrFail();

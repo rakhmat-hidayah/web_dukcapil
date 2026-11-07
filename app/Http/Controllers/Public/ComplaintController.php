@@ -70,12 +70,12 @@ class ComplaintController extends Controller
             return back()->withErrors(['captcha_answer' => 'Jawaban CAPTCHA salah. Silakan coba lagi.'])->withInput();
         }
 
-        // Handle optional attachment
+        // Handle optional attachment - securely store in private storage (outside web root)
         $attachmentPath = null;
         $attachmentName = null;
         if ($request->hasFile('attachment')) {
             $file           = $request->file('attachment');
-            $attachmentPath = $file->store('complaints/attachments', 'public');
+            $attachmentPath = $file->store('complaints/attachments', 'local');
             $attachmentName = $file->getClientOriginalName();
         }
 

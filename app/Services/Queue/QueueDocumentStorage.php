@@ -15,9 +15,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class QueueDocumentStorage
 {
     /**
-     * Private disk identifier from config/filesystems.php ('local' maps to storage/app/private).
+     * Dedicated private disk identifier from config/filesystems.php ('private_documents' maps to storage/app/private).
      */
-    const DISK = 'local';
+    const DISK = 'private_documents';
     const BASE_PATH = 'queue-documents';
 
     const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'jfif', 'pjpeg', 'pdf'];

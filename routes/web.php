@@ -356,6 +356,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/complaints/categories/{category}', [\App\Http\Controllers\Admin\ComplaintController::class, 'updateCategory'])->name('complaints.categories.update');
             Route::delete('/complaints/categories/{category}', [\App\Http\Controllers\Admin\ComplaintController::class, 'destroyCategory'])->name('complaints.categories.destroy');
             Route::get('/complaints/{complaint}', [\App\Http\Controllers\Admin\ComplaintController::class, 'show'])->name('complaints.show');
+            Route::get('/complaints/{complaint}/attachment', [\App\Http\Controllers\Admin\ComplaintController::class, 'attachment'])->name('complaints.attachment');
             Route::post('/complaints/{complaint}/reply', [\App\Http\Controllers\Admin\ComplaintController::class, 'reply'])->name('complaints.reply');
             Route::post('/complaints/{complaint}/status', [\App\Http\Controllers\Admin\ComplaintController::class, 'changeStatus'])->name('complaints.status');
             Route::post('/complaints/{complaint}/assign', [\App\Http\Controllers\Admin\ComplaintController::class, 'assign'])->name('complaints.assign');

@@ -135,7 +135,7 @@
           <!-- Download Response Attachment if provided by Admin in CMS -->
           <div v-if="ppidRequest.response_file" class="pt-2">
             <a 
-              :href="route('public.ppid.response.download', ppidRequest.id)"
+              :href="route('public.ppid.response.download', { request: ppidRequest.id, ticket: ppidRequest.ticket_number })"
               target="_blank"
               class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
             >

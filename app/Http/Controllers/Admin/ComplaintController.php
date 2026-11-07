@@ -8,8 +8,10 @@ use App\Models\ComplaintCategory;
 use App\Models\ComplaintReply;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ComplaintController extends Controller
 {
@@ -77,6 +79,42 @@ class ComplaintController extends Controller
             'complaint'    => $complaint,
             'statusLabels' => Complaint::STATUS_LABELS,
             'statusColors' => Complaint::STATUS_COLORS,
+        ]);
+    }
+
+    /**
+     * Securely stream private complaint attachment to authorized officers.
+     */
+    public function attachment(Complaint $complaint): StreamedResponse
+    {
+        if (!$complaint->attachment_path) {
+            abort(404, 'Lampiran pengaduan tidak ditemukan.');
+        }
+
+        $path = $complaint->attachment_path;
+
+        if (!Storage::disk('local')->exists($path)) {
+            abort(404, 'Berkas fisik lampiran tidak ditemukan di penyimpanan server.');
+        }
+
+        $stream = Storage::disk('local')->readStream($path);
+        $mime = Storage::disk('local')->mimeType($path) ?: 'application/octet-stream';
+        $size = Storage::disk('local')->size($path);
+        $filename = preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $complaint->attachment_name ?: basename($path));
+
+        return response()->stream(function () use ($stream) {
+            fpassthru($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }, 200, [
+            'Content-Type'           => $mime,
+            'Content-Length'         => $size,
+            'Cache-Control'          => 'private, no-cache, no-store, must-revalidate',
+            'Pragma'                 => 'no-cache',
+            'Expires'                => '0',
+            'X-Content-Type-Options' => 'nosniff',
+            'Content-Disposition'    => 'inline; filename="' . $filename . '"',
         ]);
     }
 

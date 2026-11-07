@@ -13,8 +13,10 @@
     RewriteCond %{HTTP:X-Forwarded-Proto} !https
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-    # CRITICAL: Map /storage/ → /uploads/ (Apache blocks symlink follow)
-    # This rule has NO RewriteCond so it applies unconditionally before any dir check
+    # CRITICAL SECURITY: Block direct HTTP access to sensitive document directories
+    RewriteRule ^(storage|uploads)/(complaints|queue-documents|archives|handover_proofs|ppid-responses)(/.*)?$ - [F,L,NC]
+
+    # Map public CMS assets /storage/ → /uploads/
     RewriteRule ^storage/(.+)$ uploads/$1 [L,NC]
 
     # Handle Authorization Header
@@ -36,7 +38,18 @@
     RewriteRule ^ index.php [L]
 </IfModule>
 
-# Security: Block access to sensitive files
+# Security: Block direct execution of any PHP script except index.php
+<FilesMatch "(?i)\.(php.*|sh|py|pl|rb|sql|bak|swp)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<Files "index.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Security: Block access to hidden files and sensitive dotfiles
 <FilesMatch "^\.">
     Order allow,deny
     Deny from all

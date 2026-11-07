@@ -261,11 +261,24 @@ class PpidController extends Controller
         abort(404, 'File tidak ditemukan.');
     }
 
-    /** Download PPID official response file attachment */
+    /** Download PPID official response file attachment (protected by ticket verification or officer auth) */
     public function downloadResponse(PpidRequest $request)
     {
-        if ($request->response_file && file_exists(storage_path('app/public/' . $request->response_file))) {
-            return response()->download(storage_path('app/public/' . $request->response_file));
+        $ticket = request()->query('ticket');
+        $isRequester = $ticket && strtoupper(trim($ticket)) === strtoupper($request->ticket_number);
+        $isOfficer = \Illuminate\Support\Facades\Auth::check();
+
+        if (!$isRequester && !$isOfficer) {
+            abort(403, 'Akses ditolak. Nomor tiket permohonan PPID tidak cocok atau belum disertakan.');
+        }
+
+        if ($request->response_file) {
+            if (\Illuminate\Support\Facades\Storage::disk('local')->exists($request->response_file)) {
+                return \Illuminate\Support\Facades\Storage::disk('local')->download($request->response_file);
+            }
+            if (file_exists(storage_path('app/public/' . $request->response_file))) {
+                return response()->download(storage_path('app/public/' . $request->response_file));
+            }
         }
 
         abort(404, 'Berkas tanggapan tidak ditemukan.');

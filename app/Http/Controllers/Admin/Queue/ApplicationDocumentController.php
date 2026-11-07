@@ -27,9 +27,19 @@ class ApplicationDocumentController extends Controller
     {
         $user = Auth::user();
 
-        // Strict role/permission check
-        if (!$user || (!$user->hasAnyRole(['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website']) && !$user->can('manage_queue_verification'))) {
-            abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk melihat dokumen kependudukan ini.');
+        // Strict role and least-privilege permission check for queue citizen documents
+        $allowedRoles = [
+            'Super Administrator',
+            'Administrator Utama',
+            'Administrator Website',
+            'Supervisor Layanan KTP-el',
+            'Petugas Verifikasi / Registrasi KTP-el',
+            'Petugas Pengambilan KTP-el',
+            'Petugas Pengarsipan',
+        ];
+
+        if (!$user || (!$user->hasAnyRole($allowedRoles) && !$user->can('manage_queue_verification'))) {
+            abort(403, 'Akses ditolak. Anda tidak memiliki izin kewenangan tugas untuk melihat dokumen kependudukan ini.');
         }
 
         $document = ApplicationDocument::with('application')->findOrFail($documentId);

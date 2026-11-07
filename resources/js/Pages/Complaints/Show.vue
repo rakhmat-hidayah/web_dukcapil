@@ -71,11 +71,12 @@
                   {{ complaint.attachment_name || 'lampiran_dokumen' }}
                 </span>
                 <a 
-                  :href="`/uploads/${(complaint.attachment_path||'').replace(/^\/?(storage|uploads)\//, '')}`" 
+                  :href="route('admin.complaints.attachment', complaint.id)" 
                   target="_blank" 
-                  class="px-3 py-1 bg-primary-600 hover:bg-primary-500 text-white text-[10px] font-bold rounded-lg transition"
+                  class="px-3 py-1 bg-primary-600 hover:bg-primary-500 text-white text-[10px] font-bold rounded-lg transition flex items-center gap-1"
                 >
-                  Buka File
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  <span>Buka Berkas Aman</span>
                 </a>
               </div>
             </div>
