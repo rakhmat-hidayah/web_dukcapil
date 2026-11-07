@@ -536,4 +536,49 @@ class ArchiveWorkflowTest extends TestCase
         $response->assertRedirect(route('admin.archive.packages.index'));
         $this->assertNull(ArchivePackage::find($packageId));
     }
+
+    public function test_settings_accepts_any_retention_days_greater_than_zero()
+    {
+        $response = $this->actingAs($this->adminUser)
+            ->post(route('admin.archive.settings.update'), [
+                'operation_mode' => 'ARSIP_SAJA',
+                'eligible_statuses' => ['COMPLETED'],
+                'retention_policy_days' => 14,
+                'cleaning_grace_period_days' => 7,
+                'permanent_storage_driver' => 'null',
+            ]);
+
+        $response->assertSessionHas('success');
+        $this->assertEquals(14, ArchiveSetting::get('retention_policy_days'));
+        $this->assertEquals(7, ArchiveSetting::get('cleaning_grace_period_days'));
+    }
+
+    public function test_automatic_retention_cleanup_deletes_expired_packages()
+    {
+        $app = $this->createValidCompletedApplication();
+        $service = app(ArchiveService::class);
+        $package = $service->createPackage(['application_ids' => [$app->id]], $this->archiveOperatorUser);
+
+        // Manually age the package to 15 days ago
+        $package->created_at = now()->subDays(15);
+        $package->save();
+
+        $packageId = $package->id;
+        $this->assertNotNull(ArchivePackage::find($packageId));
+
+        // Run retention cleanup with 14 days
+        $result = $service->cleanupExpiredArchives(14, 7);
+
+        $this->assertGreaterThanOrEqual(1, $result['purged_packages_count']);
+        $this->assertNull(ArchivePackage::find($packageId));
+    }
+
+    public function test_settings_cleanup_retention_route_can_be_invoked()
+    {
+        $response = $this->actingAs($this->adminUser)
+            ->post(route('admin.archive.settings.cleanup-retention'));
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect();
+    }
 }

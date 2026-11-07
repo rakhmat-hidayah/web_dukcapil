@@ -96,11 +96,11 @@
                 <input
                   type="number"
                   v-model="form.retention_policy_days"
-                  min="30"
+                  min="1"
                   max="3650"
                   class="w-full text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2.5"
                 />
-                <p class="text-[11px] text-slate-400 mt-1">Default 365 hari (1 tahun)</p>
+                <p class="text-[11px] text-slate-400 mt-1">Dihitung dalam hari (bebas ditentukan, minimal 1 hari)</p>
               </div>
 
               <div>
@@ -108,12 +108,33 @@
                 <input
                   type="number"
                   v-model="form.cleaning_grace_period_days"
-                  min="30"
+                  min="1"
                   max="1825"
                   class="w-full text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-2.5"
                 />
-                <p class="text-[11px] text-slate-400 mt-1">Default 90 hari setelah verifikasi penyimpanan permanen</p>
+                <p class="text-[11px] text-slate-400 mt-1">Masa tenggang setelah konfirmasi / verifikasi penyimpanan permanen (minimal 1 hari)</p>
               </div>
+            </div>
+
+            <div class="mt-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div class="space-y-0.5">
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  Pembersihan Otomatis Arsip Berdasarkan Retensi
+                </span>
+                <p class="text-[11px] text-slate-500">
+                  Paket arsip yang telah melewati batas masa retensi (<strong>{{ form.retention_policy_days }} hari</strong>) atau masa tenggang (<strong>{{ form.cleaning_grace_period_days }} hari</strong>) akan dihapus otomatis dari server lokal.
+                </p>
+              </div>
+              <button
+                type="button"
+                @click="runManualCleanup"
+                :disabled="isCleaning"
+                class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': isCleaning }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <span>{{ isCleaning ? 'Memproses...' : 'Jalankan Pembersihan Sekarang' }}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -246,12 +267,25 @@ const form = ref({
 });
 
 const isSubmitting = ref(false);
+const isCleaning = ref(false);
 
 function submitSettings() {
   isSubmitting.value = true;
   router.post(route('admin.archive.settings.update'), form.value, {
     onFinish: () => {
       isSubmitting.value = false;
+    },
+  });
+}
+
+function runManualCleanup() {
+  if (!confirm('Jalankan pembersihan arsip sekarang sesuai masa retensi yang tersimpan? Paket arsip yang telah melewati masa retensi akan dihapus dari server.')) {
+    return;
+  }
+  isCleaning.value = true;
+  router.post(route('admin.archive.settings.cleanup-retention'), {}, {
+    onFinish: () => {
+      isCleaning.value = false;
     },
   });
 }

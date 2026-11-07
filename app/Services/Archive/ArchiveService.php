@@ -803,6 +803,102 @@ class ArchiveService
     }
 
     /**
+     * Automatically clean up expired archive packages according to retention policy and cleaning grace period.
+     *
+     * @param int|null $retentionDays Override retention policy days (default from ArchiveSetting)
+     * @param int|null $gracePeriodDays Override grace period days (default from ArchiveSetting)
+     * @param User|null $user
+     * @return array Summary of cleanup results
+     */
+    public function cleanupExpiredArchives(?int $retentionDays = null, ?int $gracePeriodDays = null, ?User $user = null): array
+    {
+        $retentionDays = $retentionDays ?? (int) ArchiveSetting::get('retention_policy_days', 365);
+        $gracePeriodDays = $gracePeriodDays ?? (int) ArchiveSetting::get('cleaning_grace_period_days', 90);
+
+        $retentionCutoff = now()->subDays(max(1, $retentionDays));
+        $graceCutoff = now()->subDays(max(1, $gracePeriodDays));
+
+        // 1. Packages exceeding general retention policy days
+        $expiredRetentionPackages = ArchivePackage::where('created_at', '<', $retentionCutoff)->get();
+
+        // 2. Packages whose operator confirmation or permanent storage verification exceeds grace period
+        $expiredGracePackages = ArchivePackage::where(function ($q) use ($graceCutoff) {
+            $q->where(function ($cq) use ($graceCutoff) {
+                $cq->where('is_operator_confirmed', true)
+                   ->whereNotNull('operator_confirmed_at')
+                   ->where('operator_confirmed_at', '<', $graceCutoff);
+            })->orWhere(function ($pq) use ($graceCutoff) {
+                $pq->where('permanent_storage_status', ArchivePackage::PERM_VERIFIED)
+                   ->whereNotNull('permanent_storage_verified_at')
+                   ->where('permanent_storage_verified_at', '<', $graceCutoff);
+            });
+        })->get();
+
+        // Merge unique packages to purge
+        $allEligible = $expiredRetentionPackages->concat($expiredGracePackages)->unique('id');
+
+        $purgedCount = 0;
+        $freedBytes = 0;
+        $purgedCodes = [];
+
+        foreach ($allEligible as $package) {
+            $freedBytes += (int) $package->package_size_bytes;
+            $code = $package->package_code;
+            $isGrace = $expiredGracePackages->contains('id', $package->id);
+
+            // Log retention purge audit
+            ArchiveAuditService::log('PACKAGE_RETENTION_PURGED', $package->id, null, [
+                'package_code' => $code,
+                'retention_days' => $retentionDays,
+                'grace_period_days' => $gracePeriodDays,
+                'reason' => $isGrace ? 'GRACE_PERIOD_EXCEEDED' : 'RETENTION_POLICY_EXPIRED',
+                'package_created_at' => $package->created_at?->toIso8601String(),
+                'size_bytes' => $package->package_size_bytes,
+            ], $user);
+
+            $this->deletePackage($package, $user);
+            $purgedCount++;
+            $purgedCodes[] = $code;
+        }
+
+        // Clean any temporary directories or unlinked orphaned archive files older than retention cutoff
+        $archivesDir = storage_path('app/private/archives');
+        if (File::isDirectory($archivesDir)) {
+            $allZipFiles = File::files($archivesDir);
+            foreach ($allZipFiles as $file) {
+                if ($file->getExtension() === 'zip') {
+                    $mtime = Carbon::createFromTimestamp(File::lastModified($file->getPathname()));
+                    if ($mtime->lt($retentionCutoff)) {
+                        $relPath = 'archives/' . $file->getFilename();
+                        $isReferenced = ArchivePackage::where('zip_path', $relPath)->exists();
+                        if (!$isReferenced) {
+                            $freedBytes += File::size($file->getPathname());
+                            File::delete($file->getPathname());
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($purgedCount > 0) {
+            Log::info("Archive retention cleanup executed: purged {$purgedCount} package(s), freed {$this->formatBytes($freedBytes)}.", [
+                'retention_days' => $retentionDays,
+                'grace_period_days' => $gracePeriodDays,
+                'packages' => $purgedCodes,
+            ]);
+        }
+
+        return [
+            'purged_packages_count' => $purgedCount,
+            'freed_bytes' => $freedBytes,
+            'freed_bytes_formatted' => $this->formatBytes($freedBytes),
+            'retention_days' => $retentionDays,
+            'grace_period_days' => $gracePeriodDays,
+            'purged_package_codes' => $purgedCodes,
+        ];
+    }
+
+    /**
      * Rebuild an incomplete or failed package into a valid ZIP archive.
      */
     public function rebuildPackage(ArchivePackage $package, ?User $user = null): ArchivePackage

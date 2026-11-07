@@ -23,3 +23,11 @@ Schedule::command('visitor:cleanup', ['--triggered-by' => 'scheduler'])
 Schedule::command(\App\Console\Commands\PurgeExpiredDraftApplicationsCommand::class)
     ->hourly()
     ->withoutOverlapping(15);
+
+/**
+ * Archive Retention & Cleaning Grace Period Automatic Cleanup
+ * Runs daily at 02:30 WIB (overlap protected)
+ */
+Schedule::command(\App\Console\Commands\ArchiveRetentionCleanupCommand::class, ['--triggered-by' => 'scheduler'])
+    ->dailyAt('02:30')
+    ->withoutOverlapping(30);

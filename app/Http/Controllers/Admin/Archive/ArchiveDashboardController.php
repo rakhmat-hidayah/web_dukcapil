@@ -17,6 +17,13 @@ class ArchiveDashboardController extends Controller
 
     public function index(Request $request): Response
     {
+        // Automatically purge any packages exceeding configured retention policy
+        try {
+            $this->archiveService->cleanupExpiredArchives();
+        } catch (\Throwable $e) {
+            \Log::warning("Auto archive retention cleanup on dashboard warning: " . $e->getMessage());
+        }
+
         $stats = $this->archiveService->getDashboardStatistics();
 
         $recentPackages = ArchivePackage::with(['serviceType', 'creator'])

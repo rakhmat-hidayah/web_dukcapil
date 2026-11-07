@@ -533,6 +533,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::middleware('permission:archive.settings.manage')->group(function () {
                 Route::get('/settings', [\App\Http\Controllers\Admin\Archive\ArchiveSettingsController::class, 'index'])->name('settings.index');
                 Route::post('/settings', [\App\Http\Controllers\Admin\Archive\ArchiveSettingsController::class, 'update'])->name('settings.update');
+                Route::post('/settings/cleanup-retention', [\App\Http\Controllers\Admin\Archive\ArchiveSettingsController::class, 'runRetentionCleanup'])->name('settings.cleanup-retention');
             });
         });
     });

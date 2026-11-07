@@ -58,8 +58,8 @@ class ArchiveSettingsController extends Controller
             'operation_mode' => 'required|in:ARSIP_SAJA,ARSIP_DAN_TRANSFER,ARSIP_TRANSFER_DAN_PEMBERSIHAN',
             'eligible_statuses' => 'required|array|min:1',
             'eligible_statuses.*' => 'string|in:' . implode(',', QueueApplication::STATUSES),
-            'retention_policy_days' => 'required|integer|min:30|max:3650',
-            'cleaning_grace_period_days' => 'required|integer|min:30|max:1825',
+            'retention_policy_days' => 'required|integer|min:1|max:3650',
+            'cleaning_grace_period_days' => 'required|integer|min:1|max:1825',
             'permanent_storage_driver' => 'required|in:null,local_path,sftp',
             'permanent_storage_config' => 'nullable|array',
             'permanent_storage_config.host' => 'nullable|string|max:255',
@@ -93,8 +93,39 @@ class ArchiveSettingsController extends Controller
             'operation_mode' => $validated['operation_mode'],
             'driver' => $validated['permanent_storage_driver'],
             'eligible_statuses' => $validated['eligible_statuses'],
+            'retention_policy_days' => $validated['retention_policy_days'],
+            'cleaning_grace_period_days' => $validated['cleaning_grace_period_days'],
         ]);
 
+        // Automatically trigger retention cleanup according to the freshly configured days
+        try {
+            $cleanup = app(\App\Services\Archive\ArchiveService::class)->cleanupExpiredArchives(
+                (int) $validated['retention_policy_days'],
+                (int) $validated['cleaning_grace_period_days']
+            );
+            if ($cleanup['purged_packages_count'] > 0) {
+                return back()->with('success', "Konfigurasi pengarsipan berhasil disimpan. Pembersihan otomatis berhasil menghapus {$cleanup['purged_packages_count']} paket arsip kedaluwarsa ({$cleanup['freed_bytes_formatted']}).");
+            }
+        } catch (\Throwable $e) {
+            \Log::warning("Retention cleanup on update error: " . $e->getMessage());
+        }
+
         return back()->with('success', 'Konfigurasi modul pengarsipan berhasil diperbarui.');
+    }
+
+    /**
+     * Run archive retention cleanup on demand from admin settings.
+     */
+    public function runRetentionCleanup(): RedirectResponse
+    {
+        try {
+            $cleanup = app(\App\Services\Archive\ArchiveService::class)->cleanupExpiredArchives();
+            if ($cleanup['purged_packages_count'] > 0) {
+                return back()->with('success', "Pembersihan retensi berhasil: {$cleanup['purged_packages_count']} paket arsip kedaluwarsa dibersihkan ({$cleanup['freed_bytes_formatted']}).");
+            }
+            return back()->with('info', "Pembersihan retensi selesai. Tidak ada paket arsip yang melebihi batas retensi ({$cleanup['retention_days']} hari) atau masa tenggang ({$cleanup['grace_period_days']} hari).");
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal menjalankan pembersihan retensi: ' . $e->getMessage());
+        }
     }
 }

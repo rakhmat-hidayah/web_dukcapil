@@ -21,6 +21,13 @@ class ArchivePackageController extends Controller
 
     public function index(Request $request): Response
     {
+        // Automatically purge any packages exceeding configured retention policy
+        try {
+            $this->archiveService->cleanupExpiredArchives();
+        } catch (\Throwable $e) {
+            \Log::warning("Auto archive retention cleanup on package index warning: " . $e->getMessage());
+        }
+
         $query = ArchivePackage::with(['serviceType', 'creator', 'confirmedByUser'])
             ->latest();
 
