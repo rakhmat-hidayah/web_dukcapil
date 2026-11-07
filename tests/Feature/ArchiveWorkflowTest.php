@@ -510,4 +510,30 @@ class ArchiveWorkflowTest extends TestCase
         // Clean mock dir
         File::deleteDirectory($mockPermanentDir);
     }
+
+    public function test_batch_period_packaging_packages_complete_apps_and_skips_missing_files()
+    {
+        $app1 = $this->createValidCompletedApplication();
+        $service = app(ArchiveService::class);
+
+        $package = $service->createPackage([
+            'application_ids' => [$app1->id],
+            'period' => date('Y-m'),
+        ], $this->archiveOperatorUser);
+
+        $this->assertEquals(ArchivePackage::STATUS_READY_FOR_DOWNLOAD, $package->status);
+        $this->assertGreaterThan(0, $package->total_files);
+        $this->assertNotNull($package->zip_path);
+
+        // Test rebuild
+        $rebuilt = $service->rebuildPackage($package, $this->archiveOperatorUser);
+        $this->assertEquals(ArchivePackage::STATUS_READY_FOR_DOWNLOAD, $rebuilt->status);
+
+        // Test destroy
+        $packageId = $package->id;
+        $response = $this->actingAs($this->archiveOperatorUser)
+            ->delete(route('admin.archive.packages.destroy', $packageId));
+        $response->assertRedirect(route('admin.archive.packages.index'));
+        $this->assertNull(ArchivePackage::find($packageId));
+    }
 }

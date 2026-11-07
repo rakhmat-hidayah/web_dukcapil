@@ -126,4 +126,35 @@ class ArchivePackageController extends Controller
 
         return back()->with('error', $result['message']);
     }
+
+    public function rebuild(int $id, Request $request): RedirectResponse
+    {
+        $package = ArchivePackage::findOrFail($id);
+
+        try {
+            $updated = $this->archiveService->rebuildPackage($package, $request->user());
+
+            if ($updated->status === ArchivePackage::STATUS_INCOMPLETE) {
+                return back()->with('error', 'Proses ulang selesai, namun tidak ditemukan berkas fisik yang lengkap di storage server untuk permohonan pada paket ini.');
+            }
+
+            return back()->with('success', "Paket arsip [{$updated->package_code}] berhasil dikemas ulang ({$updated->total_files} berkas) dan siap diunduh.");
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal memproses ulang paket arsip: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy(int $id, Request $request): RedirectResponse
+    {
+        $package = ArchivePackage::findOrFail($id);
+        $code = $package->package_code;
+
+        try {
+            $this->archiveService->deletePackage($package, $request->user());
+            return redirect()->route('admin.archive.packages.index')
+                ->with('success', "Paket arsip [{$code}] berhasil dihapus.");
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal menghapus paket arsip: ' . $e->getMessage());
+        }
+    }
 }

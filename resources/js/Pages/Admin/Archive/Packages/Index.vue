@@ -182,12 +182,28 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                     Download
                   </a>
+                  <button
+                    v-if="pkg.status === 'INCOMPLETE' || pkg.status === 'FAILED'"
+                    @click="rebuildPackage(pkg)"
+                    class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs inline-flex items-center gap-1 shadow-sm transition cursor-pointer"
+                    title="Proses Ulang & Buat ZIP"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Proses Ulang
+                  </button>
                   <Link
                     :href="route('admin.archive.packages.show', pkg.id)"
                     class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs inline-flex items-center gap-1 transition"
                   >
                     Detail
                   </Link>
+                  <button
+                    @click="deletePackage(pkg)"
+                    class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 font-bold text-xs inline-flex items-center gap-1 border border-rose-200 dark:border-rose-800 transition cursor-pointer"
+                    title="Hapus Paket Arsip"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -292,6 +308,18 @@ function openConfirmModal(pkg) {
   activePackage.value = pkg;
   confirmNotes.value = pkg.operator_storage_location_notes || '';
   showConfirmModal.value = true;
+}
+
+function rebuildPackage(pkg) {
+  if (confirm(`Proses ulang dan buat berkas ZIP untuk paket [${pkg.package_code}]?`)) {
+    router.post(route('admin.archive.packages.rebuild', pkg.id));
+  }
+}
+
+function deletePackage(pkg) {
+  if (confirm(`Yakin ingin menghapus paket arsip [${pkg.package_code}]? Tindakan ini tidak dapat dibatalkan.`)) {
+    router.delete(route('admin.archive.packages.destroy', pkg.id));
+  }
 }
 
 function submitConfirm() {

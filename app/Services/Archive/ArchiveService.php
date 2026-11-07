@@ -276,13 +276,18 @@ class ArchiveService
             }
         }
 
+        // Applications with valid files on storage
+        $appsToArchive = $applications->filter(function ($app) use ($appAnalysis) {
+            return ($appAnalysis[$app->id]['document_count'] ?? 0) > 0;
+        });
+
         // Initial package record
         $package = ArchivePackage::create([
             'package_code' => $packageCode,
             'archive_period' => $period,
             'service_type_id' => $serviceTypeId,
             'filter_criteria' => $params,
-            'status' => !empty($incompleteApps) ? ArchivePackage::STATUS_INCOMPLETE : ArchivePackage::STATUS_PROCESSING,
+            'status' => $appsToArchive->isEmpty() ? ArchivePackage::STATUS_INCOMPLETE : ArchivePackage::STATUS_PROCESSING,
             'total_applications' => $applications->count(),
             'total_files' => 0,
             'total_uncompressed_bytes' => 0,
@@ -290,14 +295,15 @@ class ArchiveService
             'created_by' => $user?->id,
             'permanent_storage_status' => ArchivePackage::PERM_NOT_CONFIGURED,
             'source_files_cleaned' => false,
-            'error_message' => !empty($incompleteApps) 
-                ? 'Paket ditandai TIDAK LENGKAP karena terdapat dokumen wajib yang hilang/rusak pada permohonan terkait.' 
+            'error_message' => $appsToArchive->isEmpty() 
+                ? 'Tidak ada berkas fisik yang ditemukan di storage untuk permohonan pada periode ini.' 
                 : null,
         ]);
 
         // Record items in DB
         foreach ($applications as $app) {
             $analysis = $appAnalysis[$app->id];
+            $itemStatus = $analysis['is_complete'] ? 'INCLUDED' : (($analysis['document_count'] ?? 0) > 0 ? 'PARTIAL' : 'FAILED');
             ArchivePackageItem::create([
                 'archive_package_id' => $package->id,
                 'application_id' => $app->id,
@@ -305,25 +311,33 @@ class ArchiveService
                 'applicant_name_masked' => $app->applicant_name,
                 'document_count' => $analysis['document_count'],
                 'total_size_bytes' => $analysis['total_size_bytes'],
-                'status' => $analysis['is_complete'] ? 'INCLUDED' : 'FAILED',
+                'status' => $itemStatus,
                 'notes' => !empty($analysis['issues']) ? implode('; ', $analysis['issues']) : 'Dokumen lengkap & valid',
             ]);
         }
 
-        // If incomplete, stop packaging into ZIP and return with INCOMPLETE status
-        if (!empty($incompleteApps)) {
+        // If no application has readable files on storage, stop and return INCOMPLETE
+        if ($appsToArchive->isEmpty()) {
             ArchiveAuditService::log('PACKAGE_CREATION_FAILED_INCOMPLETE', $package->id, null, [
                 'package_code' => $packageCode,
-                'reason' => 'Terdapat berkas wajib yang hilang atau rusak pada storage.',
+                'reason' => 'Tidak ada berkas fisik yang ditemukan di storage server.',
                 'incomplete_applications' => $incompleteApps,
             ], $user);
 
             return $package;
         }
 
-        // Build ZIP Package
+        // Build ZIP Package containing all applications with valid documents
         try {
-            $this->buildZipArchive($package, $applications, $appAnalysis);
+            $this->buildZipArchive($package, $appsToArchive, $appAnalysis);
+
+            // Informational notice if some applications were skipped/incomplete
+            if (!empty($incompleteApps)) {
+                $completedCount = $applications->count() - count($incompleteApps);
+                $package->update([
+                    'error_message' => "Arsip ZIP berhasil dikemas ({$package->total_files} berkas dari {$completedCount} permohonan lengkap). " . count($incompleteApps) . " permohonan dilewati/tidak lengkap di storage server.",
+                ]);
+            }
 
             ArchiveAuditService::log('PACKAGE_CREATED', $package->id, null, [
                 'package_code' => $package->package_code,
@@ -390,6 +404,11 @@ class ArchiveService
 
         // Process each application
         foreach ($applications as $app) {
+            $analysis = $appAnalysis[$app->id] ?? null;
+            if (!$analysis || empty($analysis['documents'])) {
+                continue;
+            }
+
             $appFolderName = !empty($app->applicant_nik)
                 ? "{$app->reg_number}_{$app->applicant_nik}"
                 : $app->reg_number;
@@ -748,6 +767,120 @@ class ArchiveService
             'permanent_storage_driver' => $permanentStorageDriver,
             'permanent_storage_configured' => ArchiveStorageManager::resolve()->isConfigured(),
         ];
+    }
+
+    /**
+     * Delete an archive package and its associated physical ZIP.
+     */
+    public function deletePackage(ArchivePackage $package, ?User $user = null): bool
+    {
+        $user = $user ?? auth()->user();
+
+        // Delete physical zip if exists
+        if (!empty($package->zip_path)) {
+            $zipFullPath = storage_path('app/private/' . $package->zip_path);
+            if (File::exists($zipFullPath)) {
+                File::delete($zipFullPath);
+            }
+        }
+
+        // Clean temp dir if exists
+        $tempDir = storage_path("app/private/temp_archives/{$package->package_code}");
+        if (File::isDirectory($tempDir)) {
+            File::deleteDirectory($tempDir);
+        }
+
+        ArchiveAuditService::log('PACKAGE_DELETED', $package->id, null, [
+            'package_code' => $package->package_code,
+            'status' => $package->status,
+        ], $user);
+
+        // Delete items and package
+        $package->items()->delete();
+        $package->delete();
+
+        return true;
+    }
+
+    /**
+     * Rebuild an incomplete or failed package into a valid ZIP archive.
+     */
+    public function rebuildPackage(ArchivePackage $package, ?User $user = null): ArchivePackage
+    {
+        $user = $user ?? auth()->user();
+
+        // Get applications for this package
+        $applicationIds = $package->items()->pluck('application_id')->toArray();
+        $applications = QueueApplication::with(['serviceType.documents', 'documents.serviceDocument'])
+            ->whereIn('id', $applicationIds)
+            ->get();
+
+        if ($applications->isEmpty()) {
+            throw new \InvalidArgumentException('Tidak ada permohonan yang terdaftar pada paket ini.');
+        }
+
+        $incompleteApps = [];
+        $appAnalysis = [];
+
+        foreach ($applications as $app) {
+            $analysis = $this->checkApplicationCompleteness($app);
+            $appAnalysis[$app->id] = $analysis;
+
+            if (!$analysis['is_complete']) {
+                $incompleteApps[] = [
+                    'reg_number' => $app->reg_number,
+                    'issues' => $analysis['issues'],
+                ];
+            }
+        }
+
+        // Applications with valid files
+        $appsToArchive = $applications->filter(function ($app) use ($appAnalysis) {
+            return ($appAnalysis[$app->id]['document_count'] ?? 0) > 0;
+        });
+
+        // Update items status
+        foreach ($applications as $app) {
+            $analysis = $appAnalysis[$app->id];
+            $itemStatus = $analysis['is_complete'] ? 'INCLUDED' : (($analysis['document_count'] ?? 0) > 0 ? 'PARTIAL' : 'FAILED');
+            $package->items()->where('application_id', $app->id)->update([
+                'document_count' => $analysis['document_count'],
+                'total_size_bytes' => $analysis['total_size_bytes'],
+                'status' => $itemStatus,
+                'notes' => !empty($analysis['issues']) ? implode('; ', $analysis['issues']) : 'Dokumen lengkap & valid',
+            ]);
+        }
+
+        if ($appsToArchive->isEmpty()) {
+            $package->update([
+                'status' => ArchivePackage::STATUS_INCOMPLETE,
+                'total_files' => 0,
+                'package_size_bytes' => 0,
+                'error_message' => 'Tidak ada berkas fisik yang ditemukan di storage untuk permohonan pada paket ini.',
+            ]);
+            return $package;
+        }
+
+        // Build ZIP
+        $package->update(['status' => ArchivePackage::STATUS_PROCESSING]);
+        $this->buildZipArchive($package, $appsToArchive, $appAnalysis);
+
+        if (!empty($incompleteApps)) {
+            $completedCount = $applications->count() - count($incompleteApps);
+            $package->update([
+                'error_message' => "Arsip ZIP berhasil dikemas ({$package->total_files} berkas dari {$completedCount} permohonan lengkap). " . count($incompleteApps) . " permohonan dilewati/tidak lengkap di storage server.",
+            ]);
+        } else {
+            $package->update(['error_message' => null]);
+        }
+
+        ArchiveAuditService::log('PACKAGE_REBUILT', $package->id, null, [
+            'package_code' => $package->package_code,
+            'total_files' => $package->total_files,
+            'package_size_bytes' => $package->package_size_bytes,
+        ], $user);
+
+        return $package->fresh();
     }
 
     protected function formatBytes(int $bytes): string

@@ -72,12 +72,20 @@
             </button>
 
             <button
-              v-if="package.status === 'READY_FOR_DOWNLOAD'"
-              @click="showConfirmModal = true"
-              class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm transition flex items-center gap-2 cursor-pointer"
+              v-if="package.status === 'INCOMPLETE' || package.status === 'FAILED'"
+              @click="rebuildPackage"
+              class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              <span>{{ package.is_operator_confirmed ? 'Ubah Catatan Konfirmasi' : 'Konfirmasi Arsip Tersimpan' }}</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              <span>Proses Ulang & Buat ZIP Sekarang</span>
+            </button>
+
+            <button
+              @click="deletePackage"
+              class="px-4 py-2.5 rounded-xl border border-rose-200 dark:border-rose-800 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold text-xs shadow-sm transition flex items-center gap-2 cursor-pointer"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              <span>Hapus Paket</span>
             </button>
           </div>
         </div>
@@ -352,6 +360,18 @@ function checkIntegrity() {
       isCheckingIntegrity.value = false;
     },
   });
+}
+
+function rebuildPackage() {
+  if (confirm(`Proses ulang dan kemas semua berkas permohonan yang lengkap ke dalam file ZIP untuk paket [${props.package.package_code}]?`)) {
+    router.post(route('admin.archive.packages.rebuild', props.package.id));
+  }
+}
+
+function deletePackage() {
+  if (confirm(`Yakin ingin menghapus paket arsip [${props.package.package_code}]? Tindakan ini tidak dapat dibatalkan.`)) {
+    router.delete(route('admin.archive.packages.destroy', props.package.id));
+  }
 }
 
 function submitConfirm() {

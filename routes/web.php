@@ -513,6 +513,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/packages/{id}/download', [\App\Http\Controllers\Admin\Archive\ArchivePackageController::class, 'download'])->name('packages.download');
             Route::post('/packages/{id}/confirm', [\App\Http\Controllers\Admin\Archive\ArchivePackageController::class, 'confirm'])->name('packages.confirm');
             Route::post('/packages/{id}/verify-integrity', [\App\Http\Controllers\Admin\Archive\ArchivePackageController::class, 'verifyIntegrity'])->name('packages.verify-integrity');
+            Route::post('/packages/{id}/rebuild', [\App\Http\Controllers\Admin\Archive\ArchivePackageController::class, 'rebuild'])->name('packages.rebuild');
+            Route::delete('/packages/{id}', [\App\Http\Controllers\Admin\Archive\ArchivePackageController::class, 'destroy'])->name('packages.destroy');
 
             // 4. Riwayat Pengarsipan
             Route::get('/history', [\App\Http\Controllers\Admin\Archive\ArchiveHistoryController::class, 'index'])->name('history');
