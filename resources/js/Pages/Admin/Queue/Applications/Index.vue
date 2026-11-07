@@ -741,7 +741,7 @@
                       Otomatis Terbitkan Nomor Antrean & Jadwal Terdekat
                     </span>
                     <span class="text-indigo-700 dark:text-indigo-400 text-[11px]">
-                      Jika dicentang dan belum memiliki nomor antrean, sistem akan langsung mengalokasikan nomor antrean resmi dan jadwal loket terdekat.
+                      Jika dicentang dan belum memiliki nomor antrean, sistem akan langsung mengalokasikan nomor antrean dan jadwal loket terdekat.
                     </span>
                   </div>
                 </label>

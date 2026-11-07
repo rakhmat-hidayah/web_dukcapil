@@ -315,7 +315,7 @@ class QueueApplicationService
             'statement_agreed_at'  => now(),
         ]);
 
-        $queueNote = $application->queue_number ? " Nomor antrean resmi diterbitkan: {$application->queue_number}." : "";
+        $queueNote = $application->queue_number ? " Nomor antrean diterbitkan: {$application->queue_number}." : "";
 
         VerificationHistory::create([
             'application_id' => $application->id,

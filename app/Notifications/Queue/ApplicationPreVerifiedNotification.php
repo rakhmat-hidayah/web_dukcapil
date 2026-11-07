@@ -37,7 +37,7 @@ class ApplicationPreVerifiedNotification extends Notification
 
         return $mail
             ->line("**Langkah Selanjutnya (PENTING):**")
-            ->line("Silakan klik tombol di bawah untuk **langsung memilih hari dan sesi jam kedatangan** ke kantor Disdukcapil. Nomor Antrean resmi Anda akan otomatis diterbitkan begitu Anda memilih jadwal.")
+            ->line("Silakan klik tombol di bawah untuk **langsung memilih hari dan sesi jam kedatangan** ke kantor Disdukcapil. Nomor Antrean Anda akan otomatis diterbitkan begitu Anda memilih jadwal.")
             ->action('📅 Pilih Jadwal Antrean Sekarang', $bookingUrl)
             ->line("Catatan: Harap segera memilih jadwal sebelum kuota sesi pelayanan pada hari yang diinginkan terisi penuh.")
             ->salutation("Salam hangat,\nTim Pelayanan Disdukcapil Kabupaten Dompu");

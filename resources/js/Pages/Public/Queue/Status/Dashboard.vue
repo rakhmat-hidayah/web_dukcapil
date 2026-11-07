@@ -123,7 +123,7 @@
               Berkas Disetujui! Segera Pilih Jadwal Kedatangan Anda
             </h2>
             <p class="text-xs text-emerald-100 max-w-xl leading-relaxed mt-1">
-              Dokumen persyaratan digital Anda telah sah & lengkap. Harap segera memilih tanggal kedatangan untuk menerbitkan <strong>Nomor Antrean Resmi</strong> ke kantor Disdukcapil.
+              Dokumen persyaratan digital Anda telah sah & lengkap. Harap segera memilih tanggal kedatangan untuk menerbitkan <strong>Nomor Antrean</strong> ke kantor Disdukcapil.
             </p>
           </div>
         </div>
@@ -169,8 +169,6 @@
               <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
                 <span>Pemohon: <strong class="text-slate-700 dark:text-slate-200">{{ application.applicant_name }}</strong></span>
                 <span>·</span>
-                <span>NIK: <span class="font-mono font-bold">{{ application.masked_nik }}</span></span>
-                <span>·</span>
                 <span class="inline-flex items-center gap-1 font-medium text-blue-600 dark:text-blue-400">
                   Kehadiran: {{ attendanceLabel }}
                 </span>
@@ -197,7 +195,7 @@
             class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-3xl p-5 text-center shadow-lg shadow-blue-600/30 min-w-[210px] shrink-0"
           >
             <p class="text-[10px] uppercase font-bold tracking-widest text-blue-200">
-              NOMOR ANTREAN RESMI
+              NOMOR ANTREAN
             </p>
             <p class="text-4xl sm:text-5xl font-black font-mono tracking-tight mt-1">
               {{ application.queue_number }}
@@ -257,11 +255,11 @@
             <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             <div class="flex-1">
               <p class="font-bold text-sm text-blue-900 dark:text-blue-200">
-                {{ application.queue_number ? 'Nomor Antrean Resmi Telah Terbit · Berkas Sedang Diverifikasi' : 'Berkas Sedang Diverifikasi Petugas (Pra-Verifikasi Online)' }}
+                {{ application.queue_number ? 'Nomor Antrean Telah Terbit · Berkas Sedang Diverifikasi' : 'Berkas Sedang Diverifikasi Petugas (Pra-Verifikasi Online)' }}
               </p>
               <p class="mt-1 leading-relaxed">
                 <template v-if="application.queue_number">
-                  Nomor antrean resmi Anda telah diterbitkan untuk jadwal <strong>{{ scheduleDateFormatted }}</strong>. Petugas verifikator sedang memeriksa berkas digital Anda. Silakan simpan atau cetak bukti tiket antrean di bawah ini dan bawa dokumen asli saat hadir ke kantor.
+                  Nomor antrean Anda telah diterbitkan untuk jadwal <strong>{{ scheduleDateFormatted }}</strong>. Petugas verifikator sedang memeriksa berkas digital Anda. Silakan simpan atau cetak bukti tiket antrean di bawah ini dan bawa dokumen asli saat hadir ke kantor.
                 </template>
                 <template v-else>
                   Dokumen persyaratan digital Anda sedang diperiksa kelengkapannya oleh verifikator Disdukcapil Kabupaten Dompu.
@@ -527,7 +525,7 @@
             <div class="flex-1 text-center md:text-left space-y-2">
               <template v-if="application.queue_number">
                 <span class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                  Nomor Antrean Resmi Anda
+                  Nomor Antrean Anda
                 </span>
                 <p class="text-5xl sm:text-6xl font-black font-mono tracking-tight text-blue-600 dark:text-blue-400">
                   {{ application.queue_number }}
@@ -538,9 +536,6 @@
                 <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
                   <span class="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200">
                     Sesi: {{ application.slot?.name || 'Sesi Pelayanan' }} ({{ scheduleTimeFormatted }})
-                  </span>
-                  <span class="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-mono font-bold bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                    Reg: {{ application.reg_number }}
                   </span>
                 </div>
               </template>
@@ -585,9 +580,6 @@
 
               <!-- QR Code Subtext & Scanner Guidance -->
               <div class="mt-1.5 space-y-0.5">
-                <p class="text-[11px] font-mono font-bold text-slate-800 dark:text-slate-200 tracking-wider">
-                  {{ application.reg_number }}
-                </p>
                 <p class="text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
                   <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
                   Scan QR Loket
@@ -626,7 +618,6 @@
             <div>
               <span class="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Pemilik Dokumen</span>
               <p class="font-bold text-slate-900 dark:text-white mt-0.5">{{ application.applicant_name }}</p>
-              <p class="text-slate-500 font-mono">NIK: {{ application.masked_nik }}</p>
             </div>
             <div>
               <span class="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Yang Hadir ke Kantor</span>
@@ -660,58 +651,6 @@
         </div>
       </div>
 
-      <!-- Uploaded Documents Inspection Table -->
-      <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-md print:hidden">
-        <div class="mb-6 flex items-center justify-between">
-          <div>
-            <h3 class="text-xl font-black text-slate-900 dark:text-white">
-              Status Berkas Persyaratan Digital
-            </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Rincian hasil verifikasi terhadap setiap dokumen yang Anda unggah.
-            </p>
-          </div>
-        </div>
-
-        <div class="divide-y divide-slate-100 dark:divide-slate-700/60">
-          <div
-            v-for="doc in (application.documents || [])"
-            :key="doc.id"
-            class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-          >
-            <div class="space-y-1">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-sm text-slate-900 dark:text-white">
-                  {{ doc.service_document?.label || doc.original_filename }}
-                </span>
-                <StatusBadge :status="doc.status" :custom-label="docStatusLabel(doc.status)" size="sm" />
-              </div>
-
-              <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                {{ doc.original_filename }} · {{ doc.formatted_size }}
-              </p>
-
-              <!-- Per-document Reviewer Comment -->
-              <p
-                v-if="doc.reviewer_note"
-                class="text-xs text-orange-600 dark:text-orange-400 italic bg-orange-50 dark:bg-orange-950/40 px-3 py-1.5 rounded-xl border border-orange-200 dark:border-orange-800 mt-1"
-              >
-                Catatan Petugas: "{{ doc.reviewer_note }}"
-              </p>
-            </div>
-
-            <!-- Preview Button -->
-            <button
-              type="button"
-              @click="openPreviewDoc(doc)"
-              class="self-start sm:self-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold transition flex items-center gap-1.5"
-            >
-              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-              Pratinjau
-            </button>
-          </div>
-        </div>
-      </div>
 
       <!-- IN-PLACE REVISION UPLOAD FORM (Only when REVISION_REQUIRED) -->
       <div
@@ -857,7 +796,7 @@
                     Aksi Lanjutan: Pilih Jadwal Pelayanan
                   </span>
                   <p class="text-[11px] text-emerald-700 dark:text-emerald-300 leading-snug">
-                    Klik tombol di samping untuk langsung memilih tanggal kedatangan dan menerbitkan nomor antrean resmi Anda.
+                    Klik tombol di samping untuk langsung memilih tanggal kedatangan dan menerbitkan nomor antrean Anda.
                   </p>
                 </div>
                 <Link

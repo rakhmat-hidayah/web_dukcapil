@@ -157,7 +157,7 @@ class ApplicantDashboardController extends Controller
         // If queue number is already issued and not explicitly rescheduling, redirect directly to status
         if ($application->queue_number && !$isReschedule) {
             return redirect()->route('queue.status', ['token' => $token])
-                ->with('info', "Nomor antrean resmi Anda telah diterbitkan: {$application->queue_number}.");
+                ->with('info', "Nomor antrean Anda telah diterbitkan: {$application->queue_number}.");
         }
 
         $availableSchedules = QueueSchedule::where('is_open', true)
@@ -238,7 +238,7 @@ class ApplicantDashboardController extends Controller
         // If queue number is already issued and not rescheduling, prevent double-booking
         if ($application->queue_number && !$isReschedule) {
             return redirect()->route('queue.status', ['token' => $token])
-                ->with('info', "Nomor antrean resmi Anda telah diterbitkan: {$application->queue_number}.");
+                ->with('info', "Nomor antrean Anda telah diterbitkan: {$application->queue_number}.");
         }
 
         try {
@@ -270,8 +270,8 @@ class ApplicantDashboardController extends Controller
 
         $freshApp = $application->fresh();
         $msg = $isReschedule
-            ? "Jadwal kedatangan berhasil diubah! Nomor antrean resmi Anda: {$freshApp->queue_number}."
-            : "Jadwal antrean berhasil ditetapkan! Nomor antrean resmi Anda: {$freshApp->queue_number}.";
+            ? "Jadwal kedatangan berhasil diubah! Nomor antrean Anda: {$freshApp->queue_number}."
+            : "Jadwal antrean berhasil ditetapkan! Nomor antrean Anda: {$freshApp->queue_number}.";
 
         return redirect()->route('queue.status', ['token' => $token])
             ->with('success', $msg);

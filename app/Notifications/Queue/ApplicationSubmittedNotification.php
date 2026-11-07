@@ -35,9 +35,9 @@ class ApplicationSubmittedNotification extends Notification
         if ($this->application->queue_number) {
             $scheduleDate = $schedule?->schedule_date_formatted ?? '-';
             $hours = $schedule?->operational_hours_formatted ?? '08:00 - 15:30 WITA';
-            $mail->line("**Nomor Antrean Resmi:** `{$this->application->queue_number}`")
+            $mail->line("**Nomor Antrean:** `{$this->application->queue_number}`")
                  ->line("**Jadwal Kedatangan Pelayanan:** {$scheduleDate} ({$hours})")
-                 ->line("Nomor antrean resmi Anda telah diterbitkan terlebih dahulu agar Anda mendapatkan kepastian nomor dan jadwal pelayanan.")
+                 ->line("Nomor antrean Anda telah diterbitkan terlebih dahulu agar Anda mendapatkan kepastian nomor dan jadwal pelayanan.")
                  ->line("Saat ini berkas dokumen persyaratan digital Anda sedang dalam tahap **Pra-Verifikasi Petugas**.");
         } else {
             $mail->line("Saat ini berkas dokumen persyaratan digital Anda sedang berada dalam tahap **Pra-Verifikasi Petugas**.");

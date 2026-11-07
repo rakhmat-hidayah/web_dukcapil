@@ -440,7 +440,7 @@ class QueueApplicationController extends Controller
             'applicant_verified_at'  => now()->timestamp,
         ]);
 
-        $queueInfo = $application->queue_number ? " Nomor antrean resmi Anda telah terbit: {$application->queue_number}." : "";
+        $queueInfo = $application->queue_number ? " Nomor antrean Anda telah terbit: {$application->queue_number}." : "";
 
         return redirect()->route('queue.status', ['token' => $application->access_token])
             ->with('success', "Permohonan berkas Anda berhasil dikirim!{$queueInfo} Simpan bukti antrean ini untuk kedatangan Anda ke kantor.");

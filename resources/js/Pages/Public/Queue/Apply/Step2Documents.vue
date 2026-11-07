@@ -296,7 +296,7 @@
                 {{ canSubmit ? 'Semua Berkas & Pernyataan Lengkap' : 'Lengkapi Berkas & Centang Pernyataan' }}
               </p>
               <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                {{ canSubmit ? 'Klik tombol di samping untuk mengirimkan berkas dan langsung menerbitkan nomor antrean resmi Anda.' : 'Pastikan seluruh dokumen wajib terunggah dan pernyataan pemohon telah dicentang.' }}
+                {{ canSubmit ? 'Klik tombol di samping untuk mengirimkan berkas dan langsung menerbitkan nomor antrean Anda.' : 'Pastikan seluruh dokumen wajib terunggah dan pernyataan pemohon telah dicentang.' }}
               </p>
             </div>
           </div>

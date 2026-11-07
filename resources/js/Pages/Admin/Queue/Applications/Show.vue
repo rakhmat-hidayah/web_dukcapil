@@ -606,7 +606,7 @@
               >
                 <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <div>
-                  <span class="font-bold">Menunggu Penetapan Jadwal & Nomor Antrean:</span> Tombol cetak KTP-el dinonaktifkan dan akan aktif setelah jadwal kedatangan ditetapkan serta nomor antrean resmi terbit.
+                  <span class="font-bold">Menunggu Penetapan Jadwal & Nomor Antrean:</span> Tombol cetak KTP-el dinonaktifkan dan akan aktif setelah jadwal kedatangan ditetapkan serta nomor antrean terbit.
                 </div>
               </div>
 
@@ -1655,7 +1655,7 @@
                     Otomatis Terbitkan Nomor Antrean & Jadwal Terdekat
                   </span>
                   <span class="text-indigo-700 dark:text-indigo-400 text-[11px]">
-                    Jika dicentang dan belum memiliki nomor antrean, sistem akan langsung mengalokasikan nomor antrean resmi dan jadwal loket terdekat.
+                    Jika dicentang dan belum memiliki nomor antrean, sistem akan langsung mengalokasikan nomor antrean dan jadwal loket terdekat.
                   </span>
                 </div>
               </label>
