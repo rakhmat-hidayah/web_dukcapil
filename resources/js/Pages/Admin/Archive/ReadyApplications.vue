@@ -169,8 +169,7 @@
                     type="checkbox"
                     :value="app.id"
                     v-model="selectedIds"
-                    :disabled="!app.is_archive_ready"
-                    class="w-4 h-4 rounded text-blue-600 border-slate-300 dark:border-slate-600 focus:ring-blue-500 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    class="w-4 h-4 rounded text-blue-600 border-slate-300 dark:border-slate-600 focus:ring-blue-500 cursor-pointer"
                   />
                 </td>
                 <td class="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">
@@ -204,10 +203,10 @@
                     ✓ Lengkap & Terbaca di Storage
                   </span>
                   <div v-else class="space-y-1">
-                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 inline-flex items-center gap-1">
-                      ✕ Berkas Tidak Lengkap / Hilang
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 inline-flex items-center gap-1">
+                      ⚠ Berkas Belum Lengkap (Tetap Dapat Diarsipkan)
                     </span>
-                    <ul class="text-[10px] text-rose-600 dark:text-rose-400 list-disc list-inside">
+                    <ul class="text-[10px] text-amber-700 dark:text-amber-400 list-disc list-inside">
                       <li v-for="(iss, idx) in app.archive_issues" :key="idx">{{ iss }}</li>
                     </ul>
                   </div>
@@ -251,7 +250,7 @@
             </div>
             <div>
               <h3 class="text-base font-bold text-slate-900 dark:text-white">Buat Paket Arsip ZIP</h3>
-              <p class="text-xs text-slate-500">Kemas berkas permohonan ke dalam arsip resmi</p>
+              <p class="text-xs text-slate-500">Kemas berkas permohonan ke dalam arsip digital</p>
             </div>
           </div>
           <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
@@ -338,18 +337,18 @@ const currentYearMonth = computed(() => {
   return `${d.getFullYear()}-${m}`;
 });
 
-const readyAppsOnPage = computed(() => {
-  return (props.applications.data || []).filter(app => app.is_archive_ready);
+const allAppsOnPage = computed(() => {
+  return props.applications.data || [];
 });
 
 const isAllSelected = computed(() => {
-  if (readyAppsOnPage.value.length === 0) return false;
-  return readyAppsOnPage.value.every(app => selectedIds.value.includes(app.id));
+  if (allAppsOnPage.value.length === 0) return false;
+  return allAppsOnPage.value.every(app => selectedIds.value.includes(app.id));
 });
 
 function toggleSelectAll(e) {
   if (e.target.checked) {
-    selectedIds.value = readyAppsOnPage.value.map(app => app.id);
+    selectedIds.value = allAppsOnPage.value.map(app => app.id);
   } else {
     selectedIds.value = [];
   }

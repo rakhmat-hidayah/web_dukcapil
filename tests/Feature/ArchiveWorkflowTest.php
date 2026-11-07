@@ -295,14 +295,15 @@ class ArchiveWorkflowTest extends TestCase
         $this->assertNotEmpty($completeness['issues']);
         $this->assertStringContainsString('Berkas fisik hilang', $completeness['issues'][0]);
 
-        // Attempting to package it should mark the package INCOMPLETE and not produce a false success
+        // Packaging it should now succeed even with incomplete files by generating 00_informasi_berkas.txt
         $package = $service->createPackage([
             'application_ids' => [$app->id],
             'period' => date('Y-m'),
         ], $this->archiveOperatorUser);
 
-        $this->assertEquals(ArchivePackage::STATUS_INCOMPLETE, $package->status);
-        $this->assertNull($package->zip_path);
+        $this->assertEquals(ArchivePackage::STATUS_READY_FOR_DOWNLOAD, $package->status);
+        $this->assertNotNull($package->zip_path);
+        $this->assertTrue(File::exists(storage_path('app/private/' . $package->zip_path)));
     }
 
     public function test_completeness_check_excludes_surat_kuasa_f107_when_applicant_attends_self()

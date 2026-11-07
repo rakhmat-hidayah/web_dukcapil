@@ -276,18 +276,13 @@ class ArchiveService
             }
         }
 
-        // Applications with valid files on storage
-        $appsToArchive = $applications->filter(function ($app) use ($appAnalysis) {
-            return ($appAnalysis[$app->id]['document_count'] ?? 0) > 0;
-        });
-
         // Initial package record
         $package = ArchivePackage::create([
             'package_code' => $packageCode,
             'archive_period' => $period,
             'service_type_id' => $serviceTypeId,
             'filter_criteria' => $params,
-            'status' => $appsToArchive->isEmpty() ? ArchivePackage::STATUS_INCOMPLETE : ArchivePackage::STATUS_PROCESSING,
+            'status' => ArchivePackage::STATUS_PROCESSING,
             'total_applications' => $applications->count(),
             'total_files' => 0,
             'total_uncompressed_bytes' => 0,
@@ -295,15 +290,13 @@ class ArchiveService
             'created_by' => $user?->id,
             'permanent_storage_status' => ArchivePackage::PERM_NOT_CONFIGURED,
             'source_files_cleaned' => false,
-            'error_message' => $appsToArchive->isEmpty() 
-                ? 'Tidak ada berkas fisik yang ditemukan di storage untuk permohonan pada periode ini.' 
-                : null,
+            'error_message' => null,
         ]);
 
         // Record items in DB
         foreach ($applications as $app) {
             $analysis = $appAnalysis[$app->id];
-            $itemStatus = $analysis['is_complete'] ? 'INCLUDED' : (($analysis['document_count'] ?? 0) > 0 ? 'PARTIAL' : 'FAILED');
+            $itemStatus = $analysis['is_complete'] ? 'INCLUDED' : (($analysis['document_count'] ?? 0) > 0 ? 'PARTIAL' : 'OFFLINE_PROCESSED');
             ArchivePackageItem::create([
                 'archive_package_id' => $package->id,
                 'application_id' => $app->id,
@@ -316,26 +309,14 @@ class ArchiveService
             ]);
         }
 
-        // If no application has readable files on storage, stop and return INCOMPLETE
-        if ($appsToArchive->isEmpty()) {
-            ArchiveAuditService::log('PACKAGE_CREATION_FAILED_INCOMPLETE', $package->id, null, [
-                'package_code' => $packageCode,
-                'reason' => 'Tidak ada berkas fisik yang ditemukan di storage server.',
-                'incomplete_applications' => $incompleteApps,
-            ], $user);
-
-            return $package;
-        }
-
-        // Build ZIP Package containing all applications with valid documents
+        // Build ZIP Package containing all applications (including partial / offline files)
         try {
-            $this->buildZipArchive($package, $appsToArchive, $appAnalysis);
+            $this->buildZipArchive($package, $applications, $appAnalysis);
 
-            // Informational notice if some applications were skipped/incomplete
+            // Informational notice if some applications had incomplete requirements
             if (!empty($incompleteApps)) {
-                $completedCount = $applications->count() - count($incompleteApps);
                 $package->update([
-                    'error_message' => "Arsip ZIP berhasil dikemas ({$package->total_files} berkas dari {$completedCount} permohonan lengkap). " . count($incompleteApps) . " permohonan dilewati/tidak lengkap di storage server.",
+                    'error_message' => "Arsip ZIP berhasil dikemas ({$package->total_files} berkas dari {$package->total_applications} permohonan). " . count($incompleteApps) . " permohonan memiliki berkas persyaratan yang belum lengkap di portal namun seluruh data dan berkas yang tersedia tetap berhasil diarsipkan ke dalam ZIP.",
                 ]);
             }
 
@@ -405,9 +386,6 @@ class ArchiveService
         // Process each application
         foreach ($applications as $app) {
             $analysis = $appAnalysis[$app->id] ?? null;
-            if (!$analysis || empty($analysis['documents'])) {
-                continue;
-            }
 
             $appFolderName = !empty($app->applicant_nik)
                 ? "{$app->reg_number}_{$app->applicant_nik}"
@@ -416,52 +394,96 @@ class ArchiveService
             $appFolderFull = "{$tempDir}/{$appFolderRelative}";
             File::makeDirectory($appFolderFull, 0755, true);
 
-            $analysis = $appAnalysis[$app->id];
             $appDocManifests = [];
-
             $docIndex = 1;
-            foreach ($analysis['documents'] as $docItem) {
-                /** @var ApplicationDocument $doc */
-                $doc = $docItem['document'];
-                $sourcePath = storage_path('app/private/' . $docItem['path']);
 
-                if (!File::exists($sourcePath)) {
-                    continue;
+            if ($analysis && !empty($analysis['documents'])) {
+                foreach ($analysis['documents'] as $docItem) {
+                    /** @var ApplicationDocument $doc */
+                    $doc = $docItem['document'];
+                    $sourcePath = storage_path('app/private/' . $docItem['path']);
+
+                    if (!File::exists($sourcePath)) {
+                        continue;
+                    }
+
+                    $ext = pathinfo($docItem['path'], PATHINFO_EXTENSION) ?: 'jpg';
+                    $cleanLabel = Str::slug($doc->serviceDocument?->label ?? 'dokumen', '_');
+                    $destFileName = sprintf('%02d_%s.%s', $docIndex++, $cleanLabel, $ext);
+                    $destPath = "{$appFolderFull}/{$destFileName}";
+
+                    File::copy($sourcePath, $destPath);
+
+                    $fileSize = File::size($destPath);
+                    $fileSha256 = hash_file('sha256', $destPath);
+                    $zipRelativePath = "{$package->package_code}/{$appFolderRelative}/{$destFileName}";
+
+                    $fileInfo = [
+                        'relative_path' => $zipRelativePath,
+                        'application_ref' => $app->reg_number,
+                        'applicant_nik' => $app->applicant_nik,
+                        'original_filename' => $doc->original_filename,
+                        'archive_filename' => $destFileName,
+                        'mime_type' => $doc->mime_type,
+                        'size_bytes' => $fileSize,
+                        'sha256' => $fileSha256,
+                    ];
+
+                    $manifestFiles[] = $fileInfo;
+                    $appDocManifests[] = $fileInfo;
+
+                    $csvRows[] = [
+                        $app->reg_number,
+                        $app->applicant_name,
+                        $app->masked_nik,
+                        $app->serviceType?->name ?? 'KTP-el',
+                        ($app->completed_at ?? $app->handover_at ?? $app->updated_at)?->format('Y-m-d H:i:s') ?? '-',
+                        $destFileName,
+                        $doc->original_filename,
+                        $fileSize,
+                        $fileSha256,
+                    ];
+
+                    $totalFiles++;
+                    $totalUncompressedBytes += $fileSize;
                 }
-
-                $ext = pathinfo($docItem['path'], PATHINFO_EXTENSION) ?: 'jpg';
-                $cleanLabel = Str::slug($doc->serviceDocument?->label ?? 'dokumen', '_');
-                $destFileName = sprintf('%02d_%s.%s', $docIndex++, $cleanLabel, $ext);
-                $destPath = "{$appFolderFull}/{$destFileName}";
-
-                File::copy($sourcePath, $destPath);
-
-                $fileSize = File::size($destPath);
-                $fileSha256 = hash_file('sha256', $destPath);
-                $zipRelativePath = "{$package->package_code}/{$appFolderRelative}/{$destFileName}";
+            } else {
+                // Application with 0 digital documents (offline processed / physical counter)
+                $infoTxt = "INFORMASI DOKUMEN PERMOHONAN PELAYANAN KTP-EL\n"
+                    . "====================================================\n"
+                    . "Nomor Registrasi : {$app->reg_number}\n"
+                    . "Nama Pemohon     : {$app->applicant_name}\n"
+                    . "NIK Pemohon      : {$app->masked_nik}\n"
+                    . "Jenis Layanan    : " . ($app->serviceType?->name ?? 'KTP-el') . "\n"
+                    . "Status Pelayanan : " . ($app->status_label ?? $app->status) . "\n"
+                    . "Catatan Arsip    : Permohonan diproses langsung secara fisik di loket pelayanan. Dokumen persyaratan diverifikasi langsung saat kedatangan.\n"
+                    . "====================================================\n";
+                File::put("{$appFolderFull}/00_informasi_berkas.txt", $infoTxt);
+                $fileSize = File::size("{$appFolderFull}/00_informasi_berkas.txt");
+                $fileSha256 = hash_file('sha256', "{$appFolderFull}/00_informasi_berkas.txt");
+                $zipRelativePath = "{$package->package_code}/{$appFolderRelative}/00_informasi_berkas.txt";
 
                 $fileInfo = [
                     'relative_path' => $zipRelativePath,
                     'application_ref' => $app->reg_number,
                     'applicant_nik' => $app->applicant_nik,
-                    'original_filename' => $doc->original_filename,
-                    'archive_filename' => $destFileName,
-                    'mime_type' => $doc->mime_type,
+                    'original_filename' => '00_informasi_berkas.txt',
+                    'archive_filename' => '00_informasi_berkas.txt',
+                    'mime_type' => 'text/plain',
                     'size_bytes' => $fileSize,
                     'sha256' => $fileSha256,
                 ];
 
                 $manifestFiles[] = $fileInfo;
                 $appDocManifests[] = $fileInfo;
-
                 $csvRows[] = [
                     $app->reg_number,
                     $app->applicant_name,
                     $app->masked_nik,
                     $app->serviceType?->name ?? 'KTP-el',
                     ($app->completed_at ?? $app->handover_at ?? $app->updated_at)?->format('Y-m-d H:i:s') ?? '-',
-                    $destFileName,
-                    $doc->original_filename,
+                    '00_informasi_berkas.txt',
+                    '00_informasi_berkas.txt',
                     $fileSize,
                     $fileSha256,
                 ];
@@ -930,15 +952,10 @@ class ArchiveService
             }
         }
 
-        // Applications with valid files
-        $appsToArchive = $applications->filter(function ($app) use ($appAnalysis) {
-            return ($appAnalysis[$app->id]['document_count'] ?? 0) > 0;
-        });
-
         // Update items status
         foreach ($applications as $app) {
             $analysis = $appAnalysis[$app->id];
-            $itemStatus = $analysis['is_complete'] ? 'INCLUDED' : (($analysis['document_count'] ?? 0) > 0 ? 'PARTIAL' : 'FAILED');
+            $itemStatus = $analysis['is_complete'] ? 'INCLUDED' : (($analysis['document_count'] ?? 0) > 0 ? 'PARTIAL' : 'OFFLINE_PROCESSED');
             $package->items()->where('application_id', $app->id)->update([
                 'document_count' => $analysis['document_count'],
                 'total_size_bytes' => $analysis['total_size_bytes'],
@@ -947,24 +964,13 @@ class ArchiveService
             ]);
         }
 
-        if ($appsToArchive->isEmpty()) {
-            $package->update([
-                'status' => ArchivePackage::STATUS_INCOMPLETE,
-                'total_files' => 0,
-                'package_size_bytes' => 0,
-                'error_message' => 'Tidak ada berkas fisik yang ditemukan di storage untuk permohonan pada paket ini.',
-            ]);
-            return $package;
-        }
-
-        // Build ZIP
+        // Build ZIP containing all applications
         $package->update(['status' => ArchivePackage::STATUS_PROCESSING]);
-        $this->buildZipArchive($package, $appsToArchive, $appAnalysis);
+        $this->buildZipArchive($package, $applications, $appAnalysis);
 
         if (!empty($incompleteApps)) {
-            $completedCount = $applications->count() - count($incompleteApps);
             $package->update([
-                'error_message' => "Arsip ZIP berhasil dikemas ({$package->total_files} berkas dari {$completedCount} permohonan lengkap). " . count($incompleteApps) . " permohonan dilewati/tidak lengkap di storage server.",
+                'error_message' => "Arsip ZIP berhasil dikemas ({$package->total_files} berkas dari {$package->total_applications} permohonan). " . count($incompleteApps) . " permohonan memiliki berkas yang belum lengkap namun seluruh data dan berkas yang tersedia tetap berhasil diarsipkan ke dalam ZIP.",
             ]);
         } else {
             $package->update(['error_message' => null]);
