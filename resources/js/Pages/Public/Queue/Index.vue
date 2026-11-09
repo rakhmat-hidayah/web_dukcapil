@@ -7,22 +7,6 @@
       <!-- Top App Container -->
       <div class="max-w-4xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 space-y-5">
 
-        <!-- Rollback / Switcher Pill Notice (Allows instant switch between Modern App & Classic view) -->
-        <div class="flex items-center justify-between px-3 py-1.5 rounded-2xl bg-blue-50 dark:bg-slate-900 border border-blue-200/80 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-300">
-          <div class="flex items-center gap-1.5 font-medium">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Tampilan: <strong>Portal Aplikasi KTP-el</strong></span>
-          </div>
-          <a
-            :href="route('queue.index', { mode: 'classic' })"
-            class="font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
-            title="Kembali ke tampilan standar kartu banner"
-          >
-            <span>Beralih ke Mode Klasik (Rollback)</span>
-            <RotateCcw class="w-3 h-3" />
-          </a>
-        </div>
-
         <!-- Maintenance Alert Banner (If Active) -->
         <div 
           v-if="maintenance?.is_active" 
@@ -53,68 +37,6 @@
           >
             Lihat Informasi Lengkap &rarr;
           </Link>
-        </div>
-
-        <!-- 1. HEADER APP PORTAL (Inspired by Grobogan SuperApp Header) -->
-        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-700 text-white shadow-xl shadow-blue-600/15 border border-blue-400/30 p-5 sm:p-7">
-          <!-- Subtle decorative graphic watermark -->
-          <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-          <div class="absolute -left-10 -top-10 w-40 h-40 bg-sky-300/20 rounded-full blur-2xl pointer-events-none"></div>
-
-          <div class="relative z-10 space-y-4">
-            <!-- App Brand & Title Bar -->
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-inner">
-                  <CreditCard class="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <h1 class="text-lg sm:text-xl font-black tracking-tight leading-none text-white">
-                      Layanan Online KTP-el
-                    </h1>
-                  </div>
-                  <p class="text-xs text-sky-100 font-medium mt-1">
-                    Dinas Kependudukan dan Pencatatan Sipil Kab. Dompu
-                  </p>
-                </div>
-              </div>
-
-              <!-- Live Status Pill Badge -->
-              <div class="shrink-0">
-                <span 
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-[11px] font-bold backdrop-blur-md border shadow-sm"
-                  :class="todayStats.is_open ? 'bg-emerald-500/25 border-emerald-300/40 text-emerald-100' : 'bg-rose-500/25 border-rose-300/40 text-rose-100'"
-                >
-                  <span class="w-2 h-2 rounded-full" :class="todayStats.is_open ? 'bg-emerald-300 animate-ping' : 'bg-rose-300'"></span>
-                  <span>{{ todayStats.is_open ? 'Loket Buka' : (todayStats.is_holiday ? 'Hari Libur' : 'Loket Tutup') }}</span>
-                </span>
-              </div>
-            </div>
-
-            <!-- Subtitle message & Running text style notice -->
-            <div class="pt-1 border-t border-white/15">
-              <p class="text-xs text-sky-50 leading-relaxed max-w-2xl font-normal">
-                Lakukan pendaftaran pelayanan KTP-el, foto berkas persyaratan langsung dari HP, dan pantau hasil verifikasi berkas tanpa harus antre berlama-lama di kantor dinas.
-              </p>
-            </div>
-
-            <!-- Key Feature Badges -->
-            <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-medium text-sky-100">
-              <span class="px-2.5 py-1 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center gap-1">
-                <CheckCircle2 class="w-3.5 h-3.5 text-emerald-300" />
-                100% Gratis Rp 0
-              </span>
-              <span class="px-2.5 py-1 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center gap-1">
-                <CheckCircle2 class="w-3.5 h-3.5 text-emerald-300" />
-                Pra-Verifikasi Online
-              </span>
-              <span class="px-2.5 py-1 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center gap-1">
-                <CheckCircle2 class="w-3.5 h-3.5 text-emerald-300" />
-                Kuota Hari Ini: {{ todayStats.total_remaining }} Slot
-              </span>
-            </div>
-          </div>
         </div>
 
         <!-- 2. SECTION LAYANAN & SURVEY IKM BUTTON (Matching photo) -->

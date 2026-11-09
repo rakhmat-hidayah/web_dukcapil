@@ -2,21 +2,7 @@
   <Head title="Layanan KTP-el & Pra-Verifikasi Digital - Disdukcapil Kabupaten Dompu" />
 
   <PublicLayout>
-    <div class="py-8 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-      <!-- Rollback / Switcher Notice -->
-      <div class="flex items-center justify-between px-4 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-          <span>Tampilan Saat Ini: <strong>Mode Klasik (Banner Standard)</strong></span>
-        </div>
-        <a
-          :href="route('queue.index', { mode: 'app' })"
-          class="font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1.5"
-        >
-          <span>Beralih ke Portal Aplikasi Modern &rarr;</span>
-        </a>
-      </div>
-
+    <div class="py-8 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
       <!-- Maintenance Alert Banner (If Active) -->
       <div v-if="maintenance?.is_active" class="p-5 sm:p-6 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-200 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-amber-500/5">
         <div class="flex items-start gap-3.5">
