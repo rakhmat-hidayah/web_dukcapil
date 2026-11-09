@@ -2136,6 +2136,209 @@
         </div>
       </div>
     </transition>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL HASIL VERIFIKASI BIOMETRIK (PREMIUM NOTIFICATION MODAL)             -->
+    <!-- ========================================================================= -->
+    <transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0 scale-95 translate-y-2"
+      enter-to-class="opacity-100 scale-100 translate-y-0"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100 scale-100 translate-y-0"
+      leave-to-class="opacity-0 scale-95 translate-y-2"
+    >
+      <div
+        v-if="isSelfieResultModalOpen"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
+        @keydown.esc="isSelfieResultModalOpen = false"
+      >
+        <div
+          class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-7 overflow-hidden text-slate-800 dark:text-slate-100 animate-in"
+          role="dialog"
+          aria-modal="true"
+        >
+          <!-- Ambient Decorative Glow -->
+          <div
+            class="absolute -top-16 -right-16 w-56 h-56 rounded-full blur-3xl pointer-events-none opacity-40"
+            :class="{
+              'bg-emerald-400 dark:bg-emerald-600': selfieResultData.decision === 'MATCH',
+              'bg-rose-500 dark:bg-rose-600': selfieResultData.decision === 'MISMATCH',
+              'bg-red-500 dark:bg-red-600': selfieResultData.decision === 'ERROR',
+            }"
+          ></div>
+          <div
+            class="absolute -bottom-16 -left-16 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-30"
+            :class="{
+              'bg-teal-400 dark:bg-teal-600': selfieResultData.decision === 'MATCH',
+              'bg-amber-400 dark:bg-amber-600': selfieResultData.decision === 'MISMATCH',
+              'bg-rose-400 dark:bg-rose-600': selfieResultData.decision === 'ERROR',
+            }"
+          ></div>
+
+          <!-- Close Button -->
+          <button
+            type="button"
+            @click="isSelfieResultModalOpen = false"
+            class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition cursor-pointer z-10"
+            title="Tutup Notifikasi"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+
+          <!-- Header Icon & Status Pill -->
+          <div class="relative flex flex-col items-center text-center space-y-3 pt-2">
+            <!-- Icon Container -->
+            <div
+              class="relative w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-xl transition-transform duration-300 hover:scale-105"
+              :class="{
+                'bg-gradient-to-tr from-emerald-600 to-teal-500 shadow-emerald-500/30': selfieResultData.decision === 'MATCH',
+                'bg-gradient-to-tr from-rose-600 to-amber-600 shadow-rose-500/30': selfieResultData.decision === 'MISMATCH',
+                'bg-gradient-to-tr from-red-600 to-rose-500 shadow-red-500/30': selfieResultData.decision === 'ERROR',
+              }"
+            >
+              <!-- Icon for MATCH -->
+              <svg v-if="selfieResultData.decision === 'MATCH'" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+
+              <!-- Icon for MISMATCH -->
+              <svg v-else-if="selfieResultData.decision === 'MISMATCH'" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+
+              <!-- Icon for ERROR -->
+              <svg v-else class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+
+            <!-- Decision Badge -->
+            <div
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider border shadow-xs"
+              :class="{
+                'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800': selfieResultData.decision === 'MATCH',
+                'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800': selfieResultData.decision === 'MISMATCH',
+                'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800': selfieResultData.decision === 'ERROR',
+              }"
+            >
+              <span
+                class="w-2 h-2 rounded-full animate-pulse"
+                :class="{
+                  'bg-emerald-500': selfieResultData.decision === 'MATCH',
+                  'bg-rose-500': selfieResultData.decision === 'MISMATCH',
+                  'bg-red-500': selfieResultData.decision === 'ERROR',
+                }"
+              ></span>
+              <span>{{ selfieResultData.decision === 'MATCH' ? 'Wajah Sesuai (MATCH)' : (selfieResultData.decision === 'MISMATCH' ? 'Bukan Pemohon (MISMATCH)' : 'Pemeriksaan Gagal') }}</span>
+            </div>
+
+            <!-- Title & Subtitle -->
+            <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
+              {{ selfieResultData.title }}
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm">
+              {{ selfieResultData.subtitle }}
+            </p>
+          </div>
+
+          <!-- Highlight Message Box -->
+          <div
+            class="mt-4 p-4 rounded-2xl border text-xs leading-relaxed"
+            :class="{
+              'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-800/60 text-emerald-950 dark:text-emerald-200': selfieResultData.decision === 'MATCH',
+              'bg-amber-50/80 dark:bg-amber-950/30 border-amber-200/80 dark:border-amber-800/60 text-amber-950 dark:text-amber-200': selfieResultData.decision === 'MISMATCH',
+              'bg-rose-50/80 dark:bg-rose-950/30 border-rose-200/80 dark:border-rose-800/60 text-rose-950 dark:text-rose-200': selfieResultData.decision === 'ERROR',
+            }"
+          >
+            <div class="flex items-start gap-2.5">
+              <span class="text-base select-none mt-0.5">
+                {{ selfieResultData.decision === 'MATCH' ? '✅' : (selfieResultData.decision === 'MISMATCH' ? '⚠️' : '❌') }}
+              </span>
+              <p class="font-medium">
+                {{ selfieResultData.message }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Technical & Security Audit Details -->
+          <div class="mt-4 space-y-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 text-xs">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-700/60">
+              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                Pemusnahan Berkas Fisik:
+              </span>
+              <span class="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>Permanent Destroyed (0 Bytes)</span>
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-700/60">
+              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                Petugas Verifikator:
+              </span>
+              <span class="font-semibold text-slate-800 dark:text-slate-200">
+                {{ selfieResultData.officerName || 'Petugas Verifikator' }}
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-700/60">
+              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Status Permohonan:
+              </span>
+              <span
+                class="font-black px-2 py-0.5 rounded-md text-[10px] uppercase"
+                :class="selfieResultData.decision === 'MATCH'
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                  : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'"
+              >
+                {{ selfieResultData.decision === 'MATCH' ? (application.status || 'DIPROSES') : 'BUTUH PERBAIKAN DOKUMEN' }}
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                Kepatuhan Privasi:
+              </span>
+              <span class="text-slate-600 dark:text-slate-300 font-medium">
+                Private Storage Purged (Zero Retention)
+              </span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="mt-6 flex flex-col sm:flex-row items-center gap-2.5">
+            <button
+              v-if="selfieVerificationState"
+              type="button"
+              @click="viewAuditFromNotification"
+              class="w-full sm:w-auto flex-1 px-4 py-2.5 rounded-xl font-bold text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span>Lihat Bukti Audit</span>
+            </button>
+
+            <button
+              type="button"
+              @click="isSelfieResultModalOpen = false"
+              class="w-full sm:w-auto flex-1 px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer text-white"
+              :class="{
+                'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30': selfieResultData.decision === 'MATCH',
+                'bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white dark:text-slate-900 shadow-slate-900/20': selfieResultData.decision === 'MISMATCH',
+                'bg-rose-600 hover:bg-rose-500 shadow-rose-600/30': selfieResultData.decision === 'ERROR',
+              }"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>Mengerti & Tutup Notifikasi</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </AdminLayout>
 </template>
 
@@ -2336,6 +2539,24 @@ const selfieForm = ref({
 // Audit detail modal
 const isSelfieAuditModalOpen = ref(false)
 
+// Modal Hasil Verifikasi Biometrik (Premium Notification Modal)
+const isSelfieResultModalOpen = ref(false)
+const selfieResultData = ref({
+  type: 'success', // 'success', 'warning', 'error'
+  decision: 'MATCH', // 'MATCH', 'MISMATCH', 'ERROR'
+  title: '',
+  subtitle: '',
+  message: '',
+  officerName: '',
+  verifiedAt: '',
+  deletionStatus: 'DELETED',
+})
+
+const viewAuditFromNotification = () => {
+  isSelfieResultModalOpen.value = false
+  isSelfieAuditModalOpen.value = true
+}
+
 const isSelfieVerified = computed(() => {
   return !!(selfieVerificationState.value && selfieVerificationState.value.decision)
 })
@@ -2411,14 +2632,18 @@ const closeSelfieInspectionModal = () => {
 const submitSelfieVerification = async () => {
   if (!selfieForm.value.decision || !selfieForm.value.statement_agreed || isSubmittingSelfie.value) return
 
+  const chosenDecision = selfieForm.value.decision
+  const chosenVersion = selfieForm.value.statement_version
+  const chosenAgreed = selfieForm.value.statement_agreed
+
   isSubmittingSelfie.value = true
   try {
     const response = await axios.post(
       route('admin.queue.applications.selfie.verify', { applicationId: props.application.id }),
       {
-        decision: selfieForm.value.decision,
-        statement_agreed: selfieForm.value.statement_agreed,
-        statement_version: selfieForm.value.statement_version,
+        decision: chosenDecision,
+        statement_agreed: chosenAgreed,
+        statement_version: chosenVersion,
       }
     )
 
@@ -2426,7 +2651,7 @@ const submitSelfieVerification = async () => {
       selfieVerificationState.value = response.data.verification
       if (selfieDocument.value) {
         selfieDocument.value.is_destroyed = true
-        selfieDocument.value.status = selfieForm.value.decision === 'MATCH' ? 'APPROVED' : 'REVISION_REQUIRED'
+        selfieDocument.value.status = chosenDecision === 'MATCH' ? 'APPROVED' : 'REVISION_REQUIRED'
       }
       if (response.data.application) {
         props.application.status = response.data.application.status
@@ -2437,11 +2662,39 @@ const submitSelfieVerification = async () => {
       }
 
       closeSelfieInspectionModal()
-      alert(response.data.message || 'Verifikasi biometrik berhasil dicatat dan foto telah dimusnahkan secara aman.')
+
+      const isMatch = chosenDecision === 'MATCH'
+      selfieResultData.value = {
+        type: isMatch ? 'success' : 'warning',
+        decision: chosenDecision,
+        title: isMatch
+          ? 'Verifikasi Wajah Berhasil: FOTO SESUAI'
+          : 'Pemeriksaan Selesai: BUKAN PEMOHON',
+        subtitle: isMatch
+          ? 'Wajah pemohon dinyatakan VALID dan sesuai dengan identitas kependudukan.'
+          : 'Pengajuan otomatis dialihkan ke status Butuh Perbaikan Dokumen (MISMATCH).',
+        message: response.data.message || (isMatch
+          ? 'Pemeriksaan foto selesai: SESUAI DENGAN PEMOHON. Berkas foto fisik telah dimusnahkan secara aman dari server.'
+          : 'Pemeriksaan foto selesai: FOTO BUKAN PEMOHON (MISMATCH). Pengajuan ditandai butuh perbaikan dan berkas foto fisik telah dimusnahkan.'),
+        officerName: response.data.verification?.verified_by_name || props.auth?.user?.name || 'Petugas Verifikator',
+        verifiedAt: response.data.verification?.verified_at || new Date().toISOString(),
+        deletionStatus: response.data.verification?.deletion_status || 'DELETED',
+      }
+      isSelfieResultModalOpen.value = true
     }
   } catch (err) {
     console.error('Selfie verification error:', err)
-    alert(err.response?.data?.message || 'Terjadi kesalahan saat memproses verifikasi foto pemohon.')
+    selfieResultData.value = {
+      type: 'error',
+      decision: 'ERROR',
+      title: 'Gagal Memproses Verifikasi',
+      subtitle: 'Terjadi kendala saat memproses konfirmasi hasil pemeriksaan.',
+      message: err.response?.data?.message || 'Terjadi kesalahan sistem saat memproses verifikasi foto pemohon. Silakan coba kembali.',
+      officerName: props.auth?.user?.name || 'Petugas Verifikator',
+      verifiedAt: new Date().toISOString(),
+      deletionStatus: 'FAILED',
+    }
+    isSelfieResultModalOpen.value = true
   } finally {
     isSubmittingSelfie.value = false
   }
