@@ -58,6 +58,14 @@
           >
             Ubah Status Akun
           </button>
+          <button
+            type="button"
+            @click="showDeleteModal = true"
+            class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition shadow-xs cursor-pointer flex items-center gap-1.5"
+          >
+            <Trash2 class="w-3.5 h-3.5" />
+            <span>Hapus Akun</span>
+          </button>
         </div>
       </div>
 
@@ -333,6 +341,54 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- MODAL: Hapus Akun Pemohon -->
+    <Teleport to="body">
+      <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm" @click.self="showDeleteModal = false">
+        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 space-y-4 border border-rose-200 dark:border-rose-900 shadow-2xl">
+          <div class="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-inner">
+            <Trash2 class="w-6 h-6" />
+          </div>
+
+          <div class="text-center space-y-1">
+            <h3 class="text-base font-black text-slate-900 dark:text-white">Hapus Akun Pemohon</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">
+              Apakah Anda yakin ingin menghapus akun pemohon <strong>{{ account.name }}</strong> (NIK: <span class="font-mono text-blue-600 font-bold">{{ account.masked_nik }}</span>)?
+            </p>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 text-[11px] text-rose-800 dark:text-rose-300 space-y-1">
+            <p class="font-bold">⚠️ Perhatian Tindakan Permanen:</p>
+            <ul class="list-disc pl-4 space-y-0.5">
+              <li>Sesi login dan pengikatan browser perangkat pemohon akan langsung dicabut.</li>
+              <li>NIK dan alamat email akan dibebaskan kembali sehingga pemohon dapat mendaftar ulang jika diperlukan.</li>
+              <li>Riwayat berkas permohonan yang telah diajukan tetap tersimpan di arsip antrian.</li>
+            </ul>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              @click="showDeleteModal = false"
+              :disabled="deleteForm.processing"
+              class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              @click="submitDeleteAccount"
+              :disabled="deleteForm.processing"
+              class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <Trash2 class="w-3.5 h-3.5" />
+              <span v-if="deleteForm.processing">Menghapus Akun...</span>
+              <span v-else>Ya, Hapus Akun Ini</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </AdminLayout>
 </template>
 
@@ -346,6 +402,7 @@ import {
   ShieldAlert,
   FileText,
   History,
+  Trash2,
 } from '@lucide/vue'
 
 const props = defineProps({
@@ -358,6 +415,9 @@ const props = defineProps({
 const showRevokeModal = ref(false)
 const showStatusModal = ref(false)
 const showVerifyModal = ref(false)
+const showDeleteModal = ref(false)
+
+const deleteForm = useForm({})
 
 const revokeForm = useForm({
   reason: '',
@@ -409,6 +469,14 @@ const submitVerifyIdentity = () => {
   verifyForm.post(route('admin.queue.applicants.verify-identity', props.account.id), {
     onSuccess: () => {
       showVerifyModal.value = false
+    },
+  })
+}
+
+const submitDeleteAccount = () => {
+  deleteForm.delete(route('admin.queue.applicants.destroy', props.account.id), {
+    onSuccess: () => {
+      showDeleteModal.value = false
     },
   })
 }

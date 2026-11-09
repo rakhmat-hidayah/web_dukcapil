@@ -239,4 +239,27 @@ class ApplicantManagementController extends Controller
 
         return back()->with('success', "Identitas pemohon berhasil diverifikasi ({$decision}) dan pemberitahuan telah dikirimkan ke email pemohon.");
     }
+
+    /**
+     * Delete an applicant account permanently.
+     */
+    public function destroy(Request $request, ApplicantAccount $account): RedirectResponse
+    {
+        $applicantName = $account->name;
+        $maskedNik = $account->masked_nik;
+
+        // Revoke active device if any
+        $this->deviceService->revokeActiveDevice(
+            account: $account,
+            reason: 'Akun pemohon dihapus oleh administrator',
+            actorType: 'admin',
+            actorId: Auth::id()
+        );
+
+        // Permanently force delete to release NIK & email unique indexes
+        $account->forceDelete();
+
+        return redirect()->route('admin.queue.applicants.index')
+            ->with('success', "Akun pemohon {$applicantName} ({$maskedNik}) berhasil dihapus dari sistem.");
+    }
 }

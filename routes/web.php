@@ -518,6 +518,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/applicants/{account}/revoke-device', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'revokeDevice'])->name('applicants.revoke-device');
             Route::post('/applicants/{account}/update-status', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'updateStatus'])->name('applicants.update-status');
             Route::post('/applicants/{account}/verify-identity', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'verifyIdentity'])->name('applicants.verify-identity');
+            Route::delete('/applicants/{account}', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'destroy'])->name('applicants.destroy');
         });
 
         // -------------------------------------------------------------

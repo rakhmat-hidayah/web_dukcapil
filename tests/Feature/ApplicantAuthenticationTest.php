@@ -423,4 +423,44 @@ class ApplicantAuthenticationTest extends TestCase
             return $mail->hasTo($email);
         });
     }
+
+    /**
+     * Test 24: Admin dapat menghapus akun pemohon secara permanen.
+     */
+    public function test_admin_can_delete_applicant_account(): void
+    {
+        \Spatie\Permission\Models\Role::findOrCreate('Super Administrator', 'web');
+
+        $admin = User::first() ?? User::factory()->create([
+            'email'    => 'admin.delete@dukcapil.dompukab.go.id',
+            'username' => 'admin_delete',
+        ]);
+        $admin->assignRole('Super Administrator');
+
+        $email = 'hapus.akun@gmail.com';
+        $nik = '5205011205950077';
+
+        ApplicantAccount::where('email_normalized', $email)->forceDelete();
+
+        $account = new ApplicantAccount();
+        $account->name = 'PEMOHON AKAN DIHAPUS';
+        $account->email_normalized = $email;
+        $account->nik = $nik;
+        $account->password = Hash::make('Password123#');
+        $account->account_status = ApplicantAccount::STATUS_ACTIVE;
+        $account->identity_status = ApplicantAccount::IDENTITY_VERIFIED;
+        $account->save();
+
+        $accountId = $account->id;
+
+        $response = $this->actingAs($admin, 'web')
+            ->delete(route('admin.queue.applicants.destroy', $account));
+
+        $response->assertRedirect(route('admin.queue.applicants.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('applicant_accounts', [
+            'id' => $accountId,
+        ]);
+    }
 }

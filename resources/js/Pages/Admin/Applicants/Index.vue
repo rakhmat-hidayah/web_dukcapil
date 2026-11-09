@@ -226,6 +226,15 @@
                       <span>Detail</span>
                       <ChevronRight class="w-3.5 h-3.5" />
                     </Link>
+
+                    <button
+                      type="button"
+                      @click="openDeleteModal(acc)"
+                      title="Hapus Akun Pemohon"
+                      class="p-1.5 rounded-xl text-rose-500 hover:text-white hover:bg-rose-600 transition cursor-pointer"
+                    >
+                      <Trash2 class="w-4 h-4" />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -323,6 +332,60 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Modal Hapus Akun Pemohon -->
+    <Teleport to="body">
+      <div 
+        v-if="selectedApplicantForDelete"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
+        @click.self="selectedApplicantForDelete = null"
+      >
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-rose-200 dark:border-rose-900 space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-inner">
+            <Trash2 class="w-6 h-6" />
+          </div>
+
+          <div class="text-center space-y-1">
+            <h3 class="text-base font-black text-slate-900 dark:text-white">
+              Hapus Akun Pemohon
+            </h3>
+            <p class="text-xs text-slate-500">
+              Apakah Anda yakin ingin menghapus akun pemohon <strong>{{ selectedApplicantForDelete.name }}</strong> (NIK: <span class="font-mono text-blue-600 font-bold">{{ selectedApplicantForDelete.masked_nik }}</span>)?
+            </p>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 text-[11px] text-rose-800 dark:text-rose-300 space-y-1">
+            <p class="font-bold">⚠️ Perhatian Tindakan Permanen:</p>
+            <ul class="list-disc pl-4 space-y-0.5">
+              <li>Sesi login dan pengikatan browser perangkat pemohon akan langsung dicabut.</li>
+              <li>NIK dan alamat email akan dibebaskan kembali sehingga pemohon dapat mendaftar ulang jika diperlukan.</li>
+              <li>Riwayat berkas permohonan yang telah diajukan tetap tersimpan di arsip antrian.</li>
+            </ul>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-2">
+            <button
+              type="button"
+              @click="selectedApplicantForDelete = null"
+              :disabled="deleteForm.processing"
+              class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              @click="submitDeleteApplicant"
+              :disabled="deleteForm.processing"
+              class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <Trash2 class="w-3.5 h-3.5" />
+              <span v-if="deleteForm.processing">Menghapus...</span>
+              <span v-else>Ya, Hapus Akun Ini</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </AdminLayout>
 </template>
 
@@ -330,7 +393,7 @@
 import { ref } from 'vue'
 import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { ChevronRight, UserCheck, Mail } from '@lucide/vue'
+import { ChevronRight, UserCheck, Mail, Trash2 } from '@lucide/vue'
 
 const props = defineProps({
   accounts: Object,
@@ -378,6 +441,23 @@ const submitQuickVerify = () => {
   quickVerifyForm.post(route('admin.queue.applicants.verify-identity', selectedApplicantForVerify.value.id), {
     onSuccess: () => {
       selectedApplicantForVerify.value = null
+    },
+  })
+}
+
+// Delete applicant account modal & submit
+const selectedApplicantForDelete = ref(null)
+const deleteForm = useForm({})
+
+const openDeleteModal = (acc) => {
+  selectedApplicantForDelete.value = acc
+}
+
+const submitDeleteApplicant = () => {
+  if (!selectedApplicantForDelete.value) return
+  deleteForm.delete(route('admin.queue.applicants.destroy', selectedApplicantForDelete.value.id), {
+    onSuccess: () => {
+      selectedApplicantForDelete.value = null
     },
   })
 }
