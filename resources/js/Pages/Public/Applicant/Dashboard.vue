@@ -50,7 +50,7 @@
             <span>MENUNGGU VERIFIKASI PETUGAS</span>
           </div>
           <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-            {{ applicant.is_verified ? 'Akun telah terverifikasi resmi oleh Dinas Dukcapil.' : 'Verifikasi fisik/data kependudukan oleh petugas.' }}
+            {{ applicant.is_verified ? 'Akun telah terverifikasi oleh Dinas Dukcapil.' : 'Verifikasi fisik/data kependudukan oleh petugas.' }}
           </p>
         </div>
 

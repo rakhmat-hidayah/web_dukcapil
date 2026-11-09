@@ -10,7 +10,7 @@
             Verifikasi Pendaftar Baru & Akun Pemohon
           </h1>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Pemeriksaan dan verifikasi identitas pendaftar baru KTP-el, validasi NIK resmi, pemantauan perangkat aktif (One Account One Browser), serta pelepasan sesi.
+            Pemeriksaan dan verifikasi identitas pendaftar baru KTP-el, validasi NIK, pemantauan perangkat aktif (One Account One Browser), serta pelepasan sesi.
           </p>
         </div>
       </div>
@@ -260,7 +260,7 @@
               Verifikasi Identitas Pendaftar Baru
             </h3>
             <p class="text-xs text-slate-500 mt-1">
-              Validasi kesesuaian identitas pemohon kependudukan berdasarkan data resmi Disdukcapil.
+              Validasi kesesuaian identitas pemohon kependudukan berdasarkan data Disdukcapil.
             </p>
           </div>
 
