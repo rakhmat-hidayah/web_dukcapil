@@ -301,55 +301,67 @@
                 <!-- Applicant & NIK with Photo Preview -->
                 <td class="px-4 py-2.5">
                   <div class="flex items-center gap-3">
-                    <!-- Case 1: Photo Available (Unverified, File exists) -->
+                    <!-- Case 1: Photo Available (Unverified, File exists) - BLURRED FOR PRIVACY -->
                     <div
                       v-if="app.selfie_thumbnail_url || app.selfie_url"
-                      class="relative w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800"
-                      title="Foto selfie pemohon"
+                      class="group relative w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800 cursor-pointer"
+                      title="Foto selfie disamarkan demi privasi pemohon (Arahkan kursor untuk melihat jelas)"
                     >
                       <img
                         :src="app.selfie_thumbnail_url || app.selfie_url"
                         :alt="app.applicant_name"
-                        class="w-full h-full object-cover select-none pointer-events-none"
+                        class="w-full h-full object-cover select-none pointer-events-none filter blur-[4px] group-hover:blur-none transition-all duration-300 scale-110 group-hover:scale-100"
                         loading="lazy"
                       />
+                      <!-- Privacy icon badge overlay (dissolves on hover) -->
+                      <div class="absolute inset-0 flex items-center justify-center bg-black/15 group-hover:opacity-0 transition-opacity pointer-events-none">
+                        <svg class="w-3.5 h-3.5 text-white drop-shadow-sm opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>
+                        </svg>
+                      </div>
                     </div>
 
-                    <!-- Case 2: Photo Examined & Verified (Biometric Verified, File Safely Destroyed) -->
+                    <!-- Case 2: Photo Examined & Verified (Biometric Verified, File Safely Destroyed) - NEAT & POLISHED -->
                     <div
                       v-else-if="app.selfie_verification || app.is_selfie_verified"
-                      class="relative w-11 h-10 rounded-xl border flex flex-col items-center justify-center shrink-0 shadow-xs select-none"
+                      class="relative w-10 h-10 rounded-xl border flex flex-col items-center justify-center shrink-0 shadow-xs select-none transition-all"
                       :class="app.selfie_verification?.decision === 'MATCH'
-                        ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400'"
+                        ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400'"
                       :title="app.selfie_verification?.decision === 'MATCH'
-                        ? 'Foto Telah Diperiksa: SESUAI PEMOHON (MATCH). Berkas fisik telah dimusnahkan secara aman.'
-                        : 'Foto Telah Diperiksa: BUKAN PEMOHON (MISMATCH). Berkas fisik telah dimusnahkan secara aman.'"
+                        ? 'Foto Telah Terverifikasi: SESUAI PEMOHON (MATCH). Berkas fisik telah dimusnahkan secara aman.'
+                        : 'Foto Telah Terverifikasi: BUKAN PEMOHON (MISMATCH). Berkas fisik telah dimusnahkan secara aman.'"
                     >
-                      <!-- MATCH Icon -->
-                      <svg v-if="app.selfie_verification?.decision === 'MATCH'" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                      <!-- MISMATCH Icon -->
-                      <svg v-else class="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
+                      <!-- Styled Pill Icon -->
+                      <div
+                        class="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
+                        :class="app.selfie_verification?.decision === 'MATCH'
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-rose-500 text-white'"
+                      >
+                        <svg v-if="app.selfie_verification?.decision === 'MATCH'" class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <svg v-else class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </div>
                       <span
-                        class="text-[6.5px] font-black uppercase tracking-tight leading-none mt-0.5 text-center px-0.5"
+                        class="text-[7.5px] font-black uppercase tracking-tight leading-none mt-1 text-center"
                         :class="app.selfie_verification?.decision === 'MATCH' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'"
                       >
-                        Terverifikasi
+                        {{ app.selfie_verification?.decision === 'MATCH' ? 'Sesuai' : 'Bukan' }}
                       </span>
                     </div>
 
                     <!-- Case 3: No Photo Uploaded / Empty -->
                     <div
                       v-else
-                      class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700/60 border border-dashed border-slate-300 dark:border-slate-600 flex flex-col items-center justify-center text-slate-400 shrink-0 select-none"
+                      class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 shrink-0 select-none"
                       title="Belum ada foto selfie pemohon"
                     >
                       <svg class="w-4 h-4 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                      <span class="text-[7px] leading-tight text-slate-400">No Foto</span>
+                      <span class="text-[7.5px] font-bold text-slate-400 mt-0.5 leading-none">Kosong</span>
                     </div>
 
                     <!-- Applicant Text Info -->
@@ -360,14 +372,15 @@
                         </div>
                         <span
                           v-if="app.selfie_verification || app.is_selfie_verified"
-                          class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase shrink-0"
+                          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase shrink-0 border shadow-2xs"
                           :class="app.selfie_verification?.decision === 'MATCH'
-                            ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
-                            : 'bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800'"
+                            ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+                            : 'bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800'"
                           :title="app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai (MATCH)' : 'Bukan Pemohon (MISMATCH)'"
                         >
-                          <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                          <span>{{ app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai' : 'Bukan Pemohon' }}</span>
+                          <svg v-if="app.selfie_verification?.decision === 'MATCH'" class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                          <svg v-else class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                          <span>Terverifikasi: {{ app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai' : 'Bukan Pemohon' }}</span>
                         </span>
                       </div>
                       <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
