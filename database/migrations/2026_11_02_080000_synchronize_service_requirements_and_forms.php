@@ -151,14 +151,28 @@ return new class extends Migration
         // 3. Perubahan Elemen Data KTP-el (perubahan-elemen-data)
         $perubahan = ServiceType::where('slug', 'perubahan-elemen-data')->first();
         if ($perubahan) {
-            // Delete F-1.02 from Perubahan Elemen Data if present (it should strictly use F-1.06)
-            ServiceDocument::where('service_type_id', $perubahan->id)
+            // Delete F-1.02 from Perubahan Elemen Data if present and unreferenced
+            $legacyDocs = ServiceDocument::where('service_type_id', $perubahan->id)
                 ->where(function ($q) {
                     $q->where('label', 'like', '%F-1.02%')
                       ->orWhere('label', 'like', '%F1.02%')
                       ->orWhere('label', 'like', '%Pendaftaran Peristiwa%');
                 })
-                ->delete();
+                ->get();
+
+            foreach ($legacyDocs as $doc) {
+                $hasLinkedUploads = DB::table('queue_application_documents')
+                    ->where('service_document_id', $doc->id)
+                    ->exists();
+
+                if (!$hasLinkedUploads) {
+                    try {
+                        $doc->delete();
+                    } catch (\Throwable) {
+                        // Safe ignore
+                    }
+                }
+            }
 
             $this->syncDoc($perubahan->id, 'KTP-el Lama Asli', [
                 'sort_order'       => 1,

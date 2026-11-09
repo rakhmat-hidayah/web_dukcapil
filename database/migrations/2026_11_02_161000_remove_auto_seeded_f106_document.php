@@ -27,8 +27,16 @@ return new class extends Migration
                 ->get();
 
             foreach ($f106Docs as $doc) {
-                $doc->applicationDocuments()->delete();
-                $doc->delete();
+                try {
+                    $hasUploads = DB::table('queue_application_documents')
+                        ->where('service_document_id', $doc->id)
+                        ->exists();
+                    if (!$hasUploads) {
+                        $doc->delete();
+                    }
+                } catch (\Throwable) {
+                    // Safe ignore
+                }
             }
         }
     }
