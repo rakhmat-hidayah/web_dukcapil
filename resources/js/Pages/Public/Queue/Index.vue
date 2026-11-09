@@ -361,13 +361,14 @@
                       Opsional
                     </span>
                     <a
-                      v-if="doc.template_url"
-                      :href="doc.template_url"
+                      v-if="getDownloadLink(doc)"
+                      :href="getDownloadLink(doc)"
                       target="_blank"
-                      class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline mt-0.5"
+                      download
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition shadow-xs mt-1 cursor-pointer"
                     >
-                      <FileDown class="w-3 h-3" />
-                      <span>Unduh Blanko</span>
+                      <FileDown class="w-3.5 h-3.5" />
+                      <span>Download Formulir</span>
                     </a>
                   </div>
                 </div>
@@ -409,22 +410,45 @@
               <ClipboardList class="w-5 h-5 text-blue-600" />
               <h3 class="text-base font-black text-slate-900 dark:text-white">Persyaratan Berkas KTP-el</h3>
             </div>
-            <button type="button" @click="showRequirementsModal = false" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+            <button type="button" @click="showRequirementsModal = false" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center cursor-pointer">
               <X class="w-4 h-4" />
             </button>
           </div>
 
           <div class="p-5 overflow-y-auto space-y-4 text-xs">
-            <div v-for="srv in services" :key="srv.id" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-2">
+            <div v-for="srv in services" :key="srv.id" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-3">
               <h4 class="font-black text-sm text-slate-900 dark:text-white">{{ srv.name }}</h4>
-              <ul class="space-y-1.5 pl-4 list-disc text-slate-600 dark:text-slate-300">
-                <li v-for="doc in srv.documents" :key="doc.id">
-                  <strong>{{ doc.label }}</strong> 
-                  <span v-if="doc.is_required" class="text-rose-500 font-bold"> (Wajib)</span>
-                  <span v-else class="text-slate-600 dark:text-slate-400"> (Opsional)</span>
+              
+              <ul class="space-y-2 text-slate-700 dark:text-slate-300">
+                <li 
+                  v-for="doc in srv.documents" 
+                  :key="doc.id"
+                  class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                >
+                  <div class="flex items-start gap-2 min-w-0">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
+                    <div class="text-xs">
+                      <span class="font-bold text-slate-900 dark:text-slate-100">{{ doc.label }}</span>
+                      <span v-if="doc.is_required" class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
+                      <span v-else class="text-slate-600 dark:text-slate-400 text-[11px] ml-1">(Opsional)</span>
+                    </div>
+                  </div>
+
+                  <!-- Download Button for Formulir F-1.02, F-1.07, etc. -->
+                  <a
+                    v-if="getDownloadLink(doc)"
+                    :href="getDownloadLink(doc)"
+                    target="_blank"
+                    download
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-xs shrink-0 self-start sm:self-auto cursor-pointer"
+                  >
+                    <FileDown class="w-3.5 h-3.5" />
+                    <span>Download Formulir</span>
+                  </a>
                 </li>
               </ul>
-              <div class="pt-2">
+
+              <div class="pt-2 flex justify-end">
                 <Link 
                   :href="route('queue.apply.create', { layanan: srv.slug })" 
                   class="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
@@ -708,5 +732,20 @@ function scrollToTop() {
 function cleanPhone(phone) {
   if (!phone) return '6282124824114';
   return phone.replace(/[^0-9]/g, '');
+}
+
+function getDownloadLink(doc) {
+  if (doc?.template_url) return doc.template_url;
+  const label = (doc?.label || '').toLowerCase();
+  if (label.includes('f-1.02') || label.includes('f1.02') || label.includes('pendaftaran peristiwa')) {
+    return '/downloads/stream/19';
+  }
+  if (label.includes('f-1.07') || label.includes('f1.07') || label.includes('kuasa')) {
+    return '/downloads/stream/24';
+  }
+  if (label.includes('f-1.06') || label.includes('f1.06') || label.includes('perubahan elemen')) {
+    return '/downloads/stream/23';
+  }
+  return null;
 }
 </script>
