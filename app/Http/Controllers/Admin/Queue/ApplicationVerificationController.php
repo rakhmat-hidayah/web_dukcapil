@@ -290,10 +290,11 @@ class ApplicationVerificationController extends Controller
         }
 
         return Inertia::render('Admin/Queue/Applications/Show', [
-            'application'    => $application,
-            'availableSlots' => $availableSlots,
-            'can_delete'     => Auth::user()?->isSuperAdmin() ?? false,
-            'is_trashed'     => $application->trashed(),
+            'application'        => $application,
+            'availableSlots'     => $availableSlots,
+            'rejectionTemplates' => \App\Models\Queue\QueueRejectionTemplate::getActiveTemplates(),
+            'can_delete'         => Auth::user()?->isSuperAdmin() ?? false,
+            'is_trashed'         => $application->trashed(),
         ]);
     }
 

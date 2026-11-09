@@ -339,6 +339,203 @@
           </button>
         </div>
       </form>
+
+      <!-- TEMPLATE ALASAN PENOLAKAN & PERBAIKAN (DYNAMIC MANAGEMENT) -->
+      <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-700 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold shadow-sm">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-black text-slate-900 dark:text-white">
+                  Template Alasan Penolakan & Perbaikan Dokumen
+                </h3>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                  {{ (rejectionTemplates || []).length }} Template
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Kelola pesan formal dan sopan yang muncul pada dropdown pemeriksaan berkas pemohon. Admin dapat menambah, mengubah, atau menghapus template ini.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            @click="openCreateTemplateModal"
+            class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition flex items-center gap-2 self-start sm:self-auto"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>Tambah Template Baru</span>
+          </button>
+        </div>
+
+        <!-- Template List Table -->
+        <div v-if="rejectionTemplates && rejectionTemplates.length > 0" class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="p-3.5 w-12 text-center">Urutan</th>
+                <th class="p-3.5 w-64">Judul Template (Dropdown)</th>
+                <th class="p-3.5">Isi Teks Formal & Sopan</th>
+                <th class="p-3.5 w-24 text-center">Status</th>
+                <th class="p-3.5 w-28 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 bg-white dark:bg-slate-800">
+              <tr
+                v-for="tpl in rejectionTemplates"
+                :key="tpl.id"
+                class="hover:bg-slate-50/80 dark:hover:bg-slate-750 transition"
+              >
+                <td class="p-3.5 text-center font-bold text-slate-500 dark:text-slate-400">
+                  {{ tpl.sort_order }}
+                </td>
+                <td class="p-3.5 font-bold text-slate-900 dark:text-white">
+                  {{ tpl.title }}
+                </td>
+                <td class="p-3.5 text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                  {{ tpl.content }}
+                </td>
+                <td class="p-3.5 text-center">
+                  <span
+                    v-if="tpl.is_active"
+                    class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
+                  >
+                    Aktif
+                  </span>
+                  <span
+                    v-else
+                    class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                  >
+                    Nonaktif
+                  </span>
+                </td>
+                <td class="p-3.5 text-center">
+                  <div class="flex items-center justify-center gap-1.5">
+                    <button
+                      type="button"
+                      @click="openEditTemplateModal(tpl)"
+                      title="Edit Template"
+                      class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    </button>
+                    <button
+                      type="button"
+                      @click="deleteTemplate(tpl)"
+                      title="Hapus Template"
+                      class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div v-else class="text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+          <p class="text-xs text-slate-500">Belum ada template penolakan. Klik tombol di atas untuk menambah template baru.</p>
+        </div>
+      </div>
+
+      <!-- MODAL CREATE / EDIT TEMPLATE -->
+      <div v-if="templateModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+            <h3 class="text-base font-black text-slate-900 dark:text-white">
+              {{ editingTemplateId ? 'Edit Template Penolakan' : 'Tambah Template Penolakan Baru' }}
+            </h3>
+            <button
+              type="button"
+              @click="closeTemplateModal"
+              class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm font-bold"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form @submit.prevent="saveTemplate" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Judul Template (Teks pada Dropdown) *
+              </label>
+              <input
+                v-model="templateForm.title"
+                type="text"
+                required
+                placeholder="Contoh: Foto selfie pemohon tidak sesuai"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 font-semibold"
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Urutan Tampilan
+                </label>
+                <input
+                  v-model.number="templateForm.sort_order"
+                  type="number"
+                  min="0"
+                  class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Status Penggunaan
+                </label>
+                <label class="flex items-center gap-2 pt-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    v-model="templateForm.is_active"
+                    class="rounded text-rose-600 focus:ring-rose-500"
+                  />
+                  <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Aktifkan Template</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Isi Pesan Formal & Sopan (Otomatis masuk ke pesan penolakan) *
+              </label>
+              <textarea
+                v-model="templateForm.content"
+                rows="5"
+                required
+                placeholder="Tuliskan alasan penolakan dengan bahasa baku, santun, dan jelas bagi pemohon..."
+                class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 leading-relaxed"
+              ></textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                @click="closeTemplateModal"
+                class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                :disabled="templateSaving || !templateForm.title || !templateForm.content"
+                class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-bold shadow-md shadow-rose-600/20 transition flex items-center gap-1.5"
+              >
+                <span v-if="templateSaving">Menyimpan...</span>
+                <span v-else>{{ editingTemplateId ? 'Perbarui Template' : 'Simpan Template' }}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </AdminLayout>
 </template>
@@ -350,6 +547,10 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps({
   settings: Object,
+  rejectionTemplates: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const page = usePage()
@@ -443,5 +644,89 @@ const quickSaveMaintenance = () => {
     preserveScroll: true,
     onFinish: () => { submitting.value = false },
   })
+}
+
+// Rejection Template Management
+const templateModalOpen = ref(false)
+const templateSaving = ref(false)
+const editingTemplateId = ref(null)
+
+const templateForm = ref({
+  title: '',
+  content: '',
+  type: 'all',
+  sort_order: 1,
+  is_active: true,
+})
+
+const openCreateTemplateModal = () => {
+  editingTemplateId.value = null
+  const nextOrder = (props.rejectionTemplates?.length || 0) + 1
+  templateForm.value = {
+    title: '',
+    content: '',
+    type: 'all',
+    sort_order: nextOrder,
+    is_active: true,
+  }
+  templateModalOpen.value = true
+}
+
+const openEditTemplateModal = (tpl) => {
+  editingTemplateId.value = tpl.id
+  templateForm.value = {
+    title: tpl.title,
+    content: tpl.content,
+    type: tpl.type || 'all',
+    sort_order: tpl.sort_order ?? 0,
+    is_active: Boolean(tpl.is_active),
+  }
+  templateModalOpen.value = true
+}
+
+const closeTemplateModal = () => {
+  templateModalOpen.value = false
+  editingTemplateId.value = null
+}
+
+const saveTemplate = () => {
+  templateSaving.value = true
+  if (editingTemplateId.value) {
+    router.put(
+      route('admin.queue.rejection-templates.update', editingTemplateId.value),
+      templateForm.value,
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          closeTemplateModal()
+        },
+        onFinish: () => {
+          templateSaving.value = false
+        },
+      }
+    )
+  } else {
+    router.post(
+      route('admin.queue.rejection-templates.store'),
+      templateForm.value,
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          closeTemplateModal()
+        },
+        onFinish: () => {
+          templateSaving.value = false
+        },
+      }
+    )
+  }
+}
+
+const deleteTemplate = (tpl) => {
+  if (confirm(`Apakah Anda yakin ingin menghapus template "${tpl.title}"?`)) {
+    router.delete(route('admin.queue.rejection-templates.destroy', tpl.id), {
+      preserveScroll: true,
+    })
+  }
 }
 </script>

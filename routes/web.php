@@ -476,6 +476,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Settings
             Route::get('/settings', [\App\Http\Controllers\Admin\Queue\QueueSettingsController::class, 'index'])->name('settings.index');
             Route::match(['post', 'put'], '/settings', [\App\Http\Controllers\Admin\Queue\QueueSettingsController::class, 'update'])->name('settings.update');
+
+            // Rejection & Revision Templates (CRUD)
+            Route::get('/rejection-templates', [\App\Http\Controllers\Admin\Queue\QueueRejectionTemplateController::class, 'index'])->name('rejection-templates.index');
+            Route::post('/rejection-templates', [\App\Http\Controllers\Admin\Queue\QueueRejectionTemplateController::class, 'store'])->name('rejection-templates.store');
+            Route::put('/rejection-templates/{id}', [\App\Http\Controllers\Admin\Queue\QueueRejectionTemplateController::class, 'update'])->name('rejection-templates.update');
+            Route::delete('/rejection-templates/{id}', [\App\Http\Controllers\Admin\Queue\QueueRejectionTemplateController::class, 'destroy'])->name('rejection-templates.destroy');
         });
 
         // -------------------------------------------------------------

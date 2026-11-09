@@ -17,8 +17,13 @@ class QueueSettingsController extends Controller
             return $items->keyBy('key');
         });
 
+        $rejectionTemplates = \App\Models\Queue\QueueRejectionTemplate::orderBy('sort_order', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
+
         return Inertia::render('Admin/Queue/Settings/Index', [
-            'settings' => $settings,
+            'settings'           => $settings,
+            'rejectionTemplates' => $rejectionTemplates,
         ]);
     }
 

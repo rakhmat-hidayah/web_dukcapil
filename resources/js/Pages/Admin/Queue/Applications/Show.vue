@@ -1196,14 +1196,43 @@
         </p>
 
         <div class="space-y-3">
+          <!-- Template Perbaikan Dropdown -->
+          <div v-if="rejectionTemplates && rejectionTemplates.length > 0" class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/80 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Pilih Template Catatan Perbaikan
+              </label>
+              <span class="text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-900/50">
+                Formal & Sopan
+              </span>
+            </div>
+            <select
+              v-model="selectedRevisionTemplateId"
+              @change="applyRevisionTemplate"
+              class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium cursor-pointer shadow-sm"
+            >
+              <option value="">-- Pilih Template Catatan Cepat (Atau Tulis Manual) --</option>
+              <option
+                v-for="tpl in rejectionTemplates"
+                :key="tpl.id"
+                :value="tpl.id"
+              >
+                {{ tpl.sort_order ? tpl.sort_order + '. ' : '' }}{{ tpl.title }}
+              </option>
+            </select>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 italic">
+              Memilih template akan otomatis mengisi catatan perbaikan di bawah. Petugas tetap dapat menyesuaikan kalimat.
+            </p>
+          </div>
+
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
             Instruksi / Catatan Perbaikan *
           </label>
           <textarea
             v-model="revisionForm.notes"
-            rows="3"
+            rows="4"
             placeholder="Tuliskan secara jelas dokumen mana yang buram, tidak lengkap, atau perlu difoto ulang..."
-            class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"
           ></textarea>
 
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 pt-2">
@@ -1256,14 +1285,43 @@
         </p>
 
         <div class="space-y-3">
+          <!-- Template Penolakan Dropdown -->
+          <div v-if="rejectionTemplates && rejectionTemplates.length > 0" class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/80 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Pilih Template Alasan Penolakan
+              </label>
+              <span class="text-[10px] font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded-full border border-rose-200 dark:border-rose-900/50">
+                Formal & Sopan
+              </span>
+            </div>
+            <select
+              v-model="selectedRejectTemplateId"
+              @change="applyRejectTemplate"
+              class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 font-medium cursor-pointer shadow-sm"
+            >
+              <option value="">-- Pilih Template Cepat (Atau Tulis Manual) --</option>
+              <option
+                v-for="tpl in rejectionTemplates"
+                :key="tpl.id"
+                :value="tpl.id"
+              >
+                {{ tpl.sort_order ? tpl.sort_order + '. ' : '' }}{{ tpl.title }}
+              </option>
+            </select>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 italic">
+              Memilih template akan otomatis mengisi alasan penolakan formal di bawah. Petugas tetap dapat menyesuaikan isinya.
+            </p>
+          </div>
+
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
             Alasan Penolakan Pengajuan *
           </label>
           <textarea
             v-model="rejectForm.reason"
-            rows="3"
+            rows="4"
             placeholder="Contoh: Dokumen fisik asli yang diserahkan di loket tidak cocok dengan data pendaftaran..."
-            class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500"
+            class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 leading-relaxed"
           ></textarea>
         </div>
 
@@ -2359,6 +2417,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  rejectionTemplates: {
+    type: Array,
+    default: () => [],
+  },
   can_delete: {
     type: Boolean,
     default: false,
@@ -2989,6 +3051,26 @@ const submitApprove = () => {
   )
 }
 
+// Rejection & Revision Templates State
+const selectedRejectTemplateId = ref('')
+const selectedRevisionTemplateId = ref('')
+
+const applyRejectTemplate = () => {
+  if (!selectedRejectTemplateId.value) return
+  const found = (props.rejectionTemplates || []).find(t => t.id === Number(selectedRejectTemplateId.value))
+  if (found) {
+    rejectForm.value.reason = found.content
+  }
+}
+
+const applyRevisionTemplate = () => {
+  if (!selectedRevisionTemplateId.value) return
+  const found = (props.rejectionTemplates || []).find(t => t.id === Number(selectedRevisionTemplateId.value))
+  if (found) {
+    revisionForm.value.notes = found.content
+  }
+}
+
 // Revision Modal State
 const revisionModalOpen = ref(false)
 const revisionSubmitting = ref(false)
@@ -3000,6 +3082,7 @@ const revisionForm = ref({
 const openRevisionModal = () => {
   revisionForm.value.notes = ''
   revisionForm.value.rejectedDocIds = []
+  selectedRevisionTemplateId.value = ''
   revisionModalOpen.value = true
 }
 
@@ -3037,6 +3120,7 @@ const rejectForm = ref({
 
 const openRejectModal = () => {
   rejectForm.value.reason = ''
+  selectedRejectTemplateId.value = ''
   rejectModalOpen.value = true
 }
 
