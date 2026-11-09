@@ -130,6 +130,7 @@ class QueueApplication extends Model
         'physical_verified_notes',
         'selfie_document',
         'selfie_verification',
+        'is_selfie_verified',
         'selfie_url',
         'selfie_thumbnail_url',
         'tracking_url',
@@ -266,6 +267,11 @@ class QueueApplication extends Model
         return $this->relationLoaded('selfieVerification')
             ? $this->getRelation('selfieVerification')
             : $this->selfieVerification()->first();
+    }
+
+    public function getIsSelfieVerifiedAttribute(): bool
+    {
+        return $this->selfie_verification !== null;
     }
 
     public function getNikAttribute(): ?string

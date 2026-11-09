@@ -301,7 +301,7 @@
                 <!-- Applicant & NIK with Photo Preview -->
                 <td class="px-4 py-2.5">
                   <div class="flex items-center gap-3">
-                    <!-- Photo Thumbnail -->
+                    <!-- Case 1: Photo Available (Unverified, File exists) -->
                     <div
                       v-if="app.selfie_thumbnail_url || app.selfie_url"
                       @click.stop="openPhotoPreview(app)"
@@ -318,6 +318,36 @@
                         <svg class="w-3.5 h-3.5 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
                       </div>
                     </div>
+
+                    <!-- Case 2: Photo Examined & Verified (Biometric Verified, File Safely Destroyed) -->
+                    <div
+                      v-else-if="app.selfie_verification || app.is_selfie_verified"
+                      @click.stop="openPhotoPreview(app)"
+                      class="relative w-11 h-10 rounded-xl border flex flex-col items-center justify-center shrink-0 shadow-xs cursor-pointer select-none transition transform hover:scale-105"
+                      :class="app.selfie_verification?.decision === 'MATCH'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 hover:ring-2 hover:ring-emerald-500'
+                        : 'bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:ring-2 hover:ring-rose-500'"
+                      :title="app.selfie_verification?.decision === 'MATCH'
+                        ? 'Foto Telah Diperiksa: SESUAI PEMOHON (MATCH). Berkas fisik telah dimusnahkan secara aman.'
+                        : 'Foto Telah Diperiksa: BUKAN PEMOHON (MISMATCH). Berkas fisik telah dimusnahkan secara aman.'"
+                    >
+                      <!-- MATCH Icon -->
+                      <svg v-if="app.selfie_verification?.decision === 'MATCH'" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                      <!-- MISMATCH Icon -->
+                      <svg v-else class="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <span
+                        class="text-[6.5px] font-black uppercase tracking-tight leading-none mt-0.5 text-center px-0.5"
+                        :class="app.selfie_verification?.decision === 'MATCH' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'"
+                      >
+                        Terverifikasi
+                      </span>
+                    </div>
+
+                    <!-- Case 3: No Photo Uploaded / Empty -->
                     <div
                       v-else
                       class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700/60 border border-dashed border-slate-300 dark:border-slate-600 flex flex-col items-center justify-center text-slate-400 shrink-0 select-none"
@@ -329,8 +359,21 @@
 
                     <!-- Applicant Text Info -->
                     <div class="min-w-0">
-                      <div class="font-bold text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-[180px]">
-                        {{ app.applicant_name }}
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <div class="font-bold text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-[180px]">
+                          {{ app.applicant_name }}
+                        </div>
+                        <span
+                          v-if="app.selfie_verification || app.is_selfie_verified"
+                          class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase shrink-0"
+                          :class="app.selfie_verification?.decision === 'MATCH'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
+                            : 'bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800'"
+                          :title="app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai (MATCH)' : 'Bukan Pemohon (MISMATCH)'"
+                        >
+                          <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                          <span>{{ app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai' : 'Bukan Pemohon' }}</span>
+                        </span>
                       </div>
                       <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
                         <span>{{ maskNik(app.applicant_nik) }}</span>
@@ -586,13 +629,66 @@
               </button>
             </div>
 
-            <!-- Image Container -->
+            <!-- Image / Verified Audit Container -->
             <div class="p-6 bg-slate-950 flex items-center justify-center relative min-h-[260px] max-h-[58vh]">
+              <!-- If photo file still exists -->
               <img
+                v-if="previewPhotoApp.selfie_url || previewPhotoApp.selfie_thumbnail_url"
                 :src="previewPhotoApp.selfie_url || previewPhotoApp.selfie_thumbnail_url"
                 :alt="previewPhotoApp.applicant_name"
                 class="max-w-full max-h-[52vh] object-contain rounded-2xl shadow-2xl border border-white/10"
               />
+              <!-- If photo was already examined, verified & physically destroyed -->
+              <div
+                v-else-if="previewPhotoApp.selfie_verification || previewPhotoApp.is_selfie_verified"
+                class="w-full max-w-sm rounded-2xl p-6 text-center space-y-3.5 border transition"
+                :class="previewPhotoApp.selfie_verification?.decision === 'MATCH'
+                  ? 'bg-emerald-950/40 border-emerald-600/60 text-emerald-200'
+                  : 'bg-rose-950/40 border-rose-600/60 text-rose-200'"
+              >
+                <div
+                  class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-white shadow-xl"
+                  :class="previewPhotoApp.selfie_verification?.decision === 'MATCH'
+                    ? 'bg-emerald-600 shadow-emerald-500/30'
+                    : 'bg-rose-600 shadow-rose-500/30'"
+                >
+                  <svg v-if="previewPhotoApp.selfie_verification?.decision === 'MATCH'" class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                  <svg v-else class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <div class="space-y-1">
+                  <span
+                    class="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider"
+                    :class="previewPhotoApp.selfie_verification?.decision === 'MATCH'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'"
+                  >
+                    {{ previewPhotoApp.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai (MATCH)' : 'Bukan Pemohon (MISMATCH)' }}
+                  </span>
+                  <h4 class="text-white font-black text-base mt-2">
+                    Foto Wajah Sudah Diperiksa
+                  </h4>
+                  <p class="text-xs text-slate-300 leading-relaxed">
+                    Sesuai ketentuan keamanan biometrik, file foto fisik telah dimusnahkan permanen dari server (Zero Retention) setelah hasil pemeriksaan dicatat.
+                  </p>
+                </div>
+                <div class="pt-2 border-t border-white/10 text-[11px] text-slate-300 space-y-1.5 text-left">
+                  <div class="flex justify-between">
+                    <span class="text-slate-400">Petugas Pemeriksa:</span>
+                    <span class="font-bold text-white">{{ previewPhotoApp.selfie_verification?.verified_by_name || 'Petugas Verifikator' }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-400">Status Berkas Fisik:</span>
+                    <span class="font-bold text-emerald-400 flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                      Dimusnahkan (DELETED)
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <!-- Fallback: No Photo Uploaded -->
+              <div v-else class="text-slate-400 text-xs text-center py-12">
+                Tidak ada berkas foto selfie yang tersimpan.
+              </div>
             </div>
 
             <!-- Detail Information -->
