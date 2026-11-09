@@ -11,7 +11,24 @@
           <a v-if="websiteSettings.social_instagram" :href="websiteSettings.social_instagram" target="_blank" rel="noopener noreferrer" class="hidden md:inline hover:text-amber-300 transition font-bold">📸 Instagram</a>
           <a v-if="websiteSettings.social_facebook" :href="websiteSettings.social_facebook" target="_blank" rel="noopener noreferrer" class="hidden md:inline hover:text-amber-300 transition font-bold">🌐 Facebook</a>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3">
+          <Link 
+            v-if="$page.props.auth?.applicant" 
+            :href="route('applicant.dashboard')" 
+            class="hover:underline flex items-center gap-1 font-bold text-amber-300"
+          >
+            <UserCheck class="w-3 h-3" />
+            <span>Akun: {{ $page.props.auth.applicant.name.split(' ')[0] }}</span>
+          </Link>
+          <Link 
+            v-else 
+            :href="route('applicant.login')" 
+            class="hover:underline flex items-center gap-1 font-bold text-amber-200 hover:text-white"
+          >
+            <LogIn class="w-3 h-3" />
+            <span>Login Pemohon</span>
+          </Link>
+          <span class="text-white/40">|</span>
           <a href="/admin/login" class="hover:underline">Operator Portal</a>
         </div>
       </div>
@@ -371,8 +388,27 @@
 
           <Link href="/contact" @click="mobileMenuOpen = false" class="flex items-center px-5 py-3.5 text-xs font-bold text-gray-800 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-primary-600 transition">Kontak</Link>
 
-          <!-- SANAI Mobile Button -->
-          <div class="p-4">
+          <!-- Mobile Action Buttons (Pemohon Login & SANAI) -->
+          <div class="p-4 space-y-2">
+            <Link 
+              v-if="$page.props.auth?.applicant" 
+              :href="route('applicant.dashboard')" 
+              @click="mobileMenuOpen = false"
+              class="w-full py-2.5 px-4 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center gap-2 border border-blue-200 dark:border-blue-800"
+            >
+              <UserCheck class="w-4 h-4" />
+              <span>Akun Pemohon ({{ $page.props.auth.applicant.name }})</span>
+            </Link>
+            <Link 
+              v-else 
+              :href="route('applicant.login')" 
+              @click="mobileMenuOpen = false"
+              class="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm"
+            >
+              <LogIn class="w-4 h-4" />
+              <span>Login Pemohon (NIK)</span>
+            </Link>
+
             <a 
               v-if="sanaiConfig.sanai_is_active && sanaiConfig.sanai_display_navbar"
               :href="sanaiConfig.sanai_url"
@@ -528,7 +564,7 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { Search, Sun, Moon, Menu, ChevronDown, Globe, ArrowUpRight, Ticket } from '@lucide/vue';
+import { Search, Sun, Moon, Menu, ChevronDown, Globe, ArrowUpRight, Ticket, UserCheck, LogIn } from '@lucide/vue';
 
 const props = defineProps({
   hideFooter: {

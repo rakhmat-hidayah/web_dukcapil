@@ -52,14 +52,33 @@
               </p>
             </div>
 
-            <!-- Green Pill "★ Isi Survey IKM" Button (Exact like Grobogan screenshot) -->
-            <Link
-              :href="route('public.survey.index')"
-              class="inline-flex items-center gap-1 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] sm:text-xs font-black shadow-sm transition active:scale-95 shrink-0"
-            >
-              <Star class="w-3 h-3 fill-current text-amber-300" />
-              <span>Isi Survey IKM</span>
-            </Link>
+            <!-- Green Pill "★ Isi Survey IKM" Button & Desktop Applicant Login -->
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <Link
+                v-if="$page.props.auth?.applicant"
+                :href="route('applicant.dashboard')"
+                class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] sm:text-xs font-black shadow-sm transition active:scale-95 shrink-0"
+              >
+                <UserCheck class="w-3.5 h-3.5" />
+                <span>Akun Pemohon</span>
+              </Link>
+              <Link
+                v-else
+                :href="route('applicant.login')"
+                class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] sm:text-xs font-black shadow-sm transition active:scale-95 shrink-0"
+              >
+                <LogIn class="w-3.5 h-3.5" />
+                <span>Login Pemohon</span>
+              </Link>
+
+              <Link
+                :href="route('public.survey.index')"
+                class="inline-flex items-center gap-1 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] sm:text-xs font-black shadow-sm transition active:scale-95 shrink-0"
+              >
+                <Star class="w-3 h-3 fill-current text-amber-300" />
+                <span>Isi Survey IKM</span>
+              </Link>
+            </div>
           </div>
 
           <!-- 3. CIRCULAR NEUMORPHIC ICON GRID (4 Core Services Only) -->
@@ -264,13 +283,22 @@
             <span>Riwayat</span>
           </Link>
 
-          <!-- Nav 5: Akun Pemohon -->
+          <!-- Nav 5: Menu Login / Akun Pemohon -->
           <Link 
+            v-if="$page.props.auth?.applicant"
+            :href="route('applicant.dashboard')"
+            class="flex flex-col items-center py-1 text-blue-600 dark:text-blue-400 transition"
+          >
+            <UserCheck class="w-5 h-5 mb-0.5" />
+            <span class="font-extrabold text-blue-600 dark:text-blue-400">Akun</span>
+          </Link>
+          <Link 
+            v-else
             :href="route('applicant.login')"
             class="flex flex-col items-center py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
           >
-            <UserCheck class="w-5 h-5 mb-0.5" />
-            <span>Akun Saya</span>
+            <LogIn class="w-5 h-5 mb-0.5" />
+            <span class="font-bold">Login</span>
           </Link>
         </div>
       </nav>
@@ -648,7 +676,7 @@ import PublicLayout from '@/Layouts/PublicLayout.vue';
 import {
   CreditCard, RotateCcw, FileText, Camera, Search, FolderClock,
   Calendar, ClipboardList, MessageCircle, Star, AlertCircle, CheckCircle2,
-  ArrowRight, ChevronRight, X, FileDown, Info, UserCheck
+  ArrowRight, ChevronRight, X, FileDown, Info, UserCheck, LogIn
 } from '@lucide/vue';
 
 const props = defineProps({
