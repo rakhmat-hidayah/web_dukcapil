@@ -125,6 +125,7 @@ class QueueApplicationService
         $absenceReason = $attendanceType !== 'self' ? ($data['absence_reason'] ?? $data['representative_reason'] ?? null) : null;
 
         $application = new QueueApplication([
+            'applicant_account_id'         => $data['applicant_account_id'] ?? \Illuminate\Support\Facades\Auth::guard('applicant')->id(),
             'reg_number'                   => QueueNumberGenerator::generateRegNumber(),
             'service_type_id'              => $serviceType->id,
             'status'                       => QueueApplication::STATUS_DRAFT,

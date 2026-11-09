@@ -264,15 +264,14 @@
             <span>Riwayat</span>
           </Link>
 
-          <!-- Nav 5: Helpdesk WA -->
-          <a 
-            :href="'https://wa.me/' + cleanPhone(settings.helpdesk_phone)"
-            target="_blank"
-            class="flex flex-col items-center py-1 text-slate-600 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition"
+          <!-- Nav 5: Akun Pemohon -->
+          <Link 
+            :href="route('applicant.login')"
+            class="flex flex-col items-center py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
           >
-            <MessageCircle class="w-5 h-5 mb-0.5" />
-            <span>Bantuan</span>
-          </a>
+            <UserCheck class="w-5 h-5 mb-0.5" />
+            <span>Akun Saya</span>
+          </Link>
         </div>
       </nav>
 
@@ -649,7 +648,7 @@ import PublicLayout from '@/Layouts/PublicLayout.vue';
 import {
   CreditCard, RotateCcw, FileText, Camera, Search, FolderClock,
   Calendar, ClipboardList, MessageCircle, Star, AlertCircle, CheckCircle2,
-  ArrowRight, ChevronRight, X, FileDown, Info
+  ArrowRight, ChevronRight, X, FileDown, Info, UserCheck
 } from '@lucide/vue';
 
 const props = defineProps({

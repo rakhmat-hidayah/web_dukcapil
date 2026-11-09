@@ -77,10 +77,17 @@ class HandleInertiaRequests extends Middleware
             
             // Auth details with granular roles and permissions
             'auth' => [
-                'user' => $user ? $user->only('id', 'username', 'name', 'email', 'is_active', 'last_login_at') : null,
-                'roles' => $user ? $user->getRoleNames() : [],
-                'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
-                'is_super_admin' => $user ? $user->isSuperAdmin() : false,
+                'user' => ($user && $user instanceof \App\Models\User) ? $user->only('id', 'username', 'name', 'email', 'is_active', 'last_login_at') : null,
+                'roles' => ($user && method_exists($user, 'getRoleNames')) ? $user->getRoleNames() : [],
+                'permissions' => ($user && method_exists($user, 'getAllPermissions')) ? $user->getAllPermissions()->pluck('name') : [],
+                'is_super_admin' => ($user && method_exists($user, 'isSuperAdmin')) ? $user->isSuperAdmin() : false,
+                'applicant' => \Illuminate\Support\Facades\Auth::guard('applicant')->user() ? [
+                    'id'              => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->id,
+                    'name'            => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->name,
+                    'masked_nik'      => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->masked_nik,
+                    'account_status'  => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->account_status,
+                    'identity_status' => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->identity_status,
+                ] : null,
             ],
             
             // Cached branding and site settings

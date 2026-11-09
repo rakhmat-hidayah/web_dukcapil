@@ -57,6 +57,7 @@ class QueueApplication extends Model
     ];
 
     protected $fillable = [
+        'applicant_account_id',
         'reg_number',
         'access_token',
         'service_type_id',
@@ -235,6 +236,11 @@ class QueueApplication extends Model
             return substr($nik, 0, 6) . '******' . substr($nik, 12);
         }
         return substr($nik, 0, 4) . '****';
+    }
+
+    public function applicantAccount()
+    {
+        return $this->belongsTo(\App\Models\Applicant\ApplicantAccount::class, 'applicant_account_id');
     }
 
     public function checkedInUser()

@@ -48,6 +48,8 @@ return Application::configure(basePath: dirname(__DIR__))
             '2fa' => \App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
             'record.visitor' => \App\Http\Middleware\RecordVisitor::class,
             'admin.timeout' => \App\Http\Middleware\AdminIdleTimeout::class,
+            'applicant.device' => \App\Http\Middleware\EnsureApplicantDeviceValid::class,
+            'applicant.verified' => \App\Http\Middleware\EnsureApplicantIdentityVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

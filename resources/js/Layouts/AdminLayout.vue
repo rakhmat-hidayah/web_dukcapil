@@ -522,6 +522,7 @@ const menuGroups = [
       { label: 'Pemohon Registrasi & Verifikasi', route: 'admin.queue.applications.index', icon: FileCheck },
       { label: 'Jenis Layanan KTP-el', route: 'admin.queue.service-types.index', icon: FileText },
       { label: 'Jadwal & Kuota', route: 'admin.queue.schedules.index', icon: CalendarDays },
+      { label: 'Akun Pemohon (One Device)', route: 'admin.queue.applicants.index', icon: Users },
       { label: 'Pengaturan Antrian', route: 'admin.queue.settings.index', icon: Settings },
     ]
   },

@@ -86,13 +86,17 @@ Route::get('/statistik-kependudukan', [\App\Http\Controllers\Public\DemographicC
 Route::prefix('layanan/antrian')->name('queue.')->group(function () {
     Route::get('/', [\App\Http\Controllers\Public\Queue\QueueInfoController::class, 'index'])->name('index');
     Route::post('/cek-status', [\App\Http\Controllers\Public\Queue\QueueInfoController::class, 'checkStatus'])->name('check');
-    Route::get('/daftar', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'create'])->name('apply.create');
-    Route::post('/daftar', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'storeDraft'])->name('apply.store');
-    Route::get('/daftar/{regNumber}/dokumen', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'showDocuments'])->name('apply.documents');
-    Route::post('/daftar/{regNumber}/dokumen', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'uploadDocument'])->name('apply.upload-doc');
-    Route::delete('/daftar/{regNumber}/dokumen/{documentId}', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'removeDocument'])->name('apply.remove-doc');
-    Route::post('/daftar/{regNumber}/submit', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'submit'])->name('apply.submit');
-    Route::get('/daftar/{regNumber}/dokumen/{documentId}/preview', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'serveDraftDocument'])->name('apply.preview-doc');
+
+    // Application creation (Requires active applicant account & verified identity)
+    Route::middleware(['applicant.device', 'applicant.verified'])->group(function () {
+        Route::get('/daftar', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'create'])->name('apply.create');
+        Route::post('/daftar', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'storeDraft'])->name('apply.store');
+        Route::get('/daftar/{regNumber}/dokumen', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'showDocuments'])->name('apply.documents');
+        Route::post('/daftar/{regNumber}/dokumen', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'uploadDocument'])->name('apply.upload-doc');
+        Route::delete('/daftar/{regNumber}/dokumen/{documentId}', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'removeDocument'])->name('apply.remove-doc');
+        Route::post('/daftar/{regNumber}/submit', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'submit'])->name('apply.submit');
+        Route::get('/daftar/{regNumber}/dokumen/{documentId}/preview', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'serveDraftDocument'])->name('apply.preview-doc');
+    });
     
     // Status tracking, schedule booking & re-submission
     Route::get('/status/{token}', [\App\Http\Controllers\Public\Queue\ApplicantDashboardController::class, 'show'])->name('status');
@@ -110,6 +114,27 @@ Route::prefix('layanan/antrian')->name('queue.')->group(function () {
 
     // Quick Tracking & QR Code Scan resolver (prefixed)
     Route::get('/lacak/{code}', [\App\Http\Controllers\Public\Queue\QueueTrackController::class, 'track'])->where('code', '.*')->name('track');
+});
+
+// ── Applicant Authentication & Portal (NIK + Password, One Active Browser) ───
+Route::prefix('layanan/pemohon')->name('applicant.')->group(function () {
+    Route::get('/masuk', [\App\Http\Controllers\Public\Applicant\ApplicantAuthController::class, 'showLogin'])->name('login');
+    Route::post('/masuk', [\App\Http\Controllers\Public\Applicant\ApplicantAuthController::class, 'login'])->name('login.post');
+    Route::get('/daftar', [\App\Http\Controllers\Public\Applicant\ApplicantAuthController::class, 'showRegister'])->name('register');
+    Route::post('/daftar', [\App\Http\Controllers\Public\Applicant\ApplicantAuthController::class, 'register'])->name('register.post');
+    Route::get('/verifikasi-otp', [\App\Http\Controllers\Public\Applicant\ApplicantAuthController::class, 'showVerifyOtp'])->name('verify-otp');
+    Route::post('/verifikasi-otp', [\App\Http\Controllers\Public\Applicant\ApplicantAuthController::class, 'verifyOtp'])->name('verify-otp.post');
+    Route::post('/kirim-ulang-otp', [\App\Http\Controllers\Public\Applicant\ApplicantAuthController::class, 'resendOtp'])->name('resend-otp');
+
+    // Account & Device Recovery
+    Route::get('/pemulihan', [\App\Http\Controllers\Public\Applicant\ApplicantRecoveryController::class, 'showRecover'])->name('recover');
+    Route::post('/pemulihan/kirim-otp', [\App\Http\Controllers\Public\Applicant\ApplicantRecoveryController::class, 'requestRecoveryOtp'])->name('recover.send-otp');
+    Route::post('/pemulihan/konfirmasi', [\App\Http\Controllers\Public\Applicant\ApplicantRecoveryController::class, 'completeRecovery'])->name('recover.complete');
+
+    // Applicant Portal Dashboard (requires valid bound active device)
+    Route::get('/dashboard', [\App\Http\Controllers\Public\Applicant\ApplicantPortalController::class, 'index'])
+        ->middleware('applicant.device')
+        ->name('dashboard');
 });
 
 // Universal Direct QR Code / Barcode Tracking URL (Root-level for short, crisp QR codes)
@@ -486,6 +511,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/rejection-templates', [\App\Http\Controllers\Admin\Queue\QueueRejectionTemplateController::class, 'store'])->name('rejection-templates.store');
             Route::put('/rejection-templates/{id}', [\App\Http\Controllers\Admin\Queue\QueueRejectionTemplateController::class, 'update'])->name('rejection-templates.update');
             Route::delete('/rejection-templates/{id}', [\App\Http\Controllers\Admin\Queue\QueueRejectionTemplateController::class, 'destroy'])->name('rejection-templates.destroy');
+
+            // Applicant Accounts Management (One Account One Device, Revocation & Identity Verification)
+            Route::get('/applicants', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'index'])->name('applicants.index');
+            Route::get('/applicants/{account}', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'show'])->name('applicants.show');
+            Route::post('/applicants/{account}/revoke-device', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'revokeDevice'])->name('applicants.revoke-device');
+            Route::post('/applicants/{account}/update-status', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'updateStatus'])->name('applicants.update-status');
+            Route::post('/applicants/{account}/verify-identity', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'verifyIdentity'])->name('applicants.verify-identity');
         });
 
         // -------------------------------------------------------------

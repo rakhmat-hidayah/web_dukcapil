@@ -12,7 +12,7 @@ class EnsureTwoFactorAuthenticated
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (!$user || !($user instanceof \App\Models\User)) {
             return $next($request);
         }
 
