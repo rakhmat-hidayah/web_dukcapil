@@ -41,13 +41,13 @@
         </div>
 
         <!-- 2. SECTION LAYANAN & SURVEY IKM BUTTON (Matching photo) -->
-        <div class="space-y-2 sm:space-y-3">
+        <div class="space-y-2.5 sm:space-y-3.5">
           <div class="flex items-center justify-between px-0.5">
             <div>
-              <h2 class="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+              <h2 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                 Layanan
               </h2>
-              <p class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
+              <p class="text-[10.5px] sm:text-xs text-slate-500 dark:text-slate-400">
                 Pilih menu pelayanan KTP-el di bawah ini untuk memulai pengajuan
               </p>
             </div>
@@ -57,32 +57,32 @@
               <Link
                 v-if="$page.props.auth?.applicant"
                 :href="route('applicant.dashboard')"
-                class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] sm:text-xs font-black shadow-sm transition active:scale-95 shrink-0"
+                class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-black shadow-sm transition active:scale-95 shrink-0"
               >
-                <UserCheck class="w-3.5 h-3.5" />
+                <UserCheck class="w-4 h-4" />
                 <span>Akun Pemohon</span>
               </Link>
               <Link
                 v-else
                 :href="route('applicant.login')"
-                class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] sm:text-xs font-black shadow-sm transition active:scale-95 shrink-0"
+                class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-black shadow-sm transition active:scale-95 shrink-0"
               >
-                <LogIn class="w-3.5 h-3.5" />
+                <LogIn class="w-4 h-4" />
                 <span>Login Pemohon</span>
               </Link>
 
               <Link
                 :href="route('public.survey.index')"
-                class="inline-flex items-center gap-1 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] sm:text-xs font-black shadow-sm transition active:scale-95 shrink-0"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] sm:text-xs font-black shadow-sm transition active:scale-95 shrink-0"
               >
-                <Star class="w-3 h-3 fill-current text-amber-300" />
+                <Star class="w-3.5 h-3.5 fill-current text-amber-300" />
                 <span>Isi Survey IKM</span>
               </Link>
             </div>
           </div>
 
           <!-- 3. CIRCULAR NEUMORPHIC ICON GRID (4 Core Services Only) -->
-          <div class="grid grid-cols-4 gap-1.5 sm:gap-4 py-3 px-1.5 sm:p-5 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800">
+          <div class="grid grid-cols-4 gap-1.5 sm:gap-4 py-4 px-1.5 sm:py-6 sm:px-5 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800">
             
             <!-- Icon 1: KTP Hilang -->
             <button
@@ -90,14 +90,14 @@
               @click="openServiceModalBySlug('cetak-ktp-hilang')"
               class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center text-white shadow-md shadow-sky-500/25 ring-2 sm:ring-4 ring-sky-100 dark:ring-sky-950/60 group-hover:scale-105 transition-transform duration-200">
+              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center text-white shadow-md shadow-sky-500/25 ring-3 sm:ring-6 ring-sky-100 dark:ring-sky-950/60 group-hover:scale-105 transition-transform duration-200">
                 <!-- Neumorphic 3D styled inner icon -->
-                <CreditCard class="w-6 h-6 sm:w-7 sm:h-7" />
+                <CreditCard class="w-7 h-7 sm:w-9 sm:h-9" />
               </div>
-              <span class="mt-1.5 text-[10.5px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-2 text-[11.5px] sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 KTP-el Hilang
               </span>
-              <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Surat Hilang</span>
+              <span class="text-[9px] sm:text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">Surat Hilang</span>
             </button>
 
             <!-- Icon 2: KTP Rusak -->
@@ -106,13 +106,13 @@
               @click="openServiceModalBySlug('cetak-ktp-rusak')"
               class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25 ring-2 sm:ring-4 ring-blue-100 dark:ring-blue-950/60 group-hover:scale-105 transition-transform duration-200">
-                <RotateCcw class="w-6 h-6 sm:w-7 sm:h-7" />
+              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25 ring-3 sm:ring-6 ring-blue-100 dark:ring-blue-950/60 group-hover:scale-105 transition-transform duration-200">
+                <RotateCcw class="w-7 h-7 sm:w-9 sm:h-9" />
               </div>
-              <span class="mt-1.5 text-[10.5px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-2 text-[11.5px] sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 KTP-el Rusak
               </span>
-              <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Fisik Patah/Pudar</span>
+              <span class="text-[9px] sm:text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">Fisik Patah/Pudar</span>
             </button>
 
             <!-- Icon 3: Perubahan Data -->
@@ -121,13 +121,13 @@
               @click="openServiceModalBySlug('perubahan-elemen-data')"
               class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-cyan-400 to-teal-600 flex items-center justify-center text-white shadow-md shadow-teal-500/25 ring-2 sm:ring-4 ring-teal-100 dark:ring-teal-950/60 group-hover:scale-105 transition-transform duration-200">
-                <FileText class="w-6 h-6 sm:w-7 sm:h-7" />
+              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-cyan-400 to-teal-600 flex items-center justify-center text-white shadow-md shadow-teal-500/25 ring-3 sm:ring-6 ring-teal-100 dark:ring-teal-950/60 group-hover:scale-105 transition-transform duration-200">
+                <FileText class="w-7 h-7 sm:w-9 sm:h-9" />
               </div>
-              <span class="mt-1.5 text-[10.5px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-2 text-[11.5px] sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 Ubah Elemen Data
               </span>
-              <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Status / Alamat</span>
+              <span class="text-[9px] sm:text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">Status / Alamat</span>
             </button>
 
             <!-- Icon 4: Perekaman Baru (Pemula) -->
@@ -136,13 +136,13 @@
               @click="openServiceModalBySlug('perekaman-ktp-el-baru')"
               class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-emerald-400 to-green-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/25 ring-2 sm:ring-4 ring-emerald-100 dark:ring-emerald-950/60 group-hover:scale-105 transition-transform duration-200">
-                <Camera class="w-6 h-6 sm:w-7 sm:h-7" />
+              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-emerald-400 to-green-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/25 ring-3 sm:ring-6 ring-emerald-100 dark:ring-emerald-950/60 group-hover:scale-105 transition-transform duration-200">
+                <Camera class="w-7 h-7 sm:w-9 sm:h-9" />
               </div>
-              <span class="mt-1.5 text-[10.5px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-2 text-[11.5px] sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 Perekaman Baru
               </span>
-              <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Pemula 16-17 Thn</span>
+              <span class="text-[9px] sm:text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">Pemula 16-17 Thn</span>
             </button>
 
           </div>
