@@ -7,36 +7,37 @@
       <!-- Top App Container -->
       <div class="max-w-4xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 space-y-5">
 
-        <!-- Maintenance Alert Banner (If Active) -->
+        <!-- Compact Maintenance Alert Bar (If Active) -->
         <div 
           v-if="maintenance?.is_active" 
-          class="p-4 sm:p-5 rounded-3xl bg-amber-500/10 dark:bg-amber-500/15 border-2 border-amber-400 dark:border-amber-700 text-amber-950 dark:text-amber-200 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-amber-500/5"
+          @click="showMaintenanceModal = true"
+          class="px-3.5 py-2.5 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/60 dark:border-amber-600/50 flex items-center justify-between gap-2.5 shadow-xs text-amber-950 dark:text-amber-200 cursor-pointer hover:bg-amber-500/15 transition group"
         >
-          <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
-              <AlertCircle class="w-5 h-5" />
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-7 h-7 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <AlertCircle class="w-4 h-4" />
             </div>
-            <div>
-              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-600 text-white mb-1">
-                Informasi Pemeliharaan
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-amber-600 text-white leading-none shrink-0">
+                  Pemeliharaan
+                </span>
+                <p class="text-xs font-bold text-amber-950 dark:text-amber-100 truncate">
+                  {{ maintenance.title || 'Pendaftaran Online Sedang Ditutup Sementara' }}
+                </p>
               </div>
-              <h3 class="font-bold text-sm sm:text-base text-amber-950 dark:text-amber-100">
-                {{ maintenance.title || 'Layanan Pendaftaran Online Sedang Ditutup Sementara' }}
-              </h3>
-              <p class="text-xs text-amber-900/80 dark:text-amber-300/90 mt-0.5 leading-relaxed">
-                {{ maintenance.message }}
-              </p>
-              <p v-if="maintenance.estimated_end" class="text-xs text-amber-800 dark:text-amber-400 font-bold mt-1">
-                Estimasi Dibuka: {{ maintenance.estimated_end }}
+              <p v-if="maintenance.estimated_end" class="text-[10px] text-amber-800 dark:text-amber-300 font-medium truncate mt-0.5">
+                Estimasi Dibuka: <strong class="font-bold">{{ maintenance.estimated_end }}</strong>
               </p>
             </div>
           </div>
-          <Link
-            :href="route('queue.apply.create')"
-            class="shrink-0 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-md"
+          <button
+            type="button"
+            class="shrink-0 px-2.5 py-1.5 rounded-xl bg-amber-600 group-hover:bg-amber-500 text-white font-bold text-[11px] transition shadow-xs flex items-center gap-1 cursor-pointer"
           >
-            Lihat Informasi Lengkap &rarr;
-          </Link>
+            <span>Detail</span>
+            <ChevronRight class="w-3.5 h-3.5" />
+          </button>
         </div>
 
         <!-- 2. SECTION LAYANAN & SURVEY IKM BUTTON (Matching photo) -->
@@ -640,6 +641,67 @@
       </div>
     </Teleport>
 
+    <!-- MODAL 4: DETAIL INFORMASI PEMELIHARAAN SISTEM -->
+    <Teleport to="body">
+      <div 
+        v-if="showMaintenanceModal"
+        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
+        @click.self="showMaintenanceModal = false"
+      >
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 animate-in slide-in-from-bottom duration-200">
+          <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                <AlertCircle class="w-4 h-4" />
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-900 dark:text-white leading-tight">Informasi Pemeliharaan</h3>
+                <span class="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">Layanan Pendaftaran Online</span>
+              </div>
+            </div>
+            <button 
+              type="button" 
+              @click="showMaintenanceModal = false" 
+              class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 transition cursor-pointer"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs leading-relaxed">
+            <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60">
+              <h4 class="font-bold text-amber-950 dark:text-amber-200 text-sm mb-1.5">
+                {{ maintenance.title || 'Layanan Pendaftaran Online Sedang Ditutup Sementara' }}
+              </h4>
+              <p class="text-amber-900/90 dark:text-amber-300 text-xs whitespace-pre-line leading-relaxed">
+                {{ maintenance.message }}
+              </p>
+            </div>
+
+            <div v-if="maintenance.estimated_end" class="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 flex items-center justify-between">
+              <span class="font-medium text-blue-900 dark:text-blue-300">Estimasi Selesai:</span>
+              <span class="font-black text-blue-700 dark:text-blue-400">{{ maintenance.estimated_end }}</span>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 text-[11px] text-slate-600 dark:text-slate-300 flex items-start gap-2">
+              <Info class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+              <span>Bagi masyarakat yang membutuhkan pelayanan mendesak, silakan langsung hadir ke loket kantor Disdukcapil Kabupaten Dompu: {{ settings.office_address || 'Jl. Soekarno Hatta No. 09 Dompu' }}.</span>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button
+              type="button"
+              @click="showMaintenanceModal = false"
+              class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold text-xs transition cursor-pointer"
+            >
+              Saya Mengerti & Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
   </PublicLayout>
 </template>
 
@@ -695,6 +757,7 @@ function submitSearch() {
 const selectedService = ref(null);
 const showRequirementsModal = ref(false);
 const showQuotaModal = ref(false);
+const showMaintenanceModal = ref(false);
 
 function openServiceModalBySlug(slug) {
   const match = props.services.find(s => s.slug === slug);
