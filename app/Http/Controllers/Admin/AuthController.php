@@ -159,6 +159,7 @@ class AuthController extends Controller
         // 8. Normal login (No 2FA required for this user)
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
+        session(['admin_last_activity_time' => now()->timestamp]);
         RateLimiter::clear($throttleKey);
 
         $user->recordSuccessfulLogin($request->ip());
@@ -266,6 +267,7 @@ class AuthController extends Controller
 
         Auth::login($user, $remember);
         $request->session()->regenerate();
+        session(['admin_last_activity_time' => now()->timestamp]);
 
         $user->two_factor_last_used_at = now();
         $user->recordSuccessfulLogin($request->ip());

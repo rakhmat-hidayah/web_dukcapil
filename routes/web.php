@@ -184,9 +184,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/login/two-factor', [AuthController::class, 'verifyTwoFactorChallenge'])->name('login.two-factor.store');
     });
 
-    // Authenticated Admin
-    Route::middleware('auth')->group(function () {
+    // Authenticated Admin (Protected with 15-minute idle session timeout)
+    Route::middleware(['auth', 'admin.timeout'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::post('/keep-alive', function () {
+            session(['admin_last_activity_time' => now()->timestamp]);
+            return response()->json(['status' => 'active', 'timestamp' => now()->timestamp]);
+        })->name('keep-alive');
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Account Security & 2FA Management (Available for all authenticated operators)

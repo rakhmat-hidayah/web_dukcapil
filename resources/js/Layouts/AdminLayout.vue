@@ -233,11 +233,71 @@
         <p class="font-medium text-xs leading-relaxed">{{ toast.message }}</p>
       </div>
     </transition>
+
+    <!-- Idle Timeout Warning Modal (14th Minute Inactivity Alert) -->
+    <Teleport to="body">
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0 scale-95"
+        enter-to-class="opacity-100 scale-100"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 scale-100"
+        leave-to-class="opacity-0 scale-95"
+      >
+        <div
+          v-if="showTimeoutWarning"
+          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
+        >
+          <div class="relative w-full max-w-md p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-amber-500/30 text-center space-y-4">
+            <div class="w-16 h-16 mx-auto rounded-full bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center text-amber-500 ring-8 ring-amber-500/10 animate-pulse">
+              <Clock class="w-8 h-8" />
+            </div>
+
+            <div class="space-y-2">
+              <h3 class="text-lg font-bold text-slate-800 dark:text-white">
+                Peringatan Sesi Tidak Aktif
+              </h3>
+              <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                Tidak ada aktivitas selama <strong class="font-semibold text-slate-900 dark:text-white">14 menit</strong>. Demi keamanan data sistem kependudukan Disdukcapil, sesi akun Anda akan otomatis ditutup dalam:
+              </p>
+              <div class="inline-flex items-center justify-center px-4 py-2 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 rounded-2xl">
+                <span class="text-2xl font-black font-mono tracking-wider text-amber-600 dark:text-amber-400">
+                  {{ formatCountdown(countdownSeconds) }}
+                </span>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-slate-600 dark:text-slate-300">
+              Klik tombol di bawah jika Anda masih bekerja untuk melanjutkan sesi Anda.
+            </p>
+
+            <div class="pt-2 flex flex-col sm:flex-row gap-2.5 justify-center">
+              <button
+                type="button"
+                @click="extendSession"
+                :disabled="isExtending"
+                class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition shadow-md shadow-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <span v-if="isExtending">Menghubungkan...</span>
+                <span v-else>Tetap Masuk (Lanjutkan Sesi)</span>
+              </button>
+              <button
+                type="button"
+                @click="logoutDueToInactivity"
+                class="w-full sm:w-auto px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl transition focus:outline-none"
+              >
+                Logout Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
 usePage;
 import axios from 'axios';
@@ -251,6 +311,85 @@ import {
 } from '@lucide/vue';
 
 const page = usePage();
+
+// 15-Minute Inactivity Auto-Logout Logic
+const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 menit (900.000 ms)
+const WARNING_BEFORE_MS = 60 * 1000;    // Peringatan 1 menit terakhir (menit ke-14)
+const showTimeoutWarning = ref(false);
+const countdownSeconds = ref(60);
+const isExtending = ref(false);
+let idleTimer = null;
+const activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+
+const formatCountdown = (seconds) => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s < 10 ? '0' : ''}${s}`;
+};
+
+const recordActivity = () => {
+  if (!showTimeoutWarning.value) {
+    const now = Date.now();
+    localStorage.setItem('admin_last_activity_time', now.toString());
+  }
+};
+
+const extendSession = async () => {
+  if (isExtending.value) return;
+  isExtending.value = true;
+  try {
+    await axios.post(route('admin.keep-alive'));
+    const now = Date.now();
+    localStorage.setItem('admin_last_activity_time', now.toString());
+    showTimeoutWarning.value = false;
+    countdownSeconds.value = 60;
+  } catch (err) {
+    console.error('Gagal memperpanjang sesi:', err);
+    if (err.response && err.response.status === 401) {
+      logoutDueToInactivity();
+    }
+  } finally {
+    isExtending.value = false;
+  }
+};
+
+const logoutDueToInactivity = () => {
+  showTimeoutWarning.value = false;
+  localStorage.removeItem('admin_last_activity_time');
+  router.post(route('admin.logout'), {}, {
+    onFinish: () => {
+      window.location.href = route('admin.login', { timeout: 1 });
+    }
+  });
+};
+
+const checkIdleStatus = () => {
+  if (!page.props.auth?.user) return;
+
+  const rawLastActivity = localStorage.getItem('admin_last_activity_time');
+  const lastActivity = rawLastActivity ? parseInt(rawLastActivity, 10) : Date.now();
+  const elapsed = Date.now() - lastActivity;
+
+  if (elapsed >= IDLE_TIMEOUT_MS) {
+    logoutDueToInactivity();
+    return;
+  }
+
+  const remainingMs = IDLE_TIMEOUT_MS - elapsed;
+  if (remainingMs <= WARNING_BEFORE_MS) {
+    showTimeoutWarning.value = true;
+    countdownSeconds.value = Math.max(1, Math.ceil(remainingMs / 1000));
+  } else {
+    showTimeoutWarning.value = false;
+    countdownSeconds.value = 60;
+  }
+};
+
+const handleStorageEvent = (event) => {
+  if (event.key === 'admin_last_activity_time') {
+    checkIdleStatus();
+  }
+};
 
 // Sidebar state
 const sidebarOpen = ref(true);
@@ -725,6 +864,28 @@ onMounted(() => {
   nextTick(() => {
     restoreSidebarScroll();
   });
+
+  // 15-Minute Inactivity Auto-Logout Watcher
+  if (page.props.auth?.user) {
+    if (!localStorage.getItem('admin_last_activity_time')) {
+      localStorage.setItem('admin_last_activity_time', Date.now().toString());
+    }
+
+    activityEvents.forEach(evt => {
+      window.addEventListener(evt, recordActivity, { passive: true });
+    });
+    window.addEventListener('storage', handleStorageEvent);
+
+    idleTimer = setInterval(checkIdleStatus, 1000);
+  }
+});
+
+onUnmounted(() => {
+  if (idleTimer) clearInterval(idleTimer);
+  activityEvents.forEach(evt => {
+    window.removeEventListener(evt, recordActivity);
+  });
+  window.removeEventListener('storage', handleStorageEvent);
 });
 </script>
 

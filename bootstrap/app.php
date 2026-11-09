@@ -47,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \App\Http\Middleware\SafeRoleOrPermissionMiddleware::class,
             '2fa' => \App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
             'record.visitor' => \App\Http\Middleware\RecordVisitor::class,
+            'admin.timeout' => \App\Http\Middleware\AdminIdleTimeout::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

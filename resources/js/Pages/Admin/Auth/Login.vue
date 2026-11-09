@@ -27,6 +27,15 @@
 
           <!-- Login Form -->
           <form @submit.prevent="submit" class="space-y-5">
+            <!-- Session Idle Timeout Alert Banner -->
+            <div
+              v-if="isTimeout || $page.props.flash?.warning"
+              class="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs font-semibold text-amber-300 flex items-start gap-2.5 shadow-sm"
+            >
+              <Clock class="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <span>{{ $page.props.flash?.warning || 'Sesi Anda telah berakhir otomatis karena tidak ada aktivitas selama 15 menit. Silakan login kembali demi keamanan.' }}</span>
+            </div>
+
             <!-- Rate Limit / Global Error Banner -->
             <div
               v-if="form.errors.username && (form.errors.username.includes('Terlalu banyak') || form.errors.username.includes('dikunci'))"
@@ -176,13 +185,24 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useForm, Head } from '@inertiajs/vue3';
 import axios from 'axios';
-import { Eye, EyeOff } from '@lucide/vue';
+import { Eye, EyeOff, Clock } from '@lucide/vue';
 
 const props = defineProps({
   captchaImage: String,
+});
+
+const isTimeout = ref(false);
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('timeout') === '1') {
+      isTimeout.value = true;
+    }
+  }
 });
 
 const currentCaptcha = ref(props.captchaImage);
