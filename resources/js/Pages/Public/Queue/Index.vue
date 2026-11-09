@@ -1,53 +1,53 @@
 <template>
   <Head title="Layanan Online KTP-el - Disdukcapil Kabupaten Dompu" />
 
-  <PublicLayout :hide-footer="true">
-    <div class="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 md:pb-16 text-slate-800 dark:text-slate-100">
+  <PublicLayout :hide-footer="true" :compact-main="true">
+    <div class="bg-slate-50 dark:bg-slate-950 pb-16 md:pb-16 text-slate-800 dark:text-slate-100">
       
       <!-- Top App Container -->
-      <div class="max-w-4xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 space-y-5">
+      <div class="max-w-4xl mx-auto px-1 sm:px-6 pt-0.5 sm:pt-4 space-y-2.5 sm:space-y-4">
 
         <!-- Compact Maintenance Alert Bar (If Active) -->
         <div 
           v-if="maintenance?.is_active" 
           @click="showMaintenanceModal = true"
-          class="px-3.5 py-2.5 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/60 dark:border-amber-600/50 flex items-center justify-between gap-2.5 shadow-xs text-amber-950 dark:text-amber-200 cursor-pointer hover:bg-amber-500/15 transition group"
+          class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/60 dark:border-amber-600/50 flex items-center justify-between gap-2 shadow-xs text-amber-950 dark:text-amber-200 cursor-pointer hover:bg-amber-500/15 transition group"
         >
-          <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-7 h-7 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <AlertCircle class="w-4 h-4" />
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <AlertCircle class="w-3.5 h-3.5" />
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-1.5">
-                <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-amber-600 text-white leading-none shrink-0">
+                <span class="inline-block px-1.5 py-0.5 rounded text-[8.5px] font-black uppercase tracking-wider bg-amber-600 text-white leading-none shrink-0">
                   Pemeliharaan
                 </span>
-                <p class="text-xs font-bold text-amber-950 dark:text-amber-100 truncate">
+                <p class="text-[11px] sm:text-xs font-bold text-amber-950 dark:text-amber-100 truncate">
                   {{ maintenance.title || 'Pendaftaran Online Sedang Ditutup Sementara' }}
                 </p>
               </div>
-              <p v-if="maintenance.estimated_end" class="text-[10px] text-amber-800 dark:text-amber-300 font-medium truncate mt-0.5">
+              <p v-if="maintenance.estimated_end" class="text-[9px] sm:text-[10px] text-amber-800 dark:text-amber-300 font-medium truncate mt-0.5">
                 Estimasi Dibuka: <strong class="font-bold">{{ maintenance.estimated_end }}</strong>
               </p>
             </div>
           </div>
           <button
             type="button"
-            class="shrink-0 px-2.5 py-1.5 rounded-xl bg-amber-600 group-hover:bg-amber-500 text-white font-bold text-[11px] transition shadow-xs flex items-center gap-1 cursor-pointer"
+            class="shrink-0 px-2 py-1 rounded-lg bg-amber-600 group-hover:bg-amber-500 text-white font-bold text-[10.5px] transition shadow-xs flex items-center gap-0.5 cursor-pointer"
           >
             <span>Detail</span>
-            <ChevronRight class="w-3.5 h-3.5" />
+            <ChevronRight class="w-3 h-3" />
           </button>
         </div>
 
         <!-- 2. SECTION LAYANAN & SURVEY IKM BUTTON (Matching photo) -->
-        <div class="space-y-4">
-          <div class="flex items-center justify-between px-1">
+        <div class="space-y-2 sm:space-y-3">
+          <div class="flex items-center justify-between px-0.5">
             <div>
-              <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+              <h2 class="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
                 Layanan
               </h2>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+              <p class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
                 Pilih menu pelayanan KTP-el di bawah ini untuk memulai pengajuan
               </p>
             </div>
@@ -55,110 +55,110 @@
             <!-- Green Pill "★ Isi Survey IKM" Button (Exact like Grobogan screenshot) -->
             <Link
               :href="route('public.survey.index')"
-              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md shadow-emerald-600/25 transition active:scale-95 shrink-0"
+              class="inline-flex items-center gap-1 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] sm:text-xs font-black shadow-sm transition active:scale-95 shrink-0"
             >
-              <Star class="w-3.5 h-3.5 fill-current text-amber-300" />
+              <Star class="w-3 h-3 fill-current text-amber-300" />
               <span>Isi Survey IKM</span>
             </Link>
           </div>
 
           <!-- 3. CIRCULAR NEUMORPHIC ICON GRID (4 Core Services Only) -->
-          <div class="grid grid-cols-4 gap-2 sm:gap-4 p-4 sm:p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800">
+          <div class="grid grid-cols-4 gap-1 sm:gap-4 py-2 px-1 sm:p-5 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800">
             
             <!-- Icon 1: KTP Hilang -->
             <button
               type="button"
               @click="openServiceModalBySlug('cetak-ktp-hilang')"
-              class="group flex flex-col items-center text-center p-1.5 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
+              class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/25 ring-4 ring-sky-100 dark:ring-sky-950/60 group-hover:scale-105 transition-transform duration-200">
+              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center text-white shadow-md shadow-sky-500/25 ring-2 sm:ring-4 ring-sky-100 dark:ring-sky-950/60 group-hover:scale-105 transition-transform duration-200">
                 <!-- Neumorphic 3D styled inner icon -->
-                <CreditCard class="w-6 h-6 sm:w-8 sm:h-8" />
+                <CreditCard class="w-5 h-5 sm:w-7 sm:h-7" />
               </div>
-              <span class="mt-2 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-1 text-[10px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 KTP-el Hilang
               </span>
-              <span class="text-[9px] sm:text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Surat Hilang</span>
+              <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Surat Hilang</span>
             </button>
 
             <!-- Icon 2: KTP Rusak -->
             <button
               type="button"
               @click="openServiceModalBySlug('cetak-ktp-rusak')"
-              class="group flex flex-col items-center text-center p-1.5 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
+              class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 ring-4 ring-blue-100 dark:ring-blue-950/60 group-hover:scale-105 transition-transform duration-200">
-                <RotateCcw class="w-6 h-6 sm:w-8 sm:h-8" />
+              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25 ring-2 sm:ring-4 ring-blue-100 dark:ring-blue-950/60 group-hover:scale-105 transition-transform duration-200">
+                <RotateCcw class="w-5 h-5 sm:w-7 sm:h-7" />
               </div>
-              <span class="mt-2 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-1 text-[10px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 KTP-el Rusak
               </span>
-              <span class="text-[9px] sm:text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Fisik Patah/Pudar</span>
+              <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Fisik Patah/Pudar</span>
             </button>
 
             <!-- Icon 3: Perubahan Data -->
             <button
               type="button"
               @click="openServiceModalBySlug('perubahan-elemen-data')"
-              class="group flex flex-col items-center text-center p-1.5 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
+              class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-cyan-400 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/25 ring-4 ring-teal-100 dark:ring-teal-950/60 group-hover:scale-105 transition-transform duration-200">
-                <FileText class="w-6 h-6 sm:w-8 sm:h-8" />
+              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-cyan-400 to-teal-600 flex items-center justify-center text-white shadow-md shadow-teal-500/25 ring-2 sm:ring-4 ring-teal-100 dark:ring-teal-950/60 group-hover:scale-105 transition-transform duration-200">
+                <FileText class="w-5 h-5 sm:w-7 sm:h-7" />
               </div>
-              <span class="mt-2 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-1 text-[10px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 Ubah Elemen Data
               </span>
-              <span class="text-[9px] sm:text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Status / Alamat</span>
+              <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Status / Alamat</span>
             </button>
 
             <!-- Icon 4: Perekaman Baru (Pemula) -->
             <button
               type="button"
               @click="openServiceModalBySlug('perekaman-ktp-el-baru')"
-              class="group flex flex-col items-center text-center p-1.5 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
+              class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-emerald-400 to-green-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 ring-4 ring-emerald-100 dark:ring-emerald-950/60 group-hover:scale-105 transition-transform duration-200">
-                <Camera class="w-6 h-6 sm:w-8 sm:h-8" />
+              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-emerald-400 to-green-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/25 ring-2 sm:ring-4 ring-emerald-100 dark:ring-emerald-950/60 group-hover:scale-105 transition-transform duration-200">
+                <Camera class="w-5 h-5 sm:w-7 sm:h-7" />
               </div>
-              <span class="mt-2 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-1 text-[10px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 Perekaman Baru
               </span>
-              <span class="text-[9px] sm:text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Pemula 16-17 Thn</span>
+              <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Pemula 16-17 Thn</span>
             </button>
 
           </div>
         </div>
 
         <!-- 4. BANNER CAROUSEL INOVASI & EDUKASI (Exact like Grobogan bottom slider) -->
-        <div class="space-y-3 pt-2">
-          <div class="flex items-center justify-between px-1">
-            <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+        <div class="space-y-1.5 pt-0.5 sm:space-y-2 sm:pt-2">
+          <div class="flex items-center justify-between px-0.5">
+            <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
               Inovasi & Informasi Pelayanan
             </h3>
-            <span class="text-[11px] text-slate-600 dark:text-slate-400">Geser untuk info lengkap &rarr;</span>
+            <span class="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-400">Geser untuk info lengkap &rarr;</span>
           </div>
 
           <!-- Carousel Slider Component -->
-          <div class="relative overflow-hidden rounded-3xl bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+          <div class="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div 
               class="flex transition-transform duration-500 ease-out"
               :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
             >
               <!-- Slide 1: Bebas Pungli / 100% Gratis -->
-              <div class="w-full shrink-0 p-5 sm:p-6 bg-gradient-to-r from-blue-700 via-indigo-800 to-slate-900 text-white min-h-[160px] sm:min-h-[180px] flex flex-col justify-between">
+              <div class="w-full shrink-0 p-3 sm:p-5 bg-gradient-to-r from-blue-700 via-indigo-800 to-slate-900 text-white min-h-[115px] sm:min-h-[160px] flex flex-col justify-between">
                 <div>
-                  <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-900 mb-2">
+                  <span class="inline-block px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider bg-amber-400 text-slate-900 mb-1">
                     Inovasi Layanan!
                   </span>
-                  <h4 class="text-lg sm:text-xl font-black tracking-tight leading-snug">
+                  <h4 class="text-sm sm:text-lg font-black tracking-tight leading-snug">
                     Pelayanan KTP-el Cepat, Tepat & Bebas Calo
                   </h4>
-                  <p class="text-xs text-slate-200 mt-1 max-w-xl leading-relaxed">
+                  <p class="text-[10px] sm:text-xs text-slate-200 mt-0.5 max-w-xl leading-relaxed line-clamp-2">
                     Seluruh proses pendaftaran dan pencetakan KTP-el di Dinas Dukcapil Kabupaten Dompu 100% GRATIS (Rp 0) tanpa dipungut biaya apapun.
                   </p>
                 </div>
-                <div class="flex items-center gap-3 pt-3 text-[11px] font-bold text-emerald-300">
+                <div class="flex items-center gap-2 pt-1.5 text-[9px] sm:text-[11px] font-bold text-emerald-300">
                   <span>✓ LEBIH CEPAT</span>
                   <span>•</span>
                   <span>✓ LEBIH AMAN</span>
@@ -168,19 +168,19 @@
               </div>
 
               <!-- Slide 2: Panduan Foto Selfie & Berkas HP -->
-              <div class="w-full shrink-0 p-5 sm:p-6 bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 text-white min-h-[160px] sm:min-h-[180px] flex flex-col justify-between">
+              <div class="w-full shrink-0 p-3 sm:p-5 bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 text-white min-h-[115px] sm:min-h-[160px] flex flex-col justify-between">
                 <div>
-                  <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-400 text-slate-900 mb-2">
+                  <span class="inline-block px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider bg-emerald-400 text-slate-900 mb-1">
                     Tips Unggah Berkas
                   </span>
-                  <h4 class="text-lg sm:text-xl font-black tracking-tight leading-snug">
+                  <h4 class="text-sm sm:text-lg font-black tracking-tight leading-snug">
                     Pra-Verifikasi Dokumen Cukup Dari Handphone
                   </h4>
-                  <p class="text-xs text-emerald-100 mt-1 max-w-xl leading-relaxed">
+                  <p class="text-[10px] sm:text-xs text-emerald-100 mt-0.5 max-w-xl leading-relaxed line-clamp-2">
                     Ambil foto berkas asli menggunakan kamera handphone dengan pencahayaan terang dan tegak lurus agar verifikasi berkas langsung disetujui petugas.
                   </p>
                 </div>
-                <div class="flex items-center gap-3 pt-3 text-[11px] font-bold text-amber-300">
+                <div class="flex items-center gap-2 pt-1.5 text-[9px] sm:text-[11px] font-bold text-amber-300">
                   <span>📷 Foto Wajah Selfie Asli</span>
                   <span>•</span>
                   <span>📄 Dokumen Tidak Buram</span>
@@ -191,29 +191,29 @@
               <template v-for="b in banners" :key="b.id">
                 <div 
                   v-if="b.image_url"
-                  class="w-full shrink-0 min-h-[160px] sm:min-h-[180px] relative bg-slate-900 text-white flex flex-col justify-end p-5 sm:p-6"
+                  class="w-full shrink-0 min-h-[115px] sm:min-h-[160px] relative bg-slate-900 text-white flex flex-col justify-end p-3 sm:p-5"
                 >
                   <img :src="b.image_url" :alt="b.title" class="absolute inset-0 w-full h-full object-cover opacity-40" />
                   <div class="relative z-10">
-                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500 text-white mb-1.5">
+                    <span class="inline-block px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider bg-blue-500 text-white mb-1">
                       Informasi Resmi
                     </span>
-                    <h4 class="text-base sm:text-lg font-black tracking-tight">{{ b.title }}</h4>
-                    <p class="text-xs text-slate-200 mt-0.5 line-clamp-2 max-w-xl">{{ b.subtitle }}</p>
+                    <h4 class="text-xs sm:text-base font-black tracking-tight leading-snug">{{ b.title }}</h4>
+                    <p class="text-[10px] sm:text-xs text-slate-200 mt-0.5 line-clamp-2 max-w-xl">{{ b.subtitle }}</p>
                   </div>
                 </div>
               </template>
             </div>
 
             <!-- Carousel Controls & Dots -->
-            <div class="absolute bottom-3 right-4 flex items-center gap-1.5 z-20">
+            <div class="absolute bottom-2 right-3 flex items-center gap-1.5 z-20">
               <button
                 v-for="(dot, idx) in totalSlides"
                 :key="idx"
                 type="button"
                 @click="currentSlide = idx"
-                class="w-2 h-2 rounded-full transition-all"
-                :class="currentSlide === idx ? 'bg-white w-5' : 'bg-white/40 hover:bg-white/70'"
+                class="w-1.5 h-1.5 rounded-full transition-all"
+                :class="currentSlide === idx ? 'bg-white w-4' : 'bg-white/40 hover:bg-white/70'"
                 :aria-label="'Slide ' + (idx + 1)"
               ></button>
             </div>

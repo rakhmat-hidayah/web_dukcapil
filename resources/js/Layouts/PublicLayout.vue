@@ -391,7 +391,12 @@
     </div>
 
     <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8 print:p-0 print:m-0 print:max-w-none print:w-full">
+    <main 
+      :class="[
+        'flex-1 max-w-7xl mx-auto w-full print:p-0 print:m-0 print:max-w-none print:w-full transition-all',
+        compactMain ? 'px-2.5 sm:px-6 pt-1 pb-2 sm:py-4' : 'px-6 py-8'
+      ]"
+    >
       <slot />
     </main>
 
@@ -527,6 +532,10 @@ import { Search, Sun, Moon, Menu, ChevronDown, Globe, ArrowUpRight, Ticket } fro
 
 const props = defineProps({
   hideFooter: {
+    type: Boolean,
+    default: false,
+  },
+  compactMain: {
     type: Boolean,
     default: false,
   },
