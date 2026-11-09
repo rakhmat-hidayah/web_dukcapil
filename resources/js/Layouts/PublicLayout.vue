@@ -396,7 +396,7 @@
     </main>
 
     <!-- Public Footer -->
-    <footer class="mt-auto w-full bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 py-12 text-xs print:hidden">
+    <footer v-if="!hideFooter" class="mt-auto w-full bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 py-12 text-xs print:hidden">
       <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center sm:text-left">
         <!-- Brand Info -->
         <div class="space-y-3 flex flex-col items-center sm:items-start">
@@ -524,6 +524,13 @@
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Search, Sun, Moon, Menu, ChevronDown, Globe, ArrowUpRight, Ticket } from '@lucide/vue';
+
+const props = defineProps({
+  hideFooter: {
+    type: Boolean,
+    default: false,
+  },
+});
 
 const isDark = ref(false);
 const mobileMenuOpen = ref(false);

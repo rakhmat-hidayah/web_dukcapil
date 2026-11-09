@@ -1,7 +1,7 @@
 <template>
   <Head title="Layanan Online KTP-el - Disdukcapil Kabupaten Dompu" />
 
-  <PublicLayout>
+  <PublicLayout :hide-footer="true">
     <div class="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 md:pb-16 text-slate-800 dark:text-slate-100">
       
       <!-- Top App Container -->
@@ -48,157 +48,83 @@
                 Layanan
               </h2>
               <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                Pilih menu di bawah ini untuk memulai pengajuan atau memantau status
+                Pilih menu pelayanan KTP-el di bawah ini untuk memulai pengajuan
               </p>
             </div>
 
             <!-- Green Pill "★ Isi Survey IKM" Button (Exact like Grobogan screenshot) -->
             <Link
               :href="route('public.survey.index')"
-              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md shadow-emerald-600/25 transition active:scale-95"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md shadow-emerald-600/25 transition active:scale-95 shrink-0"
             >
               <Star class="w-3.5 h-3.5 fill-current text-amber-300" />
               <span>Isi Survey IKM</span>
             </Link>
           </div>
 
-          <!-- 3. CIRCULAR NEUMORPHIC ICON GRID (3 Columns on Mobile, 4-5 on Desktop) -->
-          <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3.5 sm:gap-4 p-4 sm:p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800">
+          <!-- 3. CIRCULAR NEUMORPHIC ICON GRID (4 Core Services Only) -->
+          <div class="grid grid-cols-4 gap-2 sm:gap-4 p-4 sm:p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800">
             
             <!-- Icon 1: KTP Hilang -->
             <button
               type="button"
               @click="openServiceModalBySlug('cetak-ktp-hilang')"
-              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+              class="group flex flex-col items-center text-center p-1.5 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/25 ring-4 ring-sky-100 dark:ring-sky-950/60 group-hover:scale-105 transition-transform duration-200">
+              <div class="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/25 ring-4 ring-sky-100 dark:ring-sky-950/60 group-hover:scale-105 transition-transform duration-200">
                 <!-- Neumorphic 3D styled inner icon -->
-                <CreditCard class="w-7 h-7 sm:w-8 sm:h-8" />
+                <CreditCard class="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
-              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-2 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 KTP-el Hilang
               </span>
-              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Surat Hilang</span>
+              <span class="text-[9px] sm:text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Surat Hilang</span>
             </button>
 
             <!-- Icon 2: KTP Rusak -->
             <button
               type="button"
               @click="openServiceModalBySlug('cetak-ktp-rusak')"
-              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+              class="group flex flex-col items-center text-center p-1.5 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 ring-4 ring-blue-100 dark:ring-blue-950/60 group-hover:scale-105 transition-transform duration-200">
-                <RotateCcw class="w-7 h-7 sm:w-8 sm:h-8" />
+              <div class="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 ring-4 ring-blue-100 dark:ring-blue-950/60 group-hover:scale-105 transition-transform duration-200">
+                <RotateCcw class="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
-              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-2 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 KTP-el Rusak
               </span>
-              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Fisik Patah/Pudar</span>
+              <span class="text-[9px] sm:text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Fisik Patah/Pudar</span>
             </button>
 
             <!-- Icon 3: Perubahan Data -->
             <button
               type="button"
               @click="openServiceModalBySlug('perubahan-elemen-data')"
-              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+              class="group flex flex-col items-center text-center p-1.5 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-cyan-400 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/25 ring-4 ring-teal-100 dark:ring-teal-950/60 group-hover:scale-105 transition-transform duration-200">
-                <FileText class="w-7 h-7 sm:w-8 sm:h-8" />
+              <div class="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-cyan-400 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/25 ring-4 ring-teal-100 dark:ring-teal-950/60 group-hover:scale-105 transition-transform duration-200">
+                <FileText class="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
-              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-2 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 Ubah Elemen Data
               </span>
-              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Status / Alamat</span>
+              <span class="text-[9px] sm:text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Status / Alamat</span>
             </button>
 
             <!-- Icon 4: Perekaman Baru (Pemula) -->
             <button
               type="button"
               @click="openServiceModalBySlug('perekaman-ktp-el-baru')"
-              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+              class="group flex flex-col items-center text-center p-1.5 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-emerald-400 to-green-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 ring-4 ring-emerald-100 dark:ring-emerald-950/60 group-hover:scale-105 transition-transform duration-200">
-                <Camera class="w-7 h-7 sm:w-8 sm:h-8" />
+              <div class="w-14 h-14 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-emerald-400 to-green-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 ring-4 ring-emerald-100 dark:ring-emerald-950/60 group-hover:scale-105 transition-transform duration-200">
+                <Camera class="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
-              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-2 text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 Perekaman Baru
               </span>
-              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Pemula 16-17 Thn</span>
+              <span class="text-[9px] sm:text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Pemula 16-17 Thn</span>
             </button>
-
-            <!-- Icon 5: Lacak Permohonan (Search Anchor) -->
-            <button
-              type="button"
-              @click="scrollToTracking"
-              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
-            >
-              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/25 ring-4 ring-amber-100 dark:ring-amber-950/60 group-hover:scale-105 transition-transform duration-200">
-                <Search class="w-7 h-7 sm:w-8 sm:h-8" />
-              </div>
-              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                Lacak Status
-              </span>
-              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">No. Reg / NIK</span>
-            </button>
-
-            <!-- Icon 6: Riwayat Permohonan Saya -->
-            <Link
-              :href="route('queue.history')"
-              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
-            >
-              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-purple-400 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/25 ring-4 ring-purple-100 dark:ring-purple-950/60 group-hover:scale-105 transition-transform duration-200">
-                <FolderClock class="w-7 h-7 sm:w-8 sm:h-8" />
-              </div>
-              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                Riwayat Saya
-              </span>
-              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Daftar Tiket</span>
-            </Link>
-
-            <!-- Icon 7: Jadwal & Sisa Kuota Loket -->
-            <button
-              type="button"
-              @click="showQuotaModal = true"
-              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
-            >
-              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-rose-400 to-red-600 flex items-center justify-center text-white shadow-lg shadow-rose-500/25 ring-4 ring-rose-100 dark:ring-rose-950/60 group-hover:scale-105 transition-transform duration-200">
-                <Calendar class="w-7 h-7 sm:w-8 sm:h-8" />
-              </div>
-              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                Jadwal & Kuota
-              </span>
-              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Sisa {{ todayStats.total_remaining }} Slot</span>
-            </button>
-
-            <!-- Icon 8: Persyaratan Berkas & Blanko -->
-            <button
-              type="button"
-              @click="showRequirementsModal = true"
-              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
-            >
-              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-indigo-400 to-blue-700 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 ring-4 ring-indigo-100 dark:ring-indigo-950/60 group-hover:scale-105 transition-transform duration-200">
-                <ClipboardList class="w-7 h-7 sm:w-8 sm:h-8" />
-              </div>
-              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                Syarat & Blanko
-              </span>
-              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Formulir F-1.02</span>
-            </button>
-
-            <!-- Icon 9: Helpdesk WhatsApp -->
-            <a
-              :href="'https://wa.me/' + cleanPhone(settings.helpdesk_phone) + '?text=' + encodeURIComponent('Halo Admin Pelayanan KTP-el Disdukcapil Dompu, saya ingin konsultasi mengenai pengajuan KTP-el.')"
-              target="_blank"
-              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-emerald-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
-            >
-              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-emerald-500 to-green-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 ring-4 ring-emerald-100 dark:ring-emerald-950/60 group-hover:scale-105 transition-transform duration-200">
-                <MessageCircle class="w-7 h-7 sm:w-8 sm:h-8" />
-              </div>
-              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                Helpdesk WA
-              </span>
-              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Konsultasi Loket</span>
-            </a>
 
           </div>
         </div>
@@ -294,89 +220,6 @@
           </div>
         </div>
 
-        <!-- 5. QUICK TRACKING SEARCH BOX (Lacak Status Antrian) -->
-        <div id="lacak-status-antrian" class="p-5 sm:p-7 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4 scroll-mt-20">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-              <Search class="w-5 h-5" />
-            </div>
-            <div>
-              <h3 class="text-base font-black text-slate-900 dark:text-white">
-                Pantau Status Pengajuan & Tiket Antrian
-              </h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400">
-                Masukkan Nomor Registrasi (contoh: REG-2611-XXXXXX) atau 16 digit NIK Anda
-              </p>
-            </div>
-          </div>
-
-          <form @submit.prevent="submitSearch" class="flex flex-col sm:flex-row gap-2.5">
-            <div class="relative flex-1">
-              <input
-                v-model="searchForm.query"
-                type="text"
-                placeholder="Masukkan Nomor Registrasi atau NIK..."
-                required
-                class="w-full pl-4 pr-10 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <span v-if="searchForm.query" @click="searchForm.query = ''" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer">
-                <X class="w-4 h-4" />
-              </span>
-            </div>
-            <button
-              type="submit"
-              :disabled="searchForm.processing"
-              class="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs transition shadow-md shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5"
-            >
-              <span>{{ searchForm.processing ? 'Memeriksa...' : 'Lacak Status' }}</span>
-              <ArrowRight class="w-4 h-4" />
-            </button>
-          </form>
-
-          <p v-if="searchForm.errors.query" class="text-xs text-rose-500 font-semibold">
-            {{ searchForm.errors.query }}
-          </p>
-
-          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-            <span>Lupa nomor registrasi Anda?</span>
-            <Link :href="route('queue.history')" class="font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
-              <span>Buka Riwayat Permohonan Saya</span>
-              <ChevronRight class="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-
-        <!-- 6. ALUR 4 LANGKAH MUDAH (Workflow Preview) -->
-        <div class="p-5 sm:p-7 rounded-3xl bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 space-y-4">
-          <h3 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-            <span class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs">4</span>
-            Alur Pelayanan KTP-el Tanpa Antre Panjang
-          </h3>
-
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
-              <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-black text-[10px] flex items-center justify-center">1</span>
-              <h5 class="font-bold text-slate-900 dark:text-white">Pilih Layanan</h5>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">Pilih jenis KTP-el dan lengkapi data pemohon.</p>
-            </div>
-            <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
-              <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-black text-[10px] flex items-center justify-center">2</span>
-              <h5 class="font-bold text-slate-900 dark:text-white">Foto Berkas HP</h5>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">Unggah foto KK, surat kehilangan & foto selfie.</p>
-            </div>
-            <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
-              <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-black text-[10px] flex items-center justify-center">3</span>
-              <h5 class="font-bold text-slate-900 dark:text-white">Verifikasi Petugas</h5>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">Petugas memeriksa keabsahan berkas secara online.</p>
-            </div>
-            <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
-              <span class="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-black text-[10px] flex items-center justify-center">4</span>
-              <h5 class="font-bold text-slate-900 dark:text-white">Dapat Tiket & Hadir</h5>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">Nomor antrean terbit. Hadir bawa berkas fisik asli.</p>
-            </div>
-          </div>
-        </div>
-
       </div>
 
       <!-- 7. FIXED MOBILE BOTTOM NAVIGATION BAR (Exact mobile app feeling) -->
@@ -405,7 +248,7 @@
           <!-- Nav 3: Lacak Status -->
           <button 
             type="button" 
-            @click="scrollToTracking"
+            @click="showTrackingModal = true"
             class="flex flex-col items-center py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
           >
             <Search class="w-5 h-5 mb-0.5" />
@@ -702,6 +545,76 @@
       </div>
     </Teleport>
 
+    <!-- MODAL 5: LACAK STATUS PERMOHONAN -->
+    <Teleport to="body">
+      <div 
+        v-if="showTrackingModal"
+        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
+        @click.self="showTrackingModal = false"
+      >
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 animate-in slide-in-from-bottom duration-200">
+          <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs">
+                <Search class="w-4 h-4" />
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-900 dark:text-white leading-tight">Lacak Status Permohonan</h3>
+                <span class="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">Antrian & Pra-Verifikasi</span>
+              </div>
+            </div>
+            <button 
+              type="button" 
+              @click="showTrackingModal = false" 
+              class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 transition cursor-pointer"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <form @submit.prevent="submitSearch" class="space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Nomor Registrasi atau NIK
+              </label>
+              <div class="relative">
+                <input
+                  v-model="searchForm.query"
+                  type="text"
+                  placeholder="Contoh: REG-2611-XXXXXX atau 16 digit NIK..."
+                  required
+                  class="w-full pl-4 pr-10 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <span v-if="searchForm.query" @click="searchForm.query = ''" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer">
+                  <X class="w-4 h-4" />
+                </span>
+              </div>
+            </div>
+
+            <p v-if="searchForm.errors.query" class="text-xs text-rose-500 font-semibold">
+              {{ searchForm.errors.query }}
+            </p>
+
+            <button
+              type="submit"
+              :disabled="searchForm.processing"
+              class="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-md shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span>{{ searchForm.processing ? 'Memeriksa...' : 'Lacak Status Sekarang' }}</span>
+              <ArrowRight class="w-4 h-4" />
+            </button>
+          </form>
+
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
+            <span>Lupa nomor registrasi Anda? </span>
+            <Link :href="route('queue.history')" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
+              Buka Riwayat Permohonan Saya &rarr;
+            </Link>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
   </PublicLayout>
 </template>
 
@@ -758,6 +671,7 @@ const selectedService = ref(null);
 const showRequirementsModal = ref(false);
 const showQuotaModal = ref(false);
 const showMaintenanceModal = ref(false);
+const showTrackingModal = ref(false);
 
 function openServiceModalBySlug(slug) {
   const match = props.services.find(s => s.slug === slug);
@@ -784,12 +698,7 @@ onUnmounted(() => {
 });
 
 function scrollToTracking() {
-  const el = document.getElementById('lacak-status-antrian');
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth' });
-    const input = el.querySelector('input');
-    if (input) input.focus();
-  }
+  showTrackingModal.value = true;
 }
 
 function scrollToTop() {
