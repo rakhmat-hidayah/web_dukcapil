@@ -132,11 +132,11 @@
             </div>
 
             <h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
-              Antrian Online KTP-el Disdukcapil Dompu
+              Layanan Online KTP-el Disdukcapil Dompu
             </h3>
 
             <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
-              Daftar antrian cetak KTP-el hilang, rusak, perubahan elemen data, dan perekaman baru secara online. Unggah foto berkas langsung dari kamera HP, diverifikasi sebelum datang ke kantor, tanpa antre panjang.
+              Daftar layanan cetak KTP-el hilang, rusak, perubahan elemen data, dan perekaman baru secara online. Unggah foto berkas langsung dari kamera HP, diverifikasi sebelum datang ke kantor, tanpa antre panjang.
             </p>
           </div>
 
@@ -147,7 +147,7 @@
               class="px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 text-xs sm:text-sm font-black rounded-2xl shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 flex-1 md:flex-initial"
             >
               <Ticket class="w-4 h-4 text-slate-950" />
-              <span>Daftar Antrian Online</span>
+              <span>Daftar Layanan Online</span>
               <ArrowRight class="w-4 h-4 text-slate-950" />
             </Link>
 

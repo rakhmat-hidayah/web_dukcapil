@@ -1,5 +1,5 @@
 <template>
-  <Head title="Antrian Online & Pra-Verifikasi KTP-el - Disdukcapil Kabupaten Dompu" />
+  <Head title="Layanan KTP-el & Pra-Verifikasi Digital - Disdukcapil Kabupaten Dompu" />
 
   <PublicLayout>
     <div class="py-8 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -41,7 +41,7 @@
         <div class="relative z-10 max-w-3xl">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold uppercase tracking-wider mb-4">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            Sistem Antrian & Pra-Verifikasi Digital
+            Layanan KTP-el & Pra-Verifikasi Digital
           </div>
 
           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
@@ -49,7 +49,7 @@
           </h1>
 
           <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
-            Daftar antrian dari rumah, unggah berkas persyaratan melalui kamera handphone, dan dapatkan kepastian verifikasi dokumen sebelum datang ke loket Dinas Dukcapil Kabupaten Dompu.
+            Daftar permohonan layanan KTP-el dari rumah, unggah berkas persyaratan melalui kamera handphone, dan dapatkan kepastian verifikasi dokumen sebelum datang ke loket Dinas Dukcapil Kabupaten Dompu.
           </p>
 
           <!-- Quick Action Buttons -->
