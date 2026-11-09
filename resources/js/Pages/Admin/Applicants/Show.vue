@@ -6,11 +6,11 @@
       <!-- Top Bar -->
       <div class="flex items-center justify-between">
         <Link
-          :href="route('queue.applicants.index')"
+          :href="route('admin.queue.applicants.index')"
           class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 transition"
         >
           <ArrowLeft class="w-4 h-4" />
-          <span>Kembali ke Daftar Pemohon</span>
+          <span>Kembali ke Verifikasi Pendaftar Baru</span>
         </Link>
       </div>
 
@@ -390,7 +390,7 @@ const openVerifyModal = () => {
 }
 
 const submitRevokeDevice = () => {
-  revokeForm.post(route('queue.applicants.revoke-device', props.account.id), {
+  revokeForm.post(route('admin.queue.applicants.revoke-device', props.account.id), {
     onSuccess: () => {
       showRevokeModal.value = false
     },
@@ -398,7 +398,7 @@ const submitRevokeDevice = () => {
 }
 
 const submitStatusChange = () => {
-  statusForm.post(route('queue.applicants.update-status', props.account.id), {
+  statusForm.post(route('admin.queue.applicants.update-status', props.account.id), {
     onSuccess: () => {
       showStatusModal.value = false
     },
@@ -406,7 +406,7 @@ const submitStatusChange = () => {
 }
 
 const submitVerifyIdentity = () => {
-  verifyForm.post(route('queue.applicants.verify-identity', props.account.id), {
+  verifyForm.post(route('admin.queue.applicants.verify-identity', props.account.id), {
     onSuccess: () => {
       showVerifyModal.value = false
     },
