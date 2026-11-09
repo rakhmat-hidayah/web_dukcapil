@@ -247,6 +247,6 @@ class User extends Authenticatable
     public function isSuperAdmin(): bool
     {
         return $this->username === 'superadmin'
-            || $this->hasAnyRole(['Administrator Utama', 'Super Administrator']);
+            || $this->roles->pluck('name')->intersect(['Administrator Utama', 'Super Administrator'])->isNotEmpty();
     }
 }

@@ -324,6 +324,15 @@ class ApplicantDashboardController extends Controller
             ->where('application_id', $application->id)
             ->firstOrFail();
 
+        if ($doc->is_destroyed || empty($doc->getRawOriginal('path'))) {
+            abort(410, 'Dokumen ini telah dimusnahkan atau tidak lagi tersedia pada sistem penyimpanan.');
+        }
+
+        // Biometric selfie photos are never accessible via public applicant URLs
+        if ($doc->isSelfie()) {
+            abort(403, 'Akses ditolak. Foto selfie pemohon hanya dapat diperiksa oleh petugas berwenang.');
+        }
+
         return QueueDocumentStorage::serve($doc, true);
     }
 }

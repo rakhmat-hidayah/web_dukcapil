@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin\Queue;
 use App\Http\Controllers\Controller;
 use App\Models\Queue\ApplicationDocument;
 use App\Models\Queue\QueueApplication;
+use App\Models\Queue\QueueSelfieVerification;
 use App\Services\Queue\QueueDocumentStorage;
+use App\Services\Queue\QueueSelfieVerificationService;
 use App\Services\Queue\QueueVerificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -17,7 +19,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ApplicationDocumentController extends Controller
 {
     public function __construct(
-        protected QueueVerificationService $verificationService
+        protected QueueVerificationService $verificationService,
+        protected QueueSelfieVerificationService $selfieVerificationService
     ) {}
 
     /**
@@ -38,18 +41,34 @@ class ApplicationDocumentController extends Controller
             'Petugas Pengarsipan',
         ];
 
-        if (!$user || (!$user->hasAnyRole($allowedRoles) && !$user->can('manage_queue_verification'))) {
+        $hasAllowedRole = $user->isSuperAdmin()
+            || $user->can('manage_queue_verification')
+            || $user->roles->pluck('name')->intersect($allowedRoles)->isNotEmpty();
+
+        if (!$user || !$hasAllowedRole) {
             abort(403, 'Akses ditolak. Anda tidak memiliki izin kewenangan tugas untuk melihat dokumen kependudukan ini.');
         }
 
-        $document = ApplicationDocument::with('application')->findOrFail($documentId);
+        $document = ApplicationDocument::with(['application.selfieVerification', 'serviceDocument'])->findOrFail($documentId);
+
+        // If this document is a destroyed selfie, return 410 Gone
+        if ($document->is_destroyed || empty($document->getRawOriginal('path'))) {
+            abort(410, 'Foto selfie pemohon telah dimusnahkan pasca verifikasi demi perlindungan privasi.');
+        }
+
+        $isSelfie = $document->isSelfie();
+
+        // If already verified with DELETED status, strictly forbid access
+        if ($isSelfie && $document->application?->selfieVerification?->deletion_status === QueueSelfieVerification::DELETION_DELETED) {
+            abort(410, 'Foto selfie pemohon telah dimusnahkan pasca verifikasi demi perlindungan privasi.');
+        }
 
         // Audit log preview activity without recording sensitive NIK
-        Log::info("Queue document previewed: DocID {$document->id} by User {$user->id} ({$user->name}) from IP {$request->ip()}");
+        Log::info("Queue document previewed: DocID {$document->id} by User {$user->id} ({$user->name}) from IP {$request->ip()}" . ($isSelfie ? ' [Biometric Selfie]' : ''));
 
         // Otomatis sinkronkan status dokumen menjadi Sudah Diperiksa (APPROVED) saat dibuka oleh verifikator
-        // Kecuali saat dipanggil sebagai preview thumbnail di tabel antrean (preview_only)
-        if (!$request->boolean('preview_only', false) && $document->status === ApplicationDocument::STATUS_PENDING) {
+        // KECUALI foto selfie (karena selfie memerlukan formulir pernyataan dan konfirmasi petugas di Tahap D)
+        if (!$isSelfie && !$request->boolean('preview_only', false) && $document->status === ApplicationDocument::STATUS_PENDING) {
             $document->update([
                 'status'      => ApplicationDocument::STATUS_APPROVED,
                 'reviewed_by' => $user->id,
@@ -57,9 +76,51 @@ class ApplicationDocumentController extends Controller
             ]);
         }
 
-        $download = $request->boolean('download', false);
+        $download = $isSelfie ? false : $request->boolean('download', false);
 
         return QueueDocumentStorage::serve($document, !$download);
+    }
+
+    /**
+     * Submit biometric selfie verification decision (Tahap D) and immediately delete physical photo.
+     */
+    public function verifySelfie(Request $request, int $applicationId): JsonResponse|RedirectResponse
+    {
+        $request->validate([
+            'decision'          => 'required|string|in:MATCH,MISMATCH',
+            'statement_agreed'  => 'required|accepted',
+            'statement_version' => 'nullable|string|max:20',
+        ], [
+            'decision.required'         => 'Hasil pemeriksaan wajib dipilih antara "FOTO SESUAI" atau "FOTO BUKAN PEMOHON".',
+            'decision.in'               => 'Pilihan hasil pemeriksaan tidak valid.',
+            'statement_agreed.required' => 'Pernyataan tanggung jawab hasil pemeriksaan wajib dicentang.',
+            'statement_agreed.accepted' => 'Pernyataan tanggung jawab hasil pemeriksaan wajib disetujui.',
+        ]);
+
+        $application = QueueApplication::with('documents.serviceDocument')->findOrFail($applicationId);
+
+        $verification = $this->selfieVerificationService->recordVerification(
+            $application,
+            $request->input('decision'),
+            $request->boolean('statement_agreed'),
+            Auth::user(),
+            $request->input('statement_version', 'v1.0')
+        );
+
+        $freshApp = $application->fresh(['documents.serviceDocument', 'selfieVerification.officer']);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success'      => true,
+                'message'      => $verification->decision === QueueSelfieVerification::DECISION_MATCH
+                    ? 'Pemeriksaan foto selesai: SESUAI DENGAN PEMOHON. Berkas foto fisik telah dimusnahkan secara aman dari server.'
+                    : 'Pemeriksaan foto selesai: FOTO BUKAN PEMOHON (MISMATCH). Pengajuan ditandai butuh perbaikan dan berkas foto fisik telah dimusnahkan.',
+                'verification' => $verification,
+                'application'  => $freshApp,
+            ]);
+        }
+
+        return back()->with('success', 'Hasil pemeriksaan foto pemohon telah disimpan dan berkas fisik foto telah dimusnahkan.');
     }
 
     /**

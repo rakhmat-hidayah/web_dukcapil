@@ -143,6 +143,11 @@ class ArchiveService
                         return false;
                     }
                 }
+                // Exclude temporary biometric selfie photos from archive completeness check
+                $label = strtolower($req->label ?? '');
+                if ($req->capture_mode === 'user' || str_contains($label, 'selfie') || str_contains($label, 'foto wajah') || str_contains($label, 'foto pemohon') || str_contains($label, 'pas foto') || str_contains($label, 'foto diri')) {
+                    return false;
+                }
                 return true;
             });
 
@@ -162,12 +167,15 @@ class ArchiveService
             }
 
             $rawPath = $uploaded->getRawOriginal('path');
-            if (empty($rawPath) || !Storage::disk('local')->exists($rawPath)) {
+            $docDisk = $uploaded->disk ?: (Storage::disk('private_documents')->exists($rawPath) ? 'private_documents' : 'local');
+            $disk = Storage::disk($docDisk)->exists($rawPath) ? $docDisk : (Storage::disk('local')->exists($rawPath) ? 'local' : $docDisk);
+
+            if (empty($rawPath) || !Storage::disk($disk)->exists($rawPath)) {
                 $issues[] = "Berkas fisik hilang dari storage: [{$req->label}] ({$uploaded->original_filename})";
                 continue;
             }
 
-            $size = Storage::disk('local')->size($rawPath);
+            $size = Storage::disk($disk)->size($rawPath);
             if ($size === 0) {
                 $issues[] = "Berkas fisik rusak/kosong (0 bytes): [{$req->label}]";
                 continue;
@@ -184,13 +192,21 @@ class ArchiveService
 
         // Check optional / additional docs as well
         foreach ($uploadedDocs as $upDoc) {
+            // Exclude temporary selfie biometric photos from archive package
+            if ($upDoc->isSelfie() || $upDoc->is_destroyed) {
+                continue;
+            }
+
             if ($upDoc->service_document_id && in_array($upDoc->service_document_id, $requiredDocIds)) {
                 continue; // Already handled above
             }
 
             $rawPath = $upDoc->getRawOriginal('path');
-            if (!empty($rawPath) && Storage::disk('local')->exists($rawPath)) {
-                $size = Storage::disk('local')->size($rawPath);
+            $docDisk = $upDoc->disk ?: (Storage::disk('private_documents')->exists($rawPath) ? 'private_documents' : 'local');
+            $disk = Storage::disk($docDisk)->exists($rawPath) ? $docDisk : (Storage::disk('local')->exists($rawPath) ? 'local' : $docDisk);
+
+            if (!empty($rawPath) && Storage::disk($disk)->exists($rawPath)) {
+                $size = Storage::disk($disk)->size($rawPath);
                 $totalBytes += $size;
                 $validDocuments[] = [
                     'document' => $upDoc,
@@ -399,6 +415,9 @@ class ArchiveService
                 foreach ($analysis['documents'] as $docItem) {
                     /** @var ApplicationDocument $doc */
                     $doc = $docItem['document'];
+                    if ($doc->isSelfie() || $doc->is_destroyed) {
+                        continue;
+                    }
                     $sourcePath = storage_path('app/private/' . $docItem['path']);
 
                     if (!File::exists($sourcePath)) {

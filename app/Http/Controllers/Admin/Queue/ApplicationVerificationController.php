@@ -220,6 +220,7 @@ class ApplicationVerificationController extends Controller
         $application->loadMissing([
             'serviceType.documents' => fn($q) => $q->orderBy('sort_order'),
             'documents.serviceDocument',
+            'selfieVerification.officer',
         ]);
 
         // Auto-sync any pending documents to APPROVED if application is already pre-verified or further

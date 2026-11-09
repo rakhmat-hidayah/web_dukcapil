@@ -514,6 +514,14 @@ class QueueApplicationController extends Controller
             ->where('application_id', $application->id)
             ->firstOrFail();
 
+        if ($doc->is_destroyed || empty($doc->getRawOriginal('path'))) {
+            abort(410, 'Dokumen ini telah dimusnahkan pasca verifikasi demi perlindungan privasi.');
+        }
+
+        if ($doc->isSelfie() && !$isAuthorizedOfficer) {
+            abort(403, 'Akses ditolak. Foto selfie pemohon hanya dapat diperiksa oleh petugas pemeriksa berwenang.');
+        }
+
         return QueueDocumentStorage::serve($doc, true);
     }
 }

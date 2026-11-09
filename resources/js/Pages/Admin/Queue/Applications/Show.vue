@@ -263,22 +263,79 @@
               Profil Pemohon KTP-el
             </h3>
 
-            <!-- Selfie Preview -->
+            <!-- Selfie Verification & Photo Security Module -->
             <div class="flex flex-col items-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700">
+              <!-- Case 1: Already Verified & Destroyed -->
               <div
-                v-if="selfieDocument && (selfieDocument.id || selfieDocument.admin_serve_url)"
-                @click="previewSelfie"
-                class="w-32 h-32 rounded-2xl overflow-hidden border-2 border-blue-500 shadow-md cursor-pointer group relative bg-slate-100 dark:bg-slate-900"
+                v-if="isSelfieVerified"
+                class="w-full flex flex-col items-center text-center p-3.5 rounded-2xl border transition"
+                :class="selfieVerificationState.decision === 'MATCH' 
+                  ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800' 
+                  : 'bg-rose-50/70 dark:bg-rose-950/30 border-rose-300 dark:border-rose-800'"
               >
-                <img
-                  :src="selfieDocument.admin_serve_url || (selfieDocument.id ? route('admin.queue.documents.serve', { documentId: selfieDocument.id }) : '')"
-                  alt="Foto Wajah Pemohon"
-                  class="w-full h-full object-cover group-hover:scale-105 transition"
-                />
-                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[10px] font-bold">
-                  Klik Perbesar
+                <div 
+                  class="w-13 h-13 rounded-2xl flex items-center justify-center mb-2 shadow-sm"
+                  :class="selfieVerificationState.decision === 'MATCH'
+                    ? 'bg-emerald-600 text-white shadow-emerald-600/30'
+                    : 'bg-rose-600 text-white shadow-rose-600/30'"
+                >
+                  <svg v-if="selfieVerificationState.decision === 'MATCH'" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                  <svg v-else class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </div>
+
+                <span 
+                  class="text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full"
+                  :class="selfieVerificationState.decision === 'MATCH'
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300'
+                    : 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300'"
+                >
+                  {{ selfieVerificationState.decision === 'MATCH' ? 'Foto Sesuai (MATCH)' : 'Bukan Pemohon (MISMATCH)' }}
+                </span>
+
+                <p class="text-[11px] font-bold text-slate-700 dark:text-slate-200 mt-2 flex items-center justify-center gap-1">
+                  <span>🔒 Berkas Fisik Dimusnahkan</span>
+                </p>
+                <p class="text-[10px] text-slate-400 mt-0.5">
+                  Diperiksa oleh: <strong class="text-slate-600 dark:text-slate-300">{{ selfieVerificationState.verified_by_name || 'Petugas' }}</strong> ({{ formatDate(selfieVerificationState.verified_at) }})
+                </p>
+
+                <button
+                  type="button"
+                  @click="isSelfieAuditModalOpen = true"
+                  class="mt-3 w-full py-1.5 px-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-bold border border-slate-200 dark:border-slate-700 shadow-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  <span>Lihat Bukti Pemeriksaan</span>
+                </button>
               </div>
+
+              <!-- Case 2: Selfie Uploaded & Pending Verification (Locked) -->
+              <div
+                v-else-if="selfieDocument && (selfieDocument.id || selfieDocument.path)"
+                class="w-full flex flex-col items-center text-center p-3.5 rounded-2xl border-2 border-dashed border-blue-400 dark:border-blue-600 bg-blue-50/60 dark:bg-blue-950/20"
+              >
+                <div class="w-13 h-13 rounded-2xl bg-blue-600 text-white flex items-center justify-center mb-2 shadow-md shadow-blue-600/30">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                </div>
+
+                <span class="text-xs font-black text-blue-950 dark:text-blue-200">
+                  Foto Wajah Pemohon (Terkunci)
+                </span>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 max-w-[210px] leading-tight">
+                  Tersedia sementara untuk verifikasi. Wajib konfirmasi sebelum membuka.
+                </p>
+
+                <button
+                  type="button"
+                  @click="openSelfieConfirmation(selfieDocument)"
+                  class="mt-3 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-600/30 transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  <span>Periksa Foto Pemohon</span>
+                </button>
+              </div>
+
+              <!-- Case 3: No Selfie Uploaded -->
               <div
                 v-else
                 class="w-32 h-32 rounded-2xl bg-slate-200 dark:bg-slate-700 flex flex-col items-center justify-center text-slate-400 text-xs"
@@ -286,8 +343,9 @@
                 <svg class="w-8 h-8 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 Tanpa Foto Wajah
               </div>
+
               <p class="text-[11px] font-bold text-slate-700 dark:text-slate-300 mt-2">
-                Foto Wajah Langsung (Selfie)
+                Foto Wajah Langsung (Selfie Verifikasi)
               </p>
             </div>
 
@@ -442,45 +500,89 @@
                   <!-- Uploaded File State & Actions -->
                   <div class="flex items-center gap-2">
                     <template v-if="getDocument(docConfig.id)">
-                      <div class="text-right mr-2">
-                        <span
-                          :class="[
-                            'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase',
-                            ['APPROVED', 'VERIFIED', 'EXAMINED'].includes(getDocument(docConfig.id).status)
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700'
-                              : ['REJECTED', 'REVISION_REQUIRED'].includes(getDocument(docConfig.id).status)
-                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400 border border-rose-300 dark:border-rose-700'
-                              : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400 border border-amber-300 dark:border-amber-700'
-                          ]"
+                      <!-- Special Treatment for Selfie Biometric Document -->
+                      <template v-if="isDocSelfie(getDocument(docConfig.id), docConfig)">
+                        <div class="text-right mr-2">
+                          <span
+                            :class="[
+                              'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border',
+                              isSelfieVerified && selfieVerificationState?.decision === 'MATCH'
+                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700'
+                                : isSelfieVerified && selfieVerificationState?.decision === 'MISMATCH'
+                                ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-400 border-rose-300 dark:border-rose-700'
+                                : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-400 border-amber-300 dark:border-amber-700'
+                            ]"
+                          >
+                            {{ isSelfieVerified ? (selfieVerificationState?.decision === 'MATCH' ? 'Sesuai (Dimusnahkan)' : 'Mismatch (Dimusnahkan)') : 'Belum Diperiksa (Terkunci)' }}
+                          </span>
+                          <p class="text-[10px] text-slate-400 mt-0.5 font-mono">
+                            {{ isSelfieVerified ? 'File Dimusnahkan' : (getDocument(docConfig.id).formatted_size || 'Tersedia') }}
+                          </p>
+                        </div>
+
+                        <!-- Button for Selfie -->
+                        <button
+                          v-if="isSelfieVerified"
+                          type="button"
+                          @click="isSelfieAuditModalOpen = true"
+                          class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer"
                         >
-                          {{ ['APPROVED', 'VERIFIED', 'EXAMINED'].includes(getDocument(docConfig.id).status) ? 'Sudah Diperiksa' : getDocument(docConfig.id).status === 'REVISION_REQUIRED' ? 'Perlu Perbaikan' : getDocument(docConfig.id).status === 'REJECTED' ? 'Ditolak' : 'Belum Diperiksa' }}
-                        </span>
-                        <p class="text-[10px] text-slate-400 mt-0.5 font-mono">
-                          {{ getDocument(docConfig.id).formatted_size || (Math.round((getDocument(docConfig.id).file_size_bytes || 0) / 1024) + ' KB') }}
-                        </p>
-                      </div>
+                          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                          <span>Detail Pemeriksaan</span>
+                        </button>
+                        <button
+                          v-else
+                          type="button"
+                          @click="openSelfieConfirmation(getDocument(docConfig.id))"
+                          class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        >
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                          <span>Lihat & Periksa Foto</span>
+                        </button>
+                      </template>
 
-                      <!-- Quick Approve button if pending -->
-                      <button
-                        v-if="getDocument(docConfig.id).status === 'PENDING'"
-                        type="button"
-                        @click="approveSingleDoc(getDocument(docConfig.id))"
-                        class="px-3 py-2 rounded-xl bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 text-xs font-bold transition flex items-center gap-1 shadow-sm cursor-pointer"
-                        title="Tandai berkas ini sah / sudah diperiksa"
-                      >
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Sahkan</span>
-                      </button>
+                      <!-- Standard Treatment for Non-Selfie Documents (KTP, KK, Forms, etc.) -->
+                      <template v-else>
+                        <div class="text-right mr-2">
+                          <span
+                            :class="[
+                              'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase',
+                              ['APPROVED', 'VERIFIED', 'EXAMINED'].includes(getDocument(docConfig.id).status)
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700'
+                                : ['REJECTED', 'REVISION_REQUIRED'].includes(getDocument(docConfig.id).status)
+                                ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400 border border-rose-300 dark:border-rose-700'
+                                : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400 border border-amber-300 dark:border-amber-700'
+                            ]"
+                          >
+                            {{ ['APPROVED', 'VERIFIED', 'EXAMINED'].includes(getDocument(docConfig.id).status) ? 'Sudah Diperiksa' : getDocument(docConfig.id).status === 'REVISION_REQUIRED' ? 'Perlu Perbaikan' : getDocument(docConfig.id).status === 'REJECTED' ? 'Ditolak' : 'Belum Diperiksa' }}
+                          </span>
+                          <p class="text-[10px] text-slate-400 mt-0.5 font-mono">
+                            {{ getDocument(docConfig.id).formatted_size || (Math.round((getDocument(docConfig.id).file_size_bytes || 0) / 1024) + ' KB') }}
+                          </p>
+                        </div>
 
-                      <!-- Preview / Inspect Button -->
-                      <button
-                        type="button"
-                        @click="openViewer(getDocument(docConfig.id), docConfig.label)"
-                        class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
-                      >
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                        <span>Lihat & Periksa</span>
-                      </button>
+                        <!-- Quick Approve button if pending -->
+                        <button
+                          v-if="getDocument(docConfig.id).status === 'PENDING'"
+                          type="button"
+                          @click="approveSingleDoc(getDocument(docConfig.id))"
+                          class="px-3 py-2 rounded-xl bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 text-xs font-bold transition flex items-center gap-1 shadow-sm cursor-pointer"
+                          title="Tandai berkas ini sah / sudah diperiksa"
+                        >
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                          <span>Sahkan</span>
+                        </button>
+
+                        <!-- Preview / Inspect Button -->
+                        <button
+                          type="button"
+                          @click="openViewer(getDocument(docConfig.id), docConfig.label)"
+                          class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        >
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                          <span>Lihat & Periksa</span>
+                        </button>
+                      </template>
                     </template>
 
                     <div v-else class="text-xs text-slate-400 italic">
@@ -1696,6 +1798,344 @@
         </div>
       </div>
     </transition>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL TAHAP B: Konfirmasi Pemeriksaan Foto Pemohon                        -->
+    <!-- ========================================================================= -->
+    <transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
+    >
+      <div
+        v-if="isSelfieConfirmModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
+      >
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 space-y-5 animate-in">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white">
+                Konfirmasi Pemeriksaan Foto Pemohon
+              </h3>
+              <p class="text-[11px] text-slate-400 font-mono mt-0.5">
+                {{ application.reg_number }} — {{ application.applicant_name }}
+              </p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-xs text-amber-900 dark:text-amber-200 leading-relaxed font-medium">
+            Apakah Anda yakin akan melakukan pemeriksaan terhadap foto wajah pemohon ini? Foto hanya tersedia sementara untuk keperluan verifikasi dan akan dihapus setelah hasil pemeriksaan dikonfirmasi.
+          </div>
+
+          <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
+            <button
+              type="button"
+              @click="cancelSelfieConfirmation"
+              class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              @click="proceedToSelfieInspection"
+              class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/30 transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Ya, Periksa Foto</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL TAHAP C & D: Pemeriksaan Foto & Pernyataan Petugas                  -->
+    <!-- ========================================================================= -->
+    <transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
+    >
+      <div
+        v-if="isSelfieInspectionModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto"
+      >
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 my-auto space-y-5 animate-in">
+          <!-- Header -->
+          <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                Verifikasi Biometrik Wajah Sementara
+              </span>
+              <h3 class="text-base font-black text-slate-900 dark:text-white mt-0.5">
+                Pemeriksaan Foto Wajah Pemohon (Selfie)
+              </h3>
+            </div>
+            <button
+              type="button"
+              @click="closeSelfieInspectionModal"
+              class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 transition cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Applicant Identity Reference Pill -->
+          <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs">
+            <div>
+              <span class="text-slate-400 text-[10px] block">Pemohon:</span>
+              <span class="font-bold text-slate-900 dark:text-white">{{ application.applicant_name }}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 text-[10px] block">NIK:</span>
+              <span class="font-mono font-bold text-slate-900 dark:text-white">{{ application.applicant_nik }}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 text-[10px] block">Nomor Registrasi:</span>
+              <span class="font-mono font-bold text-blue-600 dark:text-blue-400">{{ application.reg_number }}</span>
+            </div>
+          </div>
+
+          <!-- TAHAP C: Tampilan Foto Terproteksi (No Download, ContextMenu Blocked) -->
+          <div class="space-y-2">
+            <div
+              class="relative w-full max-h-[360px] min-h-[220px] rounded-2xl bg-black/95 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-800 select-none"
+              @contextmenu.prevent
+            >
+              <div v-if="selfieLoadingImage" class="absolute inset-0 flex flex-col items-center justify-center text-white/70 text-xs space-y-2 bg-slate-900">
+                <svg class="animate-spin w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                <span>Memuat foto terproteksi...</span>
+              </div>
+              <img
+                v-if="selfieServeUrl"
+                :src="selfieServeUrl"
+                alt="Foto Wajah Pemohon Terproteksi"
+                class="max-h-[360px] w-auto max-w-full object-contain pointer-events-none"
+                draggable="false"
+                @load="selfieLoadingImage = false"
+                @error="selfieLoadingImage = false"
+              />
+            </div>
+            <p class="text-[10px] text-center text-slate-400">
+              🔒 Tampilan terproteksi (Cache-Control: no-store). Klik kanan & download dinonaktifkan demi privasi pemohon.
+            </p>
+          </div>
+
+          <!-- TAHAP D: Formulir Pernyataan Petugas -->
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-4">
+            <div>
+              <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                PERNYATAAN HASIL PEMERIKSAAN FOTO PEMOHON
+              </h4>
+              <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 italic">
+                "Saya menyatakan telah memeriksa foto wajah yang diunggah dan memberikan hasil pemeriksaan sesuai dengan kondisi yang saya lihat."
+              </p>
+            </div>
+
+            <!-- Two Mandatory Radio Options -->
+            <div class="space-y-2.5">
+              <label
+                class="flex items-start gap-3 p-3.5 rounded-xl border-2 transition cursor-pointer"
+                :class="selfieForm.decision === 'MATCH'
+                  ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-500 dark:border-emerald-500'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300'"
+              >
+                <input
+                  type="radio"
+                  name="selfie_decision"
+                  value="MATCH"
+                  v-model="selfieForm.decision"
+                  class="mt-1 text-emerald-600 focus:ring-emerald-500"
+                />
+                <div class="text-xs">
+                  <span class="font-black text-slate-900 dark:text-white block">
+                    1. FOTO SESUAI DENGAN PEMOHON
+                  </span>
+                  <p class="text-slate-600 dark:text-slate-300 text-[11px] mt-0.5">
+                    "Saya menyatakan bahwa wajah pada foto tersebut merupakan pemohon yang bersangkutan."
+                  </p>
+                </div>
+              </label>
+
+              <label
+                class="flex items-start gap-3 p-3.5 rounded-xl border-2 transition cursor-pointer"
+                :class="selfieForm.decision === 'MISMATCH'
+                  ? 'bg-rose-50/80 dark:bg-rose-950/40 border-rose-500 dark:border-rose-500'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300'"
+              >
+                <input
+                  type="radio"
+                  name="selfie_decision"
+                  value="MISMATCH"
+                  v-model="selfieForm.decision"
+                  class="mt-1 text-rose-600 focus:ring-rose-500"
+                />
+                <div class="text-xs">
+                  <span class="font-black text-slate-900 dark:text-white block">
+                    2. FOTO BUKAN PEMOHON
+                  </span>
+                  <p class="text-slate-600 dark:text-slate-300 text-[11px] mt-0.5">
+                    "Saya menyatakan bahwa wajah pada foto tersebut bukan pemohon yang bersangkutan."
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Mandatory Responsibility Checkbox -->
+            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="selfieForm.statement_agreed"
+                class="rounded text-blue-600 focus:ring-blue-500 mt-0.5"
+              />
+              <span class="text-xs font-semibold text-blue-950 dark:text-blue-200">
+                Saya telah melakukan pemeriksaan secara langsung terhadap foto tersebut dan bertanggung jawab atas hasil pemeriksaan yang saya pilih.
+              </span>
+            </label>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+            <button
+              type="button"
+              @click="closeSelfieInspectionModal"
+              :disabled="isSubmittingSelfie"
+              class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+            >
+              Batal
+            </button>
+
+            <button
+              type="button"
+              @click="submitSelfieVerification"
+              :disabled="!selfieForm.decision || !selfieForm.statement_agreed || isSubmittingSelfie"
+              class="px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              :class="selfieForm.decision === 'MISMATCH'
+                ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/30'
+                : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'"
+            >
+              <svg v-if="isSubmittingSelfie" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>{{ isSubmittingSelfie ? 'Memproses & Memusnahkan Foto...' : 'Konfirmasi Hasil Pemeriksaan' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL DETAIL AUDIT: Bukti Pemeriksaan & Pemusnahan Biometrik              -->
+    <!-- ========================================================================= -->
+    <transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
+    >
+      <div
+        v-if="isSelfieAuditModalOpen && selfieVerificationState"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
+      >
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 space-y-5 animate-in">
+          <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+            <div class="flex items-center gap-2.5">
+              <div 
+                class="w-10 h-10 rounded-xl flex items-center justify-center text-white"
+                :class="selfieVerificationState.decision === 'MATCH' ? 'bg-emerald-600' : 'bg-rose-600'"
+              >
+                <svg v-if="selfieVerificationState.decision === 'MATCH'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-black text-slate-900 dark:text-white">
+                  Bukti Audit Pemeriksaan Biometrik Wajah
+                </h3>
+                <p class="text-[11px] text-slate-400 font-mono">
+                  ID Verifikasi: #{{ selfieVerificationState.id || props.application.id }}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              @click="isSelfieAuditModalOpen = false"
+              class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-700">
+              <span class="text-slate-400">Nomor Registrasi:</span>
+              <span class="font-mono font-bold text-slate-900 dark:text-white">{{ application.reg_number }}</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-700">
+              <span class="text-slate-400">Nama Pemohon:</span>
+              <span class="font-bold text-slate-900 dark:text-white">{{ application.applicant_name }}</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-700">
+              <span class="text-slate-400">Hasil Pemeriksaan Petugas:</span>
+              <span 
+                class="font-black px-2.5 py-0.5 rounded-full text-[10px] uppercase"
+                :class="selfieVerificationState.decision === 'MATCH'
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                  : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'"
+              >
+                {{ selfieVerificationState.decision === 'MATCH' ? 'SESUAI DENGAN PEMOHON (MATCH)' : 'BUKAN PEMOHON (MISMATCH)' }}
+              </span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-700">
+              <span class="text-slate-400">Petugas Pemeriksa:</span>
+              <span class="font-semibold text-slate-900 dark:text-white">{{ selfieVerificationState.verified_by_name || 'Petugas Verifikator' }}</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-700">
+              <span class="text-slate-400">Waktu Pemeriksaan:</span>
+              <span class="text-slate-700 dark:text-slate-200">{{ formatDate(selfieVerificationState.verified_at) }}</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-700">
+              <span class="text-slate-400">Versi Pernyataan:</span>
+              <span class="font-mono text-slate-700 dark:text-slate-200">{{ selfieVerificationState.statement_version || 'v1.0' }} (Disetujui)</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-700">
+              <span class="text-slate-400">Status File Fisik di Server:</span>
+              <span class="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span>Telah Dimusnahkan (DELETED)</span>
+              </span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-700">
+              <span class="text-slate-400">Waktu Pemusnahan File:</span>
+              <span class="text-slate-700 dark:text-slate-200">{{ formatDate(selfieVerificationState.deleted_at || selfieVerificationState.verified_at) }}</span>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 text-[11px] text-blue-900 dark:text-blue-200 leading-relaxed">
+            🛡️ <strong>Kepatuhan Privasi Data:</strong> Foto selfie pemohon hanya digunakan untuk verifikasi identitas satu kali dan telah dimusnahkan secara permanen dari penyimpanan hosting. Sistem hanya menyimpan metadata audit hasil pemeriksaan ini.
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button
+              type="button"
+              @click="isSelfieAuditModalOpen = false"
+              class="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs shadow-md transition cursor-pointer"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </AdminLayout>
 </template>
 
@@ -1874,6 +2314,139 @@ const viewerState = ref({
   mimeType: 'image/jpeg',
 })
 
+// Biometric Selfie Temporary Verification & Deletion State
+const selfieVerificationState = ref(props.application?.selfie_verification || null)
+
+// Tahap B Modal (Konfirmasi sebelum melihat foto)
+const isSelfieConfirmModalOpen = ref(false)
+
+// Tahap C & D Modal (Pemeriksaan & Pernyataan)
+const isSelfieInspectionModalOpen = ref(false)
+const selfieInspectionDoc = ref(null)
+const selfieServeUrl = ref('')
+const selfieLoadingImage = ref(false)
+const isSubmittingSelfie = ref(false)
+
+const selfieForm = ref({
+  decision: '', // 'MATCH' or 'MISMATCH'
+  statement_agreed: false,
+  statement_version: 'v1.0',
+})
+
+// Audit detail modal
+const isSelfieAuditModalOpen = ref(false)
+
+const isSelfieVerified = computed(() => {
+  return !!(selfieVerificationState.value && selfieVerificationState.value.decision)
+})
+
+const isDocSelfie = (doc, docConfig) => {
+  if (!doc && !docConfig) return false
+  if (doc && selfieDocument.value && selfieDocument.value.id === doc.id) return true
+  if (docConfig) {
+    const label = (docConfig.label || '').toLowerCase()
+    if (docConfig.capture_mode === 'user' || label.includes('selfie') || label.includes('foto wajah') || label.includes('foto pemohon') || label.includes('pas foto') || label.includes('foto diri')) return true
+  }
+  if (doc) {
+    const sDoc = doc.service_document
+    if (sDoc) {
+      const label = (sDoc.label || '').toLowerCase()
+      if (sDoc.capture_mode === 'user' || label.includes('selfie') || label.includes('foto wajah') || label.includes('foto pemohon') || label.includes('pas foto') || label.includes('foto diri')) return true
+    }
+    const filename = (doc.original_filename || '').toLowerCase()
+    return filename.includes('selfie') || filename.includes('foto_wajah') || filename.includes('foto-wajah') || filename.includes('pas_foto') || filename.includes('foto_pemohon')
+  }
+  return false
+}
+
+// Tahap B: Click to open confirmation modal
+const openSelfieConfirmation = (doc) => {
+  if (!doc) return
+  if (isSelfieVerified.value) {
+    isSelfieAuditModalOpen.value = true
+    return
+  }
+  selfieInspectionDoc.value = doc
+  isSelfieConfirmModalOpen.value = true
+}
+
+const cancelSelfieConfirmation = () => {
+  isSelfieConfirmModalOpen.value = false
+  selfieInspectionDoc.value = null
+}
+
+// Tahap C: Proceed from confirmation to photo inspection
+const proceedToSelfieInspection = () => {
+  isSelfieConfirmModalOpen.value = false
+  if (!selfieInspectionDoc.value && selfieDocument.value) {
+    selfieInspectionDoc.value = selfieDocument.value
+  }
+  if (!selfieInspectionDoc.value) return
+
+  selfieForm.value = {
+    decision: '',
+    statement_agreed: false,
+    statement_version: 'v1.0',
+  }
+
+  selfieServeUrl.value = route('admin.queue.documents.serve', {
+    documentId: selfieInspectionDoc.value.id,
+    preview_only: 1,
+    t: Date.now(),
+  })
+  selfieLoadingImage.value = true
+
+  isSelfieInspectionModalOpen.value = true
+}
+
+const closeSelfieInspectionModal = () => {
+  isSelfieInspectionModalOpen.value = false
+  selfieServeUrl.value = ''
+  selfieInspectionDoc.value = null
+  selfieForm.value.decision = ''
+  selfieForm.value.statement_agreed = false
+}
+
+// Tahap D: Submit statement & confirm verification result
+const submitSelfieVerification = async () => {
+  if (!selfieForm.value.decision || !selfieForm.value.statement_agreed || isSubmittingSelfie.value) return
+
+  isSubmittingSelfie.value = true
+  try {
+    const response = await axios.post(
+      route('admin.queue.applications.selfie.verify', { applicationId: props.application.id }),
+      {
+        decision: selfieForm.value.decision,
+        statement_agreed: selfieForm.value.statement_agreed,
+        statement_version: selfieForm.value.statement_version,
+      }
+    )
+
+    if (response.data?.success) {
+      selfieVerificationState.value = response.data.verification
+      if (selfieDocument.value) {
+        selfieDocument.value.is_destroyed = true
+        selfieDocument.value.status = selfieForm.value.decision === 'MATCH' ? 'APPROVED' : 'REVISION_REQUIRED'
+      }
+      if (response.data.application) {
+        props.application.status = response.data.application.status
+        props.application.revision_notes = response.data.application.revision_notes
+        if (response.data.application.documents) {
+          props.application.documents = response.data.application.documents
+        }
+      }
+
+      closeSelfieInspectionModal()
+      alert(response.data.message || 'Verifikasi biometrik berhasil dicatat dan foto telah dimusnahkan secara aman.')
+    }
+  } catch (err) {
+    console.error('Selfie verification error:', err)
+    alert(err.response?.data?.message || 'Terjadi kesalahan saat memproses verifikasi foto pemohon.')
+  } finally {
+    isSubmittingSelfie.value = false
+  }
+}
+
 const selfieDocument = computed(() => {
   if (props.application.selfie_document) {
     return props.application.selfie_document
@@ -1991,26 +2564,19 @@ const getLatestRejectionReason = () => {
 }
 
 const previewSelfie = () => {
-  if (!selfieDocument.value) return
-  if (selfieDocument.value.status === 'PENDING' && selfieDocument.value.id) {
-    selfieDocument.value.status = 'APPROVED'
-    router.post(
-      route('admin.queue.documents.approve', { applicationId: props.application.id, docId: selfieDocument.value.id }),
-      {},
-      { preserveScroll: true, preserveState: true }
-    )
+  if (isSelfieVerified.value) {
+    isSelfieAuditModalOpen.value = true
+    return
   }
-  const url = selfieDocument.value.admin_serve_url || (selfieDocument.value.id ? `/admin/queue/documents/${selfieDocument.value.id}/serve` : '')
-  viewerState.value = {
-    open: true,
-    title: 'Foto Wajah Pemohon (Selfie) - ' + props.application.applicant_name,
-    url: url,
-    mimeType: selfieDocument.value.mime_type || 'image/jpeg',
-  }
+  openSelfieConfirmation(selfieDocument.value)
 }
 
 const openViewer = (doc, label) => {
   if (!doc) return
+  if (isDocSelfie(doc)) {
+    openSelfieConfirmation(doc)
+    return
+  }
   if (doc.status === 'PENDING') {
     doc.status = 'APPROVED'
     router.post(
@@ -2030,6 +2596,10 @@ const openViewer = (doc, label) => {
 
 const approveSingleDoc = (doc) => {
   if (!doc) return
+  if (isDocSelfie(doc)) {
+    openSelfieConfirmation(doc)
+    return
+  }
   doc.status = 'APPROVED'
   router.post(
     route('admin.queue.documents.approve', { applicationId: props.application.id, docId: doc.id }),

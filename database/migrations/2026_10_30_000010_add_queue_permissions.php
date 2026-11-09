@@ -29,11 +29,11 @@ return new class extends Migration
         $queueVerifier->givePermissionTo(['manage_queue_verification', 'view_queue_reports']);
 
         // Super Administrator + Website Administrator mendapatkan semua permission baru
-        $superAdmin = \Spatie\Permission\Models\Role::findByName('Super Administrator');
+        $superAdmin = \Spatie\Permission\Models\Role::where('name', 'Super Administrator')->first();
         if ($superAdmin) {
             $superAdmin->givePermissionTo($newPermissions);
         }
-        $webAdmin = \Spatie\Permission\Models\Role::findByName('Website Administrator');
+        $webAdmin = \Spatie\Permission\Models\Role::where('name', 'Website Administrator')->first();
         if ($webAdmin) {
             $webAdmin->givePermissionTo($newPermissions);
         }

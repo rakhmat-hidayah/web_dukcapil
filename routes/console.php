@@ -31,3 +31,11 @@ Schedule::command(\App\Console\Commands\PurgeExpiredDraftApplicationsCommand::cl
 Schedule::command(\App\Console\Commands\ArchiveRetentionCleanupCommand::class, ['--triggered-by' => 'scheduler'])
     ->dailyAt('02:30')
     ->withoutOverlapping(30);
+
+/**
+ * Temporary Selfie Verification Cleanup & Retry
+ * Runs every thirty minutes to ensure any pending or failed selfie physical deletions are completely purged
+ */
+Schedule::command(\App\Console\Commands\RetrySelfieDeletionsCommand::class)
+    ->everyThirtyMinutes()
+    ->withoutOverlapping(10);

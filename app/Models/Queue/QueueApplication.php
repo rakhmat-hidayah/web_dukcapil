@@ -129,6 +129,7 @@ class QueueApplication extends Model
         'physical_verified_status',
         'physical_verified_notes',
         'selfie_document',
+        'selfie_verification',
         'selfie_url',
         'selfie_thumbnail_url',
         'tracking_url',
@@ -253,6 +254,18 @@ class QueueApplication extends Model
     public function handover(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(KtpHandover::class, 'application_id');
+    }
+
+    public function selfieVerification(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(QueueSelfieVerification::class, 'application_id');
+    }
+
+    public function getSelfieVerificationAttribute(): ?QueueSelfieVerification
+    {
+        return $this->relationLoaded('selfieVerification')
+            ? $this->getRelation('selfieVerification')
+            : $this->selfieVerification()->first();
     }
 
     public function getNikAttribute(): ?string
@@ -382,6 +395,33 @@ class QueueApplication extends Model
         });
     }
 
+    public function isSelfieDocument(ApplicationDocument $doc): bool
+    {
+        $serviceDoc = $doc->serviceDocument ?: ($doc->relationLoaded('serviceDocument') ? $doc->serviceDocument : null);
+        if ($serviceDoc) {
+            $label = strtolower($serviceDoc->label ?? '');
+            if ($serviceDoc->capture_mode === 'user'
+                || str_contains($label, 'selfie')
+                || str_contains($label, 'foto wajah')
+                || str_contains($label, 'foto pemohon')
+                || str_contains($label, 'pas foto')
+                || str_contains($label, 'foto diri')) {
+                return true;
+            }
+        }
+        $filename = strtolower($doc->original_filename ?? '');
+        if (str_contains($filename, 'selfie')
+            || str_contains($filename, 'foto_wajah')
+            || str_contains($filename, 'foto-wajah')
+            || str_contains($filename, 'pas_foto')
+            || str_contains($filename, 'foto_pemohon')) {
+            return true;
+        }
+
+        $selfie = $this->selfie_document;
+        return $selfie && $selfie->id === $doc->id;
+    }
+
     public function getSelfieUrlAttribute(): ?string
     {
         $selfie = $this->selfie_document;
@@ -389,17 +429,20 @@ class QueueApplication extends Model
             return null;
         }
 
-        // Admin portal context
-        if (request()->is('admin*') || (auth()->check() && !request()->is('layanan/antrian*'))) {
-            return route('admin.queue.documents.serve', ['documentId' => $selfie->id]);
+        // If marked destroyed or path is empty, file is permanently destroyed
+        if (!empty($selfie->is_destroyed) || empty($selfie->getRawOriginal('path'))) {
+            return null;
         }
 
-        // Public applicant context with access token
-        if (!empty($this->access_token)) {
-            return route('queue.serve-doc', [
-                'token' => $this->access_token,
-                'documentId' => $selfie->id,
-            ]);
+        $verification = $this->selfie_verification;
+        if ($verification && $verification->deletion_status === QueueSelfieVerification::DELETION_DELETED) {
+            return null;
+        }
+
+        // Selfie photos are biometric verification artifacts:
+        // NEVER expose to public applicant or unauthenticated visitors!
+        if (!auth()->check()) {
+            return null;
         }
 
         return route('admin.queue.documents.serve', ['documentId' => $selfie->id]);

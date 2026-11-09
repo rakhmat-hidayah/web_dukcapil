@@ -165,6 +165,8 @@ class AutoRoleSync
             // Ensure Admin PPID has PPID permissions
             $adminPpid = Role::where('name', 'Admin PPID')->where('guard_name', 'web')->first();
             if ($adminPpid) {
+                Permission::firstOrCreate(['name' => 'manage_ppid', 'guard_name' => 'web']);
+                Permission::firstOrCreate(['name' => 'manage_downloads', 'guard_name' => 'web']);
                 $adminPpid->givePermissionTo(['manage_ppid', 'manage_downloads']);
             }
 
@@ -206,12 +208,15 @@ class AutoRoleSync
             // Migrate all users having legacy roles
             $users = User::with('roles')->get();
             foreach ($users as $user) {
+                $userRoles = $user->roles->pluck('name')->toArray();
                 foreach (self::$roleMap as $oldName => $newName) {
-                    if ($user->hasRole($oldName)) {
+                    if (in_array($oldName, $userRoles, true)) {
                         $newRole = Role::where('name', $newName)->where('guard_name', 'web')->first();
                         if ($newRole) {
                             $user->assignRole($newRole);
-                            $user->removeRole($oldName);
+                            try {
+                                $user->removeRole($oldName);
+                            } catch (\Throwable $e) {}
                         }
                     }
                 }
