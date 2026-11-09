@@ -50,6 +50,8 @@ class QueueSettingsController extends Controller
                 $group = 'policy';
             } elseif (str_contains($key, 'notify')) {
                 $group = 'notification';
+            } elseif (str_contains($key, 'layout')) {
+                $group = 'layout';
             } elseif (str_contains($key, 'address') || str_contains($key, 'phone')) {
                 $group = 'general';
             }

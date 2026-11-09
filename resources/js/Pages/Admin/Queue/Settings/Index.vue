@@ -134,6 +134,76 @@
           </div>
         </div>
 
+        <!-- PORTAL LAYOUT & ROLLBACK GROUP -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700 pb-4">
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                Desain Tampilan Halaman Depan Layanan KTP-el Publik (/layanan/antrian)
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Pilih gaya tampilan halaman publik. Anda dapat beralih ke tampilan modern atau kembali ke tampilan klasik (rollback) sewaktu-waktu.
+              </p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <a 
+                href="/layanan/antrian" 
+                target="_blank" 
+                class="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-bold text-xs hover:bg-blue-100 transition inline-flex items-center gap-1"
+              >
+                <span>Lihat Halaman Publik &rarr;</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Pilihan 1: Portal Aplikasi Modern -->
+            <label
+              class="relative flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition select-none"
+              :class="form['queue.portal_layout'] === 'app_portal' ? 'bg-blue-50/60 dark:bg-blue-950/30 border-blue-600 ring-2 ring-blue-500/20' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300'"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="app_portal"
+                    v-model="form['queue.portal_layout']"
+                    class="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span class="font-extrabold text-xs text-slate-900 dark:text-white">Portal Aplikasi Modern (Icon Grid)</span>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-600 text-white">Rekomendasi</span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pl-6">
+                Desain ala aplikasi mobile smartphone (seperti SuperApp KLiK Dukcapil) dengan ikon bundar neumorphic, tombol cepat Survey IKM, banner carousel, dan mobile bottom bar.
+              </p>
+            </label>
+
+            <!-- Pilihan 2: Tampilan Klasik (Rollback Option) -->
+            <label
+              class="relative flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition select-none"
+              :class="form['queue.portal_layout'] === 'classic' ? 'bg-amber-50/60 dark:bg-amber-950/30 border-amber-500 ring-2 ring-amber-500/20' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300'"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="classic"
+                    v-model="form['queue.portal_layout']"
+                    class="w-4 h-4 text-amber-600 focus:ring-amber-500"
+                  />
+                  <span class="font-extrabold text-xs text-slate-900 dark:text-white">Tampilan Klasik (Banner Standard)</span>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">Rollback</span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pl-6">
+                Tampilan awal berbasis hero banner biru gelap besar dengan daftar kartu panjang dan daftar tabel berkas langsung.
+              </p>
+            </label>
+          </div>
+        </div>
+
         <!-- GENERAL GROUP -->
         <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
           <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -585,6 +655,7 @@ const form = ref({
   'queue.maintenance_title': page.props.queue_maintenance?.title || getVal('maintenance', 'queue.maintenance_title', 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem'),
   'queue.maintenance_message': page.props.queue_maintenance?.message || getVal('maintenance', 'queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan dan pembaruan sistem. Layanan akan segera dibuka kembali setelah proses selesai. Bagi masyarakat yang membutuhkan pelayanan mendesak, silakan datang langsung ke loket kantor Disdukcapil Kabupaten Dompu.'),
   'queue.maintenance_estimated_end': page.props.queue_maintenance?.estimated_end ?? getVal('maintenance', 'queue.maintenance_estimated_end', ''),
+  'queue.portal_layout': getVal('layout', 'queue.portal_layout', 'app_portal'),
   'queue.office_address': getVal('general', 'queue.office_address', 'Jl. Soekarno Hatta No. 9, Dompu - NTB 84211'),
   'queue.helpdesk_phone': getVal('general', 'queue.helpdesk_phone', '6282124824114'),
   'queue.open_time': getVal('schedule', 'queue.open_time', '08:00'),

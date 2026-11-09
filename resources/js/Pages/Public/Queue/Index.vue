@@ -1,351 +1,735 @@
 <template>
-  <Head title="Layanan KTP-el & Pra-Verifikasi Digital - Disdukcapil Kabupaten Dompu" />
+  <Head title="Layanan Online KTP-el - Disdukcapil Kabupaten Dompu" />
 
   <PublicLayout>
-    <div class="py-8 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-      <!-- Maintenance Alert Banner (If Active) -->
-      <div v-if="maintenance?.is_active" class="p-5 sm:p-6 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-200 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-amber-500/5">
-        <div class="flex items-start gap-3.5">
-          <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+    <div class="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 md:pb-16 text-slate-800 dark:text-slate-100">
+      
+      <!-- Top App Container -->
+      <div class="max-w-4xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 space-y-5">
+
+        <!-- Rollback / Switcher Pill Notice (Allows instant switch between Modern App & Classic view) -->
+        <div class="flex items-center justify-between px-3 py-1.5 rounded-2xl bg-blue-50 dark:bg-slate-900 border border-blue-200/80 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-300">
+          <div class="flex items-center gap-1.5 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Tampilan: <strong>Portal Aplikasi KTP-el</strong></span>
           </div>
-          <div>
-            <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-600 text-white mb-1">
-              Informasi Pemeliharaan
-            </div>
-            <h3 class="font-black text-sm sm:text-base text-amber-950 dark:text-amber-200">
-              {{ maintenance.title || 'Layanan Pendaftaran Online Sedang Ditutup Sementara' }}
-            </h3>
-            <p class="text-xs text-amber-900/80 dark:text-amber-300/90 mt-1 max-w-2xl leading-relaxed">
-              {{ maintenance.message }}
-            </p>
-            <p v-if="maintenance.estimated_end" class="text-xs text-amber-800 dark:text-amber-400 font-bold mt-1">
-              Estimasi Selesai: {{ maintenance.estimated_end }}
-            </p>
-          </div>
-        </div>
-        <Link
-          :href="route('queue.apply.create')"
-          class="shrink-0 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-md shadow-amber-600/20"
-        >
-          Lihat Informasi Lengkap &rarr;
-        </Link>
-      </div>
-
-      <!-- Hero Banner -->
-      <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-10 lg:p-12 shadow-2xl border border-blue-800/40">
-        <!-- Glow highlights -->
-        <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div class="relative z-10 max-w-3xl">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold uppercase tracking-wider mb-4">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            Layanan KTP-el & Pra-Verifikasi Digital
-          </div>
-
-          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
-            Pelayanan KTP-el Cepat, Tepat & Bebas Antre Panjang
-          </h1>
-
-          <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
-            Daftar permohonan layanan KTP-el dari rumah, unggah berkas persyaratan melalui kamera handphone, dan dapatkan kepastian verifikasi dokumen sebelum datang ke loket Dinas Dukcapil Kabupaten Dompu.
-          </p>
-
-          <!-- Quick Action Buttons -->
-          <div class="mt-8 flex flex-col sm:flex-row gap-3">
-            <Link
-              :href="route('queue.apply.create')"
-              :class="[
-                'px-6 py-3.5 rounded-2xl font-bold text-sm shadow-xl transition flex items-center justify-center gap-2 hover:scale-[1.02]',
-                maintenance?.is_active
-                  ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-600/30'
-                  : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30'
-              ]"
-            >
-              <span>{{ maintenance?.is_active ? 'Pendaftaran Ditutup Sementara (Info)' : 'Daftar Pelayanan Sekarang' }}</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-            </Link>
-
-            <Link
-              :href="route('queue.history')"
-              class="px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm backdrop-blur border border-white/20 transition flex items-center justify-center gap-2"
-            >
-              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-              <span>Riwayat Permohonan Saya</span>
-            </Link>
-
-            <a
-              href="#lacak-antrian"
-              class="px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white font-semibold text-sm border border-white/10 transition flex items-center justify-center gap-1.5"
-            >
-              <span>Lacak Nomor</span>
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Live Today Quota & Status Ribbon -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Status Operasional -->
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div :class="['w-12 h-12 rounded-2xl flex items-center justify-center shrink-0', todayStats.is_open ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600' : 'bg-rose-100 dark:bg-rose-950/60 text-rose-600']">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          </div>
-          <div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Status Hari Ini</p>
-            <p class="text-base font-bold text-slate-900 dark:text-white mt-0.5">
-              {{ todayStats.is_open ? 'Loket Buka' : (todayStats.is_holiday ? 'Hari Libur' : 'Loket Tutup') }}
-            </p>
-            <p class="text-[11px] text-slate-400">{{ todayStats.open_time }} - {{ todayStats.close_time }} WITA</p>
-          </div>
-        </div>
-
-        <!-- Sisa Kuota Hari Ini -->
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center shrink-0">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-          </div>
-          <div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Sisa Kuota Hari Ini</p>
-            <p class="text-2xl font-black text-blue-600 dark:text-blue-400 mt-0.5">
-              {{ todayStats.total_remaining }}
-              <span class="text-xs font-normal text-slate-400">/ {{ todayStats.total_quota }} Slot</span>
-            </p>
-          </div>
-        </div>
-
-        <!-- Terisi Hari Ini -->
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center shrink-0">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-          </div>
-          <div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Terverifikasi Hari Ini</p>
-            <p class="text-2xl font-black text-slate-900 dark:text-white mt-0.5">
-              {{ todayStats.total_booked }}
-              <span class="text-xs font-normal text-slate-400">Antrian</span>
-            </p>
-          </div>
-        </div>
-
-        <!-- Biaya Pelayanan -->
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center shrink-0">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          </div>
-          <div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Biaya Pelayanan</p>
-            <p class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-              GRATIS / Rp 0
-            </p>
-            <p class="text-[11px] text-slate-400">Tanpa Pungutan Liar</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4 Service Types Grid -->
-      <div>
-        <div class="mb-8">
-          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-            Pilih Jenis Pelayanan KTP-el
-          </h2>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Silakan pilih layanan yang sesuai dengan kebutuhan Anda untuk melihat persyaratan dan mendaftar antrian.
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div
-            v-for="service in services"
-            :key="service.id"
-            class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
+          <a
+            :href="route('queue.index', { mode: 'classic' })"
+            class="font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+            title="Kembali ke tampilan standar kartu banner"
           >
+            <span>Beralih ke Mode Klasik (Rollback)</span>
+            <RotateCcw class="w-3 h-3" />
+          </a>
+        </div>
+
+        <!-- Maintenance Alert Banner (If Active) -->
+        <div 
+          v-if="maintenance?.is_active" 
+          class="p-4 sm:p-5 rounded-3xl bg-amber-500/10 dark:bg-amber-500/15 border-2 border-amber-400 dark:border-amber-700 text-amber-950 dark:text-amber-200 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-amber-500/5"
+        >
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+              <AlertCircle class="w-5 h-5" />
+            </div>
             <div>
-              <div class="flex items-start justify-between gap-4 mb-4">
-                <div
-                  class="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold shadow-md"
-                  :style="{ backgroundColor: service.color || '#2563eb' }"
-                >
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-600 text-white mb-1">
+                Informasi Pemeliharaan
+              </div>
+              <h3 class="font-bold text-sm sm:text-base text-amber-950 dark:text-amber-100">
+                {{ maintenance.title || 'Layanan Pendaftaran Online Sedang Ditutup Sementara' }}
+              </h3>
+              <p class="text-xs text-amber-900/80 dark:text-amber-300/90 mt-0.5 leading-relaxed">
+                {{ maintenance.message }}
+              </p>
+              <p v-if="maintenance.estimated_end" class="text-xs text-amber-800 dark:text-amber-400 font-bold mt-1">
+                Estimasi Dibuka: {{ maintenance.estimated_end }}
+              </p>
+            </div>
+          </div>
+          <Link
+            :href="route('queue.apply.create')"
+            class="shrink-0 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-md"
+          >
+            Lihat Informasi Lengkap &rarr;
+          </Link>
+        </div>
+
+        <!-- 1. HEADER APP PORTAL (Inspired by Grobogan SuperApp Header) -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-700 text-white shadow-xl shadow-blue-600/15 border border-blue-400/30 p-5 sm:p-7">
+          <!-- Subtle decorative graphic watermark -->
+          <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div class="absolute -left-10 -top-10 w-40 h-40 bg-sky-300/20 rounded-full blur-2xl pointer-events-none"></div>
+
+          <div class="relative z-10 space-y-4">
+            <!-- App Brand & Title Bar -->
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-inner">
+                  <CreditCard class="w-6 h-6 text-white" />
                 </div>
-                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
-                  Kuota {{ service.quota_per_day }}/Hari
-                </span>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h1 class="text-lg sm:text-xl font-black tracking-tight leading-none text-white">
+                      Layanan Online KTP-el
+                    </h1>
+                  </div>
+                  <p class="text-xs text-sky-100 font-medium mt-1">
+                    Dinas Kependudukan dan Pencatatan Sipil Kab. Dompu
+                  </p>
+                </div>
               </div>
 
-              <h3 class="text-xl font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                {{ service.name }}
-              </h3>
-
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                {{ service.short_description }}
-              </p>
-
-              <!-- Document Requirements Checklist Preview -->
-              <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/60 space-y-2.5">
-                <div class="flex items-center justify-between">
-                  <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Daftar Persyaratan Berkas ({{ service.documents?.length || 0 }}):
-                  </p>
-                  <span class="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Foto / Scan dari HP</span>
-                </div>
-                <div
-                  v-for="(doc, dIdx) in service.documents"
-                  :key="doc.id"
-                  class="flex items-start justify-between gap-2 text-xs text-slate-700 dark:text-slate-300 p-1.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/40 transition"
+              <!-- Live Status Pill Badge -->
+              <div class="shrink-0">
+                <span 
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-[11px] font-bold backdrop-blur-md border shadow-sm"
+                  :class="todayStats.is_open ? 'bg-emerald-500/25 border-emerald-300/40 text-emerald-100' : 'bg-rose-500/25 border-rose-300/40 text-rose-100'"
                 >
-                  <div class="flex items-start gap-2 flex-1">
-                    <span class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                      {{ doc.sort_order || (dIdx + 1) }}
+                  <span class="w-2 h-2 rounded-full" :class="todayStats.is_open ? 'bg-emerald-300 animate-ping' : 'bg-rose-300'"></span>
+                  <span>{{ todayStats.is_open ? 'Loket Buka' : (todayStats.is_holiday ? 'Hari Libur' : 'Loket Tutup') }}</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Subtitle message & Running text style notice -->
+            <div class="pt-1 border-t border-white/15">
+              <p class="text-xs text-sky-50 leading-relaxed max-w-2xl font-normal">
+                Lakukan pendaftaran pelayanan KTP-el, foto berkas persyaratan langsung dari HP, dan pantau hasil verifikasi berkas tanpa harus antre berlama-lama di kantor dinas.
+              </p>
+            </div>
+
+            <!-- Key Feature Badges -->
+            <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-medium text-sky-100">
+              <span class="px-2.5 py-1 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center gap-1">
+                <CheckCircle2 class="w-3.5 h-3.5 text-emerald-300" />
+                100% Gratis Rp 0
+              </span>
+              <span class="px-2.5 py-1 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center gap-1">
+                <CheckCircle2 class="w-3.5 h-3.5 text-emerald-300" />
+                Pra-Verifikasi Online
+              </span>
+              <span class="px-2.5 py-1 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center gap-1">
+                <CheckCircle2 class="w-3.5 h-3.5 text-emerald-300" />
+                Kuota Hari Ini: {{ todayStats.total_remaining }} Slot
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. SECTION LAYANAN & SURVEY IKM BUTTON (Matching photo) -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between px-1">
+            <div>
+              <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                Layanan
+              </h2>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                Pilih menu di bawah ini untuk memulai pengajuan atau memantau status
+              </p>
+            </div>
+
+            <!-- Green Pill "★ Isi Survey IKM" Button (Exact like Grobogan screenshot) -->
+            <Link
+              :href="route('public.survey.index')"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md shadow-emerald-600/25 transition active:scale-95"
+            >
+              <Star class="w-3.5 h-3.5 fill-current text-amber-300" />
+              <span>Isi Survey IKM</span>
+            </Link>
+          </div>
+
+          <!-- 3. CIRCULAR NEUMORPHIC ICON GRID (3 Columns on Mobile, 4-5 on Desktop) -->
+          <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3.5 sm:gap-4 p-4 sm:p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800">
+            
+            <!-- Icon 1: KTP Hilang -->
+            <button
+              type="button"
+              @click="openServiceModalBySlug('cetak-ktp-hilang')"
+              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+            >
+              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/25 ring-4 ring-sky-100 dark:ring-sky-950/60 group-hover:scale-105 transition-transform duration-200">
+                <!-- Neumorphic 3D styled inner icon -->
+                <CreditCard class="w-7 h-7 sm:w-8 sm:h-8" />
+              </div>
+              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                KTP-el Hilang
+              </span>
+              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Surat Hilang</span>
+            </button>
+
+            <!-- Icon 2: KTP Rusak -->
+            <button
+              type="button"
+              @click="openServiceModalBySlug('cetak-ktp-rusak')"
+              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+            >
+              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 ring-4 ring-blue-100 dark:ring-blue-950/60 group-hover:scale-105 transition-transform duration-200">
+                <RotateCcw class="w-7 h-7 sm:w-8 sm:h-8" />
+              </div>
+              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                KTP-el Rusak
+              </span>
+              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Fisik Patah/Pudar</span>
+            </button>
+
+            <!-- Icon 3: Perubahan Data -->
+            <button
+              type="button"
+              @click="openServiceModalBySlug('perubahan-elemen-data')"
+              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+            >
+              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-cyan-400 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/25 ring-4 ring-teal-100 dark:ring-teal-950/60 group-hover:scale-105 transition-transform duration-200">
+                <FileText class="w-7 h-7 sm:w-8 sm:h-8" />
+              </div>
+              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                Ubah Elemen Data
+              </span>
+              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Status / Alamat</span>
+            </button>
+
+            <!-- Icon 4: Perekaman Baru (Pemula) -->
+            <button
+              type="button"
+              @click="openServiceModalBySlug('perekaman-ktp-el-baru')"
+              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+            >
+              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-emerald-400 to-green-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 ring-4 ring-emerald-100 dark:ring-emerald-950/60 group-hover:scale-105 transition-transform duration-200">
+                <Camera class="w-7 h-7 sm:w-8 sm:h-8" />
+              </div>
+              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                Perekaman Baru
+              </span>
+              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Pemula 16-17 Thn</span>
+            </button>
+
+            <!-- Icon 5: Lacak Permohonan (Search Anchor) -->
+            <button
+              type="button"
+              @click="scrollToTracking"
+              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+            >
+              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/25 ring-4 ring-amber-100 dark:ring-amber-950/60 group-hover:scale-105 transition-transform duration-200">
+                <Search class="w-7 h-7 sm:w-8 sm:h-8" />
+              </div>
+              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                Lacak Status
+              </span>
+              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">No. Reg / NIK</span>
+            </button>
+
+            <!-- Icon 6: Riwayat Permohonan Saya -->
+            <Link
+              :href="route('queue.history')"
+              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+            >
+              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-purple-400 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/25 ring-4 ring-purple-100 dark:ring-purple-950/60 group-hover:scale-105 transition-transform duration-200">
+                <FolderClock class="w-7 h-7 sm:w-8 sm:h-8" />
+              </div>
+              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                Riwayat Saya
+              </span>
+              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Daftar Tiket</span>
+            </Link>
+
+            <!-- Icon 7: Jadwal & Sisa Kuota Loket -->
+            <button
+              type="button"
+              @click="showQuotaModal = true"
+              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+            >
+              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-rose-400 to-red-600 flex items-center justify-center text-white shadow-lg shadow-rose-500/25 ring-4 ring-rose-100 dark:ring-rose-950/60 group-hover:scale-105 transition-transform duration-200">
+                <Calendar class="w-7 h-7 sm:w-8 sm:h-8" />
+              </div>
+              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                Jadwal & Kuota
+              </span>
+              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Sisa {{ todayStats.total_remaining }} Slot</span>
+            </button>
+
+            <!-- Icon 8: Persyaratan Berkas & Blanko -->
+            <button
+              type="button"
+              @click="showRequirementsModal = true"
+              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+            >
+              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-indigo-400 to-blue-700 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 ring-4 ring-indigo-100 dark:ring-indigo-950/60 group-hover:scale-105 transition-transform duration-200">
+                <ClipboardList class="w-7 h-7 sm:w-8 sm:h-8" />
+              </div>
+              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                Syarat & Blanko
+              </span>
+              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Formulir F-1.02</span>
+            </button>
+
+            <!-- Icon 9: Helpdesk WhatsApp -->
+            <a
+              :href="'https://wa.me/' + cleanPhone(settings.helpdesk_phone) + '?text=' + encodeURIComponent('Halo Admin Pelayanan KTP-el Disdukcapil Dompu, saya ingin konsultasi mengenai pengajuan KTP-el.')"
+              target="_blank"
+              class="group flex flex-col items-center text-center p-2 rounded-2xl hover:bg-emerald-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none"
+            >
+              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-emerald-500 to-green-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 ring-4 ring-emerald-100 dark:ring-emerald-950/60 group-hover:scale-105 transition-transform duration-200">
+                <MessageCircle class="w-7 h-7 sm:w-8 sm:h-8" />
+              </div>
+              <span class="mt-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                Helpdesk WA
+              </span>
+              <span class="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Konsultasi Loket</span>
+            </a>
+
+          </div>
+        </div>
+
+        <!-- 4. BANNER CAROUSEL INOVASI & EDUKASI (Exact like Grobogan bottom slider) -->
+        <div class="space-y-3 pt-2">
+          <div class="flex items-center justify-between px-1">
+            <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+              Inovasi & Informasi Pelayanan
+            </h3>
+            <span class="text-[11px] text-slate-600 dark:text-slate-400">Geser untuk info lengkap &rarr;</span>
+          </div>
+
+          <!-- Carousel Slider Component -->
+          <div class="relative overflow-hidden rounded-3xl bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div 
+              class="flex transition-transform duration-500 ease-out"
+              :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
+            >
+              <!-- Slide 1: Bebas Pungli / 100% Gratis -->
+              <div class="w-full shrink-0 p-5 sm:p-6 bg-gradient-to-r from-blue-700 via-indigo-800 to-slate-900 text-white min-h-[160px] sm:min-h-[180px] flex flex-col justify-between">
+                <div>
+                  <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-900 mb-2">
+                    Inovasi Layanan!
+                  </span>
+                  <h4 class="text-lg sm:text-xl font-black tracking-tight leading-snug">
+                    Pelayanan KTP-el Cepat, Tepat & Bebas Calo
+                  </h4>
+                  <p class="text-xs text-slate-200 mt-1 max-w-xl leading-relaxed">
+                    Seluruh proses pendaftaran dan pencetakan KTP-el di Dinas Dukcapil Kabupaten Dompu 100% GRATIS (Rp 0) tanpa dipungut biaya apapun.
+                  </p>
+                </div>
+                <div class="flex items-center gap-3 pt-3 text-[11px] font-bold text-emerald-300">
+                  <span>✓ LEBIH CEPAT</span>
+                  <span>•</span>
+                  <span>✓ LEBIH AMAN</span>
+                  <span>•</span>
+                  <span>✓ BEBAS ANTRE</span>
+                </div>
+              </div>
+
+              <!-- Slide 2: Panduan Foto Selfie & Berkas HP -->
+              <div class="w-full shrink-0 p-5 sm:p-6 bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 text-white min-h-[160px] sm:min-h-[180px] flex flex-col justify-between">
+                <div>
+                  <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-400 text-slate-900 mb-2">
+                    Tips Unggah Berkas
+                  </span>
+                  <h4 class="text-lg sm:text-xl font-black tracking-tight leading-snug">
+                    Pra-Verifikasi Dokumen Cukup Dari Handphone
+                  </h4>
+                  <p class="text-xs text-emerald-100 mt-1 max-w-xl leading-relaxed">
+                    Ambil foto berkas asli menggunakan kamera handphone dengan pencahayaan terang dan tegak lurus agar verifikasi berkas langsung disetujui petugas.
+                  </p>
+                </div>
+                <div class="flex items-center gap-3 pt-3 text-[11px] font-bold text-amber-300">
+                  <span>📷 Foto Wajah Selfie Asli</span>
+                  <span>•</span>
+                  <span>📄 Dokumen Tidak Buram</span>
+                </div>
+              </div>
+
+              <!-- Slide 3: Database Banners (If any from CMS) -->
+              <template v-for="b in banners" :key="b.id">
+                <div 
+                  v-if="b.image_url"
+                  class="w-full shrink-0 min-h-[160px] sm:min-h-[180px] relative bg-slate-900 text-white flex flex-col justify-end p-5 sm:p-6"
+                >
+                  <img :src="b.image_url" :alt="b.title" class="absolute inset-0 w-full h-full object-cover opacity-40" />
+                  <div class="relative z-10">
+                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500 text-white mb-1.5">
+                      Informasi Resmi
                     </span>
-                    <div class="flex-1">
-                      <span class="font-medium leading-tight">
-                        {{ doc.label }}
-                      </span>
-                      <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                        <span
-                          v-if="doc.is_required"
-                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
-                        >
-                          Wajib
-                        </span>
-                        <span
-                          v-else
-                          class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
-                        >
-                          Opsional
-                        </span>
-                        <span
-                          v-if="doc.applicable_to === 'representative_only'"
-                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
-                        >
-                          Khusus Diwakilkan
-                        </span>
-                        <a
-                          v-if="doc.template_url"
-                          :href="doc.template_url"
-                          target="_blank"
-                          class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-2 py-0.5 rounded transition"
-                          @click.stop
-                        >
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                          <span>Unduh Blanko</span>
-                        </a>
-                      </div>
+                    <h4 class="text-base sm:text-lg font-black tracking-tight">{{ b.title }}</h4>
+                    <p class="text-xs text-slate-200 mt-0.5 line-clamp-2 max-w-xl">{{ b.subtitle }}</p>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <!-- Carousel Controls & Dots -->
+            <div class="absolute bottom-3 right-4 flex items-center gap-1.5 z-20">
+              <button
+                v-for="(dot, idx) in totalSlides"
+                :key="idx"
+                type="button"
+                @click="currentSlide = idx"
+                class="w-2 h-2 rounded-full transition-all"
+                :class="currentSlide === idx ? 'bg-white w-5' : 'bg-white/40 hover:bg-white/70'"
+                :aria-label="'Slide ' + (idx + 1)"
+              ></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. QUICK TRACKING SEARCH BOX (Lacak Status Antrian) -->
+        <div id="lacak-status-antrian" class="p-5 sm:p-7 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4 scroll-mt-20">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+              <Search class="w-5 h-5" />
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white">
+                Pantau Status Pengajuan & Tiket Antrian
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                Masukkan Nomor Registrasi (contoh: REG-2611-XXXXXX) atau 16 digit NIK Anda
+              </p>
+            </div>
+          </div>
+
+          <form @submit.prevent="submitSearch" class="flex flex-col sm:flex-row gap-2.5">
+            <div class="relative flex-1">
+              <input
+                v-model="searchForm.query"
+                type="text"
+                placeholder="Masukkan Nomor Registrasi atau NIK..."
+                required
+                class="w-full pl-4 pr-10 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <span v-if="searchForm.query" @click="searchForm.query = ''" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer">
+                <X class="w-4 h-4" />
+              </span>
+            </div>
+            <button
+              type="submit"
+              :disabled="searchForm.processing"
+              class="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs transition shadow-md shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5"
+            >
+              <span>{{ searchForm.processing ? 'Memeriksa...' : 'Lacak Status' }}</span>
+              <ArrowRight class="w-4 h-4" />
+            </button>
+          </form>
+
+          <p v-if="searchForm.errors.query" class="text-xs text-rose-500 font-semibold">
+            {{ searchForm.errors.query }}
+          </p>
+
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span>Lupa nomor registrasi Anda?</span>
+            <Link :href="route('queue.history')" class="font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
+              <span>Buka Riwayat Permohonan Saya</span>
+              <ChevronRight class="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        <!-- 6. ALUR 4 LANGKAH MUDAH (Workflow Preview) -->
+        <div class="p-5 sm:p-7 rounded-3xl bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 space-y-4">
+          <h3 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs">4</span>
+            Alur Pelayanan KTP-el Tanpa Antre Panjang
+          </h3>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
+              <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-black text-[10px] flex items-center justify-center">1</span>
+              <h5 class="font-bold text-slate-900 dark:text-white">Pilih Layanan</h5>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">Pilih jenis KTP-el dan lengkapi data pemohon.</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
+              <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-black text-[10px] flex items-center justify-center">2</span>
+              <h5 class="font-bold text-slate-900 dark:text-white">Foto Berkas HP</h5>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">Unggah foto KK, surat kehilangan & foto selfie.</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
+              <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-black text-[10px] flex items-center justify-center">3</span>
+              <h5 class="font-bold text-slate-900 dark:text-white">Verifikasi Petugas</h5>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">Petugas memeriksa keabsahan berkas secara online.</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
+              <span class="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-black text-[10px] flex items-center justify-center">4</span>
+              <h5 class="font-bold text-slate-900 dark:text-white">Dapat Tiket & Hadir</h5>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">Nomor antrean terbit. Hadir bawa berkas fisik asli.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 7. FIXED MOBILE BOTTOM NAVIGATION BAR (Exact mobile app feeling) -->
+      <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 shadow-2xl safe-area-pb">
+        <div class="grid grid-cols-5 items-center text-center text-[10px] font-bold">
+          <!-- Nav 1: Home / Layanan -->
+          <button 
+            type="button" 
+            @click="scrollToTop"
+            class="flex flex-col items-center py-1 text-blue-600 dark:text-blue-400 transition"
+          >
+            <CreditCard class="w-5 h-5 mb-0.5" />
+            <span>Layanan</span>
+          </button>
+
+          <!-- Nav 2: Persyaratan -->
+          <button 
+            type="button" 
+            @click="showRequirementsModal = true"
+            class="flex flex-col items-center py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
+          >
+            <ClipboardList class="w-5 h-5 mb-0.5" />
+            <span>Syarat</span>
+          </button>
+
+          <!-- Nav 3: Lacak Status -->
+          <button 
+            type="button" 
+            @click="scrollToTracking"
+            class="flex flex-col items-center py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
+          >
+            <Search class="w-5 h-5 mb-0.5" />
+            <span>Lacak</span>
+          </button>
+
+          <!-- Nav 4: Riwayat -->
+          <Link 
+            :href="route('queue.history')"
+            class="flex flex-col items-center py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
+          >
+            <FolderClock class="w-5 h-5 mb-0.5" />
+            <span>Riwayat</span>
+          </Link>
+
+          <!-- Nav 5: Helpdesk WA -->
+          <a 
+            :href="'https://wa.me/' + cleanPhone(settings.helpdesk_phone)"
+            target="_blank"
+            class="flex flex-col items-center py-1 text-slate-600 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition"
+          >
+            <MessageCircle class="w-5 h-5 mb-0.5" />
+            <span>Bantuan</span>
+          </a>
+        </div>
+      </nav>
+
+    </div>
+
+    <!-- MODAL 1: SERVICE DETAIL & REQUIREMENT CHECKLIST (Opened on service click) -->
+    <Teleport to="body">
+      <div 
+        v-if="selectedService"
+        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm transition-opacity"
+        @click.self="selectedService = null"
+      >
+        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+          <!-- Modal Header -->
+          <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
+            <div class="flex items-center gap-3">
+              <div 
+                class="w-11 h-11 rounded-2xl flex items-center justify-center text-white shadow-md font-bold"
+                :style="{ backgroundColor: selectedService.color || '#2563eb' }"
+              >
+                <CreditCard class="w-6 h-6" />
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-900 dark:text-white leading-tight">
+                  {{ selectedService.name }}
+                </h3>
+                <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  <span>Kuota: <strong>{{ selectedService.quota_per_day }}/Hari</strong></span>
+                  <span>•</span>
+                  <span class="text-emerald-600 dark:text-emerald-400 font-bold">Proses: {{ selectedService.processing_days_label }}</span>
+                </div>
+              </div>
+            </div>
+            <button 
+              type="button" 
+              @click="selectedService = null"
+              class="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <!-- Modal Body (Requirements list) -->
+          <div class="p-5 overflow-y-auto space-y-4 text-xs">
+            <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+              {{ selectedService.short_description || selectedService.description }}
+            </p>
+
+            <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div class="flex items-center justify-between">
+                <h4 class="font-extrabold text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Dokumen Persyaratan ({{ selectedService.documents?.length || 0 }}):
+                </h4>
+                <span class="text-[10px] text-blue-600 dark:text-blue-400 font-bold">Foto langsung dari HP</span>
+              </div>
+
+              <div class="space-y-2">
+                <div
+                  v-for="(doc, idx) in selectedService.documents"
+                  :key="doc.id"
+                  class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-start justify-between gap-3"
+                >
+                  <div class="flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      {{ idx + 1 }}
+                    </span>
+                    <div>
+                      <p class="font-bold text-slate-800 dark:text-slate-200">{{ doc.label }}</p>
+                      <p v-if="doc.instruction" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                        {{ doc.instruction }}
+                      </p>
                     </div>
+                  </div>
+
+                  <div class="shrink-0 flex flex-col items-end gap-1">
+                    <span 
+                      v-if="doc.is_required"
+                      class="px-2 py-0.5 rounded text-[9px] font-black bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400"
+                    >
+                      Wajib
+                    </span>
+                    <span 
+                      v-else
+                      class="px-2 py-0.5 rounded text-[9px] font-medium bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                    >
+                      Opsional
+                    </span>
+                    <a
+                      v-if="doc.template_url"
+                      :href="doc.template_url"
+                      target="_blank"
+                      class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline mt-0.5"
+                    >
+                      <FileDown class="w-3 h-3" />
+                      <span>Unduh Blanko</span>
+                    </a>
                   </div>
                 </div>
               </div>
             </div>
-
-            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
-              <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                Waktu Proses: {{ service.processing_days_label }}
-              </span>
-              <Link
-                :href="route('queue.apply.create', { layanan: service.slug })"
-                class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-blue-600 text-white text-xs font-bold transition shadow-sm"
-              >
-                <span>Daftar Layanan</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- How It Works Flow (4 Steps) -->
-      <div class="bg-slate-100/70 dark:bg-slate-800/40 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-700/60">
-        <div class="text-center max-w-xl mx-auto mb-10">
-          <h3 class="text-2xl font-black text-slate-900 dark:text-white">Alur Pendaftaran & Verifikasi</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">4 tahapan mudah mengurus KTP-el tanpa menunggu lama di kantor.</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative">
-            <span class="w-7 h-7 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center mb-3">1</span>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm">Isi Data Pemohon</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-              Masukkan NIK, nama lengkap, dan nomor WhatsApp aktif untuk menerima tiket antrian.
-            </p>
           </div>
 
-          <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative">
-            <span class="w-7 h-7 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center mb-3">2</span>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm">Foto Berkas dari HP</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-              Ambil foto KK, KTP lama / Surat Kehilangan dan foto selfie langsung melalui kamera handphone.
-            </p>
-          </div>
-
-          <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative">
-            <span class="w-7 h-7 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center mb-3">3</span>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm">Pra-Verifikasi Petugas</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-              Petugas Dukcapil memeriksa keabsahan berkas secara online. Jika ada kekurangan, Anda bisa perbaiki online.
-            </p>
-          </div>
-
-          <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative">
-            <span class="w-7 h-7 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center mb-3">4</span>
-            <h4 class="font-bold text-slate-900 dark:text-white text-sm">Dapat Tiket & Hadir</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-              Setelah disetujui, nomor antrean terbit. Cukup datang sesuai jadwal dan bawa berkas fisik asli.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tracking Search Box Anchor Section -->
-      <div id="lacak-antrian" class="max-w-2xl mx-auto text-center scroll-mt-24">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 dark:border-slate-700">
-          <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center mx-auto mb-3">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          </div>
-
-          <h3 class="text-xl font-bold text-slate-900 dark:text-white">Pantau Status Pengajuan & Temukan Nomor</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-6">
-            Masukkan Nomor Registrasi (contoh: REG-2610-XXXXXX) untuk membuka status pengajuan, atau masukkan 16 digit NIK untuk membuka seluruh Riwayat Permohonan Anda.
-          </p>
-
-          <form @submit.prevent="submitSearch" class="flex flex-col sm:flex-row gap-2.5">
-            <input
-              v-model="searchForm.query"
-              type="text"
-              placeholder="Masukkan No. Registrasi atau 16 digit NIK..."
-              class="flex-1 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+          <!-- Modal Footer CTA -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
             <button
-              type="submit"
-              :disabled="searchForm.processing"
-              class="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-md disabled:opacity-50"
+              type="button"
+              @click="selectedService = null"
+              class="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             >
-              {{ searchForm.processing ? 'Mencari...' : 'Lacak Status' }}
+              Batal
             </button>
-          </form>
-
-          <p v-if="searchForm.errors.query" class="text-xs text-rose-500 text-left mt-2">
-            {{ searchForm.errors.query }}
-          </p>
-
-          <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-            <span>Lupa nomor registrasi Anda?</span>
-            <Link :href="route('queue.history')" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
-              Buka Riwayat Permohonan Saya &rarr;
+            <Link
+              :href="route('queue.apply.create', { layanan: selectedService.slug })"
+              class="flex-1 px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-black text-xs transition shadow-md shadow-blue-600/25 flex items-center justify-center gap-2"
+            >
+              <span>Mulai Pendaftaran Sekarang</span>
+              <ArrowRight class="w-4 h-4" />
             </Link>
           </div>
         </div>
       </div>
-    </div>
+    </Teleport>
+
+    <!-- MODAL 2: PERSYARATAN BERKAS & FORMULIR LENGKAP -->
+    <Teleport to="body">
+      <div 
+        v-if="showRequirementsModal"
+        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
+        @click.self="showRequirementsModal = false"
+      >
+        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+          <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
+            <div class="flex items-center gap-2.5">
+              <ClipboardList class="w-5 h-5 text-blue-600" />
+              <h3 class="text-base font-black text-slate-900 dark:text-white">Persyaratan Berkas KTP-el</h3>
+            </div>
+            <button type="button" @click="showRequirementsModal = false" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <div class="p-5 overflow-y-auto space-y-4 text-xs">
+            <div v-for="srv in services" :key="srv.id" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-2">
+              <h4 class="font-black text-sm text-slate-900 dark:text-white">{{ srv.name }}</h4>
+              <ul class="space-y-1.5 pl-4 list-disc text-slate-600 dark:text-slate-300">
+                <li v-for="doc in srv.documents" :key="doc.id">
+                  <strong>{{ doc.label }}</strong> 
+                  <span v-if="doc.is_required" class="text-rose-500 font-bold"> (Wajib)</span>
+                  <span v-else class="text-slate-600 dark:text-slate-400"> (Opsional)</span>
+                </li>
+              </ul>
+              <div class="pt-2">
+                <Link 
+                  :href="route('queue.apply.create', { layanan: srv.slug })" 
+                  class="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  <span>Daftar Layanan Ini &rarr;</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- MODAL 3: JADWAL & KUOTA LOKET -->
+    <Teleport to="body">
+      <div 
+        v-if="showQuotaModal"
+        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
+        @click.self="showQuotaModal = false"
+      >
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 animate-in slide-in-from-bottom duration-200">
+          <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-2">
+              <Calendar class="w-5 h-5 text-blue-600" />
+              <h3 class="text-base font-black text-slate-900 dark:text-white">Jadwal & Kuota Pelayanan</h3>
+            </div>
+            <button type="button" @click="showQuotaModal = false" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 flex justify-between items-center">
+              <span class="font-medium text-slate-600 dark:text-slate-300">Jam Layanan Loket:</span>
+              <span class="font-black text-slate-900 dark:text-white">{{ todayStats.open_time }} - {{ todayStats.close_time }} WITA</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-center">
+              <div class="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900">
+                <p class="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">Sisa Kuota Hari Ini</p>
+                <p class="text-2xl font-black text-emerald-600 dark:text-emerald-300 mt-1">{{ todayStats.total_remaining }}</p>
+                <p class="text-[10px] text-slate-600 dark:text-slate-400">dari {{ todayStats.total_quota }} Slot</p>
+              </div>
+              <div class="p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900">
+                <p class="text-[11px] text-purple-700 dark:text-purple-400 font-semibold">Terisi / Terdaftar</p>
+                <p class="text-2xl font-black text-purple-600 dark:text-purple-300 mt-1">{{ todayStats.total_booked }}</p>
+                <p class="text-[10px] text-slate-600 dark:text-slate-400">Pemohon</p>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-[11px] text-slate-500 dark:text-slate-400 flex items-start gap-2">
+              <Info class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+              <span>Lokasi pengambilan KTP-el: Kantor Dinas Dukcapil Kabupaten Dompu, {{ settings.office_address }}.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
   </PublicLayout>
 </template>
 
 <script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import {
+  CreditCard, RotateCcw, FileText, Camera, Search, FolderClock,
+  Calendar, ClipboardList, MessageCircle, Star, AlertCircle, CheckCircle2,
+  ArrowRight, ChevronRight, X, FileDown, Info
+} from '@lucide/vue';
 
 const props = defineProps({
   services: {
@@ -368,6 +752,14 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  banners: {
+    type: Array,
+    default: () => [],
+  },
+  portalLayout: {
+    type: String,
+    default: 'app_portal',
+  },
 });
 
 const searchForm = useForm({
@@ -376,5 +768,51 @@ const searchForm = useForm({
 
 function submitSearch() {
   searchForm.post(route('queue.check'));
+}
+
+const selectedService = ref(null);
+const showRequirementsModal = ref(false);
+const showQuotaModal = ref(false);
+
+function openServiceModalBySlug(slug) {
+  const match = props.services.find(s => s.slug === slug);
+  if (match) {
+    selectedService.value = match;
+  } else if (props.services.length > 0) {
+    selectedService.value = props.services[0];
+  }
+}
+
+// Banner Carousel State
+const currentSlide = ref(0);
+const totalSlides = computed(() => 2 + (props.banners?.length || 0));
+let slideTimer = null;
+
+onMounted(() => {
+  slideTimer = setInterval(() => {
+    currentSlide.value = (currentSlide.value + 1) % totalSlides.value;
+  }, 5000);
+});
+
+onUnmounted(() => {
+  if (slideTimer) clearInterval(slideTimer);
+});
+
+function scrollToTracking() {
+  const el = document.getElementById('lacak-status-antrian');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+    const input = el.querySelector('input');
+    if (input) input.focus();
+  }
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cleanPhone(phone) {
+  if (!phone) return '6282124824114';
+  return phone.replace(/[^0-9]/g, '');
 }
 </script>

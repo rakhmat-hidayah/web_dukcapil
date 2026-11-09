@@ -94,8 +94,11 @@ class QueueInfoController extends Controller
         $today = Carbon::today()->format('Y-m-d');
         $hasIsActive = \Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active');
 
-        // Fetch active service types with their requirement counts
+        // Fetch active service types with their requirement counts (filtering out automated test artifacts)
         $services = ServiceType::active()
+            ->where('slug', 'not like', '%test%')
+            ->where('name', 'not like', '%Test%')
+            ->orderBy('id', 'asc')
             ->withCount([
                 'documents as documents_count' => fn($q) => $hasIsActive ? $q->where('is_active', true) : $q,
                 'requiredDocuments'
@@ -159,12 +162,30 @@ class QueueInfoController extends Controller
             'estimated_end' => QueueSetting::get('queue.maintenance_estimated_end', ''),
         ];
 
-        return Inertia::render('Public/Queue/Index', [
+        // Active banners for carousel slider
+        $banners = \App\Models\Banner::where('is_active', true)
+            ->orderBy('sort_order', 'asc')
+            ->get();
+
+        // Portal layout mode with instant rollback support via database or query parameter (?mode=classic / ?mode=app)
+        $portalLayout = QueueSetting::get('queue.portal_layout', 'app_portal');
+        $queryMode = request()->query('mode');
+        if ($queryMode === 'classic') {
+            $portalLayout = 'classic';
+        } elseif ($queryMode === 'app' || $queryMode === 'modern') {
+            $portalLayout = 'app_portal';
+        }
+
+        $component = ($portalLayout === 'classic') ? 'Public/Queue/IndexClassic' : 'Public/Queue/Index';
+
+        return Inertia::render($component, [
             'services' => $services,
             'todayStats' => $todayStats,
             'upcomingSchedules' => $upcomingSchedules,
             'settings' => $settings,
             'maintenance' => $maintenance,
+            'banners' => $banners,
+            'portalLayout' => $portalLayout,
         ]);
     }
 
