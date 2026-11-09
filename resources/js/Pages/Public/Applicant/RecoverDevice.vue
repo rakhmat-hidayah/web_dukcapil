@@ -2,7 +2,7 @@
   <Head title="Pemulihan Akun & Ganti Perangkat - Disdukcapil Kabupaten Dompu" />
 
   <PublicLayout>
-    <div class="py-8 sm:py-16 max-w-md mx-auto px-4 space-y-6">
+    <div class="py-6 sm:py-16 max-w-md mx-auto px-2.5 sm:px-4 space-y-5 sm:space-y-6 w-full">
       <div class="flex items-center justify-between">
         <Link
           :href="route('applicant.login')"
@@ -14,7 +14,7 @@
       </div>
 
       <!-- Card -->
-      <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xl space-y-5 sm:space-y-6 w-full max-w-full overflow-hidden">
         <div class="text-center space-y-2">
           <div class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-inner">
             <Smartphone class="w-7 h-7" />
@@ -139,10 +139,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
 import { ArrowLeft, ArrowRight, Smartphone, CheckCircle2 } from '@lucide/vue'
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+  }
+})
 
 const page = usePage()
 const step2Active = ref(Boolean(page.props.flash?.otpSent))

@@ -1,10 +1,10 @@
 <template>
-  <div :class="{ 'dark': isDark }" class="min-h-screen flex flex-col bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 transition-colors duration-200">
+  <div :class="{ 'dark': isDark }" class="min-h-screen flex flex-col bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 transition-colors duration-200 overflow-x-hidden w-full max-w-full">
     
     <!-- Sticky Navigation Wrapper (Top Bar + Header Menu) -->
-    <div class="sticky top-0 z-50 shadow-md shadow-gray-200/40 dark:shadow-none print:hidden">
+    <div class="sticky top-0 z-50 shadow-md shadow-gray-200/40 dark:shadow-none print:hidden w-full overflow-x-hidden">
       <!-- Top info bar -->
-      <div class="bg-primary-900 text-white text-[10px] py-1.5 sm:py-2 px-4 sm:px-6 flex justify-between items-center font-medium">
+      <div class="bg-primary-900 text-white text-[10px] py-1.5 sm:py-2 px-3 sm:px-6 flex justify-between items-center font-medium w-full overflow-hidden">
         <div class="hidden sm:flex items-center gap-4">
           <span>📍 Dompu, Nusa Tenggara Barat</span>
           <span class="hidden sm:inline">✉️ {{ websiteSettings.office_email || 'dukcapilkabdompu@gmail.com' }}</span>
@@ -34,29 +34,29 @@
       </div>
 
       <!-- Header Navigation -->
-      <header class="bg-white/98 dark:bg-zinc-900/98 backdrop-blur border-b border-gray-100 dark:border-zinc-800/80 transition-colors">
-      <div class="max-w-7xl mx-auto px-3 xl:px-8 py-2.5 flex items-center justify-between gap-2 xl:gap-4">
+      <header class="bg-white/98 dark:bg-zinc-900/98 backdrop-blur border-b border-gray-100 dark:border-zinc-800/80 transition-colors w-full overflow-hidden">
+      <div class="max-w-7xl mx-auto px-2.5 sm:px-3 xl:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-1 sm:gap-2 xl:gap-4 w-full">
         <!-- Logo Brand (Dual Logo: Logo Daerah Dompu & Logo Disdukcapil) -->
-        <Link href="/" class="flex items-center gap-2 select-none group shrink-0 px-2.5 py-1 rounded-xl transition-all dark:bg-white/95 dark:shadow-md dark:border dark:border-white/20">
+        <Link href="/" class="flex items-center gap-1.5 sm:gap-2 select-none group shrink min-w-0 px-1.5 sm:px-2.5 py-1 rounded-xl transition-all dark:bg-white/95 dark:shadow-md dark:border dark:border-white/20">
           <!-- Logo 1: Logo Daerah Kabupaten Dompu -->
           <img 
             src="/img/logo-dompu.png" 
             @error="$event.target.src = '/images/logo-dompu.png'"
             alt="Logo Kabupaten Dompu" 
-            style="height: 36px; max-height: 36px; width: auto; object-fit: contain;"
-            class="h-8 lg:h-9 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+            style="height: 32px; max-height: 36px; width: auto; object-fit: contain;"
+            class="h-7 sm:h-8 lg:h-9 w-auto object-contain transition-transform duration-200 group-hover:scale-105 shrink-0"
           />
 
           <!-- Thin Vertical Divider -->
-          <div class="h-5 lg:h-6 w-px bg-gray-200 dark:bg-gray-300"></div>
+          <div class="h-4 sm:h-5 lg:h-6 w-px bg-gray-200 dark:bg-gray-300 shrink-0"></div>
 
           <!-- Logo 2: Logo Official Disdukcapil Dompu -->
           <img 
             src="/img/logo-dukcapil.png" 
             @error="$event.target.src = '/images/logo-dukcapil.png'"
             alt="Logo Disdukcapil Dompu" 
-            style="height: 40px; max-height: 40px; width: auto; object-fit: contain;"
-            class="h-9 lg:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+            style="height: 34px; max-height: 40px; width: auto; object-fit: contain;"
+            class="h-7.5 sm:h-9 lg:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105 shrink-0"
           />
         </Link>
 
@@ -189,10 +189,10 @@
           <!-- Layanan Online CTA Button -->
           <Link 
             href="/layanan/antrian"
-            class="flex items-center gap-1 shrink-0 px-2 py-1.5 sm:px-3 lg:px-3.5 lg:py-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-full shadow-md shadow-emerald-600/25 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
+            class="flex items-center gap-1 shrink-0 p-1.5 sm:px-3 lg:px-3.5 sm:py-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-full shadow-md shadow-emerald-600/25 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
             title="Pendaftaran Layanan KTP-el"
           >
-            <Ticket class="w-3 h-3 text-emerald-200 shrink-0" />
+            <Ticket class="w-3.5 h-3.5 sm:w-3 sm:h-3 text-emerald-200 shrink-0" />
             <span class="hidden sm:inline text-[10px] lg:text-[10.5px]">Layanan</span>
             <span class="hidden lg:inline text-[10.5px]"> KTP-el</span>
           </Link>
@@ -204,9 +204,9 @@
             :target="sanaiConfig.sanai_open_new_tab ? '_blank' : '_self'"
             rel="noopener noreferrer"
             aria-label="Buka Portal Layanan Online SANAI Dukcapil Dompu"
-            class="flex items-center gap-1 shrink-0 px-2 py-1.5 sm:px-3 lg:px-3.5 lg:py-2 bg-gradient-to-r from-primary-600 via-blue-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 text-white font-black rounded-full shadow-md shadow-primary-500/25 hover:shadow-lg hover:shadow-primary-500/35 hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
+            class="hidden xs:flex sm:flex items-center gap-1 shrink-0 p-1.5 sm:px-3 lg:px-3.5 sm:py-2 bg-gradient-to-r from-primary-600 via-blue-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 text-white font-black rounded-full shadow-md shadow-primary-500/25 hover:shadow-lg hover:shadow-primary-500/35 hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
           >
-            <Globe class="w-3 h-3 text-amber-300 animate-pulse shrink-0" />
+            <Globe class="w-3.5 h-3.5 sm:w-3 sm:h-3 text-amber-300 animate-pulse shrink-0" />
             <span class="hidden sm:inline text-[10px] lg:text-[10.5px]">SANAI</span>
             <span class="hidden lg:inline text-[10.5px]"> Online</span>
             <ArrowUpRight class="w-3 h-3 text-amber-300 shrink-0 hidden sm:block" />
@@ -429,8 +429,8 @@
     <!-- Main Content Area -->
     <main 
       :class="[
-        'flex-1 max-w-7xl mx-auto w-full print:p-0 print:m-0 print:max-w-none print:w-full transition-all',
-        compactMain ? 'px-2.5 sm:px-6 pt-1 pb-2 sm:py-4' : 'px-6 py-8'
+        'flex-1 max-w-7xl mx-auto w-full overflow-x-hidden print:p-0 print:m-0 print:max-w-none print:w-full transition-all flex flex-col',
+        compactMain ? 'px-2.5 sm:px-6 pt-1 pb-2 sm:py-4' : 'px-3 sm:px-6 py-5 sm:py-8'
       ]"
     >
       <slot />
