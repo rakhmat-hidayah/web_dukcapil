@@ -297,6 +297,13 @@ class ApplicantAuthController extends Controller
         // Log into dedicated applicant guard
         Auth::guard('applicant')->login($account);
 
+        $intended = session()->pull('url.intended');
+        if ($intended && !str_contains($intended, '/layanan/pemohon/masuk')) {
+            return redirect()->to($intended)
+                ->withCookie($cookie)
+                ->with('success', "Selamat datang, {$account->name}!");
+        }
+
         return redirect()->route('applicant.dashboard')
             ->withCookie($cookie)
             ->with('success', "Selamat datang, {$account->name}!");

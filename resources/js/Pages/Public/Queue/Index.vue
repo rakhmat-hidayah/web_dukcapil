@@ -277,7 +277,7 @@
 
           <!-- Nav 4: Riwayat -->
           <Link 
-            :href="route('queue.history')"
+            :href="$page.props.auth?.applicant ? route('applicant.dashboard') : route('applicant.login')"
             class="flex flex-col items-center py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
           >
             <FolderClock class="w-5 h-5 mb-0.5" />
@@ -624,44 +624,100 @@
             </button>
           </div>
 
-          <form @submit.prevent="submitSearch" class="space-y-3">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Nomor Registrasi atau NIK
-              </label>
-              <div class="relative">
-                <input
-                  v-model="searchForm.query"
-                  type="text"
-                  placeholder="Contoh: REG-2611-XXXXXX atau 16 digit NIK..."
-                  required
-                  class="w-full pl-4 pr-10 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <span v-if="searchForm.query" @click="searchForm.query = ''" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer">
-                  <X class="w-4 h-4" />
-                </span>
+          <!-- KONDISI 1: Belum Login Pemohon (Wajib Login Terlebih Dahulu) -->
+          <div v-if="!$page.props.auth?.applicant" class="py-1 space-y-4">
+            <div class="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-300/80 dark:border-amber-600/50 flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+                <Lock class="w-5 h-5" />
+              </div>
+              <div class="space-y-1">
+                <h4 class="text-xs font-black text-amber-950 dark:text-amber-100">
+                  Login Pemohon Diperlukan
+                </h4>
+                <p class="text-[11px] text-amber-900/80 dark:text-amber-200 leading-relaxed">
+                  Untuk melindungi kerahasiaan data kependudukan dan berkas pribadi Anda, fitur pelacakan status permohonan kini mewajibkan Anda untuk masuk ke <strong>Akun Pemohon</strong> terlebih dahulu.
+                </p>
               </div>
             </div>
 
-            <p v-if="searchForm.errors.query" class="text-xs text-rose-500 font-semibold">
-              {{ searchForm.errors.query }}
-            </p>
+            <div class="space-y-2 pt-1">
+              <Link
+                :href="route('applicant.login')"
+                class="w-full py-3 px-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-md shadow-blue-600/25 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <LogIn class="w-4 h-4" />
+                <span>Masuk ke Akun Pemohon</span>
+              </Link>
 
-            <button
-              type="submit"
-              :disabled="searchForm.processing"
-              class="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-md shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+              <Link
+                :href="route('applicant.register')"
+                class="w-full py-2.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Belum punya akun? Daftar Baru</span>
+              </Link>
+            </div>
+          </div>
+
+          <!-- KONDISI 2: Sudah Login Pemohon -->
+          <div v-else class="space-y-3.5">
+            <div class="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 flex items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2 min-w-0">
+                <UserCheck class="w-4 h-4 text-blue-600 shrink-0" />
+                <span class="truncate font-semibold text-slate-800 dark:text-slate-200">
+                  {{ $page.props.auth.applicant.name }} ({{ $page.props.auth.applicant.masked_nik }})
+                </span>
+              </div>
+              <Link :href="route('applicant.dashboard')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline shrink-0 text-[11px]">
+                Dashboard &rarr;
+              </Link>
+            </div>
+
+            <Link
+              :href="route('applicant.dashboard')"
+              class="w-full py-2.5 px-4 rounded-2xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-bold text-xs transition shadow-sm flex items-center justify-center gap-2"
             >
-              <span>{{ searchForm.processing ? 'Memeriksa...' : 'Lacak Status Sekarang' }}</span>
-              <ArrowRight class="w-4 h-4" />
-            </button>
-          </form>
-
-          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
-            <span>Lupa nomor registrasi Anda? </span>
-            <Link :href="route('queue.history')" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
-              Buka Riwayat Permohonan Saya &rarr;
+              <FolderClock class="w-4 h-4 text-amber-400" />
+              <span>Buka Seluruh Riwayat Permohonan Saya</span>
             </Link>
+
+            <div class="relative flex py-1 items-center">
+              <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+              <span class="flex-shrink mx-3 text-[10px] text-slate-400 uppercase font-bold tracking-wider">atau cari nomor registrasi</span>
+              <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+            </div>
+
+            <form @submit.prevent="submitSearch" class="space-y-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Nomor Registrasi
+                </label>
+                <div class="relative">
+                  <input
+                    v-model="searchForm.query"
+                    type="text"
+                    placeholder="Contoh: REG-2611-XXXXXX"
+                    required
+                    class="w-full pl-4 pr-10 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span v-if="searchForm.query" @click="searchForm.query = ''" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer">
+                    <X class="w-4 h-4" />
+                  </span>
+                </div>
+              </div>
+
+              <p v-if="searchForm.errors.query" class="text-xs text-rose-500 font-semibold">
+                {{ searchForm.errors.query }}
+              </p>
+
+              <button
+                type="submit"
+                :disabled="searchForm.processing"
+                class="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-md shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span>{{ searchForm.processing ? 'Memeriksa...' : 'Lacak Status Pengajuan' }}</span>
+                <ArrowRight class="w-4 h-4" />
+              </button>
+            </form>
           </div>
         </div>
       </div>
@@ -677,7 +733,7 @@ import PublicLayout from '@/Layouts/PublicLayout.vue';
 import {
   CreditCard, RotateCcw, FileText, Camera, Search, FolderClock,
   Calendar, ClipboardList, MessageCircle, Star, AlertCircle, CheckCircle2,
-  ArrowRight, ChevronRight, X, FileDown, Info, UserCheck, LogIn
+  ArrowRight, ChevronRight, X, FileDown, Info, UserCheck, LogIn, Lock
 } from '@lucide/vue';
 
 const props = defineProps({

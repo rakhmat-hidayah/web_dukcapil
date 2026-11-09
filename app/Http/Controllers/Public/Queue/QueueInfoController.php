@@ -191,53 +191,61 @@ class QueueInfoController extends Controller
 
     /**
      * Search application status by Registration Number or NIK.
-     * Directs NIK searches securely to Applicant History verification.
+     * Enforces applicant authentication to protect citizen privacy and application data.
      */
     public function checkStatus(Request $request)
     {
+        // 1. Enforce applicant authentication
+        if (!\Illuminate\Support\Facades\Auth::guard('applicant')->check()) {
+            return redirect()->route('applicant.login')
+                ->with('warning', 'Silakan masuk ke Akun Pemohon terlebih dahulu untuk melacak status permohonan Anda.');
+        }
+
+        /** @var \App\Models\Applicant\ApplicantAccount $applicant */
+        $applicant = \Illuminate\Support\Facades\Auth::guard('applicant')->user();
+        $rawNik = $applicant->nik;
+
         $request->validate([
             'query' => 'required|string|min:4|max:30',
         ], [
-            'query.required' => 'Masukkan Nomor Registrasi atau NIK Anda.',
+            'query.required' => 'Masukkan Nomor Registrasi permohonan Anda.',
             'query.min' => 'Pencarian minimal 4 karakter.',
         ]);
 
         $query = trim($request->input('query'));
         $digitsOnly = preg_replace('/[^0-9]/', '', $query);
 
-        // Case A: User entered a 16-digit NIK -> Direct to secure history verification
+        // If user entered 16 digits NIK -> Direct to their applicant dashboard
         if (strlen($digitsOnly) === 16) {
-            $verifiedNik = $request->session()->get('applicant_verified_nik');
-            if ($verifiedNik === $digitsOnly) {
-                return redirect()->route('queue.history');
-            }
-
-            $hasApp = QueueApplication::where('applicant_nik', $digitsOnly)->exists();
-            if (!$hasApp) {
-                return back()->withErrors([
-                    'query' => 'Tidak ditemukan permohonan dengan NIK tersebut. Pastikan NIK benar atau silakan ajukan pendaftaran baru.',
-                ])->withInput();
-            }
-
-            return redirect()->route('queue.history', ['nik' => $digitsOnly])
-                ->with('info', 'Silakan masukkan nomor WhatsApp/HP terdaftar untuk memverifikasi dan melihat seluruh riwayat permohonan Anda.');
+            return redirect()->route('applicant.dashboard');
         }
 
-        // Case B: Search by Registration Number (e.g. REG-2610-XXXXXX)
-        $application = QueueApplication::where('reg_number', strtoupper($query))
-            ->orWhere('reg_number', $query)
+        // Search application belonging strictly to this applicant account / NIK
+        $application = QueueApplication::query()
+            ->where(function ($q) use ($applicant, $rawNik) {
+                $q->where('applicant_account_id', $applicant->id);
+                if ($rawNik) {
+                    $q->orWhere('applicant_nik', $rawNik);
+                }
+            })
+            ->where(function ($q) use ($query) {
+                $q->where('reg_number', strtoupper($query))
+                  ->orWhere('reg_number', $query);
+            })
             ->latest()
             ->first();
 
         if (!$application) {
             return back()->withErrors([
-                'query' => 'Pengajuan tidak ditemukan. Pastikan Nomor Registrasi atau NIK yang Anda masukkan sudah benar.',
+                'query' => 'Permohonan tidak ditemukan pada akun Anda. Pastikan Nomor Registrasi sudah benar.',
             ])->withInput();
         }
 
-        // Establish session so user can access their other applications
-        $request->session()->put('applicant_verified_nik', $application->applicant_nik);
-        $request->session()->put('applicant_verified_at', now()->timestamp);
+        // Auto-link account id if not yet linked
+        if (!$application->applicant_account_id) {
+            $application->applicant_account_id = $applicant->id;
+            $application->save();
+        }
 
         return redirect()->route('queue.status', ['token' => $application->access_token]);
     }

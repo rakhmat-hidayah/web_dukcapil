@@ -310,32 +310,53 @@
             Masukkan Nomor Registrasi (contoh: REG-2610-XXXXXX) untuk membuka status pengajuan, atau masukkan 16 digit NIK untuk membuka seluruh Riwayat Permohonan Anda.
           </p>
 
-          <form @submit.prevent="submitSearch" class="flex flex-col sm:flex-row gap-2.5">
-            <input
-              v-model="searchForm.query"
-              type="text"
-              placeholder="Masukkan No. Registrasi atau 16 digit NIK..."
-              class="flex-1 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <button
-              type="submit"
-              :disabled="searchForm.processing"
-              class="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-md disabled:opacity-50"
-            >
-              {{ searchForm.processing ? 'Mencari...' : 'Lacak Status' }}
-            </button>
-          </form>
+          <!-- If not logged in -->
+          <div v-if="!$page.props.auth?.applicant" class="space-y-4">
+            <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-left flex items-start gap-3">
+              <span class="text-xl">🔐</span>
+              <div>
+                <h4 class="text-xs font-bold text-amber-900 dark:text-amber-200">Login Pemohon Diperlukan</h4>
+                <p class="text-xs text-amber-800 dark:text-amber-300 mt-0.5">Untuk keamanan data kependudukan dan perlindungan privasi, pelacakan status permohonan kini mewajibkan Anda untuk masuk ke Akun Pemohon terlebih dahulu.</p>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link :href="route('applicant.login')" class="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-md">
+                Masuk ke Akun Pemohon
+              </Link>
+              <Link :href="route('applicant.register')" class="px-6 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold text-xs transition">
+                Daftar Akun Baru
+              </Link>
+            </div>
+          </div>
 
-          <p v-if="searchForm.errors.query" class="text-xs text-rose-500 text-left mt-2">
-            {{ searchForm.errors.query }}
-          </p>
+          <!-- If already logged in -->
+          <div v-else class="space-y-4">
+            <form @submit.prevent="submitSearch" class="flex flex-col sm:flex-row gap-2.5">
+              <input
+                v-model="searchForm.query"
+                type="text"
+                placeholder="Masukkan Nomor Registrasi..."
+                class="flex-1 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <button
+                type="submit"
+                :disabled="searchForm.processing"
+                class="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-md disabled:opacity-50"
+              >
+                {{ searchForm.processing ? 'Mencari...' : 'Lacak Status' }}
+              </button>
+            </form>
 
-          <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-            <span>Lupa nomor registrasi Anda?</span>
-            <Link :href="route('queue.history')" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
-              Buka Riwayat Permohonan Saya &rarr;
-            </Link>
+            <p v-if="searchForm.errors.query" class="text-xs text-rose-500 text-left mt-2">
+              {{ searchForm.errors.query }}
+            </p>
+
+            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+              <Link :href="route('applicant.dashboard')" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                Buka Seluruh Riwayat Permohonan Saya di Dashboard &rarr;
+              </Link>
+            </div>
           </div>
         </div>
       </div>
