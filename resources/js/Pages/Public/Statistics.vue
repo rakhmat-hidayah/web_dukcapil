@@ -7,7 +7,7 @@
       <div>
         <h1 class="text-3xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">Statistik Kependudukan</h1>
         <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-          Data kependudukan resmi Kabupaten Dompu yang dipublikasikan oleh Dinas Kependudukan dan Pencatatan Sipil.
+          Data kependudukan Kabupaten Dompu yang dipublikasikan oleh Dinas Kependudukan dan Pencatatan Sipil.
         </p>
       </div>
 
@@ -53,7 +53,7 @@
         <h3 class="text-lg font-black text-gray-700 dark:text-zinc-200 mb-2">Data Belum Tersedia</h3>
         <p class="text-sm text-gray-400 max-w-md mx-auto">
           Belum ada dataset yang dipublikasikan untuk wilayah dan periode yang dipilih.
-          Data akan ditampilkan setelah operator Dukcapil mengunggah dataset resmi.
+          Data akan ditampilkan setelah operator Dukcapil mengunggah dataset.
         </p>
       </div>
 

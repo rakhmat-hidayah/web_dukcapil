@@ -1,5 +1,5 @@
 <template>
-  <Head title="Beranda Resmi Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu" />
+  <Head title="Beranda Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu" />
 
   <PublicLayout>
     <div class="space-y-12 text-left">
@@ -175,7 +175,7 @@
             <div class="flex items-center gap-2">
               <span class="px-3 py-1 bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider rounded-lg shadow-sm flex items-center gap-1">
                 <Monitor class="w-3.5 h-3.5" />
-                Layanan Digital Resmi
+                Layanan Digital
               </span>
               <span class="px-2.5 py-1 bg-white/10 text-white text-[10px] font-bold rounded-lg backdrop-blur-sm">
                 24/7 Online Access
@@ -498,7 +498,7 @@
                   Paling Banyak Diunduh
                 </span>
                 <h3 class="text-xl font-black text-gray-900 dark:text-zinc-50 tracking-tight flex items-center gap-2 mt-1">
-                  📥 Formulir &amp; Dokumen Resmi
+                  📥 Formulir &amp; Dokumen
                 </h3>
               </div>
               <Link 

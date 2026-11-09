@@ -406,7 +406,7 @@
             <img src="/img/logo-dukcapil.png" @error="$event.target.src = '/images/logo-dukcapil.png'" alt="Logo Disdukcapil" style="height: 48px; max-height: 48px; width: auto; object-fit: contain;" class="h-12 w-auto object-contain" />
           </div>
           <p class="text-gray-500 dark:text-zinc-400 leading-relaxed">
-            Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu resmi menyelenggarakan tertib administrasi kependudukan prima.
+            Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu menyelenggarakan tertib administrasi kependudukan prima.
           </p>
         </div>
 
@@ -514,6 +514,7 @@
         <p>© {{ new Date().getFullYear() }} Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu</p>
         <div class="flex items-center gap-4">
           <a href="/sitemap.xml" class="hover:underline">Sitemap</a>
+          <a href="/robots.txt" class="hover:underline">Robots.txt</a>
         </div>
       </div>
     </footer>

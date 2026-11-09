@@ -1,11 +1,11 @@
 <template>
-  <Head title="Pusat Unduhan Formulir & Regulasi Resmi" />
+  <Head title="Pusat Unduhan Formulir & Regulasi" />
 
   <PublicLayout>
     <div class="space-y-8 text-left">
       <!-- Title section -->
       <div>
-        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">Pusat Unduhan & Berkas Resmi</h1>
+        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">Pusat Unduhan & Berkas</h1>
         <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
           Unduh dokumen persyaratan pelayanan kependudukan, blanko permohonan dinas, serta berkas hukum / peraturan daerah.
         </p>

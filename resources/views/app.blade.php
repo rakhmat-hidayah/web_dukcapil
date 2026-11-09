@@ -8,7 +8,7 @@
         $theme = \App\Models\ThemeSetting::getAllCached();
         $siteTitle    = $theme['site_title'] ?? 'Dukcapil Dompu';
         $siteTagline  = $theme['site_tagline'] ?? 'Pelayanan Cepat, Tepat, dan Gratis';
-        $siteDesc     = 'Website resmi Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu, Nusa Tenggara Barat. Layanan KTP-el, KK, Akta Kelahiran, dan administrasi kependudukan lainnya.';
+        $siteDesc     = 'Website Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu, Nusa Tenggara Barat. Layanan KTP-el, KK, Akta Kelahiran, dan administrasi kependudukan lainnya.';
         $siteUrl      = rtrim(config('app.url'), '/');
         $siteLogo     = $siteUrl . '/android-chrome-512x512.png';
         $siteKeywords = 'Dukcapil Dompu, KTP-el, Kartu Keluarga, Akta Kelahiran, Administrasi Kependudukan, Disdukcapil Dompu, NTB, Pelayanan Publik';
