@@ -30,7 +30,7 @@
                   'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300': account.account_status === 'SUSPENDED' || account.account_status === 'LOCKED',
                 }"
               >
-                {{ account.account_status }}
+                {{ account.account_status_label || account.account_status }}
               </span>
             </div>
             <h1 class="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{{ account.name }}</h1>
@@ -71,7 +71,7 @@
               <span class="font-sans font-bold text-slate-500 dark:text-slate-400 text-[11px]">Identitas:</span>
               <span class="inline-flex items-center gap-1">
                 <CheckCircle2 v-if="account.identity_status === 'VERIFIED'" class="w-3.5 h-3.5 text-emerald-600" />
-                <span>{{ account.identity_status }}</span>
+                <span>{{ account.identity_status_label || account.identity_status }}</span>
               </span>
             </div>
           </div>
@@ -220,29 +220,50 @@
 
       <!-- Audit Trail Log Table -->
       <div class="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-        <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2 border-b pb-3 border-slate-100 dark:border-slate-700">
-          <History class="w-4 h-4 text-slate-600" />
-          <span>Audit Log Keamanan Perangkat & Akun</span>
-        </h2>
+        <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-700">
+          <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <History class="w-4 h-4 text-slate-600 dark:text-slate-400" />
+            <span>Audit Log Keamanan Perangkat & Akun</span>
+          </h2>
+          <span class="text-xs text-slate-500 font-bold">{{ auditLogs.length }} Aktivitas</span>
+        </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
+          <table class="w-full text-left text-xs min-w-[620px]">
             <thead class="text-slate-400 border-b border-slate-100 dark:border-slate-700">
               <tr>
-                <th class="py-2.5">Waktu</th>
-                <th class="py-2.5">Kejadian (Event)</th>
-                <th class="py-2.5">Aktor</th>
-                <th class="py-2.5">Keterangan / Alasan</th>
-                <th class="py-2.5">IP Address</th>
+                <th class="py-2.5 pr-4 font-bold">Waktu</th>
+                <th class="py-2.5 pr-4 font-bold">Aktivitas (Event)</th>
+                <th class="py-2.5 pr-4 font-bold">Aktor</th>
+                <th class="py-2.5 pr-4 font-bold">Keterangan / Alasan</th>
+                <th class="py-2.5 font-bold">IP Address</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-              <tr v-for="log in auditLogs" :key="log.id" class="text-slate-600 dark:text-slate-300">
-                <td class="py-2.5 font-mono text-[11px] whitespace-nowrap">{{ log.created_at }}</td>
-                <td class="py-2.5 font-bold font-mono text-blue-600 dark:text-blue-400">{{ log.event_type }}</td>
-                <td class="py-2.5 uppercase font-bold text-[10px]">{{ log.actor_type }}</td>
-                <td class="py-2.5">{{ log.reason }}</td>
-                <td class="py-2.5 font-mono text-[11px]">{{ log.ip_address || '-' }}</td>
+              <tr v-if="auditLogs.length === 0">
+                <td colspan="5" class="py-6 text-center text-slate-400 italic">
+                  Belum ada catatan aktivitas keamanan untuk akun ini.
+                </td>
+              </tr>
+              <tr v-for="log in auditLogs" :key="log.id" class="text-slate-600 dark:text-slate-300 hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition">
+                <td class="py-3 pr-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">{{ log.created_at }}</td>
+                <td class="py-3 pr-4 whitespace-nowrap">
+                  <span
+                    class="px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1"
+                    :class="getEventBadgeClass(log.event_type)"
+                  >
+                    {{ log.event_label || formatEventType(log.event_type) }}
+                  </span>
+                </td>
+                <td class="py-3 pr-4 whitespace-nowrap">
+                  <span class="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                    {{ log.actor_label || formatActorType(log.actor_type) }}
+                  </span>
+                </td>
+                <td class="py-3 pr-4 text-xs text-slate-700 dark:text-slate-300 max-w-xs break-words font-medium">
+                  {{ log.reason || '-' }}
+                </td>
+                <td class="py-3 font-mono text-[11px] text-slate-400 whitespace-nowrap">{{ log.ip_address || '-' }}</td>
               </tr>
             </tbody>
           </table>
@@ -486,6 +507,44 @@ const showStatusModal = ref(false)
 const showVerifyModal = ref(false)
 const showDeleteModal = ref(false)
 const copiedField = ref(null)
+
+const formatEventType = (event) => {
+  const map = {
+    registered: 'Pendaftaran Akun',
+    email_verified: 'Email Berhasil Diverifikasi',
+    identity_verification_verified: 'Identitas Diverifikasi (Sah)',
+    identity_verification_rejected: 'Identitas Ditolak',
+    account_status_changed: 'Status Akun Diubah',
+    device_bound: 'Perangkat Baru Terikat',
+    device_revoked: 'Akses Perangkat Dicabut',
+    device_recovered: 'Perangkat Berhasil Dipulihkan',
+    login_success_existing_device: 'Login Berhasil (Perangkat Terdaftar)',
+    login_rejected_device_conflict: 'Login Ditolak (Konflik Perangkat)',
+    login_failed_bad_password: 'Gagal Login (Password Salah)',
+    otp_generated: 'Kode OTP Dikirim',
+    otp_verified: 'OTP Berhasil Diverifikasi',
+  }
+  return map[event] || (event ? event.replace(/_/g, ' ') : '-')
+}
+
+const getEventBadgeClass = (event) => {
+  if (['registered', 'email_verified', 'identity_verification_verified', 'login_success_existing_device', 'device_bound', 'device_recovered', 'otp_verified'].includes(event)) {
+    return 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
+  }
+  if (['identity_verification_rejected', 'login_rejected_device_conflict', 'login_failed_bad_password', 'device_revoked'].includes(event)) {
+    return 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800'
+  }
+  return 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
+}
+
+const formatActorType = (actor) => {
+  const map = {
+    applicant: 'Pemohon',
+    admin: 'Petugas / Admin',
+    system: 'Sistem',
+  }
+  return map[actor] || actor || 'Sistem'
+}
 
 const copyText = async (text, field) => {
   if (!text) return

@@ -62,8 +62,10 @@ class ApplicantManagementController extends Controller
                 'masked_nik'          => $acc->masked_nik,
                 'email'               => $acc->email_normalized,
                 'masked_email'        => $acc->masked_email,
-                'identity_status'     => $acc->identity_status,
-                'account_status'      => $acc->account_status,
+                'identity_status'       => $acc->identity_status,
+                'identity_status_label' => self::translateIdentityStatus($acc->identity_status),
+                'account_status'        => $acc->account_status,
+                'account_status_label'  => self::translateAccountStatus($acc->account_status),
                 'active_device_label' => $acc->activeDevice?->device_label,
                 'active_device_seen'  => $acc->activeDevice?->last_seen_at?->translatedFormat('d M Y, H:i'),
                 'created_at'          => $acc->created_at?->translatedFormat('d M Y, H:i'),
@@ -107,8 +109,10 @@ class ApplicantManagementController extends Controller
                 'masked_nik'           => $account->masked_nik,
                 'email'                => $account->email_normalized,
                 'masked_email'         => $account->masked_email,
-                'identity_status'      => $account->identity_status,
-                'account_status'       => $account->account_status,
+                'identity_status'       => $account->identity_status,
+                'identity_status_label' => self::translateIdentityStatus($account->identity_status),
+                'account_status'        => $account->account_status,
+                'account_status_label'  => self::translateAccountStatus($account->account_status),
                 'status_reason'        => $account->status_reason,
                 'email_verified_at'    => $account->email_verified_at?->translatedFormat('d M Y, H:i'),
                 'identity_verified_at' => $account->identity_verified_at?->translatedFormat('d M Y, H:i'),
@@ -127,12 +131,14 @@ class ApplicantManagementController extends Controller
                 'revoked_by_type'   => $d->revoked_by_type,
             ]),
             'auditLogs' => $account->auditLogs->map(fn($l) => [
-                'id'         => $l->id,
-                'event_type' => $l->event_type,
-                'actor_type' => $l->actor_type,
-                'reason'     => $l->reason,
-                'ip_address' => $l->ip_address,
-                'created_at' => $l->created_at->translatedFormat('d M Y, H:i'),
+                'id'          => $l->id,
+                'event_type'  => $l->event_type,
+                'event_label' => self::translateEventType($l->event_type),
+                'actor_type'  => $l->actor_type,
+                'actor_label' => self::translateActorType($l->actor_type),
+                'reason'      => $l->reason,
+                'ip_address'  => $l->ip_address,
+                'created_at'  => $l->created_at->translatedFormat('d M Y, H:i'),
             ]),
             'applications' => $account->applications->map(fn($a) => [
                 'id'           => $a->id,
@@ -267,5 +273,57 @@ class ApplicantManagementController extends Controller
 
         return redirect()->route('admin.queue.applicants.index')
             ->with('success', "Akun pemohon {$applicantName} ({$maskedNik}) berhasil dihapus dari sistem.");
+    }
+
+    public static function translateEventType(string $event): string
+    {
+        return match ($event) {
+            'registered'                     => 'Pendaftaran Akun',
+            'email_verified'                 => 'Email Berhasil Diverifikasi',
+            'identity_verification_verified' => 'Identitas Diverifikasi (Sah)',
+            'identity_verification_rejected' => 'Identitas Ditolak',
+            'account_status_changed'         => 'Status Akun Diubah',
+            'device_bound'                   => 'Perangkat Baru Terikat',
+            'device_revoked'                 => 'Akses Perangkat Dicabut',
+            'device_recovered'               => 'Perangkat Berhasil Dipulihkan',
+            'login_success_existing_device'  => 'Login Berhasil (Perangkat Terdaftar)',
+            'login_rejected_device_conflict' => 'Login Ditolak (Konflik Perangkat Lain)',
+            'login_failed_bad_password'      => 'Gagal Login (Password Salah)',
+            'otp_generated'                  => 'Kode OTP Dikirim',
+            'otp_verified'                   => 'OTP Berhasil Diverifikasi',
+            default                          => ucwords(str_replace('_', ' ', $event)),
+        };
+    }
+
+    public static function translateActorType(?string $actor): string
+    {
+        return match ($actor) {
+            'applicant' => 'Pemohon',
+            'admin'     => 'Petugas / Admin',
+            'system'    => 'Sistem',
+            default     => $actor ?? 'Sistem',
+        };
+    }
+
+    public static function translateAccountStatus(string $status): string
+    {
+        return match ($status) {
+            ApplicantAccount::STATUS_ACTIVE           => 'Aktif',
+            ApplicantAccount::STATUS_IDENTITY_PENDING => 'Menunggu Verifikasi Identitas',
+            ApplicantAccount::STATUS_EMAIL_PENDING    => 'Menunggu Verifikasi Email',
+            ApplicantAccount::STATUS_SUSPENDED        => 'Ditangguhkan',
+            ApplicantAccount::STATUS_LOCKED           => 'Terkunci',
+            default                                   => $status,
+        };
+    }
+
+    public static function translateIdentityStatus(string $status): string
+    {
+        return match ($status) {
+            ApplicantAccount::IDENTITY_VERIFIED => 'Terverifikasi (Sah)',
+            ApplicantAccount::IDENTITY_PENDING  => 'Menunggu Verifikasi',
+            ApplicantAccount::IDENTITY_REJECTED => 'Ditolak',
+            default                             => $status,
+        };
     }
 }

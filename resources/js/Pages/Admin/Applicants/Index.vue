@@ -182,7 +182,7 @@
                       'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300': acc.account_status === 'SUSPENDED' || acc.account_status === 'LOCKED',
                     }"
                   >
-                    {{ acc.account_status }}
+                    {{ acc.account_status_label || acc.account_status }}
                   </span>
                 </td>
                 <td class="p-4">
@@ -194,7 +194,7 @@
                       'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300': acc.identity_status === 'REJECTED',
                     }"
                   >
-                    {{ acc.identity_status }}
+                    {{ acc.identity_status_label || acc.identity_status }}
                   </span>
                 </td>
                 <td class="p-4">
