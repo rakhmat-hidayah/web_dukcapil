@@ -541,7 +541,28 @@
                         </button>
                       </template>
 
-                      <!-- Standard Treatment for Non-Selfie Documents (KTP, KK, Forms, etc.) -->
+                      <!-- Treatment for Destroyed / Cleaned Non-Selfie Document (Retention Purged) -->
+                      <template v-else-if="getDocument(docConfig.id).is_destroyed">
+                        <div class="text-right mr-2">
+                          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700">
+                            Diarsip (Dihapus dari Server)
+                          </span>
+                          <p class="text-[10px] text-slate-400 mt-0.5 font-mono">
+                            Masa Retensi Selesai
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          disabled
+                          class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 text-xs font-semibold cursor-not-allowed opacity-70 flex items-center gap-1.5 border border-slate-200 dark:border-slate-700"
+                          title="Berkas fisik dokumen ini telah dikemas ke arsip ZIP dan dibersihkan dari penyimpanan hosting sesuai kebijakan retensi data."
+                        >
+                          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                          <span>Telah Diarsip</span>
+                        </button>
+                      </template>
+
+                      <!-- Standard Treatment for Active Non-Selfie Documents (KTP, KK, Forms, etc.) -->
                       <template v-else>
                         <div class="text-right mr-2">
                           <span

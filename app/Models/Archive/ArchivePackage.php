@@ -129,7 +129,7 @@ class ArchivePackage extends Model
             self::STATUS_INCOMPLETE => 'Dokumen Tidak Lengkap',
             self::STATUS_FAILED => 'Gagal Dibuat',
             self::STATUS_CORRUPTED => 'Integritas Berkas Rusak / Berubah',
-        ][$this->status] ?? $this->status;
+        ][$this->status ?? ''] ?? ($this->status ?: 'Tidak Diketahui');
     }
 
     public function getPermanentStorageLabelAttribute(): string

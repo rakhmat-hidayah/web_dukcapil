@@ -159,6 +159,9 @@
                   >
                     ✓ Disimpan Operator
                   </span>
+                  <span v-if="pkg.source_files_cleaned" class="block text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
+                    ✓ File Sumber Dibersihkan
+                  </span>
                   <button
                     v-else-if="pkg.status === 'READY_FOR_DOWNLOAD'"
                     @click="openConfirmModal(pkg)"

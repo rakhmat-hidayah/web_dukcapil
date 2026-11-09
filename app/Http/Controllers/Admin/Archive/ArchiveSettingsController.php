@@ -69,11 +69,6 @@ class ArchiveSettingsController extends Controller
             'permanent_storage_config.target_path' => 'nullable|string|max:500',
         ]);
 
-        // Safety lock: Mode C (ARSIP_TRANSFER_DAN_PEMBERSIHAN) is strictly disabled in initial implementation
-        if ($validated['operation_mode'] === 'ARSIP_TRANSFER_DAN_PEMBERSIHAN') {
-            return back()->with('error', 'Kebijakan Keamanan: Mode [ARSIP_TRANSFER_DAN_PEMBERSIHAN] dinonaktifkan pada tahap implementasi awal demi mencegah kehilangan data sebelum audit pemulihan instansi selesai.');
-        }
-
         $currentConfig = ArchiveSetting::get('permanent_storage_config', []);
         $newConfig = $validated['permanent_storage_config'] ?? [];
 
@@ -103,8 +98,16 @@ class ArchiveSettingsController extends Controller
                 (int) $validated['retention_policy_days'],
                 (int) $validated['cleaning_grace_period_days']
             );
+            $messages = [];
             if ($cleanup['purged_packages_count'] > 0) {
-                return back()->with('success', "Konfigurasi pengarsipan berhasil disimpan. Pembersihan otomatis berhasil menghapus {$cleanup['purged_packages_count']} paket arsip kedaluwarsa ({$cleanup['freed_bytes_formatted']}).");
+                $messages[] = "{$cleanup['purged_packages_count']} paket arsip ZIP kedaluwarsa";
+            }
+            if ($cleanup['source_cleaned_packages_count'] > 0) {
+                $messages[] = "berkas fisik persyaratan pada {$cleanup['source_cleaned_packages_count']} paket";
+            }
+
+            if (!empty($messages)) {
+                return back()->with('success', "Konfigurasi berhasil disimpan. Pembersihan otomatis berhasil menghapus " . implode(' dan ', $messages) . " ({$cleanup['freed_bytes_formatted']}).");
             }
         } catch (\Throwable $e) {
             \Log::warning("Retention cleanup on update error: " . $e->getMessage());
@@ -120,8 +123,16 @@ class ArchiveSettingsController extends Controller
     {
         try {
             $cleanup = app(\App\Services\Archive\ArchiveService::class)->cleanupExpiredArchives();
+            $messages = [];
             if ($cleanup['purged_packages_count'] > 0) {
-                return back()->with('success', "Pembersihan retensi berhasil: {$cleanup['purged_packages_count']} paket arsip kedaluwarsa dibersihkan ({$cleanup['freed_bytes_formatted']}).");
+                $messages[] = "{$cleanup['purged_packages_count']} paket arsip ZIP";
+            }
+            if ($cleanup['source_cleaned_packages_count'] > 0) {
+                $messages[] = "berkas fisik persyaratan pada {$cleanup['source_cleaned_packages_count']} paket";
+            }
+
+            if (!empty($messages)) {
+                return back()->with('success', "Pembersihan retensi berhasil: " . implode(' dan ', $messages) . " berhasil dibersihkan dari server ({$cleanup['freed_bytes_formatted']}).");
             }
             return back()->with('info', "Pembersihan retensi selesai. Tidak ada paket arsip yang melebihi batas retensi ({$cleanup['retention_days']} hari) atau masa tenggang ({$cleanup['grace_period_days']} hari).");
         } catch (\Throwable $e) {

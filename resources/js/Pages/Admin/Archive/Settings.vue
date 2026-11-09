@@ -51,19 +51,19 @@
               </div>
             </label>
 
-            <!-- Mode C (Locked) -->
-            <div class="flex items-start gap-3 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 opacity-75">
-              <input type="radio" disabled value="ARSIP_TRANSFER_DAN_PEMBERSIHAN" class="mt-1 text-slate-400 cursor-not-allowed" />
+            <!-- Mode C -->
+            <label class="flex items-start gap-3 p-4 rounded-2xl border transition cursor-pointer" :class="form.operation_mode === 'ARSIP_TRANSFER_DAN_PEMBERSIHAN' ? 'bg-blue-50/50 dark:bg-blue-950/20 border-blue-500 dark:border-blue-500' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50'">
+              <input type="radio" v-model="form.operation_mode" value="ARSIP_TRANSFER_DAN_PEMBERSIHAN" class="mt-1 text-blue-600 focus:ring-blue-500" />
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Mode C — ARSIP_TRANSFER_DAN_PEMBERSIHAN</span>
-                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">Terkunci / Nonaktif</span>
+                  <span class="text-xs font-bold text-slate-900 dark:text-white">Mode C — ARSIP_TRANSFER_DAN_PEMBERSIHAN</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400">Pembersihan Otomatis Aktif</span>
                 </div>
-                <p class="text-[11px] text-slate-500 mt-0.5">
-                  Mode pembersihan file sumber dinonaktifkan secara ketat pada tahap awal sampai prosedur pencadangan dan pemulihan arsip permanen instansi selesai diuji.
+                <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
+                  Paket ZIP dibuat dan setelah dikonfirmasi unduh oleh operator atau ditransfer permanen, berkas fisik persyaratan pemohon di hosting dan file ZIP otomatis dibersihkan sistem sesuai masa retensi & tenggang aman.
                 </p>
               </div>
-            </div>
+            </label>
           </div>
         </div>
 
@@ -123,7 +123,7 @@
                   Pembersihan Otomatis Arsip Berdasarkan Retensi
                 </span>
                 <p class="text-[11px] text-slate-500">
-                  Paket arsip yang telah melewati batas masa retensi (<strong>{{ form.retention_policy_days }} hari</strong>) atau masa tenggang (<strong>{{ form.cleaning_grace_period_days }} hari</strong>) akan dihapus otomatis dari server lokal.
+                  Paket arsip ZIP dan file berkas fisik persyaratan pemohon yang telah melewati batas masa retensi (<strong>{{ form.retention_policy_days }} hari</strong>) atau masa tenggang (<strong>{{ form.cleaning_grace_period_days }} hari</strong>) akan dihapus permanen dari server hosting.
                 </p>
               </div>
               <button

@@ -26,7 +26,7 @@ class ArchiveRetentionCleanupCommand extends Command
         try {
             $result = $archiveService->cleanupExpiredArchives($retentionDays, $graceDays);
 
-            $this->info("[archive:cleanup-retention] Selesai: {$result['purged_packages_count']} paket dibersihkan ({$result['freed_bytes_formatted']}). Batas Retensi: {$result['retention_days']} hari, Grace Period: {$result['grace_period_days']} hari.");
+            $this->info("[archive:cleanup-retention] Selesai: {$result['purged_packages_count']} paket ZIP dan berkas persyaratan pada {$result['source_cleaned_packages_count']} paket dibersihkan ({$result['freed_bytes_formatted']}). Batas Retensi: {$result['retention_days']} hari, Grace Period: {$result['grace_period_days']} hari.");
 
             return self::SUCCESS;
         } catch (\Throwable $e) {

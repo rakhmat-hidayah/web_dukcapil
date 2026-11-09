@@ -11,6 +11,7 @@ use App\Models\Queue\QueueApplication;
 use App\Models\Queue\ServiceType;
 use App\Models\User;
 use App\Services\Archive\Storage\ArchiveStorageManager;
+use App\Services\Queue\QueueDocumentStorage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -803,11 +804,152 @@ class ArchiveService
     }
 
     /**
+     * Clean up physical source documents of applications included in an archive package.
+     * Updates document records to is_destroyed = true, path = '', file_size_bytes = 0.
+     * Deletes physical files and removes empty application folders from hosting disk.
+     *
+     * @param ArchivePackage $package
+     * @param User|null $user
+     * @return int Freed bytes
+     */
+    public function cleanSourceFilesForPackage(ArchivePackage $package, ?User $user = null): int
+    {
+        if ($package->source_files_cleaned) {
+            return 0;
+        }
+
+        $user = $user ?? auth()->user();
+        $package->loadMissing('items.application.documents');
+        $freedBytes = 0;
+        $cleanedDocsCount = 0;
+        $cleanedDirsCount = 0;
+
+        foreach ($package->items as $item) {
+            $application = $item->application;
+            if (!$application) {
+                continue;
+            }
+
+            foreach ($application->documents as $doc) {
+                $rawPath = $doc->getRawOriginal('path');
+                if (!empty($rawPath)) {
+                    $docFullPath = storage_path('app/private/' . $rawPath);
+
+                    if (File::exists($docFullPath)) {
+                        $fileSize = (int) File::size($docFullPath);
+                        $freedBytes += $fileSize;
+                        File::delete($docFullPath);
+                    } elseif (Storage::disk(QueueDocumentStorage::DISK)->exists($rawPath)) {
+                        $fileSize = (int) (Storage::disk(QueueDocumentStorage::DISK)->size($rawPath) ?: 0);
+                        $freedBytes += $fileSize;
+                        Storage::disk(QueueDocumentStorage::DISK)->delete($rawPath);
+                    } elseif (Storage::disk('local')->exists($rawPath)) {
+                        $fileSize = (int) (Storage::disk('local')->size($rawPath) ?: 0);
+                        $freedBytes += $fileSize;
+                        Storage::disk('local')->delete($rawPath);
+                    }
+
+                    // If the immediate parent directory is empty, clean it
+                    $docDir = dirname($docFullPath);
+                    if (File::isDirectory($docDir) && str_contains($docDir, 'queue-documents')) {
+                        if (empty(File::files($docDir)) && empty(File::directories($docDir))) {
+                            File::deleteDirectory($docDir);
+                            $cleanedDirsCount++;
+                        }
+                    }
+
+                    $doc->update([
+                        'is_destroyed' => true,
+                        'destroyed_at' => now(),
+                        'path' => '',
+                        'file_size_bytes' => 0,
+                    ]);
+                    $cleanedDocsCount++;
+                }
+            }
+
+            // Remove the application directory if empty
+            $createdYear = $application->created_at?->format('Y') ?? date('Y');
+            $createdMonth = $application->created_at?->format('m') ?? date('m');
+            $candidateAppDirs = [
+                storage_path("app/private/queue-documents/{$createdYear}/{$createdMonth}/{$application->id}"),
+                storage_path("app/private/queue-documents/{$application->id}"),
+            ];
+
+            foreach ($candidateAppDirs as $appDir) {
+                if (File::isDirectory($appDir)) {
+                    $remainingFiles = File::files($appDir);
+                    $remainingDirs = File::directories($appDir);
+                    if (empty($remainingFiles) && empty($remainingDirs)) {
+                        File::deleteDirectory($appDir);
+                        $cleanedDirsCount++;
+                    }
+                }
+            }
+        }
+
+        $package->update([
+            'source_files_cleaned' => true,
+            'source_files_cleaned_at' => now(),
+        ]);
+
+        ArchiveAuditService::log('SOURCE_FILES_PURGED_RETENTION', $package->id, null, [
+            'package_code' => $package->package_code,
+            'freed_bytes' => $freedBytes,
+            'cleaned_docs_count' => $cleanedDocsCount,
+            'cleaned_dirs_count' => $cleanedDirsCount,
+        ], $user);
+
+        return $freedBytes;
+    }
+
+    /**
+     * Recursively prune empty directories under storage/app/private/queue-documents.
+     */
+    public function pruneEmptyDocumentDirectories(): int
+    {
+        $baseDir = storage_path('app/private/queue-documents');
+        if (!File::isDirectory($baseDir)) {
+            return 0;
+        }
+
+        $pruned = 0;
+        $years = File::directories($baseDir);
+        foreach ($years as $yearDir) {
+            $months = File::directories($yearDir);
+            foreach ($months as $monthDir) {
+                $appDirs = File::directories($monthDir);
+                foreach ($appDirs as $appDir) {
+                    if (empty(File::files($appDir)) && empty(File::directories($appDir))) {
+                        File::deleteDirectory($appDir);
+                        $pruned++;
+                    }
+                }
+                if (empty(File::files($monthDir)) && empty(File::directories($monthDir))) {
+                    File::deleteDirectory($monthDir);
+                    $pruned++;
+                }
+            }
+            if (empty(File::files($yearDir)) && empty(File::directories($yearDir))) {
+                File::deleteDirectory($yearDir);
+                $pruned++;
+            }
+        }
+
+        return $pruned;
+    }
+
+    /**
      * Delete an archive package and its associated physical ZIP.
      */
     public function deletePackage(ArchivePackage $package, ?User $user = null): bool
     {
         $user = $user ?? auth()->user();
+
+        // Ensure physical source files of included applications are cleaned first
+        if (!$package->source_files_cleaned) {
+            $this->cleanSourceFilesForPackage($package, $user);
+        }
 
         // Delete physical zip if exists
         if (!empty($package->zip_path)) {
@@ -847,14 +989,47 @@ class ArchiveService
     {
         $retentionDays = $retentionDays ?? (int) ArchiveSetting::get('retention_policy_days', 365);
         $gracePeriodDays = $gracePeriodDays ?? (int) ArchiveSetting::get('cleaning_grace_period_days', 90);
+        $operationMode = ArchiveSetting::get('operation_mode', 'ARSIP_SAJA');
 
         $retentionCutoff = now()->subDays(max(1, $retentionDays));
         $graceCutoff = now()->subDays(max(1, $gracePeriodDays));
 
-        // 1. Packages exceeding general retention policy days
+        $sourceFilesCleanedCount = 0;
+        $sourceFilesFreedBytes = 0;
+
+        // 1. Clean physical requirement documents of applications:
+        // Eligible if:
+        // - In Mode C (ARSIP_TRANSFER_DAN_PEMBERSIHAN): package is confirmed by operator OR permanent storage verified
+        // - OR operator confirmation exceeds grace cutoff
+        // - OR permanent storage verification exceeds grace cutoff
+        // - OR package creation exceeds retention cutoff
+        $sourceEligiblePackages = ArchivePackage::where('source_files_cleaned', false)
+            ->where(function ($q) use ($graceCutoff, $retentionCutoff, $operationMode) {
+                if ($operationMode === 'ARSIP_TRANSFER_DAN_PEMBERSIHAN') {
+                    $q->where('is_operator_confirmed', true)
+                      ->orWhere('permanent_storage_status', ArchivePackage::PERM_VERIFIED);
+                }
+                $q->orWhere(function ($cq) use ($graceCutoff) {
+                    $cq->where('is_operator_confirmed', true)
+                       ->whereNotNull('operator_confirmed_at')
+                       ->where('operator_confirmed_at', '<', $graceCutoff);
+                })->orWhere(function ($pq) use ($graceCutoff) {
+                    $pq->where('permanent_storage_status', ArchivePackage::PERM_VERIFIED)
+                       ->whereNotNull('permanent_storage_verified_at')
+                       ->where('permanent_storage_verified_at', '<', $graceCutoff);
+                })->orWhere('created_at', '<', $retentionCutoff);
+            })->get();
+
+        foreach ($sourceEligiblePackages as $package) {
+            $freed = $this->cleanSourceFilesForPackage($package, $user);
+            $sourceFilesFreedBytes += $freed;
+            $sourceFilesCleanedCount++;
+        }
+
+        // 2. Packages exceeding general retention policy days
         $expiredRetentionPackages = ArchivePackage::where('created_at', '<', $retentionCutoff)->get();
 
-        // 2. Packages whose operator confirmation or permanent storage verification exceeds grace period
+        // 3. Packages whose operator confirmation or permanent storage verification exceeds grace period
         $expiredGracePackages = ArchivePackage::where(function ($q) use ($graceCutoff) {
             $q->where(function ($cq) use ($graceCutoff) {
                 $cq->where('is_operator_confirmed', true)
@@ -871,11 +1046,11 @@ class ArchiveService
         $allEligible = $expiredRetentionPackages->concat($expiredGracePackages)->unique('id');
 
         $purgedCount = 0;
-        $freedBytes = 0;
+        $zipFreedBytes = 0;
         $purgedCodes = [];
 
         foreach ($allEligible as $package) {
-            $freedBytes += (int) $package->package_size_bytes;
+            $zipFreedBytes += (int) $package->package_size_bytes;
             $code = $package->package_code;
             $isGrace = $expiredGracePackages->contains('id', $package->id);
 
@@ -889,12 +1064,19 @@ class ArchiveService
                 'size_bytes' => $package->package_size_bytes,
             ], $user);
 
+            // Ensure source files are cleaned before package is deleted
+            if (!$package->source_files_cleaned) {
+                $srcFreed = $this->cleanSourceFilesForPackage($package, $user);
+                $sourceFilesFreedBytes += $srcFreed;
+                $sourceFilesCleanedCount++;
+            }
+
             $this->deletePackage($package, $user);
             $purgedCount++;
             $purgedCodes[] = $code;
         }
 
-        // Clean any temporary directories or unlinked orphaned archive files older than retention cutoff
+        // 4. Clean any temporary directories or unlinked orphaned archive files older than retention cutoff
         $archivesDir = storage_path('app/private/archives');
         if (File::isDirectory($archivesDir)) {
             $allZipFiles = File::files($archivesDir);
@@ -905,7 +1087,7 @@ class ArchiveService
                         $relPath = 'archives/' . $file->getFilename();
                         $isReferenced = ArchivePackage::where('zip_path', $relPath)->exists();
                         if (!$isReferenced) {
-                            $freedBytes += File::size($file->getPathname());
+                            $zipFreedBytes += File::size($file->getPathname());
                             File::delete($file->getPathname());
                         }
                     }
@@ -913,8 +1095,13 @@ class ArchiveService
             }
         }
 
-        if ($purgedCount > 0) {
-            Log::info("Archive retention cleanup executed: purged {$purgedCount} package(s), freed {$this->formatBytes($freedBytes)}.", [
+        // 5. Prune any empty document directories in queue-documents
+        $this->pruneEmptyDocumentDirectories();
+
+        $totalFreedBytes = $sourceFilesFreedBytes + $zipFreedBytes;
+
+        if ($purgedCount > 0 || $sourceFilesCleanedCount > 0) {
+            Log::info("Archive retention cleanup executed: purged {$purgedCount} zip package(s), cleaned source files for {$sourceFilesCleanedCount} package(s), total freed {$this->formatBytes($totalFreedBytes)}.", [
                 'retention_days' => $retentionDays,
                 'grace_period_days' => $gracePeriodDays,
                 'packages' => $purgedCodes,
@@ -923,8 +1110,9 @@ class ArchiveService
 
         return [
             'purged_packages_count' => $purgedCount,
-            'freed_bytes' => $freedBytes,
-            'freed_bytes_formatted' => $this->formatBytes($freedBytes),
+            'source_cleaned_packages_count' => $sourceFilesCleanedCount,
+            'freed_bytes' => $totalFreedBytes,
+            'freed_bytes_formatted' => $this->formatBytes($totalFreedBytes),
             'retention_days' => $retentionDays,
             'grace_period_days' => $gracePeriodDays,
             'purged_package_codes' => $purgedCodes,

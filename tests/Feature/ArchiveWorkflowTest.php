@@ -468,19 +468,19 @@ class ArchiveWorkflowTest extends TestCase
         $response->assertRedirect('/admin/login');
     }
 
-    public function test_mode_c_cannot_be_activated_in_initial_implementation()
+    public function test_mode_c_can_be_activated_for_automatic_transfer_and_cleanup()
     {
         $response = $this->actingAs($this->adminUser)
             ->post(route('admin.archive.settings.update'), [
                 'operation_mode' => 'ARSIP_TRANSFER_DAN_PEMBERSIHAN',
                 'eligible_statuses' => ['COMPLETED'],
-                'retention_policy_days' => 365,
-                'cleaning_grace_period_days' => 90,
+                'retention_policy_days' => 14,
+                'cleaning_grace_period_days' => 7,
                 'permanent_storage_driver' => 'null',
             ]);
 
-        $response->assertSessionHas('error');
-        $this->assertEquals('ARSIP_SAJA', ArchiveSetting::get('operation_mode'));
+        $response->assertSessionHas('success');
+        $this->assertEquals('ARSIP_TRANSFER_DAN_PEMBERSIHAN', ArchiveSetting::get('operation_mode'));
     }
 
     public function test_local_disk_adapter_transfer_and_verification_workflow()
@@ -564,8 +564,15 @@ class ArchiveWorkflowTest extends TestCase
     public function test_automatic_retention_cleanup_deletes_expired_packages()
     {
         $app = $this->createValidCompletedApplication();
+        $doc = $app->documents->first();
+        $docPath = $doc->getRawOriginal('path');
+        $docFullPath = storage_path('app/private/' . $docPath);
+
         $service = app(ArchiveService::class);
         $package = $service->createPackage(['application_ids' => [$app->id]], $this->archiveOperatorUser);
+
+        // Verify physical file existed before purge
+        $this->assertTrue(File::exists($docFullPath) || Storage::disk('local')->exists($docPath));
 
         // Manually age the package to 15 days ago
         $package->created_at = now()->subDays(15);
@@ -579,6 +586,35 @@ class ArchiveWorkflowTest extends TestCase
 
         $this->assertGreaterThanOrEqual(1, $result['purged_packages_count']);
         $this->assertNull(ArchivePackage::find($packageId));
+
+        // Verify document is marked destroyed and physical file is gone
+        $doc->refresh();
+        $this->assertTrue((bool) $doc->is_destroyed);
+        $this->assertFalse(File::exists($docFullPath));
+    }
+
+    public function test_clean_source_files_purges_applicant_documents_and_folders()
+    {
+        $app = $this->createValidCompletedApplication();
+        $doc = $app->documents->first();
+        $docPath = $doc->getRawOriginal('path');
+        $docFullPath = storage_path('app/private/' . $docPath);
+
+        $service = app(ArchiveService::class);
+        $package = $service->createPackage(['application_ids' => [$app->id]], $this->archiveOperatorUser);
+
+        $freed = $service->cleanSourceFilesForPackage($package, $this->adminUser);
+        $this->assertGreaterThan(0, $freed);
+
+        $package->refresh();
+        $this->assertTrue((bool) $package->source_files_cleaned);
+        $this->assertNotNull($package->source_files_cleaned_at);
+
+        $doc->refresh();
+        $this->assertTrue((bool) $doc->is_destroyed);
+        $this->assertEmpty($doc->getRawOriginal('path'));
+        $this->assertEquals(0, $doc->file_size_bytes);
+        $this->assertFalse(File::exists($docFullPath));
     }
 
     public function test_settings_cleanup_retention_route_can_be_invoked()
