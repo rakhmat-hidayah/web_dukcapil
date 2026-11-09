@@ -146,7 +146,7 @@
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th class="p-4 font-bold">Pemohon (Nama & NIK)</th>
+                <th class="p-4 font-bold">Pemohon (Nama User & NIK Utuh)</th>
                 <th class="p-4 font-bold">Email</th>
                 <th class="p-4 font-bold">Status Akun</th>
                 <th class="p-4 font-bold">Status Identitas</th>
@@ -163,11 +163,15 @@
               </tr>
               <tr v-for="acc in accounts.data" :key="acc.id" class="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition">
                 <td class="p-4">
+                  <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Nama User</p>
                   <p class="font-black text-slate-900 dark:text-white text-sm">{{ acc.name }}</p>
-                  <p class="font-mono text-xs text-blue-600 dark:text-blue-400 font-bold">{{ acc.masked_nik }}</p>
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="text-[10px] font-bold text-slate-400">NIK:</span>
+                    <span class="font-mono text-xs text-blue-600 dark:text-blue-400 font-bold tracking-wider select-all">{{ acc.nik || acc.masked_nik }}</span>
+                  </div>
                 </td>
                 <td class="p-4">
-                  <span class="font-mono text-slate-600 dark:text-slate-400">{{ acc.masked_email }}</span>
+                  <span class="font-mono text-slate-700 dark:text-slate-300 font-medium">{{ acc.email || acc.masked_email }}</span>
                 </td>
                 <td class="p-4">
                   <span
@@ -217,6 +221,18 @@
                     >
                       <UserCheck class="w-3.5 h-3.5" />
                       <span>Verifikasi</span>
+                    </button>
+
+                    <!-- Disabled button if already verified -->
+                    <button
+                      v-else-if="acc.identity_status === 'VERIFIED'"
+                      type="button"
+                      disabled
+                      title="Identitas pemohon sudah terverifikasi (Non-aktif)"
+                      class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 font-bold text-[11px] flex items-center gap-1 cursor-not-allowed border border-slate-200 dark:border-slate-700 opacity-80"
+                    >
+                      <CheckCircle2 class="w-3.5 h-3.5 text-emerald-500" />
+                      <span>Terverifikasi</span>
                     </button>
 
                     <Link
@@ -274,10 +290,10 @@
           </div>
 
           <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 space-y-1 text-xs">
-            <p class="text-slate-500">Nama Lengkap:</p>
+            <p class="text-slate-500 font-bold text-[11px]">Nama User / Pemohon:</p>
             <p class="font-black text-slate-900 dark:text-white text-sm">{{ selectedApplicantForVerify.name }}</p>
-            <p class="text-slate-500 pt-1">NIK:</p>
-            <p class="font-mono font-bold text-blue-600 dark:text-blue-400">{{ selectedApplicantForVerify.masked_nik }}</p>
+            <p class="text-slate-500 font-bold text-[11px] pt-1">NIK Utuh (16 Digit):</p>
+            <p class="font-mono font-black text-blue-600 dark:text-blue-400 text-sm tracking-widest select-all">{{ selectedApplicantForVerify.nik || selectedApplicantForVerify.masked_nik }}</p>
           </div>
 
           <!-- Email notification info -->
@@ -350,7 +366,7 @@
               Hapus Akun Pemohon
             </h3>
             <p class="text-xs text-slate-500">
-              Apakah Anda yakin ingin menghapus akun pemohon <strong>{{ selectedApplicantForDelete.name }}</strong> (NIK: <span class="font-mono text-blue-600 font-bold">{{ selectedApplicantForDelete.masked_nik }}</span>)?
+              Apakah Anda yakin ingin menghapus akun pemohon <strong>{{ selectedApplicantForDelete.name }}</strong> (NIK: <span class="font-mono text-blue-600 font-bold">{{ selectedApplicantForDelete.nik || selectedApplicantForDelete.masked_nik }}</span>)?
             </p>
           </div>
 
@@ -393,7 +409,7 @@
 import { ref } from 'vue'
 import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { ChevronRight, UserCheck, Mail, Trash2 } from '@lucide/vue'
+import { ChevronRight, UserCheck, Mail, Trash2, CheckCircle2 } from '@lucide/vue'
 
 const props = defineProps({
   accounts: Object,

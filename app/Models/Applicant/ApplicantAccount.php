@@ -185,4 +185,9 @@ class ApplicantAccount extends Authenticatable
     {
         return $this->hasMany(QueueApplication::class, 'applicant_account_id');
     }
+
+    public function verifiedByAdmin(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'identity_verified_by');
+    }
 }

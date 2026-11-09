@@ -463,4 +463,57 @@ class ApplicantAuthenticationTest extends TestCase
             'id' => $accountId,
         ]);
     }
+
+    /**
+     * Test 25: Halaman index dan detail menampilkan NIK utuh 16 digit dan nama user.
+     */
+    public function test_admin_applicants_index_and_show_expose_full_nik_and_user_name(): void
+    {
+        \Spatie\Permission\Models\Role::findOrCreate('Super Administrator', 'web');
+
+        $admin = User::first() ?? User::factory()->create([
+            'email'    => 'admin.view@dukcapil.dompukab.go.id',
+            'username' => 'admin_view',
+        ]);
+        $admin->assignRole('Super Administrator');
+
+        $email = 'warga.utuh@gmail.com';
+        $nik = '5205011205950099';
+
+        ApplicantAccount::where('email_normalized', $email)->forceDelete();
+
+        $account = new ApplicantAccount();
+        $account->name = 'WARGA NIK UTUH';
+        $account->email_normalized = $email;
+        $account->nik = $nik;
+        $account->password = Hash::make('Password123#');
+        $account->account_status = ApplicantAccount::STATUS_ACTIVE;
+        $account->identity_status = ApplicantAccount::IDENTITY_VERIFIED;
+        $account->save();
+
+        // 1. Check index returns unmasked NIK
+        $indexResponse = $this->actingAs($admin, 'web')
+            ->get(route('admin.queue.applicants.index', ['search' => 'WARGA NIK UTUH']));
+
+        $indexResponse->assertOk();
+        $indexResponse->assertInertia(fn($page) => $page
+            ->component('Admin/Applicants/Index')
+            ->has('accounts.data')
+            ->where('accounts.data.0.name', 'WARGA NIK UTUH')
+            ->where('accounts.data.0.nik', $nik)
+            ->where('accounts.data.0.identity_status', 'VERIFIED')
+        );
+
+        // 2. Check show returns unmasked NIK and user details
+        $showResponse = $this->actingAs($admin, 'web')
+            ->get(route('admin.queue.applicants.show', $account));
+
+        $showResponse->assertOk();
+        $showResponse->assertInertia(fn($page) => $page
+            ->component('Admin/Applicants/Show')
+            ->where('account.nik', $nik)
+            ->where('account.name', 'WARGA NIK UTUH')
+            ->where('account.identity_status', 'VERIFIED')
+        );
+    }
 }

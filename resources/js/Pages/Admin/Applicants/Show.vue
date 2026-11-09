@@ -16,25 +16,69 @@
 
       <!-- Account Overview Header -->
       <div class="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="space-y-2">
-          <div class="flex items-center gap-3">
-            <h1 class="text-2xl font-black text-slate-900 dark:text-white">{{ account.name }}</h1>
-            <span
-              class="px-2.5 py-0.5 rounded-full text-[10px] font-black"
-              :class="{
-                'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300': account.account_status === 'ACTIVE',
-                'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300': account.account_status === 'IDENTITY_PENDING' || account.account_status === 'EMAIL_PENDING',
-                'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300': account.account_status === 'SUSPENDED' || account.account_status === 'LOCKED',
-              }"
-            >
-              {{ account.account_status }}
-            </span>
+        <div class="space-y-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Nama Pemohon / User
+              </span>
+              <span
+                class="px-2.5 py-0.5 rounded-full text-[10px] font-black"
+                :class="{
+                  'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300': account.account_status === 'ACTIVE',
+                  'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300': account.account_status === 'IDENTITY_PENDING' || account.account_status === 'EMAIL_PENDING',
+                  'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300': account.account_status === 'SUSPENDED' || account.account_status === 'LOCKED',
+                }"
+              >
+                {{ account.account_status }}
+              </span>
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{{ account.name }}</h1>
           </div>
 
-          <div class="flex flex-wrap gap-4 text-xs text-slate-500 font-mono">
-            <span>NIK: <strong class="text-blue-600 dark:text-blue-400 font-bold">{{ account.masked_nik }}</strong></span>
-            <span>Email: <strong class="text-slate-700 dark:text-slate-300">{{ account.masked_email }}</strong></span>
-            <span>Identitas: <strong :class="account.identity_status === 'VERIFIED' ? 'text-emerald-600 font-bold' : 'text-amber-600 font-bold'">{{ account.identity_status }}</strong></span>
+          <div class="flex flex-wrap items-center gap-3 text-xs">
+            <!-- NIK UTUH (16 DIGIT) -->
+            <div class="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 px-3.5 py-2 rounded-2xl border border-blue-200 dark:border-blue-900">
+              <span class="font-sans font-bold text-slate-500 dark:text-slate-400 text-[11px]">NIK:</span>
+              <strong class="font-mono font-black text-sm tracking-widest select-all text-blue-700 dark:text-blue-300">
+                {{ account.nik || account.masked_nik }}
+              </strong>
+              <button
+                v-if="account.nik"
+                type="button"
+                @click="copyText(account.nik, 'nik')"
+                class="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 transition rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/60 cursor-pointer"
+                :title="copiedField === 'nik' ? 'NIK berhasil disalin!' : 'Salin 16 Digit NIK Utuh'"
+              >
+                <Check v-if="copiedField === 'nik'" class="w-3.5 h-3.5 text-emerald-600" />
+                <Copy v-else class="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <!-- Email Utuh -->
+            <div class="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-800 font-mono">
+              <span class="font-sans font-bold text-slate-500 dark:text-slate-400 text-[11px]">Email:</span>
+              <strong class="font-medium text-xs">{{ account.email || account.masked_email }}</strong>
+            </div>
+
+            <!-- Status Identitas -->
+            <div
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border text-xs font-bold"
+              :class="account.identity_status === 'VERIFIED'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
+                : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'"
+            >
+              <span class="font-sans font-bold text-slate-500 dark:text-slate-400 text-[11px]">Identitas:</span>
+              <span class="inline-flex items-center gap-1">
+                <CheckCircle2 v-if="account.identity_status === 'VERIFIED'" class="w-3.5 h-3.5 text-emerald-600" />
+                <span>{{ account.identity_status }}</span>
+              </span>
+            </div>
+          </div>
+
+          <div v-if="account.identity_verified_at" class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
+            <span>Diverifikasi pada: <strong class="text-slate-700 dark:text-slate-300">{{ account.identity_verified_at }}</strong></span>
+            <span v-if="account.identity_verified_by">&bull; Petugas: <strong class="text-slate-700 dark:text-slate-300">{{ account.identity_verified_by }}</strong></span>
           </div>
 
           <p v-if="account.status_reason" class="text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 p-2.5 rounded-xl border border-rose-200 dark:border-rose-900">
@@ -44,13 +88,27 @@
 
         <!-- Action Buttons -->
         <div class="flex items-center gap-2 flex-wrap">
+          <!-- Tombol Verifikasi Identitas: Nonaktif jika sudah VERIFIED -->
           <button
+            v-if="account.identity_status === 'VERIFIED'"
+            type="button"
+            disabled
+            class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 font-bold text-xs border border-slate-200 dark:border-slate-700 cursor-not-allowed inline-flex items-center gap-1.5 opacity-80 shadow-none"
+            title="Identitas pemohon sudah terverifikasi (Non-aktif)"
+          >
+            <CheckCircle2 class="w-3.5 h-3.5 text-emerald-500" />
+            <span>Sudah Terverifikasi</span>
+          </button>
+          <button
+            v-else
             type="button"
             @click="openVerifyModal"
-            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-xs cursor-pointer"
+            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-xs cursor-pointer inline-flex items-center gap-1.5"
           >
-            Verifikasi Identitas
+            <UserCheck class="w-3.5 h-3.5" />
+            <span>Verifikasi Identitas</span>
           </button>
+
           <button
             type="button"
             @click="openStatusModal"
@@ -299,6 +357,13 @@
             Menyetujui verifikasi akan mengubah status identitas menjadi <strong>VERIFIED</strong> dan mengaktifkan akun menjadi <strong>ACTIVE</strong> untuk pengajuan layanan online.
           </p>
 
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 space-y-1 text-xs">
+            <p class="text-slate-500 font-bold text-[11px]">Nama User / Pemohon:</p>
+            <p class="font-black text-slate-900 dark:text-white text-sm">{{ account.name }}</p>
+            <p class="text-slate-500 font-bold text-[11px] pt-1">NIK Utuh (16 Digit):</p>
+            <p class="font-mono font-black text-blue-600 dark:text-blue-400 text-sm tracking-widest select-all">{{ account.nik || account.masked_nik }}</p>
+          </div>
+
           <form @submit.prevent="submitVerifyIdentity" class="space-y-4">
             <div class="space-y-1">
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Keputusan</label>
@@ -353,7 +418,7 @@
           <div class="text-center space-y-1">
             <h3 class="text-base font-black text-slate-900 dark:text-white">Hapus Akun Pemohon</h3>
             <p class="text-xs text-slate-500 leading-relaxed">
-              Apakah Anda yakin ingin menghapus akun pemohon <strong>{{ account.name }}</strong> (NIK: <span class="font-mono text-blue-600 font-bold">{{ account.masked_nik }}</span>)?
+              Apakah Anda yakin ingin menghapus akun pemohon <strong>{{ account.name }}</strong> (NIK: <span class="font-mono text-blue-600 font-bold">{{ account.nik || account.masked_nik }}</span>)?
             </p>
           </div>
 
@@ -403,6 +468,10 @@ import {
   FileText,
   History,
   Trash2,
+  UserCheck,
+  CheckCircle2,
+  Copy,
+  Check,
 } from '@lucide/vue'
 
 const props = defineProps({
@@ -416,6 +485,29 @@ const showRevokeModal = ref(false)
 const showStatusModal = ref(false)
 const showVerifyModal = ref(false)
 const showDeleteModal = ref(false)
+const copiedField = ref(null)
+
+const copyText = async (text, field) => {
+  if (!text) return
+  try {
+    await navigator.clipboard.writeText(text)
+    copiedField.value = field
+    setTimeout(() => {
+      copiedField.value = null
+    }, 2000)
+  } catch (e) {
+    const el = document.createElement('textarea')
+    el.value = text
+    document.body.appendChild(el)
+    el.select()
+    document.execCommand('copy')
+    document.body.removeChild(el)
+    copiedField.value = field
+    setTimeout(() => {
+      copiedField.value = null
+    }, 2000)
+  }
+}
 
 const deleteForm = useForm({})
 
@@ -445,7 +537,9 @@ const openStatusModal = () => {
 }
 
 const openVerifyModal = () => {
+  if (props.account.identity_status === 'VERIFIED') return
   verifyForm.reset()
+  verifyForm.decision = 'VERIFIED'
   showVerifyModal.value = true
 }
 

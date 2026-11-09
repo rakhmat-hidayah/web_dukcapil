@@ -58,7 +58,9 @@ class ApplicantManagementController extends Controller
             ->through(fn(ApplicantAccount $acc) => [
                 'id'                  => $acc->id,
                 'name'                => $acc->name,
+                'nik'                 => $acc->nik,
                 'masked_nik'          => $acc->masked_nik,
+                'email'               => $acc->email_normalized,
                 'masked_email'        => $acc->masked_email,
                 'identity_status'     => $acc->identity_status,
                 'account_status'      => $acc->account_status,
@@ -94,19 +96,23 @@ class ApplicantManagementController extends Controller
             'devices' => fn($q) => $q->latest('registered_at'),
             'auditLogs' => fn($q) => $q->latest('created_at')->take(30),
             'applications' => fn($q) => $q->latest('created_at')->with('serviceType'),
+            'verifiedByAdmin',
         ]);
 
         return Inertia::render('Admin/Applicants/Show', [
             'account' => [
                 'id'                   => $account->id,
                 'name'                 => $account->name,
+                'nik'                  => $account->nik,
                 'masked_nik'           => $account->masked_nik,
+                'email'                => $account->email_normalized,
                 'masked_email'         => $account->masked_email,
                 'identity_status'      => $account->identity_status,
                 'account_status'       => $account->account_status,
                 'status_reason'        => $account->status_reason,
                 'email_verified_at'    => $account->email_verified_at?->translatedFormat('d M Y, H:i'),
                 'identity_verified_at' => $account->identity_verified_at?->translatedFormat('d M Y, H:i'),
+                'identity_verified_by' => $account->verifiedByAdmin?->name,
                 'created_at'           => $account->created_at?->translatedFormat('d M Y, H:i'),
             ],
             'devices' => $account->devices->map(fn($d) => [
