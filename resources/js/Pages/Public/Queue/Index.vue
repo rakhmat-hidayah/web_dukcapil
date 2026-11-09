@@ -2,10 +2,10 @@
   <Head title="Layanan Online KTP-el - Disdukcapil Kabupaten Dompu" />
 
   <PublicLayout :hide-footer="true" :compact-main="true">
-    <div class="bg-slate-50 dark:bg-slate-950 pb-16 md:pb-16 text-slate-800 dark:text-slate-100">
+    <div class="bg-slate-50 dark:bg-slate-950 pb-20 md:pb-16 text-slate-800 dark:text-slate-100">
       
       <!-- Top App Container -->
-      <div class="max-w-4xl mx-auto px-1 sm:px-6 pt-0.5 sm:pt-4 space-y-2.5 sm:space-y-4">
+      <div class="max-w-4xl mx-auto px-2 sm:px-6 pt-1.5 sm:pt-4 space-y-3 sm:space-y-4">
 
         <!-- Compact Maintenance Alert Bar (If Active) -->
         <div 
@@ -82,7 +82,7 @@
           </div>
 
           <!-- 3. CIRCULAR NEUMORPHIC ICON GRID (4 Core Services Only) -->
-          <div class="grid grid-cols-4 gap-1 sm:gap-4 py-2 px-1 sm:p-5 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800">
+          <div class="grid grid-cols-4 gap-1.5 sm:gap-4 py-3 px-1.5 sm:p-5 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800">
             
             <!-- Icon 1: KTP Hilang -->
             <button
@@ -90,11 +90,11 @@
               @click="openServiceModalBySlug('cetak-ktp-hilang')"
               class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center text-white shadow-md shadow-sky-500/25 ring-2 sm:ring-4 ring-sky-100 dark:ring-sky-950/60 group-hover:scale-105 transition-transform duration-200">
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center text-white shadow-md shadow-sky-500/25 ring-2 sm:ring-4 ring-sky-100 dark:ring-sky-950/60 group-hover:scale-105 transition-transform duration-200">
                 <!-- Neumorphic 3D styled inner icon -->
-                <CreditCard class="w-5 h-5 sm:w-7 sm:h-7" />
+                <CreditCard class="w-6 h-6 sm:w-7 sm:h-7" />
               </div>
-              <span class="mt-1 text-[10px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-1.5 text-[10.5px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 KTP-el Hilang
               </span>
               <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Surat Hilang</span>
@@ -106,10 +106,10 @@
               @click="openServiceModalBySlug('cetak-ktp-rusak')"
               class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25 ring-2 sm:ring-4 ring-blue-100 dark:ring-blue-950/60 group-hover:scale-105 transition-transform duration-200">
-                <RotateCcw class="w-5 h-5 sm:w-7 sm:h-7" />
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25 ring-2 sm:ring-4 ring-blue-100 dark:ring-blue-950/60 group-hover:scale-105 transition-transform duration-200">
+                <RotateCcw class="w-6 h-6 sm:w-7 sm:h-7" />
               </div>
-              <span class="mt-1 text-[10px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-1.5 text-[10.5px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 KTP-el Rusak
               </span>
               <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Fisik Patah/Pudar</span>
@@ -121,10 +121,10 @@
               @click="openServiceModalBySlug('perubahan-elemen-data')"
               class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-cyan-400 to-teal-600 flex items-center justify-center text-white shadow-md shadow-teal-500/25 ring-2 sm:ring-4 ring-teal-100 dark:ring-teal-950/60 group-hover:scale-105 transition-transform duration-200">
-                <FileText class="w-5 h-5 sm:w-7 sm:h-7" />
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-cyan-400 to-teal-600 flex items-center justify-center text-white shadow-md shadow-teal-500/25 ring-2 sm:ring-4 ring-teal-100 dark:ring-teal-950/60 group-hover:scale-105 transition-transform duration-200">
+                <FileText class="w-6 h-6 sm:w-7 sm:h-7" />
               </div>
-              <span class="mt-1 text-[10px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-1.5 text-[10.5px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 Ubah Elemen Data
               </span>
               <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Status / Alamat</span>
@@ -136,10 +136,10 @@
               @click="openServiceModalBySlug('perekaman-ktp-el-baru')"
               class="group flex flex-col items-center text-center p-1 sm:p-2 rounded-2xl hover:bg-blue-50/60 dark:hover:bg-slate-800 transition active:scale-95 focus:outline-none cursor-pointer"
             >
-              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-emerald-400 to-green-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/25 ring-2 sm:ring-4 ring-emerald-100 dark:ring-emerald-950/60 group-hover:scale-105 transition-transform duration-200">
-                <Camera class="w-5 h-5 sm:w-7 sm:h-7" />
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-emerald-400 to-green-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/25 ring-2 sm:ring-4 ring-emerald-100 dark:ring-emerald-950/60 group-hover:scale-105 transition-transform duration-200">
+                <Camera class="w-6 h-6 sm:w-7 sm:h-7" />
               </div>
-              <span class="mt-1 text-[10px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span class="mt-1.5 text-[10.5px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
                 Perekaman Baru
               </span>
               <span class="text-[8.5px] sm:text-[9.5px] text-slate-600 dark:text-slate-400 mt-0.5">Pemula 16-17 Thn</span>
@@ -149,7 +149,7 @@
         </div>
 
         <!-- 4. BANNER CAROUSEL INOVASI & EDUKASI (Exact like Grobogan bottom slider) -->
-        <div class="space-y-1.5 pt-0.5 sm:space-y-2 sm:pt-2">
+        <div class="space-y-1.5 pt-1 sm:space-y-2 sm:pt-2">
           <div class="flex items-center justify-between px-0.5">
             <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
@@ -165,19 +165,19 @@
               :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
             >
               <!-- Slide 1: Bebas Pungli / 100% Gratis -->
-              <div class="w-full shrink-0 p-3 sm:p-5 bg-gradient-to-r from-blue-700 via-indigo-800 to-slate-900 text-white min-h-[115px] sm:min-h-[160px] flex flex-col justify-between">
+              <div class="w-full shrink-0 p-4 sm:p-6 bg-gradient-to-r from-blue-700 via-indigo-800 to-slate-900 text-white min-h-[190px] sm:min-h-[220px] flex flex-col justify-between">
                 <div>
-                  <span class="inline-block px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider bg-amber-400 text-slate-900 mb-1">
+                  <span class="inline-block px-2.5 py-0.5 rounded-full text-[8.5px] sm:text-[9.5px] font-black uppercase tracking-wider bg-amber-400 text-slate-900 mb-1.5 shadow-xs">
                     Inovasi Layanan!
                   </span>
-                  <h4 class="text-sm sm:text-lg font-black tracking-tight leading-snug">
+                  <h4 class="text-base sm:text-xl font-black tracking-tight leading-snug">
                     Pelayanan KTP-el Cepat, Tepat & Bebas Calo
                   </h4>
-                  <p class="text-[10px] sm:text-xs text-slate-200 mt-0.5 max-w-xl leading-relaxed line-clamp-2">
+                  <p class="text-[11px] sm:text-xs text-slate-200 mt-1 max-w-xl leading-relaxed">
                     Seluruh proses pendaftaran dan pencetakan KTP-el di Dinas Dukcapil Kabupaten Dompu 100% GRATIS (Rp 0) tanpa dipungut biaya apapun.
                   </p>
                 </div>
-                <div class="flex items-center gap-2 pt-1.5 text-[9px] sm:text-[11px] font-bold text-emerald-300">
+                <div class="flex items-center gap-2 pt-2 text-[9.5px] sm:text-xs font-bold text-emerald-300">
                   <span>✓ LEBIH CEPAT</span>
                   <span>•</span>
                   <span>✓ LEBIH AMAN</span>
@@ -187,19 +187,19 @@
               </div>
 
               <!-- Slide 2: Panduan Foto Selfie & Berkas HP -->
-              <div class="w-full shrink-0 p-3 sm:p-5 bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 text-white min-h-[115px] sm:min-h-[160px] flex flex-col justify-between">
+              <div class="w-full shrink-0 p-4 sm:p-6 bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 text-white min-h-[190px] sm:min-h-[220px] flex flex-col justify-between">
                 <div>
-                  <span class="inline-block px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider bg-emerald-400 text-slate-900 mb-1">
+                  <span class="inline-block px-2.5 py-0.5 rounded-full text-[8.5px] sm:text-[9.5px] font-black uppercase tracking-wider bg-emerald-400 text-slate-900 mb-1.5 shadow-xs">
                     Tips Unggah Berkas
                   </span>
-                  <h4 class="text-sm sm:text-lg font-black tracking-tight leading-snug">
+                  <h4 class="text-base sm:text-xl font-black tracking-tight leading-snug">
                     Pra-Verifikasi Dokumen Cukup Dari Handphone
                   </h4>
-                  <p class="text-[10px] sm:text-xs text-emerald-100 mt-0.5 max-w-xl leading-relaxed line-clamp-2">
+                  <p class="text-[11px] sm:text-xs text-emerald-100 mt-1 max-w-xl leading-relaxed">
                     Ambil foto berkas asli menggunakan kamera handphone dengan pencahayaan terang dan tegak lurus agar verifikasi berkas langsung disetujui petugas.
                   </p>
                 </div>
-                <div class="flex items-center gap-2 pt-1.5 text-[9px] sm:text-[11px] font-bold text-amber-300">
+                <div class="flex items-center gap-2 pt-2 text-[9.5px] sm:text-xs font-bold text-amber-300">
                   <span>📷 Foto Wajah Selfie Asli</span>
                   <span>•</span>
                   <span>📄 Dokumen Tidak Buram</span>
@@ -210,29 +210,30 @@
               <template v-for="b in banners" :key="b.id">
                 <div 
                   v-if="b.image_url"
-                  class="w-full shrink-0 min-h-[115px] sm:min-h-[160px] relative bg-slate-900 text-white flex flex-col justify-end p-3 sm:p-5"
+                  class="w-full shrink-0 min-h-[190px] sm:min-h-[220px] relative bg-slate-900 text-white flex flex-col justify-end p-4 sm:p-6"
                 >
-                  <img :src="b.image_url" :alt="b.title" class="absolute inset-0 w-full h-full object-cover opacity-40" />
+                  <img :src="b.image_url" :alt="b.title" class="absolute inset-0 w-full h-full object-cover opacity-60" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
                   <div class="relative z-10">
-                    <span class="inline-block px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase tracking-wider bg-blue-500 text-white mb-1">
+                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[8.5px] sm:text-[9.5px] font-black uppercase tracking-wider bg-blue-500 text-white mb-1.5 shadow-xs">
                       Informasi Resmi
                     </span>
-                    <h4 class="text-xs sm:text-base font-black tracking-tight leading-snug">{{ b.title }}</h4>
-                    <p class="text-[10px] sm:text-xs text-slate-200 mt-0.5 line-clamp-2 max-w-xl">{{ b.subtitle }}</p>
+                    <h4 class="text-sm sm:text-lg font-black tracking-tight leading-snug">{{ b.title }}</h4>
+                    <p class="text-[11px] sm:text-xs text-slate-200 mt-1 line-clamp-2 max-w-xl leading-relaxed">{{ b.subtitle }}</p>
                   </div>
                 </div>
               </template>
             </div>
 
             <!-- Carousel Controls & Dots -->
-            <div class="absolute bottom-2 right-3 flex items-center gap-1.5 z-20">
+            <div class="absolute bottom-2.5 right-3 flex items-center gap-1.5 z-20">
               <button
                 v-for="(dot, idx) in totalSlides"
                 :key="idx"
                 type="button"
                 @click="currentSlide = idx"
-                class="w-1.5 h-1.5 rounded-full transition-all"
-                :class="currentSlide === idx ? 'bg-white w-4' : 'bg-white/40 hover:bg-white/70'"
+                class="w-2 h-2 rounded-full transition-all"
+                :class="currentSlide === idx ? 'bg-white w-5' : 'bg-white/40 hover:bg-white/70'"
                 :aria-label="'Slide ' + (idx + 1)"
               ></button>
             </div>

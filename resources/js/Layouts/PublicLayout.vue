@@ -4,18 +4,18 @@
     <!-- Sticky Navigation Wrapper (Top Bar + Header Menu) -->
     <div class="sticky top-0 z-50 shadow-md shadow-gray-200/40 dark:shadow-none print:hidden">
       <!-- Top info bar -->
-      <div class="bg-primary-900 text-white text-[10px] py-2 px-6 flex justify-between items-center font-medium">
-        <div class="flex items-center gap-4">
+      <div class="bg-primary-900 text-white text-[10px] py-1.5 sm:py-2 px-4 sm:px-6 flex justify-between items-center font-medium">
+        <div class="hidden sm:flex items-center gap-4">
           <span>📍 Dompu, Nusa Tenggara Barat</span>
           <span class="hidden sm:inline">✉️ {{ websiteSettings.office_email || 'dukcapilkabdompu@gmail.com' }}</span>
           <a v-if="websiteSettings.social_instagram" :href="websiteSettings.social_instagram" target="_blank" rel="noopener noreferrer" class="hidden md:inline hover:text-amber-300 transition font-bold">📸 Instagram</a>
           <a v-if="websiteSettings.social_facebook" :href="websiteSettings.social_facebook" target="_blank" rel="noopener noreferrer" class="hidden md:inline hover:text-amber-300 transition font-bold">🌐 Facebook</a>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
           <Link 
             v-if="$page.props.auth?.applicant" 
             :href="route('applicant.dashboard')" 
-            class="hover:underline flex items-center gap-1 font-bold text-amber-300"
+            class="hidden sm:inline-flex hover:underline items-center gap-1 font-bold text-amber-300"
           >
             <UserCheck class="w-3 h-3" />
             <span>Akun: {{ $page.props.auth.applicant.name.split(' ')[0] }}</span>
@@ -23,12 +23,12 @@
           <Link 
             v-else 
             :href="route('applicant.login')" 
-            class="hover:underline flex items-center gap-1 font-bold text-amber-200 hover:text-white"
+            class="hidden sm:inline-flex hover:underline items-center gap-1 font-bold text-amber-200 hover:text-white"
           >
             <LogIn class="w-3 h-3" />
             <span>Login Pemohon</span>
           </Link>
-          <span class="text-white/40">|</span>
+          <span class="hidden sm:inline text-white/40">|</span>
           <a href="/admin/login" class="hover:underline">Operator Portal</a>
         </div>
       </div>
