@@ -1,21 +1,25 @@
 <template>
   <Head title="Masuk Akun Pemohon - Disdukcapil Kabupaten Dompu" />
 
-  <PublicLayout>
+  <PublicLayout :hide-footer="true">
     <div class="py-2.5 sm:py-10 max-w-md mx-auto px-3 sm:px-4 space-y-2.5 sm:space-y-4 w-full">
-      <!-- Breadcrumb navigation -->
-      <div class="flex items-center justify-between">
-        <Link
-          :href="route('queue.index')"
-          class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 transition"
-        >
-          <ArrowLeft class="w-3.5 h-3.5" />
-          <span>Kembali ke Portal Antrian</span>
-        </Link>
-      </div>
-
       <!-- Login Card -->
       <div class="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-3.5 sm:space-y-5 w-full max-w-full overflow-hidden">
+        <!-- Optional Fullscreen Toggle Bar -->
+        <div v-if="canFullscreen" class="flex items-center justify-between text-xs text-slate-400">
+          <span class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Portal Pemohon</span>
+          <button
+            type="button"
+            @click="toggleFullscreen"
+            class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
+            title="Tampilkan / Sembunyikan Bilah Browser"
+          >
+            <Maximize2 v-if="!isFullscreen" class="w-3 h-3" />
+            <Minimize2 v-else class="w-3 h-3" />
+            <span>{{ isFullscreen ? 'Keluar Layar Penuh' : 'Mode Layar Penuh' }}</span>
+          </button>
+        </div>
+
         <div class="text-center space-y-1 sm:space-y-2">
           <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto shadow-inner">
             <Lock class="w-5 h-5 sm:w-6 sm:h-6" />
@@ -160,15 +164,42 @@
 import { ref, onMounted } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
-import { ArrowLeft, ArrowRight, Lock, Eye, EyeOff, ShieldAlert, CheckCircle2, AlertCircle } from '@lucide/vue'
+import { ArrowRight, Lock, Eye, EyeOff, ShieldAlert, CheckCircle2, AlertCircle, Maximize2, Minimize2 } from '@lucide/vue'
 
 const showPassword = ref(false)
+const isFullscreen = ref(false)
+const canFullscreen = ref(false)
 
 onMounted(() => {
   if (typeof window !== 'undefined') {
     window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+    canFullscreen.value = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled)
+    
+    document.addEventListener('fullscreenchange', () => {
+      isFullscreen.value = !!document.fullscreenElement
+    })
+    document.addEventListener('webkitfullscreenchange', () => {
+      isFullscreen.value = !!document.webkitFullscreenElement
+    })
   }
 })
+
+const toggleFullscreen = () => {
+  if (typeof document === 'undefined') return
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {})
+    } else if (document.documentElement.webkitRequestFullscreen) {
+      document.documentElement.webkitRequestFullscreen()
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {})
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen()
+    }
+  }
+}
 
 const getInitialNik = () => {
   if (typeof window !== 'undefined') {

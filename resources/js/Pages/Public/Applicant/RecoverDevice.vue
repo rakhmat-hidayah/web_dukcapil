@@ -1,18 +1,8 @@
 <template>
   <Head title="Pemulihan Akun & Ganti Perangkat - Disdukcapil Kabupaten Dompu" />
 
-  <PublicLayout>
+  <PublicLayout :hide-footer="true">
     <div class="py-2.5 sm:py-10 max-w-md mx-auto px-3 sm:px-4 space-y-2.5 sm:space-y-4 w-full">
-      <div class="flex items-center justify-between">
-        <Link
-          :href="route('applicant.login')"
-          class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 transition"
-        >
-          <ArrowLeft class="w-3.5 h-3.5" />
-          <span>Kembali ke Halaman Masuk</span>
-        </Link>
-      </div>
-
       <!-- Card -->
       <div class="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-3.5 sm:space-y-5 w-full max-w-full overflow-hidden">
         <div class="text-center space-y-1 sm:space-y-2">
@@ -142,7 +132,7 @@
 import { ref, onMounted } from 'vue'
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
-import { ArrowLeft, ArrowRight, Smartphone, CheckCircle2 } from '@lucide/vue'
+import { ArrowRight, Smartphone, CheckCircle2 } from '@lucide/vue'
 
 onMounted(() => {
   if (typeof window !== 'undefined') {

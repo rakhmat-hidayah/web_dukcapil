@@ -3,8 +3,11 @@
     "short_name": "Dukcapil Dompu",
     "description": "Website Resmi Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu, NTB",
     "start_url": "/",
-    "display": "browser",
-    "background_color": "#f0f7ff",
+    "scope": "/",
+    "display": "standalone",
+    "display_override": ["standalone", "minimal-ui", "window-controls-overlay"],
+    "orientation": "portrait",
+    "background_color": "#ffffff",
     "theme_color": "#0274cb",
     "icons": [
         {
@@ -21,6 +24,12 @@
             "src": "/apple-touch-icon.png",
             "sizes": "180x180",
             "type": "image/png"
+        },
+        {
+            "src": "/img/logo-dompu-circle.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ]
 }
