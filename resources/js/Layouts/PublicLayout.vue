@@ -514,7 +514,6 @@
         <p>© {{ new Date().getFullYear() }} Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu</p>
         <div class="flex items-center gap-4">
           <a href="/sitemap.xml" class="hover:underline">Sitemap</a>
-          <a href="/robots.txt" class="hover:underline">Robots.txt</a>
         </div>
       </div>
     </footer>
