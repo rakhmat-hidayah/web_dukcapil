@@ -304,29 +304,24 @@
                     <!-- Case 1: Photo Available (Unverified, File exists) -->
                     <div
                       v-if="app.selfie_thumbnail_url || app.selfie_url"
-                      @click.stop="openPhotoPreview(app)"
-                      class="relative w-10 h-10 rounded-xl overflow-hidden border border-blue-200 dark:border-blue-900 shadow-xs shrink-0 cursor-pointer group/photo bg-slate-100 dark:bg-slate-800 transition transform hover:scale-105 hover:ring-2 hover:ring-blue-500"
-                      title="Klik untuk melihat pratinjau foto pemohon"
+                      class="relative w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800"
+                      title="Foto selfie pemohon"
                     >
                       <img
                         :src="app.selfie_thumbnail_url || app.selfie_url"
                         :alt="app.applicant_name"
-                        class="w-full h-full object-cover transition duration-200"
+                        class="w-full h-full object-cover select-none pointer-events-none"
                         loading="lazy"
                       />
-                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/photo:opacity-100 transition flex items-center justify-center text-white">
-                        <svg class="w-3.5 h-3.5 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
-                      </div>
                     </div>
 
                     <!-- Case 2: Photo Examined & Verified (Biometric Verified, File Safely Destroyed) -->
                     <div
                       v-else-if="app.selfie_verification || app.is_selfie_verified"
-                      @click.stop="openPhotoPreview(app)"
-                      class="relative w-11 h-10 rounded-xl border flex flex-col items-center justify-center shrink-0 shadow-xs cursor-pointer select-none transition transform hover:scale-105"
+                      class="relative w-11 h-10 rounded-xl border flex flex-col items-center justify-center shrink-0 shadow-xs select-none"
                       :class="app.selfie_verification?.decision === 'MATCH'
-                        ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 hover:ring-2 hover:ring-emerald-500'
-                        : 'bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:ring-2 hover:ring-rose-500'"
+                        ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400'"
                       :title="app.selfie_verification?.decision === 'MATCH'
                         ? 'Foto Telah Diperiksa: SESUAI PEMOHON (MATCH). Berkas fisik telah dimusnahkan secara aman.'
                         : 'Foto Telah Diperiksa: BUKAN PEMOHON (MISMATCH). Berkas fisik telah dimusnahkan secara aman.'"
@@ -592,148 +587,6 @@
         </div>
       </transition>
 
-      <!-- Modal Preview Foto Pemohon (Lightbox) -->
-      <transition name="fade">
-        <div
-          v-if="previewPhotoApp"
-          class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          @click.self="closePhotoPreview"
-        >
-          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden relative animate-in fade-in zoom-in-95 duration-150">
-            <!-- Header -->
-            <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-800/90">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shadow-sm">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                </div>
-                <div>
-                  <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
-                    Preview Foto Pemohon
-                  </h3>
-                  <p class="text-xs text-slate-400 font-mono mt-0.5">
-                    {{ previewPhotoApp.reg_number }}
-                    <span v-if="previewPhotoApp.queue_number" class="ml-1 px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-black">
-                      No. Antrean: {{ previewPhotoApp.queue_number }}
-                    </span>
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                @click="closePhotoPreview"
-                class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition cursor-pointer"
-                title="Tutup (Esc)"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              </button>
-            </div>
-
-            <!-- Image / Verified Audit Container -->
-            <div class="p-6 bg-slate-950 flex items-center justify-center relative min-h-[260px] max-h-[58vh]">
-              <!-- If photo file still exists -->
-              <img
-                v-if="previewPhotoApp.selfie_url || previewPhotoApp.selfie_thumbnail_url"
-                :src="previewPhotoApp.selfie_url || previewPhotoApp.selfie_thumbnail_url"
-                :alt="previewPhotoApp.applicant_name"
-                class="max-w-full max-h-[52vh] object-contain rounded-2xl shadow-2xl border border-white/10"
-              />
-              <!-- If photo was already examined, verified & physically destroyed -->
-              <div
-                v-else-if="previewPhotoApp.selfie_verification || previewPhotoApp.is_selfie_verified"
-                class="w-full max-w-sm rounded-2xl p-6 text-center space-y-3.5 border transition"
-                :class="previewPhotoApp.selfie_verification?.decision === 'MATCH'
-                  ? 'bg-emerald-950/40 border-emerald-600/60 text-emerald-200'
-                  : 'bg-rose-950/40 border-rose-600/60 text-rose-200'"
-              >
-                <div
-                  class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-white shadow-xl"
-                  :class="previewPhotoApp.selfie_verification?.decision === 'MATCH'
-                    ? 'bg-emerald-600 shadow-emerald-500/30'
-                    : 'bg-rose-600 shadow-rose-500/30'"
-                >
-                  <svg v-if="previewPhotoApp.selfie_verification?.decision === 'MATCH'" class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                  <svg v-else class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                </div>
-                <div class="space-y-1">
-                  <span
-                    class="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider"
-                    :class="previewPhotoApp.selfie_verification?.decision === 'MATCH'
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                      : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'"
-                  >
-                    {{ previewPhotoApp.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai (MATCH)' : 'Bukan Pemohon (MISMATCH)' }}
-                  </span>
-                  <h4 class="text-white font-black text-base mt-2">
-                    Foto Wajah Sudah Diperiksa
-                  </h4>
-                  <p class="text-xs text-slate-300 leading-relaxed">
-                    Sesuai ketentuan keamanan biometrik, file foto fisik telah dimusnahkan permanen dari server (Zero Retention) setelah hasil pemeriksaan dicatat.
-                  </p>
-                </div>
-                <div class="pt-2 border-t border-white/10 text-[11px] text-slate-300 space-y-1.5 text-left">
-                  <div class="flex justify-between">
-                    <span class="text-slate-400">Petugas Pemeriksa:</span>
-                    <span class="font-bold text-white">{{ previewPhotoApp.selfie_verification?.verified_by_name || 'Petugas Verifikator' }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-slate-400">Status Berkas Fisik:</span>
-                    <span class="font-bold text-emerald-400 flex items-center gap-1">
-                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
-                      Dimusnahkan (DELETED)
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <!-- Fallback: No Photo Uploaded -->
-              <div v-else class="text-slate-400 text-xs text-center py-12">
-                Tidak ada berkas foto selfie yang tersimpan.
-              </div>
-            </div>
-
-            <!-- Detail Information -->
-            <div class="p-5 bg-white dark:bg-slate-800 space-y-3.5">
-              <div class="grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Nama Lengkap</span>
-                  <span class="font-bold text-slate-900 dark:text-white text-sm block truncate">{{ previewPhotoApp.applicant_name }}</span>
-                </div>
-                <div>
-                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">NIK Pemilik</span>
-                  <span class="font-mono font-bold text-slate-900 dark:text-white block">{{ previewPhotoApp.applicant_nik }}</span>
-                </div>
-                <div>
-                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Jenis Layanan</span>
-                  <span class="font-semibold text-blue-600 dark:text-blue-400 block truncate">{{ previewPhotoApp.service_type?.name }}</span>
-                </div>
-                <div>
-                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Status Berkas</span>
-                  <StatusBadge :status="previewPhotoApp.status" class="mt-0.5 inline-block" />
-                </div>
-              </div>
-
-              <!-- Action Buttons -->
-              <div class="flex items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-                <button
-                  type="button"
-                  @click="closePhotoPreview"
-                  class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold transition cursor-pointer"
-                >
-                  Tutup
-                </button>
-                <Link
-                  :href="route('admin.queue.applications.show', { id: previewPhotoApp.id })"
-                  class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-600/30 flex items-center gap-1.5 transition cursor-pointer"
-                >
-                  <span>Buka & Verifikasi Berkas</span>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </transition>
-
       <!-- Modal Eskalasi & Sinkronisasi Status -->
       <transition name="fade">
         <div
@@ -909,16 +762,6 @@ const isSuperAdmin = computed(() => {
     || page.props.auth?.roles?.includes('Super Administrator') 
     || page.props.auth?.user?.username === 'superadmin'
 })
-
-const previewPhotoApp = ref(null)
-
-const openPhotoPreview = (app) => {
-  previewPhotoApp.value = app
-}
-
-const closePhotoPreview = () => {
-  previewPhotoApp.value = null
-}
 
 const deleteModalOpen = ref(false)
 const appToDelete = ref(null)
