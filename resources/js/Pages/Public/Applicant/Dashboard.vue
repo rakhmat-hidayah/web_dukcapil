@@ -76,7 +76,7 @@
         <div class="text-xs text-amber-900 dark:text-amber-200 leading-relaxed space-y-1">
           <p class="font-bold text-sm">Status Akun: Menunggu Verifikasi Identitas Petugas (IDENTITY_PENDING)</p>
           <p>
-            Alamat email Anda telah berhasil diverifikasi. Sesuai kebijakan keamanan data kependudukan Disdukcapil Kabupaten Dompu, pengajuan permohonan baru KTP-el akan aktif setelah data identitas NIK Anda diverifikasi oleh petugas verifikator.
+            Alamat email Anda telah berhasil diverifikasi. Sesuai kebijakan keamanan data kependudukan Disdukcapil Kabupaten Dompu, pengajuan permohonan baru KTP-el akan aktif setelah data identitas NIK Anda diverifikasi oleh petugas verifikator. Pemberitahuan akan dikirimkan secara otomatis ke email Anda begitu proses verifikasi selesai.
           </p>
         </div>
       </div>

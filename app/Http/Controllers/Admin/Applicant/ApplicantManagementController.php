@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Applicant\ApplicantAccount;
 use App\Models\Applicant\ApplicantDeviceAuditLog;
 use App\Services\Applicant\ApplicantDeviceService;
+use App\Services\Applicant\ApplicantOtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,8 @@ use Inertia\Response;
 class ApplicantManagementController extends Controller
 {
     public function __construct(
-        protected ApplicantDeviceService $deviceService
+        protected ApplicantDeviceService $deviceService,
+        protected ApplicantOtpService $otpService
     ) {}
 
     /**
@@ -232,6 +234,9 @@ class ApplicantManagementController extends Controller
             reason: "Verifikasi identitas pemohon: {$decision}. Catatan: {$notes}"
         );
 
-        return back()->with('success', "Identitas pemohon berhasil diverifikasi ({$decision}).");
+        // Dispatch notification email to applicant's registered email
+        $this->otpService->sendVerificationResultEmail($account, $decision, $notes);
+
+        return back()->with('success', "Identitas pemohon berhasil diverifikasi ({$decision}) dan pemberitahuan telah dikirimkan ke email pemohon.");
     }
 }

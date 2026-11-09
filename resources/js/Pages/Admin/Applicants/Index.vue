@@ -271,6 +271,12 @@
             <p class="font-mono font-bold text-blue-600 dark:text-blue-400">{{ selectedApplicantForVerify.masked_nik }}</p>
           </div>
 
+          <!-- Email notification info -->
+          <div class="p-3 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center gap-2.5 text-[11px] text-blue-800 dark:text-blue-200">
+            <Mail class="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
+            <span>Pemberitahuan hasil verifikasi akun akan otomatis dikirimkan ke email pemohon.</span>
+          </div>
+
           <form @submit.prevent="submitQuickVerify" class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
@@ -324,7 +330,7 @@
 import { ref } from 'vue'
 import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { ChevronRight, UserCheck } from '@lucide/vue'
+import { ChevronRight, UserCheck, Mail } from '@lucide/vue'
 
 const props = defineProps({
   accounts: Object,

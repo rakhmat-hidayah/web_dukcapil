@@ -180,8 +180,10 @@ class ApplicantAuthController extends Controller
 
         session()->forget('applicant_verification_email');
 
-        return redirect()->route('applicant.login')
-            ->with('success', 'Email berhasil diverifikasi! Akun Anda aktif untuk login. Verifikasi identitas kependudukan akan diproses sesuai SOP Disdukcapil.');
+        $rawNik = $account->nik;
+
+        return redirect()->route('applicant.login', $rawNik ? ['nik' => $rawNik] : [])
+            ->with('success', 'Pendaftaran akun Anda berhasil dan email telah terverifikasi! Silakan masuk menggunakan NIK dan Password yang telah Anda daftarkan.');
     }
 
     /**

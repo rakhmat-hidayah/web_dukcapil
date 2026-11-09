@@ -28,6 +28,48 @@
           </p>
         </div>
 
+        <!-- Flash Success Notification (Registration / Verification Success) -->
+        <div
+          v-if="$page.props.flash?.success"
+          class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 flex items-start gap-3 text-emerald-900 dark:text-emerald-100 shadow-sm animate-fade-in"
+        >
+          <CheckCircle2 class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+          <div class="space-y-1">
+            <h4 class="text-xs font-bold text-emerald-800 dark:text-emerald-200 uppercase tracking-wider">
+              Pendaftaran Berhasil!
+            </h4>
+            <p class="text-xs leading-relaxed text-emerald-700 dark:text-emerald-300">
+              {{ $page.props.flash.success }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Flash Warning / Info Notification -->
+        <div
+          v-else-if="$page.props.flash?.warning || $page.props.flash?.info"
+          class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 flex items-start gap-3 text-amber-900 dark:text-amber-100 shadow-sm"
+        >
+          <AlertCircle class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div class="space-y-1">
+            <p class="text-xs leading-relaxed text-amber-800 dark:text-amber-200">
+              {{ $page.props.flash.warning || $page.props.flash.info }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Flash Error Notification -->
+        <div
+          v-else-if="$page.props.flash?.error"
+          class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 flex items-start gap-3 text-rose-900 dark:text-rose-100 shadow-sm"
+        >
+          <AlertCircle class="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+          <div class="space-y-1">
+            <p class="text-xs leading-relaxed text-rose-800 dark:text-rose-200">
+              {{ $page.props.flash.error }}
+            </p>
+          </div>
+        </div>
+
         <!-- Single Browser Active Security Info Pill -->
         <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-start gap-2.5 text-[11px] text-slate-600 dark:text-slate-300">
           <ShieldAlert class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
@@ -118,12 +160,20 @@
 import { ref } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
-import { ArrowLeft, ArrowRight, Lock, Eye, EyeOff, ShieldAlert } from '@lucide/vue'
+import { ArrowLeft, ArrowRight, Lock, Eye, EyeOff, ShieldAlert, CheckCircle2, AlertCircle } from '@lucide/vue'
 
 const showPassword = ref(false)
 
+const getInitialNik = () => {
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('nik') || ''
+  }
+  return ''
+}
+
 const form = useForm({
-  nik: '',
+  nik: getInitialNik(),
   password: '',
 })
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\ApplicantVerificationResultMail;
 use App\Models\Applicant\ApplicantAccount;
 use App\Models\Applicant\ApplicantEmailOtp;
 use App\Models\User;
@@ -10,6 +11,7 @@ use App\Services\Applicant\ApplicantOtpService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class ApplicantAuthenticationTest extends TestCase
@@ -333,5 +335,92 @@ class ApplicantAuthenticationTest extends TestCase
             ->get(route('admin.dashboard'));
 
         $response->assertOk();
+    }
+
+    /**
+     * Test 22: Verifikasi OTP sukses mengarahkan ke halaman login dengan query NIK dan flash sukses.
+     */
+    public function test_successful_otp_verification_redirects_to_login_with_nik_and_success_flash(): void
+    {
+        $email = 'sukses.verif.otp@gmail.com';
+        $nik = '5205011205950099';
+        $plainOtp = '123456';
+
+        ApplicantAccount::where('email_normalized', $email)->forceDelete();
+
+        $account = new ApplicantAccount();
+        $account->name = 'PEMOHON BARU';
+        $account->email_normalized = $email;
+        $account->nik = $nik;
+        $account->password = Hash::make('Password123#');
+        $account->account_status = ApplicantAccount::STATUS_EMAIL_PENDING;
+        $account->identity_status = ApplicantAccount::IDENTITY_PENDING;
+        $account->save();
+
+        ApplicantEmailOtp::create([
+            'applicant_account_id' => $account->id,
+            'email_normalized'     => $email,
+            'otp_hash'             => Hash::make($plainOtp),
+            'purpose'              => 'registration',
+            'expires_at'           => now()->addMinutes(10),
+            'attempts'             => 0,
+            'max_attempts'         => 3,
+            'resend_count'         => 0,
+        ]);
+
+        $response = $this->post(route('applicant.verify-otp.post'), [
+            'email' => $email,
+            'otp'   => $plainOtp,
+        ]);
+
+        $response->assertRedirect(route('applicant.login', ['nik' => $nik]));
+        $response->assertSessionHas('success');
+    }
+
+    /**
+     * Test 23: Admin memverifikasi identitas pemohon memicu pengiriman email pemberitahuan.
+     */
+    public function test_admin_verify_identity_sends_notification_email(): void
+    {
+        Mail::fake();
+
+        \Spatie\Permission\Models\Role::findOrCreate('Super Administrator', 'web');
+
+        $admin = User::first() ?? User::factory()->create([
+            'email'    => 'admin.notif@dukcapil.dompukab.go.id',
+            'username' => 'admin_notif',
+        ]);
+        $admin->assignRole('Super Administrator');
+
+        $email = 'notif.verif.identitas@gmail.com';
+        $nik = '5205011205950088';
+
+        ApplicantAccount::where('email_normalized', $email)->forceDelete();
+
+        $account = new ApplicantAccount();
+        $account->name = 'WARGA TERVERIFIKASI';
+        $account->email_normalized = $email;
+        $account->nik = $nik;
+        $account->password = Hash::make('Password123#');
+        $account->email_verified_at = now();
+        $account->account_status = ApplicantAccount::STATUS_IDENTITY_PENDING;
+        $account->identity_status = ApplicantAccount::IDENTITY_PENDING;
+        $account->save();
+
+        $response = $this->actingAs($admin, 'web')
+            ->post(route('admin.queue.applicants.verify-identity', $account), [
+                'decision' => 'VERIFIED',
+                'notes'    => 'Data kependudukan SIAK valid',
+            ]);
+
+        $response->assertSessionHas('success');
+
+        $account->refresh();
+        $this->assertEquals(ApplicantAccount::IDENTITY_VERIFIED, $account->identity_status);
+        $this->assertEquals(ApplicantAccount::STATUS_ACTIVE, $account->account_status);
+
+        Mail::assertSent(ApplicantVerificationResultMail::class, function ($mail) use ($email) {
+            return $mail->hasTo($email);
+        });
     }
 }

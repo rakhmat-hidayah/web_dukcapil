@@ -127,6 +127,29 @@ class ApplicantOtpService
     }
 
     /**
+     * Dispatch an official email notification when admin verifies or rejects applicant identity.
+     */
+    public function sendVerificationResultEmail(
+        ApplicantAccount $account,
+        string $decision,
+        ?string $notes = null
+    ): void {
+        $recipientEmail = $account->email_normalized;
+        if (empty($recipientEmail)) {
+            return;
+        }
+
+        try {
+            Mail::to($recipientEmail)->send(new \App\Mail\ApplicantVerificationResultMail($account, $decision, $notes));
+        } catch (\Throwable $e) {
+            Log::error('Failed to send applicant identity verification result email: ' . $e->getMessage(), [
+                'email'    => $recipientEmail,
+                'decision' => $decision,
+            ]);
+        }
+    }
+
+    /**
      * Dispatch email safely.
      */
     protected function sendEmail(string $recipientEmail, string $otp, string $purpose, ?string $applicantName): void
