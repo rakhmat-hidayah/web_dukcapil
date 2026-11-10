@@ -174,17 +174,6 @@
 
         <!-- Header Actions (right side) -->
         <div class="flex items-center gap-1 sm:gap-1.5 xl:gap-2 shrink-0">
-          <!-- Layanan Online CTA Button -->
-          <Link 
-            href="/layanan/antrian"
-            class="flex items-center gap-1 shrink-0 p-1.5 sm:px-3 lg:px-3.5 sm:py-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-full shadow-md shadow-emerald-600/25 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
-            title="Pendaftaran Layanan KTP-el"
-          >
-            <Ticket class="w-3.5 h-3.5 sm:w-3 sm:h-3 text-emerald-200 shrink-0" />
-            <span class="hidden sm:inline text-[10px] lg:text-[10.5px]">Layanan</span>
-            <span class="hidden lg:inline text-[10.5px]"> KTP-el</span>
-          </Link>
-
           <!-- SANAI Online Dedicated Call-To-Action Button -->
           <a 
             v-if="sanaiConfig.sanai_is_active && sanaiConfig.sanai_display_navbar && !shouldHideHeaderExtras"
