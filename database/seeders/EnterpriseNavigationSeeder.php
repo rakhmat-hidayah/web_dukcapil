@@ -213,10 +213,10 @@ class EnterpriseNavigationSeeder extends Seeder
             ]);
         }
 
-        // 8. Download Formulir
+        // 8. Download
         MenuItem::create([
             'menu_id' => $headerMenu->id,
-            'label' => 'Download Formulir',
+            'label' => 'Download',
             'url' => '/downloads',
             'target' => '_self',
             'sort_order' => 8,
@@ -250,7 +250,7 @@ class EnterpriseNavigationSeeder extends Seeder
             ['label' => 'Statistik Demografi', 'url' => '/statistik-kependudukan'],
             ['label' => 'Inovasi Pelayanan', 'url' => '/inovasi'],
             ['label' => 'Berita Terbaru', 'url' => '/news'],
-            ['label' => 'Download Formulir', 'url' => '/downloads'],
+            ['label' => 'Download', 'url' => '/downloads'],
             ['label' => 'Kontak Kami', 'url' => '/contact'],
         ];
 

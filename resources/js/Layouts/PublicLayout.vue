@@ -166,7 +166,7 @@
               </div>
             </div>
 
-            <Link href="/downloads" class="px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800/60 hover:text-primary-600 transition whitespace-nowrap">Download Formulir</Link>
+            <Link href="/downloads" class="px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800/60 hover:text-primary-600 transition whitespace-nowrap">Download</Link>
 
             <Link href="/contact" class="px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800/60 hover:text-primary-600 transition whitespace-nowrap">Kontak</Link>
           </template>
@@ -376,7 +376,7 @@
             </div>
           </div>
 
-          <Link href="/downloads" @click="mobileMenuOpen = false" class="flex items-center px-5 py-3.5 text-xs font-bold text-gray-800 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-primary-600 transition">Download Formulir</Link>
+          <Link href="/downloads" @click="mobileMenuOpen = false" class="flex items-center px-5 py-3.5 text-xs font-bold text-gray-800 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-primary-600 transition">Download</Link>
 
           <Link href="/contact" @click="mobileMenuOpen = false" class="flex items-center px-5 py-3.5 text-xs font-bold text-gray-800 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-primary-600 transition">Kontak</Link>
 
