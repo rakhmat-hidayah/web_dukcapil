@@ -606,7 +606,7 @@ const shouldHideHeaderExtras = computed(() => {
 
 const shouldHideFooter = computed(() => {
   if (props.hideFooter) return true;
-  return isUserLoggedIn.value || isQueueOrApplicantFlow.value;
+  return isUserLoggedIn.value && isQueueOrApplicantFlow.value;
 });
 
 // Toggle mobile accordion item open/close
