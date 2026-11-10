@@ -44,18 +44,30 @@
               :key="iIdx"
               :href="item.url || safeRoute(item.route)"
               preserve-scroll
-              class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group"
+              class="relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group"
               :class="[
                 isActiveRoute(item) 
-                  ? 'bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400' 
+                  ? 'bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 font-bold' 
                   : 'text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-gray-50 dark:hover:bg-zinc-800/50'
               ]"
               :title="item.label"
             >
               <component :is="item.icon" class="w-5 h-5 shrink-0" />
-              <span v-if="sidebarOpen" class="whitespace-nowrap transition-opacity duration-300">
+              <span v-if="sidebarOpen" class="whitespace-nowrap transition-opacity duration-300 flex-1 min-w-0 truncate">
                 {{ item.label }}
               </span>
+              <!-- Realtime Count Badge when sidebar is open -->
+              <span
+                v-if="sidebarOpen && getItemBadge(item) > 0"
+                class="ml-auto inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-black rounded-full bg-rose-500 text-white shadow-xs animate-pulse shrink-0"
+              >
+                {{ getItemBadge(item) }}
+              </span>
+              <!-- Dot Indicator when sidebar is collapsed -->
+              <span
+                v-else-if="!sidebarOpen && getItemBadge(item) > 0"
+                class="absolute top-2 right-2 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white dark:ring-zinc-900 animate-pulse"
+              ></span>
             </Link>
           </div>
         </div>
@@ -128,29 +140,146 @@
           <div class="relative">
             <button 
               @click="toggleNotifications"
-              class="p-2 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 relative transition"
+              class="p-2 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 relative transition cursor-pointer"
+              title="Notifikasi & Antrian Butuh Verifikasi"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
               </svg>
-              <!-- Indicator -->
-              <span v-if="unreadCount > 0" class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+              <!-- Total Notification & Verification Badge -->
+              <span 
+                v-if="totalNotificationCount > 0" 
+                class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-rose-600 text-white text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-white dark:ring-zinc-900 shadow-sm animate-pulse"
+              >
+                {{ totalNotificationCount > 99 ? '99+' : totalNotificationCount }}
+              </span>
             </button>
+
+            <!-- Backdrop to close dropdown on click outside -->
+            <div 
+              v-if="notificationsOpen"
+              class="fixed inset-0 z-30"
+              @click="notificationsOpen = false"
+            ></div>
 
             <!-- Notifications Dropdown -->
             <div 
               v-if="notificationsOpen"
-              class="absolute right-0 mt-3 w-80 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-xl overflow-hidden z-40 py-2"
+              class="absolute right-0 mt-3 w-84 sm:w-96 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden z-40 animate-in fade-in duration-150"
             >
-              <div class="px-4 py-2 border-b border-gray-100 dark:border-zinc-800 flex justify-between items-center">
-                <span class="font-bold text-xs">Notifikasi ({{ unreadCount }})</span>
-                <button @click="markAllRead" class="text-[10px] text-primary-600 dark:text-primary-400 font-semibold hover:underline">
+              <div class="px-4 py-3 border-b border-gray-100 dark:border-zinc-800 flex justify-between items-center bg-slate-50/50 dark:bg-zinc-850/50">
+                <div class="flex items-center gap-2">
+                  <span class="font-black text-xs text-slate-800 dark:text-zinc-100">Pusat Notifikasi</span>
+                  <span 
+                    v-if="totalNotificationCount > 0" 
+                    class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white"
+                  >
+                    {{ totalNotificationCount }}
+                  </span>
+                </div>
+                <button 
+                  v-if="unreadCount > 0"
+                  @click="markAllRead" 
+                  class="text-[10px] text-primary-600 dark:text-primary-400 font-semibold hover:underline cursor-pointer"
+                >
                   Tandai semua dibaca
                 </button>
               </div>
-              <div class="max-h-60 overflow-y-auto divide-y divide-gray-50 dark:divide-zinc-800">
+
+              <!-- NOTIFIKASI KHUSUS: ANTRIAN BUTUH VERIFIKASI OPERATOR -->
+              <div class="p-3 border-b border-slate-100 dark:border-zinc-800 bg-gradient-to-b from-blue-50/40 to-transparent dark:from-blue-950/20">
+                <div class="flex items-center justify-between mb-2 px-1">
+                  <div class="flex items-center gap-1.5">
+                    <span 
+                      class="w-2 h-2 rounded-full" 
+                      :class="pendingVerifications.total > 0 ? 'bg-rose-500 animate-ping' : 'bg-emerald-500'"
+                    ></span>
+                    <span class="font-black text-[11px] text-slate-800 dark:text-zinc-200 uppercase tracking-wider">
+                      Antrian Butuh Verifikasi
+                    </span>
+                  </div>
+                  <span 
+                    class="text-[9.5px] font-black px-2 py-0.5 rounded-full"
+                    :class="pendingVerifications.total > 0 ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300' : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'"
+                  >
+                    {{ pendingVerifications.total > 0 ? `${pendingVerifications.total} Perlu Aksi` : 'Semua Selesai' }}
+                  </span>
+                </div>
+
+                <div class="space-y-1.5">
+                  <!-- Item 1: Verifikasi Pendaftar Baru -->
+                  <Link
+                    :href="route('admin.queue.applicants.index', { identity_status: 'PENDING' })"
+                    @click="notificationsOpen = false"
+                    class="flex items-center justify-between p-2.5 rounded-xl transition group border cursor-pointer"
+                    :class="pendingVerifications.applicants_count > 0 ? 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-300/80 dark:border-amber-700/60' : 'bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border-slate-200/60 dark:border-zinc-800'"
+                  >
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div 
+                        class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-xs" 
+                        :class="pendingVerifications.applicants_count > 0 ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-zinc-800 text-slate-400'"
+                      >
+                        <UserCheck class="w-4 h-4" />
+                      </div>
+                      <div class="min-w-0 text-left">
+                        <p class="text-xs font-bold text-slate-900 dark:text-white truncate">
+                          Verifikasi Pendaftar Baru
+                        </p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                          {{ pendingVerifications.applicants_count > 0 ? `${pendingVerifications.applicants_count} akun pendaftar menunggu validasi NIK` : 'Tidak ada akun menunggu verifikasi' }}
+                        </p>
+                      </div>
+                    </div>
+                    <span 
+                      v-if="pendingVerifications.applicants_count > 0"
+                      class="shrink-0 ml-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-white shadow-xs animate-pulse"
+                    >
+                      {{ pendingVerifications.applicants_count }}
+                    </span>
+                    <span v-else class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
+                  </Link>
+
+                  <!-- Item 2: Permohonan KTP El -->
+                  <Link
+                    :href="route('admin.queue.applications.index', { status: 'SUBMITTED' })"
+                    @click="notificationsOpen = false"
+                    class="flex items-center justify-between p-2.5 rounded-xl transition group border cursor-pointer"
+                    :class="pendingVerifications.applications_count > 0 ? 'bg-blue-500/10 hover:bg-blue-500/20 border-blue-300/80 dark:border-blue-700/60' : 'bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border-slate-200/60 dark:border-zinc-800'"
+                  >
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div 
+                        class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-xs" 
+                        :class="pendingVerifications.applications_count > 0 ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-zinc-800 text-slate-400'"
+                      >
+                        <FileCheck class="w-4 h-4" />
+                      </div>
+                      <div class="min-w-0 text-left">
+                        <p class="text-xs font-bold text-slate-900 dark:text-white truncate">
+                          Permohonan KTP El
+                        </p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                          {{ pendingVerifications.applications_count > 0 ? `${pendingVerifications.applications_count} permohonan online menunggu verifikasi berkas` : 'Semua berkas telah diverifikasi' }}
+                        </p>
+                      </div>
+                    </div>
+                    <span 
+                      v-if="pendingVerifications.applications_count > 0"
+                      class="shrink-0 ml-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-600 text-white shadow-xs animate-pulse"
+                    >
+                      {{ pendingVerifications.applications_count }}
+                    </span>
+                    <span v-else class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold shrink-0">✓</span>
+                  </Link>
+                </div>
+              </div>
+
+              <!-- Daftar Notifikasi Umum -->
+              <div class="px-4 py-2 border-b border-gray-100 dark:border-zinc-800 flex justify-between items-center bg-slate-50/30 dark:bg-zinc-800/20">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Aktivitas Sistem & Pesan</span>
+              </div>
+              <div class="max-h-48 overflow-y-auto divide-y divide-gray-50 dark:divide-zinc-800">
                 <div v-if="notifications.length === 0" class="p-4 text-center text-xs text-gray-400">
-                  Tidak ada notifikasi baru
+                  Tidak ada pesan notifikasi baru
                 </div>
                 <div 
                   v-for="notif in notifications" 
@@ -411,20 +540,96 @@ const toggleDark = () => {
   }
 };
 
-// Notifications state
+// Notifications & Pending Verification State
 const notificationsOpen = ref(false);
 const notifications = ref([]);
 const unreadCount = ref(0);
+let verificationPollTimer = null;
+
+const pendingVerifications = ref({
+  applicants_count: page.props.pending_verifications?.applicants_count || 0,
+  applications_count: page.props.pending_verifications?.applications_count || 0,
+  total: page.props.pending_verifications?.total || 0,
+});
+
+const previousPendingTotal = ref(pendingVerifications.value.total || 0);
+
+watch(() => page.props.pending_verifications, (val) => {
+  if (val) {
+    pendingVerifications.value = {
+      applicants_count: val.applicants_count || 0,
+      applications_count: val.applications_count || 0,
+      total: val.total || 0,
+    };
+    previousPendingTotal.value = val.total || 0;
+  }
+}, { deep: true, immediate: true });
+
+const totalNotificationCount = computed(() => {
+  return (unreadCount.value || 0) + (pendingVerifications.value.total || 0);
+});
+
+const getItemBadge = (item) => {
+  if (item.route === 'admin.queue.applicants.index') {
+    return pendingVerifications.value.applicants_count || 0;
+  }
+  if (item.route === 'admin.queue.applications.index') {
+    return pendingVerifications.value.applications_count || 0;
+  }
+  return 0;
+};
+
+// Web Audio API chime tone for instant officer alert
+const playNotificationChime = () => {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    // Tone 1: 587.33 Hz (D5)
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+    // Tone 2: 880 Hz (A5)
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
+    
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.38);
+    
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.38);
+  } catch (e) {
+    // Audio autoplay fallback
+  }
+};
 
 const toggleNotifications = () => {
   notificationsOpen.value = !notificationsOpen.value;
 };
 
-const fetchNotifications = async () => {
+const fetchNotifications = async (isBackgroundPoll = false) => {
   try {
     const res = await axios.get(route('admin.notifications.index'));
-    notifications.value = res.data.notifications;
-    unreadCount.value = res.data.unreadCount;
+    notifications.value = res.data.notifications || [];
+    unreadCount.value = res.data.unreadCount || 0;
+
+    if (res.data.pending_verifications) {
+      const newTotal = res.data.pending_verifications.total || 0;
+
+      if (isBackgroundPoll && newTotal > previousPendingTotal.value) {
+        playNotificationChime();
+        showToast(
+          `🔔 Antrian Baru: Ada ${newTotal} antrian yang membutuhkan verifikasi petugas!`,
+          'info'
+        );
+      }
+
+      previousPendingTotal.value = newTotal;
+      pendingVerifications.value = res.data.pending_verifications;
+    }
   } catch (err) {
     console.error('Failed to fetch notifications', err);
   }
@@ -862,9 +1067,12 @@ onMounted(() => {
     document.documentElement.classList.remove('dark');
   }
 
-  // Load Notifications
+  // Load Notifications & Start 30s Polling
   if (page.props.auth?.user) {
     fetchNotifications();
+    verificationPollTimer = setInterval(() => {
+      fetchNotifications(true);
+    }, 30000);
   }
 
   // Restore sidebar scroll position
@@ -889,6 +1097,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (idleTimer) clearInterval(idleTimer);
+  if (verificationPollTimer) clearInterval(verificationPollTimer);
   activityEvents.forEach(evt => {
     window.removeEventListener(evt, recordActivity);
   });

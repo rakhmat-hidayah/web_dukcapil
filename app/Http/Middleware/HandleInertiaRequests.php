@@ -8,6 +8,8 @@ use App\Models\ThemeSetting;
 use App\Models\WebsiteSetting;
 use App\Models\Menu;
 use App\Models\Page;
+use App\Models\Applicant\ApplicantAccount;
+use App\Models\Queue\QueueApplication;
 use Illuminate\Support\Facades\Cache;
 
 class HandleInertiaRequests extends Middleware
@@ -101,6 +103,26 @@ class HandleInertiaRequests extends Middleware
                 'message' => \App\Models\Queue\QueueSetting::get('queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Dukcapil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan sistem.'),
                 'estimated_end' => \App\Models\Queue\QueueSetting::get('queue.maintenance_estimated_end', ''),
             ],
+
+            // Realtime count of items requiring officer verification for admin CMS
+            'pending_verifications' => function () use ($user) {
+                if (!$user || !($user instanceof \App\Models\User)) {
+                    return null;
+                }
+
+                $applicantsCount = ApplicantAccount::where('identity_status', ApplicantAccount::IDENTITY_PENDING)->count();
+                $applicationsCount = QueueApplication::whereIn('status', [
+                    QueueApplication::STATUS_SUBMITTED,
+                    QueueApplication::STATUS_RESUBMITTED,
+                    QueueApplication::STATUS_UNDER_REVIEW,
+                ])->count();
+
+                return [
+                    'applicants_count' => $applicantsCount,
+                    'applications_count' => $applicationsCount,
+                    'total' => $applicantsCount + $applicationsCount,
+                ];
+            },
 
             // Dynamic navigation menus for frontend
             'nav_menus' => Cache::remember('nav_menus', 300, function () {
