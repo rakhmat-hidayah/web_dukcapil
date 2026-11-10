@@ -163,7 +163,7 @@
       </div>
 
       <!-- Section: Applications List -->
-      <div class="space-y-4 pt-2">
+      <div id="riwayat" class="space-y-4 pt-2">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
             <FileText class="w-5 h-5 text-blue-600 dark:text-blue-400" />

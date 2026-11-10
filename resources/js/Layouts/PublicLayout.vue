@@ -422,7 +422,8 @@
     <main 
       :class="[
         'flex-1 max-w-7xl mx-auto w-full overflow-x-hidden print:p-0 print:m-0 print:max-w-none print:w-full transition-all flex flex-col',
-        compactMain ? 'px-2.5 sm:px-6 pt-1 pb-2 sm:py-4' : 'px-3 sm:px-6 py-5 sm:py-8'
+        compactMain ? 'px-2.5 sm:px-6 pt-1 pb-2 sm:py-4' : 'px-3 sm:px-6 py-5 sm:py-8',
+        shouldShowBottomNav ? 'pb-24 sm:pb-8' : ''
       ]"
     >
       <slot />
@@ -553,6 +554,9 @@
 
     <!-- Modal Panduan Mode Layar Penuh / Standalone App PWA -->
     <MobileFullscreenGuideModal v-model="showFullscreenModal" />
+
+    <!-- Fixed Mobile Bottom Navigation Bar for Applicant & Queue Pages -->
+    <MobileBottomNav v-if="shouldShowBottomNav" />
   </div>
 </template>
 
@@ -561,6 +565,7 @@ import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Search, Sun, Moon, Menu, ChevronDown, Globe, ArrowUpRight, Ticket, UserCheck, LogIn, Smartphone } from '@lucide/vue';
 import MobileFullscreenGuideModal from '@/Components/MobileFullscreenGuideModal.vue';
+import MobileBottomNav from '@/Components/Queue/MobileBottomNav.vue';
 
 const props = defineProps({
   hideFooter: {
@@ -607,6 +612,10 @@ const shouldHideHeaderExtras = computed(() => {
 const shouldHideFooter = computed(() => {
   if (props.hideFooter) return true;
   return isUserLoggedIn.value && isQueueOrApplicantFlow.value;
+});
+
+const shouldShowBottomNav = computed(() => {
+  return isQueueOrApplicantFlow.value || !!page.props.auth?.applicant;
 });
 
 // Toggle mobile accordion item open/close

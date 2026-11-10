@@ -262,68 +262,6 @@
 
       </div>
 
-      <!-- 7. FIXED MOBILE BOTTOM NAVIGATION BAR (Exact mobile app feeling) -->
-      <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 shadow-2xl safe-area-pb">
-        <div class="grid grid-cols-5 items-center text-center text-[10px] font-bold">
-          <!-- Nav 1: Home / Layanan -->
-          <button 
-            type="button" 
-            @click="scrollToTop"
-            class="flex flex-col items-center py-1 text-blue-600 dark:text-blue-400 transition"
-          >
-            <CreditCard class="w-5 h-5 mb-0.5" />
-            <span>Layanan</span>
-          </button>
-
-          <!-- Nav 2: Persyaratan -->
-          <button 
-            type="button" 
-            @click="showRequirementsModal = true"
-            class="flex flex-col items-center py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
-          >
-            <ClipboardList class="w-5 h-5 mb-0.5" />
-            <span>Syarat</span>
-          </button>
-
-          <!-- Nav 3: Lacak Status -->
-          <button 
-            type="button" 
-            @click="showTrackingModal = true"
-            class="flex flex-col items-center py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
-          >
-            <Search class="w-5 h-5 mb-0.5" />
-            <span>Lacak</span>
-          </button>
-
-          <!-- Nav 4: Riwayat -->
-          <Link 
-            :href="$page.props.auth?.applicant ? route('applicant.dashboard') : route('applicant.login')"
-            class="flex flex-col items-center py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
-          >
-            <FolderClock class="w-5 h-5 mb-0.5" />
-            <span>Riwayat</span>
-          </Link>
-
-          <!-- Nav 5: Menu Login / Akun Pemohon -->
-          <Link 
-            v-if="$page.props.auth?.applicant"
-            :href="route('applicant.dashboard')"
-            class="flex flex-col items-center py-1 text-blue-600 dark:text-blue-400 transition"
-          >
-            <UserCheck class="w-5 h-5 mb-0.5" />
-            <span class="font-extrabold text-blue-600 dark:text-blue-400">Akun</span>
-          </Link>
-          <Link 
-            v-else
-            :href="route('applicant.login')"
-            class="flex flex-col items-center py-1 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
-          >
-            <LogIn class="w-5 h-5 mb-0.5" />
-            <span class="font-bold">Login</span>
-          </Link>
-        </div>
-      </nav>
-
     </div>
 
     <!-- MODAL 1: SERVICE DETAIL & REQUIREMENT CHECKLIST (Opened on service click) -->
