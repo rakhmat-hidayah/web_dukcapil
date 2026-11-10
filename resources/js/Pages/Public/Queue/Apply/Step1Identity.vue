@@ -169,6 +169,24 @@
               </p>
             </div>
 
+            <!-- Reminder Ketentuan Layanan: Khusus KTP-el Pemilik Akun -->
+            <div
+              v-if="$page.props.auth?.applicant"
+              class="p-3.5 sm:p-4 rounded-2xl bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 flex items-start gap-3"
+            >
+              <div class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <div class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed space-y-0.5">
+                <p class="font-bold text-slate-900 dark:text-white">
+                  Ketentuan Akun Terverifikasi ({{ $page.props.auth.applicant.name }}):
+                </p>
+                <p class="text-[11.5px]">
+                  Permohonan online ini <strong>khusus untuk pengajuan KTP-el milik Anda sendiri</strong> (sesuai NIK akun terdaftar). Mohon maaf, permohonan atas nama <strong>orang lain akan ditolak</strong> demi kepatuhan UU Perlindungan Data Pribadi (UU No. 27/2022) dan pencegahan praktik percaloan.
+                </p>
+              </div>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- NIK -->
               <div>

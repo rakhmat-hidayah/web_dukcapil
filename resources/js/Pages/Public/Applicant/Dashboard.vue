@@ -22,6 +22,87 @@
         </Link>
       </div>
 
+      <!-- Friendly Notice for Verified Applicants: Pengajuan Khusus Pemilik Akun & Alasan Kebijakan -->
+      <div
+        v-if="applicant.is_verified"
+        class="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-blue-50/90 via-indigo-50/50 to-sky-50/90 dark:from-blue-950/40 dark:via-indigo-950/30 dark:to-slate-900 border border-blue-200/90 dark:border-blue-800/70 shadow-sm space-y-4"
+      >
+        <div class="flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-600/20 mt-0.5">
+            <ShieldCheck class="w-5 h-5" />
+          </div>
+          <div class="space-y-1.5 flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
+                Ketentuan Layanan Online
+              </span>
+              <span class="text-xs font-black text-slate-900 dark:text-white">
+                Khusus Pengajuan KTP-el Pemilik Akun Pribadi
+              </span>
+            </div>
+            <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+              Halo Bapak/Ibu <strong class="font-bold text-slate-900 dark:text-white">{{ applicant.name }}</strong>, selamat akun Anda telah lolos verifikasi resmi oleh Dinas Dukcapil Kabupaten Dompu. Demi tertib administrasi dan keamanan bersama, kami mengimbau bahwa layanan online ini <strong>khusus digunakan untuk mengajukan permohonan KTP-el milik Anda sendiri</strong> (sesuai data NIK akun Anda).
+            </p>
+            <div class="p-3 rounded-2xl bg-rose-50/90 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-800 dark:text-rose-300 leading-relaxed flex items-start gap-2.5">
+              <span class="text-sm shrink-0">⚠️</span>
+              <div>
+                <strong class="font-bold">Pemberitahuan Penting:</strong>
+                <p class="mt-0.5">
+                  Mohon maaf, apabila Anda mengajukan permohonan KTP-el atas nama <strong>orang lain</strong>, permohonan tersebut dengan berat hati <strong>akan kami tolak pada tahap verifikasi berkas</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Poin Alasan Kebijakan -->
+        <div class="pt-3 border-t border-blue-200/60 dark:border-blue-800/60 space-y-2.5">
+          <p class="text-[11.5px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+            <Info class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            <span>Mengapa kebijakan ini diberlakukan demi kenyamanan Anda?</span>
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+            <div class="p-3.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-blue-100 dark:border-blue-900/50 shadow-xs space-y-1">
+              <div class="flex items-center gap-1.5 text-blue-700 dark:text-blue-300">
+                <Lock class="w-3.5 h-3.5 shrink-0" />
+                <h4 class="text-xs font-bold">1. Perlindungan Data Pribadi</h4>
+              </div>
+              <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                Sesuai UU Perlindungan Data Pribadi (UU No. 27/2022), data kependudukan dan biometrik bersifat rahasia guna mencegah penyalahgunaan identitas Anda oleh pihak lain.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-blue-100 dark:border-blue-900/50 shadow-xs space-y-1">
+              <div class="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300">
+                <UserCheck class="w-3.5 h-3.5 shrink-0" />
+                <h4 class="text-xs font-bold">2. Bebas Calo & 100% Gratis</h4>
+              </div>
+              <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                Menjamin seluruh masyarakat memperoleh pelayanan langsung, transparan, dan adil tanpa pungutan liar atau keterlibatan calo/perantara tidak resmi.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-blue-100 dark:border-blue-900/50 shadow-xs space-y-1">
+              <div class="flex items-center gap-1.5 text-purple-700 dark:text-purple-300">
+                <Sparkles class="w-3.5 h-3.5 shrink-0" />
+                <h4 class="text-xs font-bold">3. Keabsahan Data SIAK</h4>
+              </div>
+              <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                Satu akun terikat tunggal dengan NIK pemilik di database kependudukan nasional, memastikan berkas dan pencetakan fisik KTP-el sah serta tepat sasaran.
+              </p>
+            </div>
+          </div>
+
+          <!-- Petunjuk ramah jika anggota keluarga butuh KTP-el -->
+          <div class="p-3 rounded-2xl bg-blue-100/60 dark:bg-blue-900/30 text-[11px] text-blue-900 dark:text-blue-200 flex items-start gap-2">
+            <span class="font-bold shrink-0">💡 Solusi Keluarga:</span>
+            <span>
+              Bagi anggota keluarga lainnya (seperti suami, istri, atau anak) yang membutuhkan pengajuan KTP-el, silakan <strong>mendaftarkan akun masing-masing</strong> menggunakan NIK dan email pribadi mereka agar hak data kependudukan tetap terlindungi.
+            </span>
+          </div>
+        </div>
+      </div>
+
       <!-- Identity & Account Status Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Card 1: Profil Pemohon -->
@@ -156,6 +237,9 @@ import {
   Inbox,
   ChevronRight,
   AlertCircle,
+  Info,
+  Lock,
+  Sparkles,
 } from '@lucide/vue'
 
 defineProps({

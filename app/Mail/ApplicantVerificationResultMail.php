@@ -78,6 +78,39 @@ class ApplicantVerificationResultMail extends Mailable
 HTML;
         }
 
+        $verifiedPolicyNotice = '';
+        if ($isVerified) {
+            $verifiedPolicyNotice = <<<HTML
+            <div style="margin: 24px 0; background-color: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 14px; padding: 18px 20px; color: #1e3a8a;">
+                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 800; color: #1d4ed8;">
+                    ℹ️ Ketentuan Penting Pengajuan Layanan KTP-el Online:
+                </p>
+                <p style="margin: 0 0 10px; font-size: 13px; color: #1e293b; line-height: 1.55;">
+                    Akun terverifikasi ini <strong>khusus diperuntukkan bagi pengajuan permohonan KTP-el milik Anda sendiri</strong> (sesuai data NIK terdaftar). Mohon maaf, apabila Anda memohonkan KTP-el untuk <strong>orang lain</strong>, permohonan tersebut <strong>akan ditolak oleh petugas verifikator</strong> saat proses validasi berkas.
+                </p>
+                <div style="background-color: #ffffff; border-radius: 10px; padding: 12px 14px; border: 1px solid #dbeafe; margin-top: 10px;">
+                    <p style="margin: 0 0 8px; font-size: 12px; font-weight: 700; color: #1e40af;">
+                        Mengapa kebijakan ini diberlakukan demi kenyamanan Anda?
+                    </p>
+                    <ol style="margin: 0; padding-left: 18px; font-size: 12px; color: #334155; line-height: 1.6;">
+                        <li style="margin-bottom: 6px;">
+                            <strong>Perlindungan Data Pribadi (UU No. 27/2022):</strong> KTP-el memuat data kependudukan pribadi dan biometrik yang bersifat rahasia, guna mencegah penyalahgunaan identitas Anda oleh pihak lain.
+                        </li>
+                        <li style="margin-bottom: 6px;">
+                            <strong>Pelayanan Bebas Calo & 100% Gratis:</strong> Menjamin setiap warga memperoleh hak pelayanan secara langsung, adil, transparan, tanpa perantara/calo, dan tanpa pungutan biaya apa pun.
+                        </li>
+                        <li>
+                            <strong>Keabsahan Data SIAK Terpadu:</strong> Setiap akun terikat secara sah dengan satu NIK pemilik akun di database kependudukan nasional, guna memastikan pencetakan fisik KTP-el tepat sasaran.
+                        </li>
+                    </ol>
+                </div>
+                <p style="margin: 10px 0 0; font-size: 11px; color: #475569; line-height: 1.45;">
+                    <em>💡 Catatan: Anggota keluarga lainnya (seperti suami, istri, atau anak) yang membutuhkan layanan KTP-el disarankan untuk mendaftarkan akun masing-masing dengan NIK dan email pribadi mereka.</em>
+                </p>
+            </div>
+HTML;
+        }
+
         return <<<HTML
 <!DOCTYPE html>
 <html>
@@ -114,6 +147,8 @@ HTML;
       </div>
 
       {$notesSection}
+
+      {$verifiedPolicyNotice}
 
       <div style="margin: 28px 0; text-align: center;">
         {$actionButton}
