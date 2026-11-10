@@ -735,7 +735,7 @@ const menuGroups = [
     title: 'Serah Terima KTP-el',
     items: [
       { label: 'Dashboard Serah Terima', route: 'admin.handover.dashboard', url: '/admin/handover/dashboard', icon: LayoutDashboard },
-      { label: 'Pemohon Sudah Registrasi', route: 'admin.handover.registrations', url: '/admin/handover/registrations', icon: UserCheck },
+      { label: 'Permohonan KTP El', route: 'admin.handover.registrations', url: '/admin/handover/registrations', icon: UserCheck },
       { label: 'Menunggu Ketersediaan KTP-el', route: 'admin.handover.pending', url: '/admin/handover/pending', icon: Clock },
       { label: 'Siap Diambil', route: 'admin.handover.ready', url: '/admin/handover/ready', icon: CheckCircle2 },
       { label: 'Riwayat Penyerahan', route: 'admin.handover.history', url: '/admin/handover/history', icon: History },

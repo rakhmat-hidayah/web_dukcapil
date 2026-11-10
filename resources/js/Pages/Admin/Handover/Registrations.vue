@@ -1,5 +1,5 @@
 <template>
-  <Head title="Pemohon Sudah Registrasi - Disdukcapil Kab. Dompu" />
+  <Head title="Permohonan KTP El - Disdukcapil Kab. Dompu" />
 
   <AdminLayout>
     <div class="space-y-6">
@@ -11,7 +11,7 @@
             Modul Serah Terima KTP-el & Antrean
           </div>
           <h1 class="text-2xl font-black text-slate-900 dark:text-white">
-            Pemohon Sudah Registrasi
+            Permohonan KTP El
           </h1>
           <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             Daftar seluruh warga pemohon yang telah melakukan pendaftaran antrean online KTP-el, status verifikasi berkas, serta ketersediaan fisik kartu di bagian serah terima.
