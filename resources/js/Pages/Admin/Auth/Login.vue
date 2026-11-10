@@ -152,8 +152,8 @@
             <!-- Remember Me Option -->
             <div class="flex items-center justify-between text-xs pt-1">
               <label class="flex items-center gap-2 cursor-pointer text-zinc-400 hover:text-white transition select-none font-medium">
-                <input type="checkbox" v-model="form.remember" class="accent-blue-500 rounded border-zinc-700 w-4 h-4" />
-                <span>Ingat saya</span>
+                <input type="checkbox" v-model="form.remember" class="accent-blue-500 rounded border-zinc-700 w-4 h-4 cursor-pointer" />
+                <span>Ingat saya (bebas OTP selama 6 jam)</span>
               </label>
             </div>
 
@@ -213,7 +213,7 @@ const form = useForm({
   password: '',
   captcha:  '',
   honeypot: '',
-  remember: false,
+  remember: true,
 });
 
 const refreshCaptcha = async () => {

@@ -8,6 +8,7 @@ use App\Services\ActivityLogger;
 use App\Services\TwoFactorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 
@@ -123,6 +124,8 @@ class TwoFactorController extends Controller
             $request->password,
             $request->otp
         );
+
+        Cookie::queue(Cookie::forget(AuthController::TWO_FACTOR_REMEMBER_COOKIE));
 
         return redirect()->route('admin.security.index')->with(
             'success',

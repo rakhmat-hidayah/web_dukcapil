@@ -10,6 +10,7 @@ use App\Services\TwoFactorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
@@ -18,6 +19,16 @@ use Inertia\Response as InertiaResponse;
 
 class AuthController extends Controller
 {
+    /**
+     * Cookie name for remembering 2FA verified device.
+     */
+    public const TWO_FACTOR_REMEMBER_COOKIE = 'admin_2fa_remember';
+
+    /**
+     * Lifetime for 2FA remember in minutes (6 hours = 360 minutes).
+     */
+    public const TWO_FACTOR_REMEMBER_MINUTES = 360;
+
     protected TwoFactorService $twoFactorService;
 
     public function __construct(TwoFactorService $twoFactorService)
@@ -49,6 +60,7 @@ class AuthController extends Controller
             'password' => 'required|string',
             'captcha'  => 'required|string',
             'honeypot' => 'nullable|string',
+            'remember' => 'nullable|boolean',
         ], [
             'username.required' => 'Username wajib diisi.',
             'username.regex'    => 'Format username tidak valid.',
@@ -139,13 +151,42 @@ class AuthController extends Controller
             ]);
         }
 
+        $remember = $request->boolean('remember', true);
+
         // 7. TWO-FACTOR AUTHENTICATION CHECK
         // Challenge OTP only if user has already activated 2FA
         if ($user->hasTwoFactorEnabled() && config('two-factor.enabled', true)) {
+            // Check if user checked 'Ingat saya' and this browser is already trusted for 6 hours
+            if ($remember && $this->isTwoFactorRemembered($request, $user)) {
+                Auth::login($user, true);
+                $request->session()->regenerate();
+                session(['admin_last_activity_time' => now()->timestamp]);
+                RateLimiter::clear($throttleKey);
+
+                $user->recordSuccessfulLogin($request->ip());
+
+                // Refresh/extend the 6-hour remember window
+                $this->queueTwoFactorRememberCookie($user);
+
+                ActivityLogger::log("Berhasil login ke CMS (Verifikasi 2FA dilewati: Perangkat diingat selama 6 jam) — {$user->username}", $user, 'login', [
+                    'ip'             => $request->ip(),
+                    'username'       => $user->username,
+                    'email'          => $user->email,
+                    '2fa_remembered' => true,
+                ]);
+
+                return redirect()->intended(\App\Services\RoleRedirectService::getHomeUrl($user));
+            }
+
+            // If user deliberately unchecked 'Ingat saya', revoke any previous remember token
+            if (!$remember) {
+                $this->forgetTwoFactorRememberCookie();
+            }
+
             // Save pending login state in session
             session([
                 'pending_2fa_user_id'  => $user->id,
-                'pending_2fa_remember' => $request->boolean('remember'),
+                'pending_2fa_remember' => $remember,
             ]);
 
             ActivityLogger::log("Username & Password valid, melanjutkan ke verifikasi 2FA — {$user->username}", $user, '2fa_challenge_prompt', [
@@ -157,7 +198,7 @@ class AuthController extends Controller
         }
 
         // 8. Normal login (No 2FA required for this user)
-        Auth::login($user, $request->boolean('remember'));
+        Auth::login($user, $remember);
         $request->session()->regenerate();
         session(['admin_last_activity_time' => now()->timestamp]);
         RateLimiter::clear($throttleKey);
@@ -193,6 +234,7 @@ class AuthController extends Controller
         return Inertia::render('Admin/Auth/TwoFactorChallenge', [
             'username' => $user->username,
             'name'     => $user->name,
+            'remember' => (bool) session('pending_2fa_remember', true),
         ]);
     }
 
@@ -202,7 +244,8 @@ class AuthController extends Controller
     public function verifyTwoFactorChallenge(Request $request): RedirectResponse
     {
         $request->validate([
-            'code' => 'required|string',
+            'code'     => 'required|string',
+            'remember' => 'nullable|boolean',
         ], [
             'code.required' => 'Kode verifikasi OTP atau Kode Pemulihan wajib diisi.',
         ]);
@@ -262,25 +305,106 @@ class AuthController extends Controller
 
         // 3. Successful verification
         RateLimiter::clear($throttleKey);
-        $remember = session('pending_2fa_remember', false);
+        $remember = $request->has('remember')
+            ? $request->boolean('remember')
+            : (bool) session('pending_2fa_remember', true);
+
         session()->forget(['pending_2fa_user_id', 'pending_2fa_remember']);
 
         Auth::login($user, $remember);
         $request->session()->regenerate();
         session(['admin_last_activity_time' => now()->timestamp]);
 
+        // If remember is chosen, store 6-hour device trust cookie
+        if ($remember) {
+            $this->queueTwoFactorRememberCookie($user);
+        } else {
+            $this->forgetTwoFactorRememberCookie();
+        }
+
         $user->two_factor_last_used_at = now();
         $user->recordSuccessfulLogin($request->ip());
 
         $methodUsed = $isOtpValid ? 'TOTP Authenticator App' : 'Recovery Code';
 
-        ActivityLogger::log("Berhasil verifikasi 2FA ({$methodUsed}) & masuk ke CMS — {$user->username}", $user, '2fa_success', [
-            'ip'          => $request->ip(),
-            'username'    => $user->username,
-            'method_used' => $methodUsed,
+        ActivityLogger::log("Berhasil verifikasi 2FA ({$methodUsed}) & masuk ke CMS" . ($remember ? ' (Perangkat diingat 6 jam)' : '') . " — {$user->username}", $user, '2fa_success', [
+            'ip'             => $request->ip(),
+            'username'       => $user->username,
+            'method_used'    => $methodUsed,
+            '2fa_remembered' => $remember,
         ]);
 
         return redirect()->intended(\App\Services\RoleRedirectService::getHomeUrl($user));
+    }
+
+    /**
+     * Check if the incoming request has a valid 6-hour 2FA remember token for this user.
+     */
+    protected function isTwoFactorRemembered(Request $request, User $user): bool
+    {
+        $rawCookie = $request->cookie(self::TWO_FACTOR_REMEMBER_COOKIE);
+        if (!$rawCookie) {
+            return false;
+        }
+
+        try {
+            $data = is_array($rawCookie) ? $rawCookie : json_decode($rawCookie, true);
+            if (!is_array($data)) {
+                return false;
+            }
+
+            // Verify user ID matches
+            if (!isset($data['user_id']) || (int) $data['user_id'] !== (int) $user->id) {
+                return false;
+            }
+
+            // Verify expiration timestamp (within 6 hours)
+            if (!isset($data['expires_at']) || (int) $data['expires_at'] < now()->timestamp) {
+                return false;
+            }
+
+            // Verify cryptographic signature based on user id, password hash, and app key
+            $expectedHash = hash_hmac('sha256', $user->id . '|' . $user->password, config('app.key'));
+            if (!isset($data['hash']) || !hash_equals($expectedHash, (string) $data['hash'])) {
+                return false;
+            }
+
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Queue a signed 6-hour 2FA remember cookie.
+     */
+    protected function queueTwoFactorRememberCookie(User $user): void
+    {
+        $payload = json_encode([
+            'user_id'    => $user->id,
+            'hash'       => hash_hmac('sha256', $user->id . '|' . $user->password, config('app.key')),
+            'expires_at' => now()->addMinutes(self::TWO_FACTOR_REMEMBER_MINUTES)->timestamp,
+        ]);
+
+        Cookie::queue(
+            self::TWO_FACTOR_REMEMBER_COOKIE,
+            $payload,
+            self::TWO_FACTOR_REMEMBER_MINUTES,
+            '/',
+            null,
+            config('session.secure', null),
+            true, // httpOnly
+            false, // raw
+            'lax'
+        );
+    }
+
+    /**
+     * Forget the 2FA remember cookie.
+     */
+    protected function forgetTwoFactorRememberCookie(): void
+    {
+        Cookie::queue(Cookie::forget(self::TWO_FACTOR_REMEMBER_COOKIE));
     }
 
     /**

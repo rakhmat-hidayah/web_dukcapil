@@ -86,6 +86,14 @@
               </span>
             </div>
 
+            <!-- Remember Device 6 Hours Option -->
+            <div class="pt-1">
+              <label class="flex items-center gap-2.5 cursor-pointer text-zinc-300 hover:text-white transition select-none font-medium bg-zinc-950/70 p-3 rounded-2xl border border-zinc-800 text-xs">
+                <input type="checkbox" v-model="form.remember" class="accent-blue-500 rounded border-zinc-700 w-4 h-4 shrink-0 cursor-pointer" />
+                <span class="leading-tight">Ingat perangkat ini (bebas OTP selama 6 jam)</span>
+              </label>
+            </div>
+
             <!-- Submit Verification Button -->
             <button
               type="submit"
@@ -144,6 +152,10 @@ import { ShieldCheck } from '@lucide/vue';
 const props = defineProps({
   username: String,
   name:     String,
+  remember: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const useRecovery    = ref(false);
@@ -151,6 +163,7 @@ const codeInputRef   = ref(null);
 
 const form = useForm({
   code: '',
+  remember: props.remember ?? true,
 });
 
 const toggleMode = () => {
