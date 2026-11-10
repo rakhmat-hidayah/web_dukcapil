@@ -597,8 +597,7 @@ const isUserLoggedIn = computed(() => !!(page.props.auth?.applicant || page.prop
 
 const isQueueOrApplicantFlow = computed(() => {
   const url = page.url || '';
-  return url.startsWith('/layanan/antrian') || 
-         url.startsWith('/layanan/pemohon') || 
+  return url.startsWith('/layanan') || 
          url.startsWith('/pemohon') ||
          url.startsWith('/antrian') ||
          url.startsWith('/queue');

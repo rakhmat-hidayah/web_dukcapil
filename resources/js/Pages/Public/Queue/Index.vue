@@ -271,7 +271,7 @@
         class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm transition-opacity"
         @click.self="selectedService = null"
       >
-        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
           <!-- Modal Header -->
           <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
             <div class="flex items-center gap-3">
@@ -390,7 +390,7 @@
         class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
         @click.self="showRequirementsModal = false"
       >
-        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
           <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
             <div class="flex items-center gap-2.5">
               <ClipboardList class="w-5 h-5 text-blue-600" />
@@ -455,7 +455,7 @@
         class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
         @click.self="showQuotaModal = false"
       >
-        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 animate-in slide-in-from-bottom duration-200">
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
           <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
             <div class="flex items-center gap-2">
               <Calendar class="w-5 h-5 text-blue-600" />
@@ -501,7 +501,7 @@
         class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
         @click.self="showMaintenanceModal = false"
       >
-        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 animate-in slide-in-from-bottom duration-200">
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
           <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
             <div class="flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
@@ -562,7 +562,7 @@
         class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
         @click.self="showTrackingModal = false"
       >
-        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 animate-in slide-in-from-bottom duration-200">
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
           <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
             <div class="flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs">

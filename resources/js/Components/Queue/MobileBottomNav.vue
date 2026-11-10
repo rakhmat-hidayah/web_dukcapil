@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Fixed Mobile Bottom Navigation Bar -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 shadow-2xl safe-area-pb print:hidden">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-[70] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 shadow-2xl safe-area-pb print:hidden">
       <div class="grid grid-cols-5 items-center text-center text-[10px] font-bold">
         <!-- 1. Layanan -->
         <button
@@ -17,9 +17,9 @@
         <!-- 2. Syarat -->
         <button
           type="button"
-          @click="showRequirementsModal = true"
+          @click="handleSyaratClick"
           class="flex flex-col items-center py-1 transition cursor-pointer"
-          :class="showRequirementsModal ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'"
+          :class="isSyaratActive ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'"
         >
           <ClipboardList class="w-5 h-5 mb-0.5" />
           <span>Syarat</span>
@@ -28,9 +28,9 @@
         <!-- 3. Lacak -->
         <button
           type="button"
-          @click="showTrackingModal = true"
+          @click="handleLacakClick"
           class="flex flex-col items-center py-1 transition cursor-pointer"
-          :class="showTrackingModal || isTrackingActive ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'"
+          :class="isTrackingActive ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'"
         >
           <Search class="w-5 h-5 mb-0.5" />
           <span>Lacak</span>
@@ -51,6 +51,7 @@
         <Link
           v-if="isApplicantLoggedIn"
           :href="route('applicant.dashboard')"
+          @click="handleAkunClick"
           class="flex flex-col items-center py-1 transition cursor-pointer"
           :class="isAkunActive ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'"
         >
@@ -60,6 +61,7 @@
         <Link
           v-else
           :href="route('applicant.login')"
+          @click="handleAkunClick"
           class="flex flex-col items-center py-1 transition cursor-pointer"
           :class="isAkunActive ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'"
         >
@@ -76,7 +78,7 @@
         class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200"
         @click.self="showRequirementsModal = false"
       >
-        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
           <!-- Modal Header -->
           <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
             <div class="flex items-center gap-2.5">
@@ -359,7 +361,7 @@
         class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200"
         @click.self="showTrackingModal = false"
       >
-        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4 animate-in slide-in-from-bottom duration-200">
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
           <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
             <div class="flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs">
@@ -555,7 +557,12 @@ const isApplicantLoggedIn = computed(() => !!page.props.auth?.applicant)
 
 const currentUrl = computed(() => page.url || '')
 
+const isSyaratActive = computed(() => {
+  return showRequirementsModal.value || currentUrl.value === '/layanan' || currentUrl.value.startsWith('/layanan?')
+})
+
 const isLayananActive = computed(() => {
+  if (showRequirementsModal.value || showTrackingModal.value) return false
   const url = currentUrl.value
   return (
     url === '/layanan/antrian' ||
@@ -566,16 +573,20 @@ const isLayananActive = computed(() => {
 })
 
 const isTrackingActive = computed(() => {
+  if (showRequirementsModal.value) return false
+  if (showTrackingModal.value) return true
   const url = currentUrl.value
   return url.startsWith('/layanan/antrian/status') || url.startsWith('/lacak')
 })
 
 const isRiwayatActive = computed(() => {
+  if (showRequirementsModal.value || showTrackingModal.value) return false
   const url = currentUrl.value
   return url.startsWith('/layanan/antrian/riwayat')
 })
 
 const isAkunActive = computed(() => {
+  if (showRequirementsModal.value || showTrackingModal.value) return false
   const url = currentUrl.value
   return (
     url.startsWith('/layanan/pemohon') ||
@@ -583,7 +594,24 @@ const isAkunActive = computed(() => {
   )
 })
 
+function handleSyaratClick() {
+  showTrackingModal.value = false
+  showRequirementsModal.value = !showRequirementsModal.value
+}
+
+function handleLacakClick() {
+  showRequirementsModal.value = false
+  showTrackingModal.value = !showTrackingModal.value
+}
+
+function handleAkunClick() {
+  showRequirementsModal.value = false
+  showTrackingModal.value = false
+}
+
 function handleLayananClick() {
+  showRequirementsModal.value = false
+  showTrackingModal.value = false
   const url = currentUrl.value
   if (url === '/layanan/antrian' || url.startsWith('/layanan/antrian-ktpel')) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -593,6 +621,8 @@ function handleLayananClick() {
 }
 
 function handleRiwayatClick() {
+  showRequirementsModal.value = false
+  showTrackingModal.value = false
   if (isApplicantLoggedIn.value) {
     const el = document.getElementById('riwayat') || document.getElementById('riwayat-section')
     if (el) {
