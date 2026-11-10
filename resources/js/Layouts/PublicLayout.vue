@@ -3,8 +3,8 @@
     
     <!-- Sticky Navigation Wrapper (Top Bar + Header Menu) -->
     <div class="sticky top-0 z-50 shadow-md shadow-gray-200/40 dark:shadow-none print:hidden w-full overflow-x-hidden">
-      <!-- Top info bar -->
-      <div class="bg-primary-900 text-white text-[10px] py-1.5 sm:py-2 px-3 sm:px-6 flex justify-end items-center font-medium w-full overflow-hidden">
+      <!-- Top info bar (hidden on mobile, visible on desktop/tablet) -->
+      <div class="hidden sm:flex bg-primary-900 text-white text-[10px] py-1.5 sm:py-2 px-3 sm:px-6 justify-end items-center font-medium w-full overflow-hidden">
         <div class="flex items-center gap-3 w-full justify-end">
           <Link 
             v-if="$page.props.auth?.applicant" 
@@ -221,6 +221,18 @@
           >
             <Sun v-if="isDark" class="w-4 h-4 text-amber-400" />
             <Moon v-else class="w-4 h-4 text-gray-600 dark:text-zinc-300" />
+          </button>
+
+          <!-- Mobile Mode Layar Penuh Button (Hilangkan Bilah Browser) -->
+          <button 
+            v-if="!isStandalone"
+            type="button"
+            @click="showFullscreenModal = true" 
+            class="sm:hidden p-1.5 hover:bg-blue-50 dark:hover:bg-zinc-800 text-blue-600 dark:text-blue-400 rounded-lg transition cursor-pointer"
+            title="Mode Layar Penuh (Hilangkan Bilah Browser)"
+            aria-label="Mode Layar Penuh"
+          >
+            <Smartphone class="w-4 h-4" />
           </button>
 
           <!-- Mobile menu trigger -->
@@ -538,13 +550,17 @@
         </div>
       </div>
     </footer>
+
+    <!-- Modal Panduan Mode Layar Penuh / Standalone App PWA -->
+    <MobileFullscreenGuideModal v-model="showFullscreenModal" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { Search, Sun, Moon, Menu, ChevronDown, Globe, ArrowUpRight, Ticket, UserCheck, LogIn } from '@lucide/vue';
+import { Search, Sun, Moon, Menu, ChevronDown, Globe, ArrowUpRight, Ticket, UserCheck, LogIn, Smartphone } from '@lucide/vue';
+import MobileFullscreenGuideModal from '@/Components/MobileFullscreenGuideModal.vue';
 
 const props = defineProps({
   hideFooter: {
@@ -562,6 +578,8 @@ const props = defineProps({
 });
 
 const isDark = ref(false);
+const showFullscreenModal = ref(false);
+const isStandalone = ref(false);
 const mobileMenuOpen = ref(false);
 const mobileAccordion = ref([]); // tracks which accordion items are open
 const searchQuery = ref('');
@@ -645,6 +663,11 @@ const handleSearch = () => {
 };
 
 onMounted(() => {
+  if (typeof window !== 'undefined') {
+    isStandalone.value = window.matchMedia('(display-mode: standalone)').matches || 
+                         window.navigator.standalone === true ||
+                         document.referrer.includes('android-app://');
+  }
   isDark.value = localStorage.getItem('public-dark-mode') === 'true' || 
                  (!('public-dark-mode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
   if (isDark.value) {

@@ -6,12 +6,12 @@
       <!-- Login Card -->
       <div class="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xl space-y-3.5 sm:space-y-5 w-full max-w-full overflow-hidden">
         <!-- Optional Fullscreen Toggle Bar -->
-        <div v-if="canFullscreen" class="flex items-center justify-between text-xs text-slate-400">
+        <div v-if="!isStandalone" class="flex items-center justify-between text-xs text-slate-400">
           <span class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Portal Pemohon</span>
           <button
             type="button"
-            @click="toggleFullscreen"
-            class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition"
+            @click="handleFullscreenClick"
+            class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition cursor-pointer"
             title="Tampilkan / Sembunyikan Bilah Browser"
           >
             <Maximize2 v-if="!isFullscreen" class="w-3 h-3" />
@@ -157,6 +157,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal Panduan Mode Layar Penuh -->
+    <MobileFullscreenGuideModal v-model="showFullscreenModal" />
   </PublicLayout>
 </template>
 
@@ -164,15 +167,29 @@
 import { ref, onMounted } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
+import MobileFullscreenGuideModal from '@/Components/MobileFullscreenGuideModal.vue'
 import { ArrowRight, Lock, Eye, EyeOff, ShieldAlert, CheckCircle2, AlertCircle, Maximize2, Minimize2 } from '@lucide/vue'
 
 const showPassword = ref(false)
 const isFullscreen = ref(false)
 const canFullscreen = ref(false)
+const isStandalone = ref(false)
+const showFullscreenModal = ref(false)
+
+const handleFullscreenClick = () => {
+  if (canFullscreen.value) {
+    toggleFullscreen()
+  } else {
+    showFullscreenModal.value = true
+  }
+}
 
 onMounted(() => {
   if (typeof window !== 'undefined') {
     window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+    isStandalone.value = window.matchMedia('(display-mode: standalone)').matches || 
+                         window.navigator.standalone === true ||
+                         document.referrer.includes('android-app://')
     canFullscreen.value = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled)
     
     document.addEventListener('fullscreenchange', () => {
