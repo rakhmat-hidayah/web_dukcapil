@@ -390,21 +390,55 @@
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Keputusan</label>
               <select
                 v-model="verifyForm.decision"
-                class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none"
+                @change="handleDecisionChange"
+                class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="VERIFIED">TERIMA (VERIFIED) - Sah & Aktifkan Pengajuan</option>
                 <option value="REJECTED">TOLAK (REJECTED) - Data Tidak Sesuai</option>
               </select>
             </div>
 
+            <!-- Template Kalimat Penolakan (Dropdown) -->
+            <div 
+              v-if="verifyForm.decision === 'REJECTED'" 
+              class="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-2 animate-in fade-in duration-150"
+            >
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-black text-rose-900 dark:text-rose-200">
+                  Pilih Template Alasan Penolakan:
+                </label>
+                <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400">Otomatis Isi</span>
+              </div>
+              <select
+                v-model="selectedRejectTemplate"
+                @change="applyRejectTemplate"
+                class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-rose-300 dark:border-rose-800 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500 font-medium cursor-pointer"
+              >
+                <option value="">-- Pilih Kalimat Penolakan Cepat --</option>
+                <option v-for="(tpl, idx) in rejectionTemplates" :key="idx" :value="tpl">
+                  {{ tpl }}
+                </option>
+              </select>
+              <p class="text-[10.5px] text-rose-700/80 dark:text-rose-300/80 leading-tight">
+                Memilih salah satu template di atas akan langsung mengisi kolom Catatan di bawah ini. Anda tetap dapat mengedit teksnya sesuai kebutuhan.
+              </p>
+            </div>
+
             <div class="space-y-1">
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Catatan Petugas (Opsional)</label>
-              <input
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Catatan Petugas {{ verifyForm.decision === 'REJECTED' ? '(Alasan Penolakan)' : '(Opsional)' }}
+                </label>
+                <span v-if="verifyForm.decision === 'REJECTED'" class="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                  *Dikirim ke email pemohon
+                </span>
+              </div>
+              <textarea
                 v-model="verifyForm.notes"
-                type="text"
-                placeholder="Contoh: Sesuai dokumen fisik / SIAK terkonfirmasi..."
-                class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none"
-              />
+                rows="3"
+                :placeholder="verifyForm.decision === 'REJECTED' ? 'Pilih template di atas atau ketik alasan penolakan di sini...' : 'Contoh: Sesuai dokumen fisik / SIAK terkonfirmasi...'"
+                class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+              ></textarea>
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
@@ -584,6 +618,39 @@ const verifyForm = useForm({
   notes: '',
 })
 
+// Rejection reason templates
+const rejectionTemplates = [
+  'Nama tidak sesuai dengan NIK pada KTP/KK, Perbaiki Penginputan Ejaan Nama, Harus Persis Nama yg tertera pada KTP/KK',
+  'Nama tidak sesuai dengan NIK pada KTP/KK',
+  'Perbaiki Penginputan Ejaan Nama, Harus Persis Nama yg tertera pada KTP/KK',
+  'NIK tidak ditemukan dalam database kependudukan SIAK Disdukcapil',
+  'Format NIK tidak valid atau tidak sesuai dengan data identitas pemohon',
+  'Terdapat kesalahan penulisan gelar/singkatan yang tidak sesuai dengan dokumen resmi',
+  'Identitas kependudukan terindikasi ganda atau sudah terdaftar di sistem',
+]
+
+const selectedRejectTemplate = ref('')
+
+const applyRejectTemplate = () => {
+  if (selectedRejectTemplate.value) {
+    verifyForm.notes = selectedRejectTemplate.value
+  }
+}
+
+const handleDecisionChange = () => {
+  if (verifyForm.decision === 'REJECTED') {
+    if (!verifyForm.notes && rejectionTemplates.length > 0) {
+      selectedRejectTemplate.value = rejectionTemplates[0]
+      verifyForm.notes = rejectionTemplates[0]
+    }
+  } else {
+    selectedRejectTemplate.value = ''
+    if (rejectionTemplates.includes(verifyForm.notes)) {
+      verifyForm.notes = ''
+    }
+  }
+}
+
 const openRevokeDeviceModal = (device) => {
   revokeForm.reset()
   showRevokeModal.value = true
@@ -599,6 +666,7 @@ const openVerifyModal = () => {
   if (props.account.identity_status === 'VERIFIED') return
   verifyForm.reset()
   verifyForm.decision = 'VERIFIED'
+  selectedRejectTemplate.value = ''
   showVerifyModal.value = true
 }
 

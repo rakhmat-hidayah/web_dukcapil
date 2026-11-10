@@ -67,7 +67,7 @@ class ApplicantDeviceAuditLog extends Model
             'actor_id'             => $actorId,
             'ip_address'           => $ipAddress ?? request()->ip(),
             'user_agent'           => $userAgent ?? request()->userAgent(),
-            'reason'               => $reason,
+            'reason'               => $reason ? mb_substr($reason, 0, 255) : null,
             'metadata'             => $metadata,
             'created_at'           => now(),
         ]);

@@ -220,7 +220,7 @@ class ApplicantManagementController extends Controller
     {
         $request->validate([
             'decision' => 'required|in:VERIFIED,REJECTED',
-            'notes'    => 'nullable|string|max:255',
+            'notes'    => 'nullable|string|max:500',
         ]);
 
         $decision = $request->input('decision');
@@ -243,7 +243,7 @@ class ApplicantManagementController extends Controller
             eventType: 'identity_verification_' . strtolower($decision),
             actorType: 'admin',
             actorId: Auth::id(),
-            reason: "Verifikasi identitas pemohon: {$decision}. Catatan: {$notes}"
+            reason: mb_substr("Verifikasi identitas pemohon: {$decision}. Catatan: {$notes}", 0, 255)
         );
 
         // Dispatch notification email to applicant's registered email
