@@ -213,13 +213,23 @@ class EnterpriseNavigationSeeder extends Seeder
             ]);
         }
 
-        // 8. Kontak
+        // 8. Download Formulir
+        MenuItem::create([
+            'menu_id' => $headerMenu->id,
+            'label' => 'Download Formulir',
+            'url' => '/downloads',
+            'target' => '_self',
+            'sort_order' => 8,
+            'is_active' => true,
+        ]);
+
+        // 9. Kontak
         MenuItem::create([
             'menu_id' => $headerMenu->id,
             'label' => 'Kontak',
             'url' => '/contact',
             'target' => '_self',
-            'sort_order' => 8,
+            'sort_order' => 9,
             'is_active' => true,
         ]);
 

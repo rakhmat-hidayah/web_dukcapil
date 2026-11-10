@@ -180,6 +180,8 @@
               </div>
             </div>
 
+            <Link href="/downloads" class="px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800/60 hover:text-primary-600 transition whitespace-nowrap">Download Formulir</Link>
+
             <Link href="/contact" class="px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-800/60 hover:text-primary-600 transition whitespace-nowrap">Kontak</Link>
           </template>
         </nav>
@@ -199,7 +201,7 @@
 
           <!-- SANAI Online Dedicated Call-To-Action Button -->
           <a 
-            v-if="sanaiConfig.sanai_is_active && sanaiConfig.sanai_display_navbar"
+            v-if="sanaiConfig.sanai_is_active && sanaiConfig.sanai_display_navbar && !shouldHideHeaderExtras"
             :href="sanaiConfig.sanai_url"
             :target="sanaiConfig.sanai_open_new_tab ? '_blank' : '_self'"
             rel="noopener noreferrer"
@@ -213,7 +215,7 @@
           </a>
 
           <!-- Search icon toggle -->
-          <div class="relative">
+          <div v-if="!shouldHideHeaderExtras" class="relative">
             <button 
               @click="searchOpen = !searchOpen"
               class="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 hover:text-primary-600 dark:text-zinc-400 rounded-lg transition cursor-pointer"
@@ -248,6 +250,7 @@
 
           <!-- Mobile menu trigger -->
           <button 
+            v-if="!shouldHideHeaderExtras"
             @click="mobileMenuOpen = !mobileMenuOpen"
             class="p-1.5 lg:hidden hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-500"
           >
@@ -258,7 +261,7 @@
 
       <!-- Mobile navigation overlay (Accordion Style) -->
       <div 
-        v-if="mobileMenuOpen" 
+        v-if="mobileMenuOpen && !shouldHideHeaderExtras" 
         class="lg:hidden bg-white dark:bg-zinc-900 border-b border-gray-100 dark:border-zinc-800 divide-y divide-gray-50 dark:divide-zinc-800/70"
       >
         <!-- Dynamic mobile menu from CMS -->
@@ -385,6 +388,8 @@
               <Link href="/faq" @click="mobileMenuOpen = false" class="py-2 text-xs font-medium text-gray-600 dark:text-zinc-400 hover:text-primary-600">Tanya Jawab (FAQ)</Link>
             </div>
           </div>
+
+          <Link href="/downloads" @click="mobileMenuOpen = false" class="flex items-center px-5 py-3.5 text-xs font-bold text-gray-800 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-primary-600 transition">Download Formulir</Link>
 
           <Link href="/contact" @click="mobileMenuOpen = false" class="flex items-center px-5 py-3.5 text-xs font-bold text-gray-800 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-primary-600 transition">Kontak</Link>
 
@@ -575,6 +580,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  hideHeaderActions: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const isDark = ref(false);
@@ -583,6 +592,24 @@ const mobileAccordion = ref([]); // tracks which accordion items are open
 const searchQuery = ref('');
 const searchOpen = ref(false);
 const searchInputRef = ref(null);
+
+// Check if applicant or auth user is logged in
+const page = usePage();
+const isUserLoggedIn = computed(() => !!(page.props.auth?.applicant || page.props.auth?.user));
+
+const isQueueOrApplicantFlow = computed(() => {
+  const url = page.url || '';
+  return url.startsWith('/layanan/antrian') || 
+         url.startsWith('/layanan/pemohon') || 
+         url.startsWith('/pemohon') ||
+         url.startsWith('/antrian') ||
+         url.startsWith('/queue');
+});
+
+const shouldHideHeaderExtras = computed(() => {
+  if (props.hideHeaderActions) return true;
+  return isUserLoggedIn.value && isQueueOrApplicantFlow.value;
+});
 
 // Toggle mobile accordion item open/close
 const toggleMobileAccordion = (id) => {
@@ -600,7 +627,6 @@ watch(mobileMenuOpen, (val) => {
 });
 
 // Get shared nav_menus and website_settings from Inertia shared props
-const page = usePage();
 const websiteSettings = computed(() => page.props.website_settings || {});
 
 const sanaiConfig = computed(() => {
