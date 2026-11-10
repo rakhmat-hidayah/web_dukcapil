@@ -1,7 +1,7 @@
 <template>
   <Head title="Pendaftaran Pelayanan KTP-el - Disdukcapil Kabupaten Dompu" />
 
-  <PublicLayout>
+  <PublicLayout :hide-footer="true">
     <div class="py-8 sm:py-12 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Wizard Progress (Step 1 of 3 wizard blocks) -->
       <ProgressWizard :current-step="1" />

@@ -1,7 +1,7 @@
 <template>
   <Head title="Riwayat Permohonan KTP-el Saya - Disdukcapil Kabupaten Dompu" />
 
-  <PublicLayout>
+  <PublicLayout :hide-footer="true">
     <div class="py-8 sm:py-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       <!-- Breadcrumb & Back navigation -->
       <div class="flex items-center justify-between gap-4">

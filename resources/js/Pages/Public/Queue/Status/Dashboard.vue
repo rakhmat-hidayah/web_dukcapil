@@ -1,7 +1,7 @@
 <template>
   <Head :title="`Status Pengajuan [${application.reg_number}] - Antrian Online KTP-el`" />
 
-  <PublicLayout>
+  <PublicLayout :hide-footer="true">
     <div class="queue-dashboard-container py-8 sm:py-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 print:p-0 print:m-0 print:max-w-none print:space-y-0">
       <!-- Top Quick Nav & Persistent Registration Identity Bar -->
       <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-4 sm:p-5 shadow-lg border border-slate-700/80 flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">

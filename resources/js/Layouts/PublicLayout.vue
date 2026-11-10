@@ -429,7 +429,7 @@
     </main>
 
     <!-- Public Footer -->
-    <footer v-if="!hideFooter" class="mt-auto w-full bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 py-12 text-xs print:hidden">
+    <footer v-if="!shouldHideFooter" class="mt-auto w-full bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 py-12 text-xs print:hidden">
       <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center sm:text-left">
         <!-- Brand Info -->
         <div class="space-y-3 flex flex-col items-center sm:items-start">
@@ -602,6 +602,11 @@ const isQueueOrApplicantFlow = computed(() => {
 const shouldHideHeaderExtras = computed(() => {
   if (props.hideHeaderActions) return true;
   return isUserLoggedIn.value && isQueueOrApplicantFlow.value;
+});
+
+const shouldHideFooter = computed(() => {
+  if (props.hideFooter) return true;
+  return isUserLoggedIn.value || isQueueOrApplicantFlow.value;
 });
 
 // Toggle mobile accordion item open/close

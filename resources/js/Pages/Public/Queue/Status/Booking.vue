@@ -1,7 +1,7 @@
 <template>
   <Head title="Pilih Jadwal & Ambil Antrean - Disdukcapil Kab. Dompu" />
 
-  <PublicLayout>
+  <PublicLayout :hide-footer="true">
     <div class="py-8 sm:py-12 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Top Breadcrumb / Navigation -->
       <div class="mb-6 flex items-center justify-between">

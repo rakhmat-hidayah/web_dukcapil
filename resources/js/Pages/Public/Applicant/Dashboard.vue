@@ -1,7 +1,7 @@
 <template>
   <Head title="Dashboard Pemohon - Disdukcapil Kabupaten Dompu" />
 
-  <PublicLayout>
+  <PublicLayout :hide-footer="true">
     <div class="py-8 sm:py-12 max-w-4xl mx-auto px-4 sm:px-6 space-y-6">
       <!-- Header bar -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

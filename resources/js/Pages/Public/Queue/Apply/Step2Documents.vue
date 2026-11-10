@@ -1,7 +1,7 @@
 <template>
   <Head title="Langkah 2: Unggah Persyaratan Digital - Antrian Online KTP-el" />
 
-  <PublicLayout>
+  <PublicLayout :hide-footer="true">
     <div class="py-8 sm:py-12 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Wizard Progress -->
       <ProgressWizard :current-step="2" />
