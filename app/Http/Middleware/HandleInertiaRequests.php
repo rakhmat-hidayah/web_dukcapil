@@ -98,7 +98,7 @@ class HandleInertiaRequests extends Middleware
 
             // Queue service maintenance status
             'queue_maintenance' => [
-                'is_active' => \App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0') === '1',
+                'is_active' => in_array((string) \App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0'), ['1', 'true'], true),
                 'title' => \App\Models\Queue\QueueSetting::get('queue.maintenance_title', 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem'),
                 'message' => \App\Models\Queue\QueueSetting::get('queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Dukcapil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan sistem.'),
                 'estimated_end' => \App\Models\Queue\QueueSetting::get('queue.maintenance_estimated_end', ''),

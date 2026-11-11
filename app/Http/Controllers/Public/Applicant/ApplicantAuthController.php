@@ -33,7 +33,7 @@ class ApplicantAuthController extends Controller
             return redirect()->route('applicant.dashboard');
         }
 
-        if (QueueSetting::get('queue.maintenance_mode', '0') === '1') {
+        if (in_array((string) QueueSetting::get('queue.maintenance_mode', '0'), ['1', 'true'], true)) {
             return redirect()->route('applicant.login')
                 ->with('warning', 'Pendaftaran akun pemohon baru sedang ditutup sementara karena layanan online sedang dalam pemeliharaan sistem.');
         }
@@ -46,7 +46,7 @@ class ApplicantAuthController extends Controller
      */
     public function register(Request $request): RedirectResponse
     {
-        if (QueueSetting::get('queue.maintenance_mode', '0') === '1') {
+        if (in_array((string) QueueSetting::get('queue.maintenance_mode', '0'), ['1', 'true'], true)) {
             return redirect()->route('applicant.login')
                 ->with('error', 'Pendaftaran akun pemohon baru sedang ditutup sementara karena layanan online sedang dalam pemeliharaan sistem.');
         }
@@ -231,7 +231,16 @@ class ApplicantAuthController extends Controller
             return redirect()->route('applicant.dashboard');
         }
 
-        return Inertia::render('Public/Applicant/Login');
+        $isMaintenance = in_array((string) QueueSetting::get('queue.maintenance_mode', '0'), ['1', 'true'], true);
+
+        return Inertia::render('Public/Applicant/Login', [
+            'maintenance' => [
+                'is_active'     => $isMaintenance,
+                'title'         => QueueSetting::get('queue.maintenance_title', 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem'),
+                'message'       => QueueSetting::get('queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Dukcapil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan sistem.'),
+                'estimated_end' => QueueSetting::get('queue.maintenance_estimated_end', ''),
+            ],
+        ]);
     }
 
     /**

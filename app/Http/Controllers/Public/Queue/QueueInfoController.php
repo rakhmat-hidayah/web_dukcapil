@@ -156,7 +156,7 @@ class QueueInfoController extends Controller
         ];
 
         $maintenance = [
-            'is_active' => QueueSetting::get('queue.maintenance_mode', '0') === '1',
+            'is_active' => in_array((string) QueueSetting::get('queue.maintenance_mode', '0'), ['1', 'true'], true),
             'title' => QueueSetting::get('queue.maintenance_title', 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem'),
             'message' => QueueSetting::get('queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Dukcapil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan sistem.'),
             'estimated_end' => QueueSetting::get('queue.maintenance_estimated_end', ''),

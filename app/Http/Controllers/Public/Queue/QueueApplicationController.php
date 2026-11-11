@@ -35,7 +35,7 @@ class QueueApplicationController extends Controller
         QueueInfoController::ensureDatabaseSchema();
 
         // Check if queue service is in temporary maintenance / update mode
-        if (\App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0') === '1') {
+        if (in_array((string) \App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0'), ['1', 'true'], true)) {
             $maintenanceInfo = [
                 'title' => \App\Models\Queue\QueueSetting::get('queue.maintenance_title', 'Layanan Pendaftaran Online KTP-el Sedang Dalam Pemeliharaan Sistem'),
                 'message' => \App\Models\Queue\QueueSetting::get('queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Dukcapil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan dan pembaruan sistem.'),
@@ -98,7 +98,7 @@ class QueueApplicationController extends Controller
     {
         QueueInfoController::ensureDatabaseSchema();
 
-        if (\App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0') === '1') {
+        if (in_array((string) \App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0'), ['1', 'true'], true)) {
             return redirect()->route('queue.apply.create')->with('error', 'Layanan pendaftaran online sedang dalam pemeliharaan sistem sementara.');
         }
 
@@ -429,7 +429,7 @@ class QueueApplicationController extends Controller
      */
     public function submit(Request $request, string $regNumber): RedirectResponse
     {
-        if (\App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0') === '1') {
+        if (in_array((string) \App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0'), ['1', 'true'], true)) {
             return redirect()->route('queue.apply.create')
                 ->with('error', 'Layanan pendaftaran online sedang dalam pemeliharaan sistem sementara.');
         }

@@ -185,7 +185,15 @@
               </ul>
 
               <div class="pt-1 flex justify-end">
+                <span
+                  v-if="$page.props.queue_maintenance?.is_active"
+                  class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 py-1"
+                >
+                  <Lock class="w-3.5 h-3.5" />
+                  <span>Pendaftaran Ditutup Sementara</span>
+                </span>
                 <Link
+                  v-else
                   :href="route('queue.apply.create', { layanan: srv.slug })"
                   @click="showRequirementsModal = false"
                   class="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
