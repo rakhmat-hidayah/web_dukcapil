@@ -388,10 +388,10 @@
                   @blur="onPersonNameBlur('applicant_name')"
                   type="text"
                   maxlength="60"
-                  autocomplete="name"
+                  autocomplete="off"
                   autocapitalize="characters"
                   spellcheck="false"
-                  placeholder="CONTOH: SITI NURHALIZA"
+                  placeholder="CONTOH: NAMA ANGGOTA KELUARGA (ISTRI / ANAK / DLL)"
                   class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-semibold"
                   required
                 />
@@ -410,39 +410,6 @@
                 <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-start gap-1.5 leading-snug">
                   <Info class="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
                   <span>Kaidah Penulisan: Wajib huruf kapital sesuai KK, tanpa angka (0-9), gelar, atau singkatan yang tidak resmi (Permendagri No. 73/2022).</span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- INFO PERWAKILAN KELUARGA (OTOMATIS DARI AKUN PEMOHON) -->
-          <div
-            v-if="form.application_target === 'family_in_kk'"
-            class="pt-6 border-t border-slate-100 dark:border-slate-700/60 space-y-3"
-          >
-            <div class="p-4 sm:p-5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 space-y-3">
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                <h4 class="text-xs font-bold uppercase tracking-wider text-blue-900 dark:text-blue-300">
-                  Data Pemohon yang Mewakili (Akun Terdaftar)
-                </h4>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
-                  <span class="text-[10px] uppercase font-bold text-slate-400 block">Nama Pemohon (Mewakili)</span>
-                  <span class="font-bold text-slate-900 dark:text-white">{{ $page.props.auth?.applicant?.name || '-' }}</span>
-                </div>
-                <div class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
-                  <span class="text-[10px] uppercase font-bold text-slate-400 block">NIK Pemohon (Mewakili)</span>
-                  <span class="font-mono font-bold text-slate-900 dark:text-white">{{ $page.props.auth?.applicant?.nik || '-' }}</span>
-                </div>
-              </div>
-              <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-900 dark:text-amber-200 space-y-1">
-                <p class="font-medium">
-                  * Data perwakilan otomatis terhubung dengan akun pemohon yang sedang login. Pada Langkah 2, pemohon wajib melampirkan <strong>Surat Kuasa (Formulir F-1.07)</strong> dan foto <strong>Kartu Keluarga (KK) asli</strong>.
-                </p>
-                <p class="font-bold text-amber-950 dark:text-amber-100">
-                  ⚠️ Penegasan: Foto Selfie Wajah pada tahap berikutnya tetap <strong>wajib Foto Selfie Pemilik Dokumen (yang bersangkutan)</strong>.
                 </p>
               </div>
             </div>
@@ -621,11 +588,16 @@ const isBiometricRecording = computed(() => {
 
 onMounted(() => {
   if (applicantAccount.value) {
-    if (!form.applicant_nik) {
-      form.applicant_nik = applicantAccount.value.nik || '';
-    }
-    if (!form.applicant_name) {
-      form.applicant_name = applicantAccount.value.name || '';
+    if (form.application_target === 'self') {
+      if (!form.applicant_nik) {
+        form.applicant_nik = applicantAccount.value.nik || '';
+      }
+      if (!form.applicant_name) {
+        form.applicant_name = applicantAccount.value.name || '';
+      }
+    } else {
+      form.applicant_nik = '';
+      form.applicant_name = '';
     }
     if (!form.applicant_email && applicantAccount.value.email) {
       form.applicant_email = applicantAccount.value.email;
@@ -656,10 +628,12 @@ function handleTargetChanged(target) {
       return;
     }
     form.application_target = 'family_in_kk';
-    if (applicantAccount.value && form.applicant_nik === applicantAccount.value.nik) {
-      form.applicant_nik = '';
-      form.applicant_name = '';
-    }
+    // Selalu kosongkan agar pemohon mengisi nama & NIK anggota keluarga yang dimohonkan
+    form.applicant_nik = '';
+    form.applicant_name = '';
+    if (form.errors.applicant_nik) delete form.errors.applicant_nik;
+    if (form.errors.applicant_name) delete form.errors.applicant_name;
+
     form.attendance_type = 'family_in_kk';
     if (applicantAccount.value) {
       form.representative_nik = applicantAccount.value.nik || '';
