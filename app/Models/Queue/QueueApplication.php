@@ -67,6 +67,7 @@ class QueueApplication extends Model
         'applicant_name',
         'applicant_nik',
         'applicant_email',
+        'family_shdk',
         'attendance_type',
         'representative_nik',
         'representative_name',

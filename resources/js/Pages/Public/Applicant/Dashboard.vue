@@ -73,18 +73,18 @@
                 Ketentuan Layanan Online
               </span>
               <span class="text-xs font-black text-slate-900 dark:text-white">
-                Khusus Pengajuan KTP-el Pemilik Akun Pribadi
+                Ketentuan Pengajuan Mandiri & Mewakili Keluarga 1 KK
               </span>
             </div>
             <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-              Halo Bapak/Ibu <strong class="font-bold text-slate-900 dark:text-white">{{ applicant.name }}</strong>, selamat akun Anda telah lolos verifikasi resmi oleh Dinas Dukcapil Kabupaten Dompu. Demi tertib administrasi dan keamanan bersama, kami mengimbau bahwa layanan online ini <strong>khusus digunakan untuk mengajukan permohonan KTP-el milik Anda sendiri</strong> (sesuai data NIK akun Anda).
+              Halo Bapak/Ibu <strong class="font-bold text-slate-900 dark:text-white">{{ applicant.name }}</strong>, selamat akun Anda telah lolos verifikasi resmi oleh Dinas Dukcapil Kabupaten Dompu. Berdasarkan regulasi kependudukan, Anda dapat mengajukan permohonan KTP-el untuk <strong>diri sendiri</strong> atau <strong>mewakili anggota keluarga dalam 1 (satu) Kartu Keluarga (KK)</strong> dengan melampirkan formulir <strong>Surat Kuasa (F-1.07)</strong>.
             </p>
-            <div class="p-3 rounded-2xl bg-rose-50/90 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-800 dark:text-rose-300 leading-relaxed flex items-start gap-2.5">
-              <span class="text-sm shrink-0">⚠️</span>
+            <div class="p-3 rounded-2xl bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-xs text-blue-900 dark:text-blue-200 leading-relaxed flex items-start gap-2.5">
+              <span class="text-sm shrink-0">ℹ️</span>
               <div>
-                <strong class="font-bold">Pemberitahuan Penting:</strong>
+                <strong class="font-bold">Ketentuan Khusus:</strong>
                 <p class="mt-0.5">
-                  Mohon maaf, apabila Anda mengajukan permohonan KTP-el atas nama <strong>orang lain</strong>, permohonan tersebut dengan berat hati <strong>akan kami tolak pada tahap verifikasi berkas</strong>.
+                  Khusus untuk <strong>Layanan Perekaman KTP-el Baru (Pemula)</strong>, permohonan wajib diajukan dan dihadiri langsung oleh pemilik dokumen karena memerlukan perekaman data biometrik (sidik jari, iris mata, pasfoto) di loket Disdukcapil dan tidak dapat diwakilkan.
                 </p>
               </div>
             </div>

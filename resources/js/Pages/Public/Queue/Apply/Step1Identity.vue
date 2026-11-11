@@ -165,34 +165,173 @@
                 2. Data Pemilik Dokumen (Yang Bersangkutan / YBS) <span class="text-rose-500">*</span>
               </h3>
               <p class="text-[11px] text-slate-400">
-                Masukkan data kependudukan pemilik KTP-el sesuai dengan Kartu Keluarga (KK).
+                Pilih apakah pengajuan untuk diri Anda sendiri atau mewakili anggota keluarga dalam 1 (satu) Kartu Keluarga (KK).
               </p>
             </div>
 
-            <!-- Reminder Ketentuan Layanan: Khusus KTP-el Pemilik Akun -->
+            <!-- Pilihan Subjek Pengajuan: Diri Sendiri vs Mewakili Anggota Keluarga (1 KK) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Opsi 1: Diri Sendiri (Pemilik Akun) -->
+              <label
+                :class="[
+                  'cursor-pointer rounded-2xl p-4 border transition-all flex items-start gap-3',
+                  form.application_target === 'self'
+                    ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/40 ring-2 ring-blue-500/20'
+                    : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
+                ]"
+              >
+                <input
+                  type="radio"
+                  v-model="form.application_target"
+                  value="self"
+                  @change="handleTargetChanged('self')"
+                  class="mt-1 text-blue-600 focus:ring-blue-500"
+                />
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-1.5">
+                    <User class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                    <span class="text-xs font-bold text-slate-900 dark:text-white">
+                      Pengajuan Untuk Diri Sendiri
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                    Dokumen KTP-el atas nama pemilik akun terdaftar ({{ $page.props.auth?.applicant?.name || 'Saya' }}).
+                  </p>
+                </div>
+              </label>
+
+              <!-- Opsi 2: Mewakili Anggota Keluarga 1 KK -->
+              <label
+                :class="[
+                  'rounded-2xl p-4 border transition-all flex items-start gap-3',
+                  isBiometricRecording
+                    ? 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+                    : (form.application_target === 'family_in_kk'
+                        ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/40 ring-2 ring-blue-500/20 cursor-pointer'
+                        : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 cursor-pointer')
+                ]"
+              >
+                <input
+                  type="radio"
+                  v-model="form.application_target"
+                  value="family_in_kk"
+                  :disabled="isBiometricRecording"
+                  @change="handleTargetChanged('family_in_kk')"
+                  class="mt-1 text-blue-600 focus:ring-blue-500"
+                />
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <Users class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                    <span class="text-xs font-bold text-slate-900 dark:text-white">
+                      Mewakili Anggota Keluarga (1 KK)
+                    </span>
+                    <span v-if="isBiometricRecording" class="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-1.5 py-0.5 rounded">
+                      Rekam Baru Wajib Sendiri
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                    Mengurus KTP-el untuk anggota keluarga dalam 1 KK (Wajib Formulir F-1.07).
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Kotak Informasi Ketentuan Pengajuan Sesuai Regulasi -->
             <div
-              v-if="$page.props.auth?.applicant"
-              class="p-3.5 sm:p-4 rounded-2xl bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 flex items-start gap-3"
+              v-if="isBiometricRecording"
+              class="p-3.5 sm:p-4 rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 flex items-start gap-3"
             >
-              <div class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <div class="w-7 h-7 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                <AlertCircle class="w-4 h-4" />
               </div>
-              <div class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed space-y-0.5">
-                <p class="font-bold text-slate-900 dark:text-white">
-                  Ketentuan Akun Terverifikasi ({{ $page.props.auth.applicant.name }}):
+              <div class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed space-y-1">
+                <p class="font-bold text-amber-900 dark:text-amber-200">
+                  Layanan Perekaman KTP-el Baru Wajib Diri Sendiri (Pemilik Dokumen):
                 </p>
-                <p class="text-[11.5px]">
-                  Permohonan online ini <strong>khusus untuk pengajuan KTP-el milik Anda sendiri</strong> (sesuai NIK akun terdaftar). Mohon maaf, permohonan atas nama <strong>orang lain akan ditolak</strong> demi kepatuhan UU Perlindungan Data Pribadi (UU No. 27/2022) dan pencegahan praktik percaloan.
+                <p class="text-[11.5px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                  Layanan perekaman baru (pemula 16-17 tahun) <strong>tidak dapat diwakilkan</strong> karena memerlukan perekaman data biometrik (sidik jari, iris mata, pasfoto digital) secara langsung di hadapan operator loket Disdukcapil. Pemilik dokumen wajib hadir secara mandiri.
                 </p>
               </div>
             </div>
 
+            <div
+              v-else
+              class="p-3.5 sm:p-4 rounded-2xl bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 flex items-start gap-3"
+            >
+              <div class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                <FileText class="w-4 h-4" />
+              </div>
+              <div class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed space-y-1.5 flex-1">
+                <p class="font-bold text-slate-900 dark:text-white">
+                  Ketentuan Akun Terverifikasi ({{ $page.props.auth?.applicant?.name }}):
+                </p>
+                <p class="text-[11.5px] leading-relaxed">
+                  Berdasarkan regulasi administrasi kependudukan, pemohon dapat mengajukan layanan KTP-el untuk <strong>diri sendiri</strong> atau <strong>mewakili anggota keluarga dalam 1 (satu) Kartu Keluarga (KK)</strong> dengan melampirkan formulir <strong>Surat Kuasa Pengurusan Administrasi Kependudukan (F-1.07)</strong> serta foto Kartu Keluarga asli saat pengunggahan berkas.
+                </p>
+                <div v-if="form.application_target === 'family_in_kk'" class="pt-1 flex flex-wrap items-center gap-2">
+                  <a
+                    href="/downloads/stream/24"
+                    target="_blank"
+                    download
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shadow-sm transition cursor-pointer"
+                  >
+                    <FileDown class="w-3.5 h-3.5" />
+                    <span>Download Formulir F-1.07 (Surat Kuasa)</span>
+                  </a>
+                  <span class="text-[11px] text-blue-700 dark:text-blue-300 font-medium">
+                    (Unggah berkas ini pada Langkah 2)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dropdown Pilihan SHDK Anggota Keluarga yang Diurus -->
+            <div
+              v-if="form.application_target === 'family_in_kk'"
+              class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border-2 border-blue-200 dark:border-blue-900/60 space-y-2 animate-in fade-in"
+            >
+              <div class="flex items-center justify-between">
+                <label for="field_family_shdk" class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  Status Hubungan Dalam Keluarga (SHDK) Anggota yang Diurus <span class="text-rose-500">*</span>
+                </label>
+                <span class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">Sesuai Kartu Keluarga (KK)</span>
+              </div>
+              <div class="relative">
+                <select
+                  id="field_family_shdk"
+                  v-model="form.family_shdk"
+                  @change="handleFamilyShdkChanged"
+                  required
+                  class="w-full px-4 py-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                  :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.family_shdk}"
+                >
+                  <option value="" disabled>==PILIHAN==</option>
+                  <option value="1 - KEPALA KELUARGA (1)">1 - KEPALA KELUARGA (1)</option>
+                  <option value="2 - SUAMI (2)">2 - SUAMI (2)</option>
+                  <option value="3 - ISTRI (3)">3 - ISTRI (3)</option>
+                  <option value="4 - ANAK (4)">4 - ANAK (4)</option>
+                  <option value="5 - MENANTU (5)">5 - MENANTU (5)</option>
+                  <option value="6 - CUCU (6)">6 - CUCU (6)</option>
+                  <option value="7 - ORANG TUA (7)">7 - ORANG TUA (7)</option>
+                  <option value="8 - MERTUA (8)">8 - MERTUA (8)</option>
+                  <option value="9 - FAMILI (9)">9 - FAMILI (9)</option>
+                  <option value="10 - LAINNYA (10)">10 - LAINNYA (10)</option>
+                </select>
+              </div>
+              <p v-if="form.errors.family_shdk" class="text-xs text-rose-500 font-medium mt-1">
+                {{ form.errors.family_shdk }}
+              </p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                Pilih status hubungan keluarga anggota yang diurus terhadap Kepala Keluarga / Pemohon sesuai dengan yang tercantum pada kolom SHDK Kartu Keluarga (KK).
+              </p>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- NIK -->
+              <!-- NIK Pemilik Dokumen -->
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    NIK Pemilik Dokumen (16 Digit) <span class="text-rose-500">*</span>
+                    {{ form.application_target === 'family_in_kk' ? 'NIK Anggota Keluarga (16 Digit)' : 'NIK Pemilik Dokumen (16 Digit)' }} <span class="text-rose-500">*</span>
                   </label>
                   <span class="text-[10px] font-mono" :class="form.applicant_nik.length === 16 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
                     {{ form.applicant_nik.length }}/16 Digit
@@ -208,7 +347,7 @@
                   pattern="[0-9]*"
                   maxlength="16"
                   autocomplete="off"
-                  placeholder="5205xxxxxxxxxxxx"
+                  :placeholder="form.application_target === 'family_in_kk' ? '5205xxxxxxxxxxxx (NIK Anggota KK)' : '5205xxxxxxxxxxxx'"
                   class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
                   :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.applicant_nik}"
                   required
@@ -219,13 +358,16 @@
                 <p v-else-if="form.applicant_nik.length > 0 && form.applicant_nik.length < 16" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
                   Kurang {{ 16 - form.applicant_nik.length }} digit lagi. NIK wajib 16 digit angka.
                 </p>
+                <p v-else-if="form.application_target === 'family_in_kk' && form.applicant_nik && form.applicant_nik === $page.props.auth?.applicant?.nik" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                  Catatan: NIK yang Anda masukkan sama dengan NIK akun Anda. Jika permohonan ini untuk diri Anda sendiri, silakan pilih opsi "Pengajuan Untuk Diri Sendiri".
+                </p>
               </div>
 
               <!-- Nama Lengkap Sesuai KK -->
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    Nama Lengkap Sesuai KK <span class="text-rose-500">*</span>
+                    {{ form.application_target === 'family_in_kk' ? 'Nama Anggota Keluarga Sesuai KK' : 'Nama Lengkap Sesuai KK' }} <span class="text-rose-500">*</span>
                   </label>
                   <span
                     class="text-[10px] font-mono font-semibold"
@@ -245,14 +387,14 @@
                   autocomplete="name"
                   autocapitalize="characters"
                   spellcheck="false"
-                  placeholder="CONTOH: AHMAD SUBARJO"
+                  :placeholder="form.application_target === 'family_in_kk' ? 'CONTOH: SITI NURHALIZA' : 'CONTOH: AHMAD SUBARJO'"
                   class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-semibold"
                   required
                 />
 
                 <!-- Notice if numbers/symbols were stripped -->
                 <p v-if="nameInputWarning['applicant_name']" class="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1 flex items-center gap-1 animate-in fade-in">
-                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <AlertCircle class="w-3.5 h-3.5 shrink-0" />
                   <span>{{ nameInputWarning['applicant_name'] }}</span>
                 </p>
 
@@ -262,121 +404,8 @@
 
                 <!-- Guidance for proper name writing rules -->
                 <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-start gap-1.5 leading-snug">
-                  <svg class="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <Info class="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
                   <span>Kaidah Penulisan: Wajib huruf kapital sesuai KK, tanpa angka (0-9), gelar, atau singkatan yang tidak resmi (Permendagri No. 73/2022).</span>
-                </p>
-              </div>
-
-              <!-- Email (Opsional dengan Default @gmail.com) -->
-              <div class="sm:col-span-2">
-                <div class="flex items-center justify-between mb-1">
-                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    Alamat Email <span class="text-slate-400 font-normal lowercase">(opsional)</span>
-                  </label>
-                  <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-200/80 dark:border-blue-900/50">
-                    <svg class="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Default: @gmail.com
-                  </span>
-                </div>
-
-                <div class="relative">
-                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
-                  </div>
-                  <input
-                    id="field_applicant_email"
-                    v-model="form.applicant_email"
-                    @blur="normalizeApplicantEmail"
-                    type="email"
-                    autocomplete="email"
-                    placeholder="nama.pemohon (otomatis @gmail.com)"
-                    class="w-full pl-10 pr-10 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition font-medium"
-                    :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.applicant_email}"
-                  />
-                  <!-- Tombol Bersihkan / Kosongkan Email jika terisi -->
-                  <button
-                    v-if="form.applicant_email"
-                    type="button"
-                    @click="clearApplicantEmail"
-                    title="Kosongkan email"
-                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-rose-500 transition cursor-pointer"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                  </button>
-                </div>
-
-                <!-- Live Preview jika pemohon hanya mengetik username tanpa domain @ -->
-                <div v-if="emailUsernameOnly" class="mt-1.5 flex items-center gap-1.5 text-[11px] text-blue-600 dark:text-blue-400 font-medium bg-blue-50/60 dark:bg-blue-950/40 px-2.5 py-1 rounded-xl border border-blue-200/50 dark:border-blue-900/40">
-                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                  <span>Otomatis disimpan: <strong class="font-mono text-blue-700 dark:text-blue-300">{{ emailUsernameOnly }}@gmail.com</strong></span>
-                </div>
-
-                <!-- Quick Domain Selector Pills -->
-                <div class="mt-2 flex items-center flex-wrap gap-1.5">
-                  <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mr-0.5">Pilihan domain:</span>
-                  <button
-                    type="button"
-                    @click="applyEmailDomain('@gmail.com')"
-                    :class="[
-                      'px-2.5 py-1 rounded-xl text-[10px] font-bold transition border cursor-pointer inline-flex items-center gap-1',
-                      currentEmailDomain === '@gmail.com'
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-500/20'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
-                    ]"
-                  >
-                    <span>@gmail.com</span>
-                    <span v-if="currentEmailDomain === '@gmail.com'" class="text-[9px] font-normal opacity-90">(aktif)</span>
-                  </button>
-                  <button
-                    type="button"
-                    @click="applyEmailDomain('@yahoo.com')"
-                    :class="[
-                      'px-2.5 py-1 rounded-xl text-[10px] font-bold transition border cursor-pointer inline-flex items-center gap-1',
-                      currentEmailDomain === '@yahoo.com'
-                        ? 'bg-purple-600 text-white border-purple-600 shadow-sm ring-2 ring-purple-500/20'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
-                    ]"
-                  >
-                    <span>@yahoo.com</span>
-                    <span v-if="currentEmailDomain === '@yahoo.com'" class="text-[9px] font-normal opacity-90">(aktif)</span>
-                  </button>
-                  <button
-                    type="button"
-                    @click="applyEmailDomain('@outlook.com')"
-                    :class="[
-                      'px-2.5 py-1 rounded-xl text-[10px] font-bold transition border cursor-pointer inline-flex items-center gap-1',
-                      currentEmailDomain === '@outlook.com'
-                        ? 'bg-sky-600 text-white border-sky-600 shadow-sm ring-2 ring-sky-500/20'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
-                    ]"
-                  >
-                    <span>@outlook.com</span>
-                    <span v-if="currentEmailDomain === '@outlook.com'" class="text-[9px] font-normal opacity-90">(aktif)</span>
-                  </button>
-                  <button
-                    type="button"
-                    @click="applyEmailDomain('@icloud.com')"
-                    :class="[
-                      'px-2.5 py-1 rounded-xl text-[10px] font-bold transition border cursor-pointer inline-flex items-center gap-1',
-                      currentEmailDomain === '@icloud.com'
-                        ? 'bg-slate-700 text-white border-slate-700 shadow-sm ring-2 ring-slate-500/20'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
-                    ]"
-                  >
-                    <span>@icloud.com</span>
-                    <span v-if="currentEmailDomain === '@icloud.com'" class="text-[9px] font-normal opacity-90">(aktif)</span>
-                  </button>
-                </div>
-
-                <p v-if="form.errors.applicant_email" class="text-xs text-rose-500 font-medium mt-1">
-                  {{ form.errors.applicant_email }}
-                </p>
-                <p v-else class="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Cukup ketik nama pengguna Anda (misal: <span class="font-mono text-slate-600 dark:text-slate-300 font-semibold">budi123</span>). Sistem otomatis melengkapinya ke <strong class="text-slate-700 dark:text-slate-200 font-semibold">@gmail.com</strong>, atau klik tombol pilihan di atas jika menggunakan email lain.
                 </p>
               </div>
             </div>
@@ -763,10 +792,23 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref, computed, onMounted } from 'vue';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import ProgressWizard from '@/Components/Queue/ProgressWizard.vue';
+import {
+  User,
+  Users,
+  AlertCircle,
+  FileText,
+  FileDown,
+  Info,
+  CheckCircle2,
+  Lock,
+} from '@lucide/vue';
+
+const page = usePage();
+const applicantAccount = computed(() => page.props.auth?.applicant || null);
 
 const props = defineProps({
   services: {
@@ -781,6 +823,8 @@ const props = defineProps({
 
 const form = useForm({
   service_type_id: props.selectedService ? props.selectedService.id : (props.services[0] ? props.services[0].id : ''),
+  application_target: 'self',
+  family_shdk: '',
   applicant_name: '',
   applicant_nik: '',
   applicant_email: '',
@@ -795,6 +839,72 @@ const form = useForm({
 const selectedServiceObj = computed(() => {
   return props.services.find(s => s.id == form.service_type_id) || null;
 });
+
+const isBiometricRecording = computed(() => {
+  return !!selectedServiceObj.value?.is_biometric_first_recording;
+});
+
+onMounted(() => {
+  if (applicantAccount.value) {
+    if (!form.applicant_nik) {
+      form.applicant_nik = applicantAccount.value.nik || '';
+    }
+    if (!form.applicant_name) {
+      form.applicant_name = applicantAccount.value.name || '';
+    }
+    if (!form.applicant_email && applicantAccount.value.email) {
+      form.applicant_email = applicantAccount.value.email;
+    }
+  }
+});
+
+function handleTargetChanged(target) {
+  if (target === 'self') {
+    form.application_target = 'self';
+    form.family_shdk = '';
+    if (form.errors.family_shdk) {
+      delete form.errors.family_shdk;
+    }
+    if (applicantAccount.value) {
+      form.applicant_nik = applicantAccount.value.nik || '';
+      form.applicant_name = applicantAccount.value.name || '';
+    }
+    form.attendance_type = 'self';
+    form.representative_nik = '';
+    form.representative_name = '';
+    form.representative_relationship = '';
+    form.representative_kk_status = '';
+    form.absence_reason = '';
+  } else if (target === 'family_in_kk') {
+    if (isBiometricRecording.value) {
+      form.application_target = 'self';
+      return;
+    }
+    form.application_target = 'family_in_kk';
+    if (applicantAccount.value && form.applicant_nik === applicantAccount.value.nik) {
+      form.applicant_nik = '';
+      form.applicant_name = '';
+    }
+    form.attendance_type = 'family_in_kk';
+    if (applicantAccount.value) {
+      form.representative_nik = applicantAccount.value.nik || '';
+      form.representative_name = applicantAccount.value.name || '';
+    }
+    form.representative_kk_status = 'same_kk';
+    form.representative_relationship = form.family_shdk || '';
+    form.absence_reason = form.absence_reason || 'Mewakili pengurusan dokumen KTP-el anggota keluarga dalam 1 Kartu Keluarga (KK).';
+  }
+}
+
+function handleFamilyShdkChanged() {
+  if (form.errors.family_shdk) {
+    delete form.errors.family_shdk;
+  }
+  if (form.family_shdk) {
+    form.representative_relationship = form.family_shdk;
+    form.absence_reason = 'Mewakili pengurusan dokumen KTP-el anggota keluarga dalam 1 Kartu Keluarga (KK) - ' + form.family_shdk;
+  }
+}
 
 // NIK Keypress filter (only numbers 0-9)
 function filterNikKeypress(e) {
@@ -917,82 +1027,9 @@ function onUppercaseInput(field, e) {
 }
 
 // Applicant Email Helpers & Auto-domain (@gmail.com as Default)
-const emailUsernameOnly = computed(() => {
-  const val = (form.applicant_email || '').trim();
-  if (!val) return '';
-  if (!val.includes('@')) {
-    return val.replace(/\s+/g, '');
-  }
-  return '';
-});
-
-const currentEmailDomain = computed(() => {
-  const val = (form.applicant_email || '').trim().toLowerCase();
-  if (!val) return '@gmail.com';
-  if (!val.includes('@')) return '@gmail.com';
-  const idx = val.indexOf('@');
-  return val.slice(idx);
-});
-
-function normalizeApplicantEmail() {
-  if (!form.applicant_email) return;
-  let val = form.applicant_email.trim();
-  if (!val) {
-    form.applicant_email = '';
-    return;
-  }
-  val = val.replace(/\s+/g, '');
-  if (!val.includes('@')) {
-    val = `${val}@gmail.com`;
-  } else if (val.endsWith('@')) {
-    val = `${val}gmail.com`;
-  }
-  form.applicant_email = val.toLowerCase();
-  if (form.errors.applicant_email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailRegex.test(form.applicant_email)) {
-      delete form.errors.applicant_email;
-    }
-  }
-}
-
-function clearApplicantEmail() {
-  form.applicant_email = '';
-  if (form.errors.applicant_email) {
-    delete form.errors.applicant_email;
-  }
-}
-
-function applyEmailDomain(domain) {
-  const current = (form.applicant_email || '').trim().replace(/\s+/g, '');
-  if (!current) {
-    form.applicant_email = domain;
-    setTimeout(() => {
-      const el = document.getElementById('field_applicant_email');
-      if (el) {
-        el.focus();
-        if (typeof el.setSelectionRange === 'function') {
-          el.setSelectionRange(0, 0);
-        }
-      }
-    }, 50);
-    return;
-  }
-  const parts = current.split('@');
-  const username = parts[0] || '';
-  form.applicant_email = `${username}${domain}`.toLowerCase();
-  if (form.errors.applicant_email) {
-    delete form.errors.applicant_email;
-  }
-}
-
 function handleServiceChanged(service) {
-  if (service.is_biometric_first_recording) {
-    form.attendance_type = 'self';
-    form.representative_nik = '';
-    form.representative_name = '';
-    form.representative_relationship = '';
-    form.absence_reason = '';
+  if (service && service.is_biometric_first_recording) {
+    handleTargetChanged('self');
   }
 }
 
@@ -1015,14 +1052,30 @@ function validateForm() {
     });
   }
 
-  // 2. NIK Pemilik Dokumen
+  // 2. Status Hubungan Dalam Keluarga (SHDK) jika mewakili anggota keluarga
+  if (form.application_target === 'family_in_kk') {
+    if (!form.family_shdk) {
+      const msg = 'Pilih Status Hubungan Dalam Keluarga (SHDK) sesuai Kartu Keluarga.';
+      form.errors.family_shdk = msg;
+      errors.push({
+        field: 'family_shdk',
+        elementId: 'field_family_shdk',
+        label: 'Status Hubungan Dalam Keluarga (SHDK)',
+        message: msg,
+      });
+    }
+  }
+
+  // 3. NIK Pemilik Dokumen
   if (!form.applicant_nik) {
-    const msg = 'NIK pemilik dokumen wajib diisi.';
+    const msg = form.application_target === 'family_in_kk'
+      ? 'NIK anggota keluarga yang diurus wajib diisi.'
+      : 'NIK pemilik dokumen wajib diisi.';
     form.errors.applicant_nik = msg;
     errors.push({
       field: 'applicant_nik',
       elementId: 'field_applicant_nik',
-      label: 'NIK Pemilik Dokumen (16 Digit)',
+      label: form.application_target === 'family_in_kk' ? 'NIK Anggota Keluarga' : 'NIK Pemilik Dokumen',
       message: msg,
     });
   } else if (form.applicant_nik.length !== 16) {
@@ -1031,12 +1084,12 @@ function validateForm() {
     errors.push({
       field: 'applicant_nik',
       elementId: 'field_applicant_nik',
-      label: 'NIK Pemilik Dokumen (16 Digit)',
+      label: 'NIK (16 Digit)',
       message: msg,
     });
   }
 
-  // 3. Nama Lengkap
+  // 4. Nama Lengkap Sesuai KK
   const cleanApplicantName = (form.applicant_name || '').trim();
   if (!cleanApplicantName) {
     const msg = 'Nama lengkap sesuai Kartu Keluarga (KK) wajib diisi.';
@@ -1083,22 +1136,6 @@ function validateForm() {
       label: 'Nama Lengkap Sesuai KK',
       message: msg,
     });
-  }
-
-  // 4. Alamat Email (Opsional - otomatis @gmail.com jika hanya username)
-  normalizeApplicantEmail();
-  if (form.applicant_email && form.applicant_email.trim()) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.applicant_email.trim())) {
-      const msg = 'Format alamat email tidak valid (contoh: nama.pemohon@gmail.com).';
-      form.errors.applicant_email = msg;
-      errors.push({
-        field: 'applicant_email',
-        elementId: 'field_applicant_email',
-        label: 'Alamat Email Pemohon',
-        message: msg,
-      });
-    }
   }
 
   // 5. Data Perwakilan (jika diwakilkan)
@@ -1215,7 +1252,6 @@ function scrollToError(elementId) {
 }
 
 function submitStep1() {
-  normalizeApplicantEmail();
   const errors = validateForm();
   if (errors.length > 0) {
     incompleteErrors.value = errors;
@@ -1227,7 +1263,8 @@ function submitStep1() {
     ...data,
     applicant_name: data.applicant_name ? sanitizePersonName(data.applicant_name).trim() : '',
     representative_name: data.representative_name ? sanitizePersonName(data.representative_name).trim() : '',
-    applicant_email: data.applicant_email ? data.applicant_email.trim() : null,
+    applicant_email: applicantAccount.value?.email || null,
+    family_shdk: data.application_target === 'family_in_kk' ? (data.family_shdk || null) : null,
   })).post(route('queue.apply.store'), {
     onError: (serverErrors) => {
       const serverList = [];

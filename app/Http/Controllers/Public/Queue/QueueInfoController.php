@@ -36,7 +36,8 @@ class QueueInfoController extends Controller
             if (\Illuminate\Support\Facades\Schema::hasTable('queue_applications')) {
                 if (\Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'applicant_phone') ||
                     \Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'representative_phone') ||
-                    \Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'applicant_address')) {
+                    \Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'applicant_address') ||
+                    !\Illuminate\Support\Facades\Schema::hasColumn('queue_applications', 'family_shdk')) {
                     $needsMigration = true;
                 }
             }

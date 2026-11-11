@@ -86,7 +86,7 @@ HTML;
                     ℹ️ Ketentuan Penting Pengajuan Layanan KTP-el Online:
                 </p>
                 <p style="margin: 0 0 10px; font-size: 13px; color: #1e293b; line-height: 1.55;">
-                    Akun terverifikasi ini <strong>khusus diperuntukkan bagi pengajuan permohonan KTP-el milik Anda sendiri</strong> (sesuai data NIK terdaftar). Mohon maaf, apabila Anda memohonkan KTP-el untuk <strong>orang lain</strong>, permohonan tersebut <strong>akan ditolak oleh petugas verifikator</strong> saat proses validasi berkas.
+                    Berdasarkan regulasi administrasi kependudukan, akun terverifikasi ini dapat digunakan untuk mengajukan permohonan KTP-el bagi <strong>diri Anda sendiri</strong> atau <strong>mewakili anggota keluarga dalam 1 (satu) Kartu Keluarga (KK)</strong> dengan melampirkan <strong>Formulir Surat Kuasa F-1.07</strong> serta Kartu Keluarga asli saat pengunggahan berkas (kecuali layanan Perekaman Baru Pemula yang wajib diajukan dan dihadiri langsung oleh pemilik dokumen).
                 </p>
                 <div style="background-color: #ffffff; border-radius: 10px; padding: 12px 14px; border: 1px solid #dbeafe; margin-top: 10px;">
                     <p style="margin: 0 0 8px; font-size: 12px; font-weight: 700; color: #1e40af;">

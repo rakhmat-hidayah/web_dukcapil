@@ -359,6 +359,10 @@
                 <span class="text-slate-400 text-[11px] block">Nomor Induk Kependudukan (NIK)</span>
                 <span class="font-mono font-bold text-slate-900 dark:text-white text-sm">{{ application.applicant_nik }}</span>
               </div>
+              <div v-if="application.family_shdk">
+                <span class="text-slate-400 text-[11px] block">Status Hubungan Dalam Keluarga (SHDK)</span>
+                <span class="font-bold text-blue-600 dark:text-blue-400 text-xs">{{ application.family_shdk }}</span>
+              </div>
               <div v-if="application.applicant_email">
                 <span class="text-slate-400 text-[11px] block">Email</span>
                 <span class="text-slate-700 dark:text-slate-200">{{ application.applicant_email }}</span>

@@ -102,8 +102,12 @@ class QueueApplicationController extends Controller
             return redirect()->route('queue.apply.create')->with('error', 'Layanan pendaftaran online sedang dalam pemeliharaan sistem sementara.');
         }
 
-        // Sanitize applicant email: default to @gmail.com if applicant typed only username without domain
-        if ($request->has('applicant_email') && $request->input('applicant_email') !== null) {
+        $applicantAccount = \Illuminate\Support\Facades\Auth::guard('applicant')->user();
+
+        // Auto-populate applicant email from logged-in applicant account if empty or not provided in form
+        if (!$request->filled('applicant_email') && $applicantAccount && !empty($applicantAccount->email)) {
+            $request->merge(['applicant_email' => strtolower(trim($applicantAccount->email))]);
+        } elseif ($request->has('applicant_email') && $request->input('applicant_email') !== null) {
             $email = trim((string) $request->input('applicant_email'));
             if ($email !== '') {
                 $email = preg_replace('/\s+/', '', $email);
@@ -128,8 +132,45 @@ class QueueApplicationController extends Controller
         $service = ServiceType::find($request->service_type_id);
         $isBiometric = $service ? (bool) $service->is_biometric_first_recording : false;
 
+        // Auto-configure representative data if applicant represents a family member in 1 KK
+        $target = $request->input('application_target', 'self');
+        if ($target === 'family_in_kk' || $request->filled('family_shdk')) {
+            if ($isBiometric) {
+                return back()->withErrors([
+                    'application_target' => 'Pelayanan perekaman KTP-el baru wajib diajukan dan dihadiri langsung oleh pemilik dokumen (tidak dapat diwakilkan).',
+                ])->withInput();
+            }
+
+            if (!$request->filled('attendance_type') || $request->input('attendance_type') === 'self') {
+                $request->merge(['attendance_type' => 'family_in_kk']);
+            }
+            if (!$request->filled('representative_nik') && $applicantAccount) {
+                $request->merge(['representative_nik' => $applicantAccount->nik]);
+            }
+            if (!$request->filled('representative_name') && $applicantAccount) {
+                $request->merge(['representative_name' => $applicantAccount->name]);
+            }
+            if (!$request->filled('representative_relationship') && $request->filled('family_shdk')) {
+                $request->merge(['representative_relationship' => $request->input('family_shdk')]);
+            }
+            if (!$request->filled('representative_kk_status')) {
+                $request->merge(['representative_kk_status' => 'same_kk']);
+            }
+            if (!$request->filled('absence_reason')) {
+                $shdkSuffix = $request->filled('family_shdk') ? ' - ' . $request->input('family_shdk') : '';
+                $request->merge(['absence_reason' => 'Mewakili pengurusan dokumen KTP-el anggota keluarga dalam 1 Kartu Keluarga (KK)' . $shdkSuffix]);
+            }
+        }
+
         $validated = $request->validate([
             'service_type_id'              => 'required|exists:queue_service_types,id',
+            'application_target'           => 'nullable|in:self,family_in_kk',
+            'family_shdk'                  => [
+                'nullable',
+                'required_if:application_target,family_in_kk',
+                'string',
+                'max:50',
+            ],
             'applicant_name'               => [
                 'required',
                 'string',
@@ -159,6 +200,7 @@ class QueueApplicationController extends Controller
         ], [
             'service_type_id.required'                => 'Pilih salah satu jenis pelayanan KTP-el.',
             'service_type_id.exists'                  => 'Jenis pelayanan yang dipilih tidak valid.',
+            'family_shdk.required_if'                 => 'Status Hubungan Dalam Keluarga (SHDK) wajib dipilih jika mewakili anggota keluarga 1 KK.',
             'applicant_name.required'                 => 'Nama lengkap pemohon wajib diisi sesuai KTP/KK.',
             'applicant_name.regex'                    => 'Kaidah penulisan nama: Nama hanya boleh memuat huruf kapital, spasi, tanda petik (\'), atau tanda hubung (-) tanpa angka (0-9) atau simbol sesuai Permendagri No. 73/2022.',
             'applicant_name.min'                      => 'Nama pemohon minimal 2 huruf.',
@@ -281,8 +323,11 @@ class QueueApplicationController extends Controller
                 ->with('error', "Sesi permohonan draf Anda telah kedaluwarsa karena telah melewati batas waktu tunggu {$timeoutMinutes} menit sejak dibuat. Silakan lakukan pendaftaran baru.");
         }
 
+        $isOwnerAccount = \Illuminate\Support\Facades\Auth::guard('applicant')->check() &&
+            $application->applicant_account_id === \Illuminate\Support\Facades\Auth::guard('applicant')->id();
+
         // Verify applicant session identity to prevent unauthorized BOLA/IDOR access
-        if (session('applicant_verified_nik') !== $application->applicant_nik && !\Illuminate\Support\Facades\Auth::check()) {
+        if (session('applicant_verified_nik') !== $application->applicant_nik && !\Illuminate\Support\Facades\Auth::check() && !$isOwnerAccount) {
             return redirect()->route('queue.apply.create')
                 ->with('error', 'Sesi pendaftaran tidak valid atau telah berakhir. Silakan masukkan NIK Anda kembali.');
         }

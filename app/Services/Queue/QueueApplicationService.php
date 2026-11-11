@@ -132,6 +132,7 @@ class QueueApplicationService
             'applicant_name'               => mb_strtoupper(trim($data['applicant_name'])),
             'applicant_nik'                => trim($data['applicant_nik']),
             'applicant_email'              => !empty($data['applicant_email']) ? trim($data['applicant_email']) : null,
+            'family_shdk'                  => !empty($data['family_shdk']) ? trim($data['family_shdk']) : null,
             'attendance_type'              => $attendanceType,
             'representative_nik'           => $attendanceType !== 'self' ? trim($data['representative_nik']) : null,
             'representative_name'          => $attendanceType !== 'self' ? mb_strtoupper(trim($data['representative_name'])) : null,

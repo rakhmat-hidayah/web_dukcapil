@@ -383,8 +383,9 @@
                           <span>Terverifikasi: {{ app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai' : 'Bukan Pemohon' }}</span>
                         </span>
                       </div>
-                      <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                      <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <span>{{ maskNik(app.applicant_nik) }}</span>
+                        <span v-if="app.family_shdk" class="text-blue-600 dark:text-blue-400 font-sans font-bold">· SHDK: {{ app.family_shdk }}</span>
                       </div>
                     </div>
                   </div>
