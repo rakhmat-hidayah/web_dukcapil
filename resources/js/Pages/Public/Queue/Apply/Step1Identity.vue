@@ -306,16 +306,16 @@
                   :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.family_shdk}"
                 >
                   <option value="" disabled>==PILIHAN==</option>
-                  <option value="1 - KEPALA KELUARGA (1)">1 - KEPALA KELUARGA (1)</option>
-                  <option value="2 - SUAMI (2)">2 - SUAMI (2)</option>
-                  <option value="3 - ISTRI (3)">3 - ISTRI (3)</option>
-                  <option value="4 - ANAK (4)">4 - ANAK (4)</option>
-                  <option value="5 - MENANTU (5)">5 - MENANTU (5)</option>
-                  <option value="6 - CUCU (6)">6 - CUCU (6)</option>
-                  <option value="7 - ORANG TUA (7)">7 - ORANG TUA (7)</option>
-                  <option value="8 - MERTUA (8)">8 - MERTUA (8)</option>
-                  <option value="9 - FAMILI (9)">9 - FAMILI (9)</option>
-                  <option value="10 - LAINNYA (10)">10 - LAINNYA (10)</option>
+                  <option value="1 - KEPALA KELUARGA">1 - KEPALA KELUARGA</option>
+                  <option value="2 - SUAMI">2 - SUAMI</option>
+                  <option value="3 - ISTRI">3 - ISTRI</option>
+                  <option value="4 - ANAK">4 - ANAK</option>
+                  <option value="5 - MENANTU">5 - MENANTU</option>
+                  <option value="6 - CUCU">6 - CUCU</option>
+                  <option value="7 - ORANG TUA">7 - ORANG TUA</option>
+                  <option value="8 - MERTUA">8 - MERTUA</option>
+                  <option value="9 - FAMILI">9 - FAMILI</option>
+                  <option value="10 - LAINNYA">10 - LAINNYA</option>
                 </select>
               </div>
               <p v-if="form.errors.family_shdk" class="text-xs text-rose-500 font-medium mt-1">
