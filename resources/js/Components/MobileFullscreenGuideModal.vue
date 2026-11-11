@@ -2,14 +2,14 @@
   <Teleport to="body">
     <div 
       v-if="modelValue" 
-      class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/65 backdrop-blur-sm animate-in fade-in duration-200"
+      class="fixed inset-0 z-[100] flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 pt-[max(env(safe-area-inset-top,0px),16px)] pb-[max(env(safe-area-inset-bottom,0px),16px)] sm:py-4 bg-black/65 backdrop-blur-sm animate-in fade-in duration-200"
       @click.self="close"
     >
       <div 
-        class="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 border border-gray-100 dark:border-zinc-800 shadow-2xl max-h-[92vh] overflow-y-auto space-y-4 text-slate-800 dark:text-zinc-100"
+        class="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-t-3xl sm:rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-2xl max-h-full sm:max-h-[90vh] flex flex-col overflow-hidden text-slate-800 dark:text-zinc-100"
       >
         <!-- Modal Header -->
-        <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-800">
+        <div class="shrink-0 p-5 sm:p-6 pb-3 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 shadow-inner">
               <Smartphone class="w-5 h-5" />
@@ -32,6 +32,9 @@
             <X class="w-5 h-5" />
           </button>
         </div>
+
+        <!-- Modal Body -->
+        <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-4">
 
         <!-- Android Instant Fullscreen Button (If Supported) -->
         <div v-if="canFullscreen" class="p-3.5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border border-blue-200 dark:border-blue-900/60 rounded-2xl space-y-2">
@@ -151,9 +154,10 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Footer Dismiss Button -->
-        <div class="pt-2">
+      <!-- Footer Dismiss Button -->
+        <div class="shrink-0 p-5 sm:p-6 pt-3 border-t border-gray-100 dark:border-zinc-800">
           <button 
             type="button"
             @click="close"

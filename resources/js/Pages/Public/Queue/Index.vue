@@ -257,24 +257,24 @@
     <Teleport to="body">
       <div 
         v-if="selectedService"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm transition-opacity"
+        class="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 pt-[max(env(safe-area-inset-top,0px),16px)] pb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:py-4 bg-slate-950/70 backdrop-blur-sm transition-opacity"
         @click.self="selectedService = null"
       >
-        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-full sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
           <!-- Modal Header -->
-          <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
-            <div class="flex items-center gap-3">
+          <div class="shrink-0 p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
+            <div class="flex items-center gap-3 min-w-0">
               <div 
-                class="w-11 h-11 rounded-2xl flex items-center justify-center text-white shadow-md font-bold"
+                class="w-11 h-11 rounded-2xl flex items-center justify-center text-white shadow-md font-bold shrink-0"
                 :style="{ backgroundColor: selectedService.color || '#2563eb' }"
               >
                 <CreditCard class="w-6 h-6" />
               </div>
-              <div>
-                <h3 class="text-base font-black text-slate-900 dark:text-white leading-tight">
+              <div class="min-w-0">
+                <h3 class="text-base font-black text-slate-900 dark:text-white leading-tight truncate">
                   {{ selectedService.name }}
                 </h3>
-                <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400 flex-wrap">
                   <span>Kuota: <strong>{{ selectedService.quota_per_day }}/Hari</strong></span>
                   <span>•</span>
                   <span class="text-emerald-600 dark:text-emerald-400 font-bold">Proses: {{ selectedService.processing_days_label }}</span>
@@ -284,14 +284,14 @@
             <button 
               type="button" 
               @click="selectedService = null"
-              class="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition"
+              class="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition shrink-0 cursor-pointer"
             >
               <X class="w-4 h-4" />
             </button>
           </div>
 
           <!-- Modal Body (Requirements list) -->
-          <div class="p-5 overflow-y-auto space-y-4 text-xs">
+          <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-5 space-y-4 text-xs">
             <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
               {{ selectedService.short_description || selectedService.description }}
             </p>
@@ -360,7 +360,7 @@
           </div>
 
           <!-- Modal Footer CTA -->
-          <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+          <div class="shrink-0 p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
             <button
               type="button"
               @click="selectedService = null"
@@ -394,11 +394,11 @@
     <Teleport to="body">
       <div 
         v-if="showRequirementsModal"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 pt-[max(env(safe-area-inset-top,0px),16px)] pb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:py-4 bg-slate-950/70 backdrop-blur-sm"
         @click.self="showRequirementsModal = false"
       >
-        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
-          <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
+        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-full sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+          <div class="shrink-0 p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
             <div class="flex items-center gap-2.5">
               <ClipboardList class="w-5 h-5 text-blue-600" />
               <h3 class="text-base font-black text-slate-900 dark:text-white">Persyaratan Berkas KTP-el</h3>
@@ -408,7 +408,7 @@
             </button>
           </div>
 
-          <div class="p-5 overflow-y-auto space-y-4 text-xs">
+          <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-5 space-y-4 text-xs">
             <div v-for="srv in services" :key="srv.id" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-3">
               <div class="flex items-center justify-between gap-2">
                 <h4 class="font-black text-sm text-slate-900 dark:text-white">{{ srv.name }}</h4>
@@ -478,21 +478,21 @@
     <Teleport to="body">
       <div 
         v-if="showQuotaModal"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 pt-[max(env(safe-area-inset-top,0px),16px)] pb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:py-4 bg-slate-950/70 backdrop-blur-sm"
         @click.self="showQuotaModal = false"
       >
-        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
-          <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-full sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+          <div class="shrink-0 p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
             <div class="flex items-center gap-2">
               <Calendar class="w-5 h-5 text-blue-600" />
               <h3 class="text-base font-black text-slate-900 dark:text-white">Jadwal & Kuota Pelayanan</h3>
             </div>
-            <button type="button" @click="showQuotaModal = false" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+            <button type="button" @click="showQuotaModal = false" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center cursor-pointer">
               <X class="w-4 h-4" />
             </button>
           </div>
 
-          <div class="space-y-3 text-xs">
+          <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 space-y-3 text-xs">
             <div class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 flex justify-between items-center">
               <span class="font-medium text-slate-600 dark:text-slate-300">Jam Layanan Loket:</span>
               <span class="font-black text-slate-900 dark:text-white">{{ todayStats.open_time }} - {{ todayStats.close_time }} WITA</span>
@@ -524,13 +524,13 @@
     <Teleport to="body">
       <div 
         v-if="showMaintenanceModal"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 pt-[max(env(safe-area-inset-top,0px),16px)] pb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:py-4 bg-slate-950/70 backdrop-blur-sm"
         @click.self="showMaintenanceModal = false"
       >
-        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
-          <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-full sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+          <div class="shrink-0 p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
             <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
+              <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs shrink-0">
                 <AlertCircle class="w-4 h-4" />
               </div>
               <div>
@@ -547,7 +547,7 @@
             </button>
           </div>
 
-          <div class="space-y-3 text-xs leading-relaxed">
+          <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 space-y-3 text-xs leading-relaxed">
             <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60">
               <h4 class="font-bold text-amber-950 dark:text-amber-200 text-sm mb-1.5">
                 {{ maintenance.title || 'Layanan Pendaftaran Online Sedang Ditutup Sementara' }}
@@ -568,7 +568,7 @@
             </div>
           </div>
 
-          <div class="pt-2 flex justify-end">
+          <div class="shrink-0 p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 flex justify-end">
             <button
               type="button"
               @click="showMaintenanceModal = false"
@@ -585,13 +585,13 @@
     <Teleport to="body">
       <div 
         v-if="showTrackingModal"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 pt-[max(env(safe-area-inset-top,0px),16px)] pb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:py-4 bg-slate-950/70 backdrop-blur-sm"
         @click.self="showTrackingModal = false"
       >
-        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
-          <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-full sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+          <div class="shrink-0 p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
             <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs">
+              <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs shrink-0">
                 <Search class="w-4 h-4" />
               </div>
               <div>
@@ -608,9 +608,10 @@
             </button>
           </div>
 
-          <!-- KONDISI 1: Belum Login Pemohon (Wajib Login Terlebih Dahulu) -->
-          <div v-if="!$page.props.auth?.applicant" class="py-1 space-y-4">
-            <div class="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-300/80 dark:border-amber-600/50 flex items-start gap-3">
+          <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-4">
+            <!-- KONDISI 1: Belum Login Pemohon (Wajib Login Terlebih Dahulu) -->
+            <div v-if="!$page.props.auth?.applicant" class="py-1 space-y-4">
+              <div class="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-300/80 dark:border-amber-600/50 flex items-start gap-3">
               <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
                 <Lock class="w-5 h-5" />
               </div>
@@ -705,7 +706,8 @@
           </div>
         </div>
       </div>
-    </Teleport>
+    </div>
+  </Teleport>
 
     <!-- MODAL PANDUAN MODE LAYAR PENUH (APP STANDALONE) -->
     <MobileFullscreenGuideModal v-model="showFullscreenGuide" />

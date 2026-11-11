@@ -75,11 +75,11 @@
     <Teleport to="body">
       <div
         v-if="showTrackingModal"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200"
+        class="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 pt-[max(env(safe-area-inset-top,0px),16px)] pb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:py-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200"
         @click.self="showTrackingModal = false"
       >
-        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
-          <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-full sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+          <div class="shrink-0 p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
             <div class="flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs">
                 <Search class="w-4 h-4" />
@@ -101,6 +101,8 @@
               <X class="w-4 h-4" />
             </button>
           </div>
+
+          <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-4">
 
           <!-- KONDISI 1: Belum Login Pemohon -->
           <div v-if="!isApplicantLoggedIn" class="py-1 space-y-3.5">
@@ -233,7 +235,8 @@
           </div>
         </div>
       </div>
-    </Teleport>
+    </div>
+  </Teleport>
   </div>
 </template>
 
