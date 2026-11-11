@@ -48,6 +48,7 @@ class KtpHandoverController extends Controller
 
         $serviceId = $request->query('service_id');
         $status = $request->query('status');
+        $attendanceType = $request->query('attendance_type');
 
         $query = QueueApplication::with([
             'serviceType',
@@ -71,6 +72,26 @@ class KtpHandoverController extends Controller
 
         if ($serviceId) {
             $query->where('service_type_id', $serviceId);
+        }
+
+        if ($attendanceType === 'self') {
+            $query->where(function ($q) {
+                $q->where(function ($sq) {
+                    $sq->where('attendance_type', 'self')->orWhereNull('attendance_type');
+                })
+                ->whereNull('family_shdk')
+                ->where(function ($sq) {
+                    $sq->whereNull('representative_name')->orWhere('representative_name', '');
+                });
+            });
+        } elseif ($attendanceType === 'represented') {
+            $query->where(function ($q) {
+                $q->whereIn('attendance_type', ['family_in_kk', 'family_out_kk', 'other', 'representative', 'PROXY'])
+                  ->orWhereNotNull('family_shdk')
+                  ->orWhere(function ($sq) {
+                      $sq->whereNotNull('representative_name')->where('representative_name', '!=', '');
+                  });
+            });
         }
 
         if ($status) {
@@ -104,8 +125,20 @@ class KtpHandoverController extends Controller
 
         $services = ServiceType::active()->orderBy('sort_order')->get(['id', 'name']);
 
+        $representedCount = QueueApplication::where(function ($q) {
+            $q->whereIn('attendance_type', ['family_in_kk', 'family_out_kk', 'other', 'representative', 'PROXY'])
+              ->orWhereNotNull('family_shdk')
+              ->orWhere(function ($sq) {
+                  $sq->whereNotNull('representative_name')->where('representative_name', '!=', '');
+              });
+        })->count();
+        $totalApps = QueueApplication::count();
+        $selfCount = max(0, $totalApps - $representedCount);
+
         $counts = [
-            'total'                 => QueueApplication::count(),
+            'total'                 => $totalApps,
+            'self'                  => $selfCount,
+            'represented'           => $representedCount,
             'draft'                 => QueueApplication::where('status', QueueApplication::STATUS_DRAFT)->count(),
             'menunggu_verifikasi'   => QueueApplication::whereIn('status', [QueueApplication::STATUS_SUBMITTED, QueueApplication::STATUS_RESUBMITTED, QueueApplication::STATUS_UNDER_REVIEW])->count(),
             'lolos_verifikasi'      => QueueApplication::whereIn('status', [QueueApplication::STATUS_PRE_VERIFIED, QueueApplication::STATUS_QUEUE_BOOKED])->count(),
@@ -122,9 +155,10 @@ class KtpHandoverController extends Controller
             'counts'              => $counts,
             'draftTimeoutMinutes' => (int) \App\Models\Queue\QueueSetting::get('queue.draft_timeout_minutes', 15),
             'filters'             => [
-                'search'     => $search,
-                'service_id' => $serviceId,
-                'status'     => $status,
+                'search'          => $search,
+                'service_id'      => $serviceId,
+                'status'          => $status,
+                'attendance_type' => $attendanceType,
             ],
         ]);
     }

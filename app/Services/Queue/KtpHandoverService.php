@@ -64,14 +64,39 @@ class KtpHandoverService
             ->limit(8)
             ->get();
 
+        // Applicant management KPI: Who helps apply/manage (Sendiri vs Diwakilkan)
+        $countApplicantRepresented = QueueApplication::where(function ($q) {
+            $q->whereIn('attendance_type', ['family_in_kk', 'family_out_kk', 'other', 'representative', 'PROXY'])
+              ->orWhereNotNull('family_shdk')
+              ->orWhere(function ($sq) {
+                  $sq->whereNotNull('representative_name')->where('representative_name', '!=', '');
+              });
+        })->count();
+
+        $countApplicantTotal = QueueApplication::count();
+        $countApplicantSelf = max(0, $countApplicantTotal - $countApplicantRepresented);
+
+        $pctApplicantSelf = $countApplicantTotal > 0
+            ? round(($countApplicantSelf / $countApplicantTotal) * 100, 1)
+            : 0;
+
+        $pctApplicantRepresented = $countApplicantTotal > 0
+            ? round(($countApplicantRepresented / $countApplicantTotal) * 100, 1)
+            : 0;
+
         return [
-            'count_pending'            => $countPending,
-            'count_ready'              => $countReady,
-            'count_today_handed_over'  => $countTodayHandedOver,
-            'count_month_handed_over'  => $countMonthHandedOver,
-            'count_exception'          => $countException,
-            'weekly_trend'             => $weeklyTrend,
-            'recent_handovers'         => $recentHandovers,
+            'count_pending'                => $countPending,
+            'count_ready'                  => $countReady,
+            'count_today_handed_over'      => $countTodayHandedOver,
+            'count_month_handed_over'      => $countMonthHandedOver,
+            'count_exception'              => $countException,
+            'weekly_trend'                 => $weeklyTrend,
+            'recent_handovers'             => $recentHandovers,
+            'count_applicant_total'        => $countApplicantTotal,
+            'count_applicant_self'         => $countApplicantSelf,
+            'count_applicant_represented'  => $countApplicantRepresented,
+            'pct_applicant_self'           => $pctApplicantSelf,
+            'pct_applicant_represented'    => $pctApplicantRepresented,
         ];
     }
 

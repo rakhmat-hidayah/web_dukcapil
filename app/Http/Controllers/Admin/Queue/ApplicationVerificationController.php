@@ -53,7 +53,13 @@ class ApplicationVerificationController extends Controller
         ];
         $cutoff24h = now()->subHours(24);
 
-        $query = QueueApplication::with(['serviceType', 'slot.schedule', 'documents.serviceDocument', 'selfieVerification.officer']);
+        $query = QueueApplication::with([
+            'serviceType',
+            'slot.schedule',
+            'documents.serviceDocument',
+            'selfieVerification.officer',
+            'applicantAccount',
+        ]);
 
         if ($urgency === 'overdue') {
             $query->whereIn('status', $unverifiedStatuses)
@@ -118,7 +124,8 @@ class ApplicationVerificationController extends Controller
                   ->orWhere('applicant_name', 'like', "%{$search}%")
                   ->orWhere('applicant_nik', 'like', "%{$search}%")
                   ->orWhere('representative_name', 'like', "%{$search}%")
-                  ->orWhere('representative_nik', 'like', "%{$search}%");
+                  ->orWhere('representative_nik', 'like', "%{$search}%")
+                  ->orWhere('family_shdk', 'like', "%{$search}%");
             });
         }
 
@@ -197,6 +204,7 @@ class ApplicationVerificationController extends Controller
             'physicalVerifiedUser',
             'handoverUser',
             'handover',
+            'applicantAccount',
         ])->find($id);
 
         if (!$application) {

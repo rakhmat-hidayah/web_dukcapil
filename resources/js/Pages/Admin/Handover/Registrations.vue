@@ -173,7 +173,7 @@
               Cari Data
             </button>
             <button
-              v-if="searchQuery || selectedService || activeStatus"
+              v-if="searchQuery || selectedService || activeStatus || activeAttendanceType"
               type="button"
               @click="resetFilters"
               class="px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
@@ -206,6 +206,60 @@
               {{ tab.count }}
             </span>
           </button>
+        </div>
+
+        <!-- Attendance / Representation Type Filter Pills -->
+        <div class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60 text-xs">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
+            Metode Pengurusan:
+          </span>
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+            <button
+              type="button"
+              @click="selectAttendanceType('')"
+              :class="[
+                'px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5',
+                !activeAttendanceType
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+              ]"
+            >
+              <span>Semua</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-white/20">
+                {{ counts.total || 0 }}
+              </span>
+            </button>
+            <button
+              type="button"
+              @click="selectAttendanceType('self')"
+              :class="[
+                'px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5',
+                activeAttendanceType === 'self'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 hover:bg-emerald-100'
+              ]"
+            >
+              <span>Mengurus Sendiri</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-emerald-200/60 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-100">
+                {{ counts.self || 0 }}
+              </span>
+            </button>
+            <button
+              type="button"
+              @click="selectAttendanceType('represented')"
+              :class="[
+                'px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5',
+                activeAttendanceType === 'represented'
+                  ? 'bg-amber-600 text-white shadow-xs'
+                  : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 hover:bg-amber-100'
+              ]"
+            >
+              <span>Diwakilkan Keluarga</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-200/60 dark:bg-amber-800 text-amber-800 dark:text-amber-100">
+                {{ counts.represented || 0 }}
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -608,13 +662,14 @@ const props = defineProps({
   },
   filters: {
     type: Object,
-    default: () => ({ search: '', service_id: '', status: '' }),
+    default: () => ({ search: '', service_id: '', status: '', attendance_type: '' }),
   },
 });
 
 const searchQuery = ref(props.filters.search || '');
 const selectedService = ref(props.filters.service_id || '');
 const activeStatus = ref(props.filters.status || '');
+const activeAttendanceType = ref(props.filters.attendance_type || '');
 
 const previewPhotoApp = ref(null);
 
@@ -642,6 +697,11 @@ const selectStatus = (statusVal) => {
   applyFilters();
 };
 
+const selectAttendanceType = (typeVal) => {
+  activeAttendanceType.value = typeVal;
+  applyFilters();
+};
+
 const applyFilters = () => {
   router.get(
     '/admin/handover/registrations',
@@ -649,6 +709,7 @@ const applyFilters = () => {
       search: searchQuery.value || undefined,
       service_id: selectedService.value || undefined,
       status: activeStatus.value || undefined,
+      attendance_type: activeAttendanceType.value || undefined,
     },
     {
       preserveState: true,
@@ -662,6 +723,7 @@ const resetFilters = () => {
   searchQuery.value = '';
   selectedService.value = '';
   activeStatus.value = '';
+  activeAttendanceType.value = '';
   router.get('/admin/handover/registrations', {}, {
     preserveState: true,
     preserveScroll: true,

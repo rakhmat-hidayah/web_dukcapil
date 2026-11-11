@@ -170,6 +170,158 @@
         </Link>
       </div>
 
+      <!-- KPI Siapa yang Membantu Mengurus (Mengurus Sendiri vs Diwakilkan) -->
+      <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-700/60">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center font-bold shadow-2xs shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-bold text-slate-900 dark:text-white text-base">
+                  KPI Pengurusan Pemohon (Siapa yang Membantu Mengurus)
+                </h3>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                  Total {{ stats.count_applicant_total }} Pemohon
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Monitoring rasio warga yang mengurus permohonan KTP-el secara mandiri vs diwakilkan anggota keluarga dalam 1 KK (surat kuasa F-1.07)
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/admin/handover/registrations"
+            class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 shrink-0"
+          >
+            <span>Buka Tabel Registrasi</span>
+            <span>&rarr;</span>
+          </Link>
+        </div>
+
+        <!-- 2 Highlight KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Card 1: Mengurus Sendiri -->
+          <Link
+            :href="'/admin/handover/registrations?attendance_type=self'"
+            class="p-5 rounded-2xl bg-gradient-to-br from-emerald-50/70 via-teal-50/30 to-white dark:from-emerald-950/25 dark:via-slate-800 dark:to-slate-800 border border-emerald-200 dark:border-emerald-800/60 shadow-xs hover:shadow-md hover:border-emerald-400 transition group block"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2.5">
+                <span class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold shadow-2xs">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </span>
+                <div>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-100 block">Mengurus Sendiri</span>
+                  <span class="text-[10px] text-slate-400">Pemilik dokumen langsung</span>
+                </div>
+              </div>
+              <span class="text-xs font-black px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 font-mono border border-emerald-200 dark:border-emerald-700">
+                {{ stats.pct_applicant_self }}%
+              </span>
+            </div>
+
+            <div class="flex items-baseline gap-2 mt-3">
+              <span class="text-3xl font-black text-emerald-700 dark:text-emerald-400 font-mono">
+                {{ stats.count_applicant_self }}
+              </span>
+              <span class="text-xs text-slate-500 font-medium">Pemohon</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-emerald-100 dark:bg-emerald-950/60 rounded-full h-2 mt-3 overflow-hidden">
+              <div
+                class="bg-emerald-500 h-2 rounded-full transition-all duration-700"
+                :style="{ width: `${stats.pct_applicant_self}%` }"
+              ></div>
+            </div>
+
+            <div class="flex items-center justify-between mt-3 pt-2 border-t border-emerald-100 dark:border-emerald-900/40 text-[11px]">
+              <span class="text-slate-400">Pengurusan mandiri</span>
+              <span class="text-emerald-700 dark:text-emerald-400 font-bold group-hover:underline flex items-center gap-1">
+                <span>Filter data</span>
+                <span>&rarr;</span>
+              </span>
+            </div>
+          </Link>
+
+          <!-- Card 2: Diwakilkan Keluarga -->
+          <Link
+            :href="'/admin/handover/registrations?attendance_type=represented'"
+            class="p-5 rounded-2xl bg-gradient-to-br from-amber-50/70 via-orange-50/30 to-white dark:from-amber-950/25 dark:via-slate-800 dark:to-slate-800 border border-amber-200 dark:border-amber-800/60 shadow-xs hover:shadow-md hover:border-amber-400 transition group block"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2.5">
+                <span class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 flex items-center justify-center font-bold shadow-2xs">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </span>
+                <div>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-100 block">Diwakilkan (Keluarga)</span>
+                  <span class="text-[10px] text-slate-400">1 KK / Surat Kuasa F-1.07</span>
+                </div>
+              </div>
+              <span class="text-xs font-black px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/80 text-amber-800 dark:text-amber-200 font-mono border border-amber-200 dark:border-amber-700">
+                {{ stats.pct_applicant_represented }}%
+              </span>
+            </div>
+
+            <div class="flex items-baseline gap-2 mt-3">
+              <span class="text-3xl font-black text-amber-700 dark:text-amber-400 font-mono">
+                {{ stats.count_applicant_represented }}
+              </span>
+              <span class="text-xs text-slate-500 font-medium">Pemohon</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-amber-100 dark:bg-amber-950/60 rounded-full h-2 mt-3 overflow-hidden">
+              <div
+                class="bg-amber-500 h-2 rounded-full transition-all duration-700"
+                :style="{ width: `${stats.pct_applicant_represented}%` }"
+              ></div>
+            </div>
+
+            <div class="flex items-center justify-between mt-3 pt-2 border-t border-amber-100 dark:border-amber-900/40 text-[11px]">
+              <span class="text-slate-400">Mewakili anggota keluarga</span>
+              <span class="text-amber-700 dark:text-amber-400 font-bold group-hover:underline flex items-center gap-1">
+                <span>Filter data</span>
+                <span>&rarr;</span>
+              </span>
+            </div>
+          </Link>
+        </div>
+
+        <!-- Proportional Stacked Bar with Legend -->
+        <div class="pt-2">
+          <div class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-full h-3 overflow-hidden flex shadow-inner">
+            <div
+              class="bg-emerald-500 h-full transition-all duration-700"
+              :style="{ width: `${stats.pct_applicant_self}%` }"
+              :title="`Mengurus Sendiri: ${stats.count_applicant_self} (${stats.pct_applicant_self}%)`"
+            ></div>
+            <div
+              class="bg-amber-500 h-full transition-all duration-700"
+              :style="{ width: `${stats.pct_applicant_represented}%` }"
+              :title="`Diwakilkan: ${stats.count_applicant_represented} (${stats.pct_applicant_represented}%)`"
+            ></div>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mt-2 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+            <div class="flex items-center gap-4">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+                <span>Mengurus Sendiri: <strong>{{ stats.count_applicant_self }}</strong> pemohon ({{ stats.pct_applicant_self }}%)</span>
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span>
+                <span>Diwakilkan Keluarga: <strong>{{ stats.count_applicant_represented }}</strong> pemohon ({{ stats.pct_applicant_represented }}%)</span>
+              </span>
+            </div>
+            <span class="text-slate-400 italic">Total basis data permohonan antrean online KTP-el</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Trend Chart & Quick Overview Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- 7-Day Trend (8 Cols) -->
