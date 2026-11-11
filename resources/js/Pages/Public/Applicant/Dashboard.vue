@@ -12,14 +12,50 @@
           </h1>
         </div>
 
+        <div
+          v-if="$page.props.queue_maintenance?.is_active"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-800 font-bold text-xs self-start sm:self-auto shadow-sm"
+        >
+          <AlertCircle class="w-4 h-4 text-amber-600 shrink-0" />
+          <span>Pengajuan Ditutup Sementara</span>
+        </div>
         <Link
-          v-if="applicant.is_verified && applicant.is_active"
+          v-else-if="applicant.is_verified && applicant.is_active"
           :href="route('queue.apply.create')"
           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg shadow-blue-600/20 cursor-pointer self-start sm:self-auto"
         >
           <Plus class="w-4 h-4" />
           <span>Ajukan Permohonan KTP-el</span>
         </Link>
+      </div>
+
+      <!-- Maintenance Mode Alert Banner for Logged In Applicant -->
+      <div
+        v-if="$page.props.queue_maintenance?.is_active"
+        class="p-4 sm:p-5 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-200 shadow-sm space-y-2 animate-fade-in"
+      >
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+            <AlertCircle class="w-4 h-4" />
+          </div>
+          <div class="space-y-1 flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-rose-600 text-white leading-none">
+                Layanan Ditutup Sementara
+              </span>
+              <span class="text-xs sm:text-sm font-black text-amber-900 dark:text-amber-100">
+                {{ $page.props.queue_maintenance.title || 'Layanan Pendaftaran Online Sedang Dalam Pemeliharaan' }}
+              </span>
+            </div>
+            <p class="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+              {{ $page.props.queue_maintenance.message }}
+            </p>
+            <div v-if="$page.props.queue_maintenance.estimated_end" class="pt-1 flex items-center gap-1.5 text-xs text-amber-900 dark:text-amber-200 font-bold">
+              <Clock class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span>Estimasi Dibuka Kembali: <strong class="underline">{{ $page.props.queue_maintenance.estimated_end }}</strong></span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Friendly Notice for Verified Applicants: Pengajuan Khusus Pemilik Akun & Alasan Kebijakan -->

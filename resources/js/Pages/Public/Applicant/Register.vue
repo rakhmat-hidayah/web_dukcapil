@@ -17,6 +17,35 @@
           </p>
         </div>
 
+        <!-- Maintenance Mode Alert Banner (If Layanan Ditutup) -->
+        <div
+          v-if="$page.props.queue_maintenance?.is_active"
+          class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-200 shadow-sm space-y-2 animate-fade-in"
+        >
+          <div class="flex items-start gap-2.5">
+            <div class="w-7 h-7 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+              <AlertCircle class="w-4 h-4" />
+            </div>
+            <div class="space-y-1 min-w-0 flex-1">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-600 text-white leading-none">
+                  Pendaftaran Ditutup Sementara
+                </span>
+                <span class="text-xs font-black text-amber-900 dark:text-amber-100">
+                  {{ $page.props.queue_maintenance.title || 'Layanan Pendaftaran Sedang Dinonaktifkan' }}
+                </span>
+              </div>
+              <p class="text-[11px] sm:text-xs leading-relaxed text-amber-800 dark:text-amber-300">
+                {{ $page.props.queue_maintenance.message }}
+              </p>
+              <div v-if="$page.props.queue_maintenance.estimated_end" class="pt-1 flex items-center gap-1.5 text-[10px] sm:text-[11px] text-amber-900 dark:text-amber-200 font-bold">
+                <Clock class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span>Estimasi Dibuka: <strong class="underline">{{ $page.props.queue_maintenance.estimated_end }}</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <form @submit.prevent="submitRegister" class="space-y-3 sm:space-y-4">
           <!-- NIK Input -->
           <div class="space-y-1">
@@ -181,7 +210,12 @@
             />
           </div>
 
+          <div v-if="$page.props.queue_maintenance?.is_active" class="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-center font-bold text-xs text-amber-800 dark:text-amber-200 flex items-center justify-center gap-2 mt-1">
+            <Lock class="w-4 h-4 text-amber-600 shrink-0" />
+            <span>Pendaftaran Akun Baru Ditutup Sementara</span>
+          </div>
           <button
+            v-else
             type="submit"
             :disabled="form.processing"
             class="w-full py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm transition shadow-md shadow-emerald-600/20 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-1"
@@ -207,7 +241,7 @@
 import { computed, onMounted } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
-import { ArrowRight, UserPlus, Sparkles, X } from '@lucide/vue'
+import { ArrowRight, UserPlus, Sparkles, X, AlertCircle, Clock, Lock } from '@lucide/vue'
 
 onMounted(() => {
   if (typeof window !== 'undefined') {

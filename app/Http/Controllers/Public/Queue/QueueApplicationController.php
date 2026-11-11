@@ -429,6 +429,11 @@ class QueueApplicationController extends Controller
      */
     public function submit(Request $request, string $regNumber): RedirectResponse
     {
+        if (\App\Models\Queue\QueueSetting::get('queue.maintenance_mode', '0') === '1') {
+            return redirect()->route('queue.apply.create')
+                ->with('error', 'Layanan pendaftaran online sedang dalam pemeliharaan sistem sementara.');
+        }
+
         \App\Services\Queue\QueueApplicationService::ensureSelfieRequirementForPerekaman();
 
         $application = QueueApplication::where('reg_number', $regNumber)

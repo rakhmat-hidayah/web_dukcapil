@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public\Applicant;
 use App\Http\Controllers\Controller;
 use App\Models\Applicant\ApplicantAccount;
 use App\Models\Applicant\ApplicantDeviceAuditLog;
+use App\Models\Queue\QueueSetting;
 use App\Services\Applicant\ApplicantDeviceService;
 use App\Services\Applicant\ApplicantOtpService;
 use Illuminate\Http\RedirectResponse;
@@ -32,6 +33,11 @@ class ApplicantAuthController extends Controller
             return redirect()->route('applicant.dashboard');
         }
 
+        if (QueueSetting::get('queue.maintenance_mode', '0') === '1') {
+            return redirect()->route('applicant.login')
+                ->with('warning', 'Pendaftaran akun pemohon baru sedang ditutup sementara karena layanan online sedang dalam pemeliharaan sistem.');
+        }
+
         return Inertia::render('Public/Applicant/Register');
     }
 
@@ -40,6 +46,11 @@ class ApplicantAuthController extends Controller
      */
     public function register(Request $request): RedirectResponse
     {
+        if (QueueSetting::get('queue.maintenance_mode', '0') === '1') {
+            return redirect()->route('applicant.login')
+                ->with('error', 'Pendaftaran akun pemohon baru sedang ditutup sementara karena layanan online sedang dalam pemeliharaan sistem.');
+        }
+
         // 1. Sanitize demographic and email inputs
         $rawNik = preg_replace('/\D/', '', (string) $request->input('nik'));
         $rawEmail = strtolower(trim((string) $request->input('email')));
