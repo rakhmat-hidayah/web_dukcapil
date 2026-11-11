@@ -592,7 +592,8 @@ const isQueueOrApplicantFlow = computed(() => {
   return url.startsWith('/layanan') || 
          url.startsWith('/pemohon') ||
          url.startsWith('/antrian') ||
-         url.startsWith('/queue');
+         url.startsWith('/queue') ||
+         url.startsWith('/pengaduan');
 });
 
 const shouldHideHeaderExtras = computed(() => {

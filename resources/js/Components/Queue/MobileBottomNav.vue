@@ -14,16 +14,16 @@
           <span>Layanan</span>
         </button>
 
-        <!-- 2. Syarat -->
-        <button
-          type="button"
-          @click="handleSyaratClick"
+        <!-- 2. Pengaduan -->
+        <Link
+          :href="route('public.complaint.create')"
+          @click="handlePengaduanClick"
           class="flex flex-col items-center py-1 transition cursor-pointer"
-          :class="isSyaratActive ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'"
+          :class="isPengaduanActive ? 'text-blue-600 dark:text-blue-400 font-extrabold' : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400'"
         >
-          <ClipboardList class="w-5 h-5 mb-0.5" />
-          <span>Syarat</span>
-        </button>
+          <MessageSquareWarning class="w-5 h-5 mb-0.5" />
+          <span>Pengaduan</span>
+        </Link>
 
         <!-- 3. Lacak -->
         <button
@@ -70,159 +70,6 @@
         </Link>
       </div>
     </nav>
-
-    <!-- MODAL PERSYARATAN BERKAS KTP-EL -->
-    <Teleport to="body">
-      <div
-        v-if="showRequirementsModal"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200"
-        @click.self="showRequirementsModal = false"
-      >
-        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl rounded-b-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 mb-[calc(56px+env(safe-area-inset-bottom,0px))] sm:mb-0 max-h-[calc(85vh-56px)] sm:max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
-          <!-- Modal Header -->
-          <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
-            <div class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                <ClipboardList class="w-5 h-5" />
-              </div>
-              <div>
-                <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white leading-tight">
-                  Persyaratan Berkas KTP-el
-                </h3>
-                <span class="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">
-                  Disdukcapil Kabupaten Dompu
-                </span>
-              </div>
-            </div>
-            <button
-              type="button"
-              @click="showRequirementsModal = false"
-              class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition cursor-pointer"
-            >
-              <X class="w-4 h-4" />
-            </button>
-          </div>
-
-          <!-- Modal Body: Daftar Layanan & Persyaratan (Sync Otomatis dengan CMS) -->
-          <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs">
-            <div
-              v-if="!queueServices || queueServices.length === 0"
-              class="py-8 text-center text-slate-400"
-            >
-              <p>Memuat informasi persyaratan layanan...</p>
-            </div>
-
-            <div
-              v-for="srv in queueServices"
-              :key="srv.id"
-              class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-3"
-            >
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2 min-w-0">
-                  <span
-                    class="w-2.5 h-2.5 rounded-full shrink-0"
-                    :style="{ backgroundColor: srv.color || '#2563eb' }"
-                  ></span>
-                  <h4 class="font-black text-sm text-slate-900 dark:text-white truncate">
-                    {{ srv.name }}
-                  </h4>
-                </div>
-                <span
-                  v-if="srv.short_description"
-                  class="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 shrink-0"
-                >
-                  {{ srv.short_description }}
-                </span>
-              </div>
-
-              <!-- List Persyaratan Dokumen dari CMS -->
-              <ul class="space-y-2 text-slate-700 dark:text-slate-300">
-                <li
-                  v-for="doc in srv.documents"
-                  :key="doc.id"
-                  class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-                >
-                  <div class="flex items-start gap-2 min-w-0">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div class="space-y-0.5">
-                      <div class="flex items-center gap-1.5 flex-wrap">
-                        <span class="font-bold text-slate-900 dark:text-slate-100">{{ doc.label }}</span>
-                        <span
-                          :class="[
-                            'text-[10px] font-bold',
-                            doc.is_required
-                              ? 'text-rose-500 font-bold'
-                              : 'text-slate-500 dark:text-slate-400'
-                          ]"
-                        >
-                          {{ doc.is_required ? '(Wajib)' : '(Opsional)' }}
-                        </span>
-                        <span
-                          v-if="doc.applicable_to && doc.applicable_to !== 'all'"
-                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
-                        >
-                          {{ doc.applicable_to === 'representative_only' ? 'Khusus Perwakilan' : 'Khusus Pemohon Langsung' }}
-                        </span>
-                      </div>
-                      <p v-if="doc.description" class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                        {{ doc.description }}
-                      </p>
-                    </div>
-                  </div>
-
-                  <!-- Download Blanko / Formulir Button -->
-                  <a
-                    v-if="getDownloadLink(doc)"
-                    :href="getDownloadLink(doc)"
-                    target="_blank"
-                    download
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-xs shrink-0 self-start sm:self-auto cursor-pointer"
-                  >
-                    <FileDown class="w-3.5 h-3.5" />
-                    <span>{{ getDownloadButtonLabel(doc) }}</span>
-                  </a>
-                </li>
-              </ul>
-
-              <div class="pt-1 flex justify-end">
-                <span
-                  v-if="$page.props.queue_maintenance?.is_active"
-                  class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 py-1"
-                >
-                  <Lock class="w-3.5 h-3.5" />
-                  <span>Pendaftaran Ditutup Sementara</span>
-                </span>
-                <Link
-                  v-else
-                  :href="route('queue.apply.create', { layanan: srv.slug })"
-                  @click="showRequirementsModal = false"
-                  class="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  <span>Daftar Layanan Ini &rarr;</span>
-                </Link>
-              </div>
-            </div>
-
-            <!-- Download Surat Kuasa F-1.07 jika diwakilkan -->
-            <div class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 flex items-center justify-between gap-2">
-              <div class="space-y-0.5">
-                <span class="font-bold text-slate-900 dark:text-white block">Diwakilkan Keluarga?</span>
-                <span class="text-[11px] text-slate-600 dark:text-slate-400 block">Unduh blanko Surat Kuasa F-1.07</span>
-              </div>
-              <a
-                href="/downloads/stream/24"
-                target="_blank"
-                download
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-xs shrink-0 cursor-pointer"
-              >
-                <FileDown class="w-3.5 h-3.5" />
-                <span>Formulir F-1.07</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Teleport>
 
     <!-- MODAL LACAK STATUS PERMOHONAN -->
     <Teleport to="body">
@@ -395,47 +242,18 @@ import { ref, computed } from 'vue'
 import { Link, router, usePage, useForm } from '@inertiajs/vue3'
 import {
   CreditCard,
-  ClipboardList,
+  MessageSquareWarning,
   Search,
   FolderClock,
   UserCheck,
   LogIn,
   X,
-  FileDown,
   Lock,
 } from '@lucide/vue'
 
 const page = usePage()
 
-const showRequirementsModal = ref(false)
 const showTrackingModal = ref(false)
-
-const queueServices = computed(() => {
-  return page.props.queue_services || page.props.services || []
-})
-
-function getDownloadButtonLabel(doc) {
-  const label = (doc?.label || '').toLowerCase()
-  if (label.includes('f-1.02') || label.includes('f1.02')) return 'Download Formulir F-1.02'
-  if (label.includes('f-1.07') || label.includes('f1.07') || label.includes('kuasa')) return 'Download Formulir F-1.07'
-  if (label.includes('f-1.06') || label.includes('f1.06') || label.includes('perubahan')) return 'Download Formulir F-1.06'
-  return 'Download Formulir'
-}
-
-function getDownloadLink(doc) {
-  if (doc?.template_url) return doc.template_url
-  const label = (doc?.label || '').toLowerCase()
-  if (label.includes('f-1.02') || label.includes('f1.02') || label.includes('pendaftaran peristiwa')) {
-    return '/downloads/stream/19'
-  }
-  if (label.includes('f-1.07') || label.includes('f1.07') || label.includes('kuasa')) {
-    return '/downloads/stream/24'
-  }
-  if (label.includes('f-1.06') || label.includes('f1.06') || label.includes('perubahan elemen')) {
-    return '/downloads/stream/23'
-  }
-  return null
-}
 
 const trackingForm = useForm({
   query: '',
@@ -454,36 +272,38 @@ const isApplicantLoggedIn = computed(() => !!page.props.auth?.applicant)
 
 const currentUrl = computed(() => page.url || '')
 
-const isSyaratActive = computed(() => {
-  return showRequirementsModal.value || currentUrl.value === '/layanan' || currentUrl.value.startsWith('/layanan?')
+const isPengaduanActive = computed(() => {
+  if (showTrackingModal.value) return false
+  return currentUrl.value.startsWith('/pengaduan')
 })
 
 const isLayananActive = computed(() => {
-  if (showRequirementsModal.value || showTrackingModal.value) return false
+  if (showTrackingModal.value) return false
   const url = currentUrl.value
   return (
     url === '/layanan/antrian' ||
     url.startsWith('/layanan/antrian?') ||
     url.startsWith('/layanan/antrian-ktpel') ||
-    url.startsWith('/layanan/antrian/daftar')
+    url.startsWith('/layanan/antrian/daftar') ||
+    url === '/layanan' ||
+    url.startsWith('/layanan?')
   )
 })
 
 const isTrackingActive = computed(() => {
-  if (showRequirementsModal.value) return false
   if (showTrackingModal.value) return true
   const url = currentUrl.value
   return url.startsWith('/layanan/antrian/status') || url.startsWith('/lacak')
 })
 
 const isRiwayatActive = computed(() => {
-  if (showRequirementsModal.value || showTrackingModal.value) return false
+  if (showTrackingModal.value) return false
   const url = currentUrl.value
   return url.startsWith('/layanan/antrian/riwayat')
 })
 
 const isAkunActive = computed(() => {
-  if (showRequirementsModal.value || showTrackingModal.value) return false
+  if (showTrackingModal.value) return false
   const url = currentUrl.value
   return (
     url.startsWith('/layanan/pemohon') ||
@@ -491,23 +311,19 @@ const isAkunActive = computed(() => {
   )
 })
 
-function handleSyaratClick() {
+function handlePengaduanClick() {
   showTrackingModal.value = false
-  showRequirementsModal.value = !showRequirementsModal.value
 }
 
 function handleLacakClick() {
-  showRequirementsModal.value = false
   showTrackingModal.value = !showTrackingModal.value
 }
 
 function handleAkunClick() {
-  showRequirementsModal.value = false
   showTrackingModal.value = false
 }
 
 function handleLayananClick() {
-  showRequirementsModal.value = false
   showTrackingModal.value = false
   const url = currentUrl.value
   if (url === '/layanan/antrian' || url.startsWith('/layanan/antrian-ktpel')) {
@@ -518,7 +334,6 @@ function handleLayananClick() {
 }
 
 function handleRiwayatClick() {
-  showRequirementsModal.value = false
   showTrackingModal.value = false
   if (isApplicantLoggedIn.value) {
     const el = document.getElementById('riwayat') || document.getElementById('riwayat-section')
