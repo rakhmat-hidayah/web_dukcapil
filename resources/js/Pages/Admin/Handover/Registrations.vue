@@ -265,28 +265,28 @@
 
       <!-- Main Applications Table -->
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-        <div class="overflow-x-auto scrollbar-thin">
-          <table class="w-full text-left text-xs">
+        <div class="overflow-x-auto scrollbar-thin pb-2">
+          <table class="w-full text-left text-xs min-w-[1280px]">
             <thead class="bg-slate-50 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700 select-none">
               <tr>
-                <th class="px-3.5 py-3.5 whitespace-nowrap">No. Registrasi / Antrean</th>
-                <th class="px-3.5 py-3.5">Data Pemohon</th>
-                <th class="px-3.5 py-3.5">Pemilik Dokumen</th>
-                <th class="px-3 py-3.5 text-center whitespace-nowrap">Hubungan (SHDK)</th>
-                <th class="px-3 py-3.5 whitespace-nowrap">Jenis Layanan</th>
-                <th class="px-3 py-3.5 whitespace-nowrap">Status Berkas</th>
-                <th class="px-3 py-3.5 whitespace-nowrap">Status Fisik (Loket)</th>
-                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-3.5 py-3.5 text-right whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)]">Aksi</th>
+                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[155px]">No. Registrasi / Antrean</th>
+                <th class="px-3.5 py-3.5 min-w-[155px]">Data Pemohon</th>
+                <th class="px-3.5 py-3.5 min-w-[155px]">Pemilik Dokumen</th>
+                <th class="px-3 py-3.5 text-center whitespace-nowrap min-w-[120px]">Hubungan (SHDK)</th>
+                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[180px]">Jenis Layanan</th>
+                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[150px]">Status Berkas</th>
+                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[185px]">Status Fisik (Loket)</th>
+                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-3.5 py-3.5 text-right whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] min-w-[130px]">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium text-slate-700 dark:text-slate-200">
               <tr
                 v-for="app in applications.data"
                 :key="app.id"
-                class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition border-b border-slate-100 dark:border-slate-700/60"
+                class="group hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition border-b border-slate-100 dark:border-slate-700/60"
               >
                 <!-- No Registrasi & Antrean -->
-                <td class="px-3.5 py-3 whitespace-nowrap">
+                <td class="px-3.5 py-3 whitespace-nowrap min-w-[155px]">
                   <div class="font-mono font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <span>{{ app.reg_number }}</span>
                     <span
@@ -302,7 +302,7 @@
                 </td>
 
                 <!-- Data Pemohon (Akun Pendaftar / Perwakilan) -->
-                <td class="px-3.5 py-3 min-w-[150px]">
+                <td class="px-3.5 py-3 min-w-[155px]">
                   <div class="min-w-0">
                     <div class="flex items-center gap-1.5 flex-wrap">
                       <span class="font-bold text-slate-900 dark:text-white truncate max-w-[160px]" :title="getApplicantName(app)">
@@ -329,7 +329,7 @@
                 </td>
 
                 <!-- Pemilik Dokumen (Yang Bersangkutan / YBS KTP-el) -->
-                <td class="px-3.5 py-3 min-w-[150px]">
+                <td class="px-3.5 py-3 min-w-[155px]">
                   <div class="min-w-0">
                     <div v-if="isRepresented(app)">
                       <div class="flex items-center gap-1.5 flex-wrap">
@@ -364,7 +364,7 @@
                 </td>
 
                 <!-- Status Hubungan Dalam Keluarga (SHDK) -->
-                <td class="px-3 py-3 text-center whitespace-nowrap min-w-[110px]">
+                <td class="px-3 py-3 text-center whitespace-nowrap min-w-[120px]">
                   <div v-if="isRepresented(app)" class="inline-flex flex-col items-center">
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
                       {{ getFamilyShdk(app) }}
@@ -379,14 +379,14 @@
                 </td>
 
                 <!-- Jenis Layanan -->
-                <td class="px-3 py-3 whitespace-nowrap">
+                <td class="px-3.5 py-3 whitespace-nowrap min-w-[180px]">
                   <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold">
                     {{ app.service_type?.name || 'Pelayanan KTP-el' }}
                   </span>
                 </td>
 
                 <!-- Status Berkas Administrasi -->
-                <td class="px-3 py-3 whitespace-nowrap">
+                <td class="px-3.5 py-3 whitespace-nowrap min-w-[150px]">
                   <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping shrink-0"></span>
                     <span>Draf (Sisa {{ app.draft_remaining_minutes !== undefined ? app.draft_remaining_minutes : draftTimeoutMinutes }} mnt)</span>
@@ -395,7 +395,7 @@
                 </td>
 
                 <!-- Status Fisik KTP-el di Loket Serah Terima -->
-                <td class="px-3 py-3 whitespace-nowrap">
+                <td class="px-3.5 py-3 whitespace-nowrap min-w-[185px]">
                   <div v-if="app.status === 'DRAFT'">
                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
                       Masa Pengisian Berkas
@@ -460,7 +460,7 @@
                 </td>
 
                 <!-- Actions (Sticky right column) -->
-                <td class="sticky right-0 z-10 bg-white dark:bg-slate-800 px-3.5 py-3 text-right whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.06)]">
+                <td class="sticky right-0 z-10 bg-white group-hover:bg-slate-50/90 dark:bg-slate-800 dark:group-hover:bg-slate-700/80 px-3.5 py-3 text-right whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.06)] min-w-[130px]">
                   <div class="flex items-center justify-end gap-1.5">
                     <!-- Direct Serah Terima Action if Handover item exists -->
                     <Link
