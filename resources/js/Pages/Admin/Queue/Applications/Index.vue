@@ -243,8 +243,6 @@
               <tr>
                 <th class="px-4 py-3.5 whitespace-nowrap">No. Registrasi / Antrian</th>
                 <th class="px-4 py-3.5">Foto & Data Pemohon</th>
-                <th class="px-4 py-3.5">Pemilik Dokumen</th>
-                <th class="px-4 py-3.5">Status Hubungan (SHDK)</th>
                 <th class="px-3.5 py-3.5">Jenis Layanan</th>
                 <th class="px-3.5 py-3.5 whitespace-nowrap">Jadwal Pelayanan</th>
                 <th class="px-3.5 py-3.5 text-center whitespace-nowrap">Status</th>
