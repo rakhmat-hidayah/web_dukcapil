@@ -517,35 +517,106 @@
           </table>
         </div>
 
-        <!-- Pagination -->
+        <!-- Pagination with Per-Page Selector & Clean Page Numbers -->
         <div
-          v-if="applications.links && applications.links.length > 3"
-          class="px-5 py-4 border-t border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-center justify-between gap-3"
+          v-if="applications.total > 0"
+          class="px-4 py-3.5 border-t border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-center justify-between gap-3 select-none"
         >
-          <div class="text-xs text-slate-500 text-center sm:text-left">
-            Menampilkan {{ applications.from || 0 }} - {{ applications.to || 0 }} dari total {{ applications.total }} pendaftaran
+          <!-- Info & Per-Page Selector -->
+          <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+            <span>
+              Menampilkan <span class="font-bold text-slate-700 dark:text-slate-200">{{ applications.from || 0 }}</span> -
+              <span class="font-bold text-slate-700 dark:text-slate-200">{{ applications.to || 0 }}</span> dari total
+              <span class="font-bold text-slate-700 dark:text-slate-200">{{ applications.total }}</span> pendaftar
+            </span>
+            <div class="hidden sm:flex items-center gap-1.5 pl-3 border-l border-slate-200 dark:border-slate-700">
+              <span class="text-[11px] text-slate-400">Tampilkan:</span>
+              <select
+                v-model="perPage"
+                @change="changePerPage"
+                class="px-2 py-1 text-xs font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+              >
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
           </div>
-          <div class="w-full sm:w-auto flex items-center justify-start sm:justify-end gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-thin">
-            <template v-for="(link, i) in applications.links" :key="i">
+
+          <!-- Page Buttons -->
+          <div
+            v-if="applications.links && applications.links.length > 3"
+            class="flex items-center gap-1 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-thin"
+          >
+            <!-- Tombol Sebelumnya -->
+            <Link
+              v-if="applications.prev_page_url"
+              :href="applications.prev_page_url"
+              preserve-scroll
+              preserve-state
+              class="h-8 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs cursor-pointer active:scale-95"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              <span>Prev</span>
+            </Link>
+            <span
+              v-else
+              class="h-8 px-2.5 rounded-lg text-xs font-medium text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 cursor-not-allowed flex items-center gap-1 opacity-60"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              <span>Prev</span>
+            </span>
+
+            <!-- Nomor Halaman -->
+            <template v-for="(link, i) in numericLinks" :key="i">
+              <span
+                v-if="link.label === '...'"
+                class="w-8 h-8 flex items-center justify-center text-xs text-slate-400 font-bold"
+              >
+                ...
+              </span>
               <Link
-                v-if="link.url"
+                v-else-if="link.url"
                 :href="link.url"
                 preserve-scroll
                 preserve-state
                 :class="[
-                  'min-w-[36px] h-9 px-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center shrink-0 cursor-pointer active:scale-95 touch-manipulation',
+                  'w-8 h-8 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer active:scale-95',
                   link.active
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200'
+                    ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-500'
+                    : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs'
                 ]"
-                v-html="link.label"
-              />
+              >
+                {{ link.label }}
+              </Link>
               <span
                 v-else
-                class="min-w-[36px] h-9 px-2.5 rounded-lg text-xs font-medium text-slate-400 cursor-not-allowed opacity-50 flex items-center justify-center shrink-0 select-none"
-                v-html="link.label"
-              />
+                class="w-8 h-8 rounded-lg text-xs font-bold flex items-center justify-center text-slate-400 bg-slate-100 dark:bg-slate-800 cursor-not-allowed"
+              >
+                {{ link.label }}
+              </span>
             </template>
+
+            <!-- Tombol Berikutnya -->
+            <Link
+              v-if="applications.next_page_url"
+              :href="applications.next_page_url"
+              preserve-scroll
+              preserve-state
+              class="h-8 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs cursor-pointer active:scale-95"
+            >
+              <span>Next</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </Link>
+            <span
+              v-else
+              class="h-8 px-2.5 rounded-lg text-xs font-medium text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 cursor-not-allowed flex items-center gap-1 opacity-60"
+            >
+              <span>Next</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </span>
           </div>
         </div>
       </div>
@@ -839,6 +910,16 @@ const activeStatus = ref(props.filters?.status || '')
 const activeUrgency = ref(props.filters?.urgency || '')
 const searchQuery = ref(props.filters?.search || '')
 const selectedService = ref(props.filters?.service_id || '')
+const perPage = ref(String(props.filters?.per_page || 15))
+
+const numericLinks = computed(() => {
+  if (!props.applications?.links || props.applications.links.length <= 2) return []
+  return props.applications.links.slice(1, -1)
+})
+
+const changePerPage = () => {
+  applyFilters()
+}
 
 const statusTabs = computed(() => [
   { label: 'Menunggu Verifikasi', value: 'SUBMITTED', count: props.statusCounts?.SUBMITTED || 0 },
@@ -886,6 +967,7 @@ const applyFilters = () => {
       urgency: activeUrgency.value || undefined,
       search: searchQuery.value || undefined,
       service_id: selectedService.value || undefined,
+      per_page: perPage.value !== '15' ? perPage.value : undefined,
     },
     { preserveState: true, replace: true }
   )
@@ -896,6 +978,7 @@ const resetFilters = () => {
   activeUrgency.value = ''
   searchQuery.value = ''
   selectedService.value = ''
+  perPage.value = '15'
   router.get(route('admin.queue.applications.index'), {}, { preserveState: true, replace: true })
 }
 

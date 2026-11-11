@@ -129,7 +129,12 @@ class ApplicationVerificationController extends Controller
             });
         }
 
-        $applications = $query->paginate(15)->withQueryString();
+        $perPage = (int) $request->query('per_page', 15);
+        if (!in_array($perPage, [10, 15, 25, 50, 100], true)) {
+            $perPage = 15;
+        }
+
+        $applications = $query->paginate($perPage)->withQueryString();
 
         // Real aggregated counts for badge tabs
         $statusCounts = [
@@ -186,6 +191,7 @@ class ApplicationVerificationController extends Controller
                 'urgency'    => $urgency,
                 'service_id' => $serviceId,
                 'search'     => $search,
+                'per_page'   => $perPage,
             ],
         ]);
     }

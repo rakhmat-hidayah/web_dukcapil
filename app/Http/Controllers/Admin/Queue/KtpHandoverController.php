@@ -121,7 +121,12 @@ class KtpHandoverController extends Controller
             }
         }
 
-        $applications = $query->paginate(15)->withQueryString();
+        $perPage = (int) $request->query('per_page', 15);
+        if (!in_array($perPage, [10, 15, 25, 50, 100], true)) {
+            $perPage = 15;
+        }
+
+        $applications = $query->paginate($perPage)->withQueryString();
 
         $services = ServiceType::active()->orderBy('sort_order')->get(['id', 'name']);
 
@@ -159,6 +164,7 @@ class KtpHandoverController extends Controller
                 'service_id'      => $serviceId,
                 'status'          => $status,
                 'attendance_type' => $attendanceType,
+                'per_page'        => $perPage,
             ],
         ]);
     }

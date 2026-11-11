@@ -265,18 +265,18 @@
 
       <!-- Main Applications Table -->
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto scrollbar-thin">
           <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700">
+            <thead class="bg-slate-50 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700 select-none">
               <tr>
-                <th class="px-5 py-4">No. Registrasi / Antrean</th>
-                <th class="px-5 py-4">Data Pemohon</th>
-                <th class="px-5 py-4">Pemilik Dokumen</th>
-                <th class="px-5 py-4">Status Hubungan (SHDK)</th>
-                <th class="px-5 py-4">Jenis Layanan</th>
-                <th class="px-5 py-4">Status Berkas</th>
-                <th class="px-5 py-4">Status Fisik KTP (Loket)</th>
-                <th class="px-5 py-4 text-right">Aksi</th>
+                <th class="px-3.5 py-3.5 whitespace-nowrap">No. Registrasi / Antrean</th>
+                <th class="px-3.5 py-3.5">Data Pemohon</th>
+                <th class="px-3.5 py-3.5">Pemilik Dokumen</th>
+                <th class="px-3 py-3.5 text-center whitespace-nowrap">Hubungan (SHDK)</th>
+                <th class="px-3 py-3.5 whitespace-nowrap">Jenis Layanan</th>
+                <th class="px-3 py-3.5 whitespace-nowrap">Status Berkas</th>
+                <th class="px-3 py-3.5 whitespace-nowrap">Status Fisik (Loket)</th>
+                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-3.5 py-3.5 text-right whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)]">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium text-slate-700 dark:text-slate-200">
@@ -286,8 +286,8 @@
                 class="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition border-b border-slate-100 dark:border-slate-700/60"
               >
                 <!-- No Registrasi & Antrean -->
-                <td class="px-5 py-3.5 whitespace-nowrap">
-                  <div class="font-mono font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <td class="px-3.5 py-3 whitespace-nowrap">
+                  <div class="font-mono font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <span>{{ app.reg_number }}</span>
                     <span
                       v-if="app.queue_number"
@@ -302,10 +302,10 @@
                 </td>
 
                 <!-- Data Pemohon (Akun Pendaftar / Perwakilan) -->
-                <td class="px-5 py-3.5">
+                <td class="px-3.5 py-3 min-w-[150px]">
                   <div class="min-w-0">
                     <div class="flex items-center gap-1.5 flex-wrap">
-                      <span class="font-bold text-slate-900 dark:text-white truncate max-w-[170px]" :title="getApplicantName(app)">
+                      <span class="font-bold text-slate-900 dark:text-white truncate max-w-[160px]" :title="getApplicantName(app)">
                         {{ getApplicantName(app) }}
                       </span>
                       <span
@@ -322,64 +322,71 @@
                         Diri Sendiri
                       </span>
                     </div>
-                    <div class="font-mono text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                    <div class="font-mono text-[10.5px] text-slate-400 flex items-center gap-2 mt-0.5">
                       <span>NIK: {{ maskNik(getApplicantNik(app)) }}</span>
                     </div>
                   </div>
                 </td>
 
                 <!-- Pemilik Dokumen (Yang Bersangkutan / YBS KTP-el) -->
-                <td class="px-5 py-3.5">
+                <td class="px-3.5 py-3 min-w-[150px]">
                   <div class="min-w-0">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                      <span class="font-bold text-slate-900 dark:text-white truncate max-w-[170px]" :title="getDocumentOwnerName(app)">
-                        {{ getDocumentOwnerName(app) }}
-                      </span>
-                      <span
-                        v-if="isRepresented(app)"
-                        class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0"
-                        title="Pemilik Dokumen KTP-el"
-                      >
-                        Pemilik KTP
-                      </span>
-                      <span
-                        v-else
-                        class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0"
-                      >
-                        Sama dgn Pemohon
-                      </span>
+                    <div v-if="isRepresented(app)">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-bold text-slate-900 dark:text-white truncate max-w-[160px]" :title="getDocumentOwnerName(app)">
+                          {{ getDocumentOwnerName(app) }}
+                        </span>
+                        <span
+                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0"
+                          title="Pemilik Dokumen KTP-el"
+                        >
+                          Pemilik KTP
+                        </span>
+                      </div>
+                      <div class="font-mono text-[10.5px] text-slate-400 mt-0.5">
+                        NIK: {{ maskNik(getDocumentOwnerNik(app)) }}
+                      </div>
                     </div>
-                    <div class="font-mono text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
-                      <span>NIK: {{ maskNik(getDocumentOwnerNik(app)) }}</span>
+                    <div v-else>
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[150px]" :title="getDocumentOwnerName(app)">
+                          {{ getDocumentOwnerName(app) }}
+                        </span>
+                        <span class="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0">
+                          Sama dgn Pemohon
+                        </span>
+                      </div>
+                      <div class="font-mono text-[10.5px] text-slate-400 mt-0.5">
+                        NIK: {{ maskNik(getDocumentOwnerNik(app)) }}
+                      </div>
                     </div>
                   </div>
                 </td>
 
                 <!-- Status Hubungan Dalam Keluarga (SHDK) -->
-                <td class="px-5 py-3.5 whitespace-nowrap">
-                  <div v-if="isRepresented(app)">
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-black uppercase bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
+                <td class="px-3 py-3 text-center whitespace-nowrap min-w-[110px]">
+                  <div v-if="isRepresented(app)" class="inline-flex flex-col items-center">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
                       {{ getFamilyShdk(app) }}
                     </span>
-                    <span class="block text-[10px] text-slate-400 mt-0.5 font-medium">
+                    <span class="text-[9px] text-slate-400 mt-0.5 font-medium">
                       {{ app.representative_kk_status === 'same_kk' || !app.representative_kk_status ? 'Dalam 1 KK' : 'Luar KK' }}
                     </span>
                   </div>
-                  <div v-else class="text-slate-400">
-                    <span class="font-mono text-xs font-bold">-</span>
-                    <span class="block text-[10px] text-slate-400 italic">Diri Sendiri</span>
+                  <div v-else class="text-slate-400 text-center">
+                    <span class="font-mono text-xs text-slate-300 dark:text-slate-600">-</span>
                   </div>
                 </td>
 
                 <!-- Jenis Layanan -->
-                <td class="px-5 py-3.5 whitespace-nowrap">
+                <td class="px-3 py-3 whitespace-nowrap">
                   <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold">
                     {{ app.service_type?.name || 'Pelayanan KTP-el' }}
                   </span>
                 </td>
 
                 <!-- Status Berkas Administrasi -->
-                <td class="px-5 py-3.5 whitespace-nowrap">
+                <td class="px-3 py-3 whitespace-nowrap">
                   <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping shrink-0"></span>
                     <span>Draf (Sisa {{ app.draft_remaining_minutes !== undefined ? app.draft_remaining_minutes : draftTimeoutMinutes }} mnt)</span>
@@ -388,7 +395,7 @@
                 </td>
 
                 <!-- Status Fisik KTP-el di Loket Serah Terima -->
-                <td class="px-5 py-3.5 whitespace-nowrap">
+                <td class="px-3 py-3 whitespace-nowrap">
                   <div v-if="app.status === 'DRAFT'">
                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
                       Masa Pengisian Berkas
@@ -452,8 +459,8 @@
                   </div>
                 </td>
 
-                <!-- Actions -->
-                <td class="px-5 py-3.5 text-right whitespace-nowrap">
+                <!-- Actions (Sticky right column) -->
+                <td class="sticky right-0 z-10 bg-white dark:bg-slate-800 px-3.5 py-3 text-right whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.06)]">
                   <div class="flex items-center justify-end gap-1.5">
                     <!-- Direct Serah Terima Action if Handover item exists -->
                     <Link
@@ -486,33 +493,110 @@
 
         <!-- Pagination Controls -->
         <div
-          v-if="applications.links && applications.links.length > 3"
-          class="px-5 py-4 border-t border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-center justify-between gap-3"
+          v-if="applications.total > 0"
+          class="px-5 py-4 border-t border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/30"
         >
-          <div class="text-xs text-slate-500 text-center sm:text-left">
-            Menampilkan {{ applications.from || 0 }} - {{ applications.to || 0 }} dari total {{ applications.total }} pemohon terdaftar
+          <!-- Info Paginasi & Pilihan Baris -->
+          <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+            <div>
+              Menampilkan
+              <span class="font-bold text-slate-800 dark:text-white">{{ applications.from || 0 }}</span>
+              -
+              <span class="font-bold text-slate-800 dark:text-white">{{ applications.to || 0 }}</span>
+              dari total
+              <span class="font-bold text-blue-600 dark:text-blue-400">{{ applications.total }}</span>
+              pendaftar
+            </div>
+
+            <!-- Per-Page Selector -->
+            <div class="flex items-center gap-1.5 pl-3 border-l border-slate-200 dark:border-slate-700">
+              <span class="text-[11px] text-slate-400">Tampilkan:</span>
+              <select
+                v-model="perPage"
+                @change="changePerPage"
+                class="px-2 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer shadow-2xs"
+              >
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
           </div>
-          <div class="w-full sm:w-auto flex items-center justify-start sm:justify-end gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-thin select-none touch-pan-x">
-            <template v-for="(link, i) in applications.links" :key="i">
+
+          <!-- Page Links -->
+          <div
+            v-if="applications.links && applications.links.length > 3"
+            class="w-full sm:w-auto flex items-center justify-start sm:justify-end gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-thin select-none"
+          >
+            <!-- Tombol Sebelumnya -->
+            <Link
+              v-if="applications.prev_page_url"
+              :href="applications.prev_page_url"
+              preserve-scroll
+              preserve-state
+              class="h-8 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs cursor-pointer active:scale-95"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              <span>Prev</span>
+            </Link>
+            <span
+              v-else
+              class="h-8 px-2.5 rounded-lg text-xs font-medium text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 cursor-not-allowed flex items-center gap-1 opacity-60"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              <span>Prev</span>
+            </span>
+
+            <!-- Nomor Halaman -->
+            <template v-for="(link, i) in numericLinks" :key="i">
+              <span
+                v-if="link.label === '...'"
+                class="w-8 h-8 flex items-center justify-center text-xs text-slate-400 font-bold"
+              >
+                ...
+              </span>
               <Link
-                v-if="link.url"
+                v-else-if="link.url"
                 :href="link.url"
                 preserve-scroll
                 preserve-state
                 :class="[
-                  'min-w-[36px] h-9 px-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center shrink-0 cursor-pointer active:scale-95 touch-manipulation',
+                  'w-8 h-8 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer active:scale-95',
                   link.active
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200'
+                    ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-500'
+                    : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs'
                 ]"
-                v-html="link.label"
-              />
+              >
+                {{ link.label }}
+              </Link>
               <span
                 v-else
-                class="min-w-[36px] h-9 px-2.5 rounded-lg text-xs font-medium text-slate-400 cursor-not-allowed opacity-50 flex items-center justify-center shrink-0 select-none"
-                v-html="link.label"
-              />
+                class="w-8 h-8 rounded-lg text-xs font-bold flex items-center justify-center text-slate-400 bg-slate-100 dark:bg-slate-800 cursor-not-allowed"
+              >
+                {{ link.label }}
+              </span>
             </template>
+
+            <!-- Tombol Berikutnya -->
+            <Link
+              v-if="applications.next_page_url"
+              :href="applications.next_page_url"
+              preserve-scroll
+              preserve-state
+              class="h-8 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs cursor-pointer active:scale-95"
+            >
+              <span>Next</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </Link>
+            <span
+              v-else
+              class="h-8 px-2.5 rounded-lg text-xs font-medium text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 cursor-not-allowed flex items-center gap-1 opacity-60"
+            >
+              <span>Next</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </span>
           </div>
         </div>
       </div>
@@ -662,7 +746,7 @@ const props = defineProps({
   },
   filters: {
     type: Object,
-    default: () => ({ search: '', service_id: '', status: '', attendance_type: '' }),
+    default: () => ({ search: '', service_id: '', status: '', attendance_type: '', per_page: 15 }),
   },
 });
 
@@ -670,8 +754,18 @@ const searchQuery = ref(props.filters.search || '');
 const selectedService = ref(props.filters.service_id || '');
 const activeStatus = ref(props.filters.status || '');
 const activeAttendanceType = ref(props.filters.attendance_type || '');
+const perPage = ref(String(props.filters.per_page || 15));
 
 const previewPhotoApp = ref(null);
+
+const numericLinks = computed(() => {
+  if (!props.applications?.links || props.applications.links.length <= 2) return [];
+  return props.applications.links.slice(1, -1);
+});
+
+const changePerPage = () => {
+  applyFilters();
+};
 
 const filterTabs = computed(() => [
   { label: 'Semua Registrasi', value: '', count: props.counts?.total || 0 },
@@ -710,6 +804,7 @@ const applyFilters = () => {
       service_id: selectedService.value || undefined,
       status: activeStatus.value || undefined,
       attendance_type: activeAttendanceType.value || undefined,
+      per_page: perPage.value !== '15' ? perPage.value : undefined,
     },
     {
       preserveState: true,
@@ -724,6 +819,7 @@ const resetFilters = () => {
   selectedService.value = '';
   activeStatus.value = '';
   activeAttendanceType.value = '';
+  perPage.value = '15';
   router.get('/admin/handover/registrations', {}, {
     preserveState: true,
     preserveScroll: true,
