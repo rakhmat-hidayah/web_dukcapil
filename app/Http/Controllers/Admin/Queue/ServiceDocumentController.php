@@ -195,6 +195,8 @@ class ServiceDocumentController extends Controller
                 ->update(['sort_order' => $item['sort_order']]);
         }
 
+        \Illuminate\Support\Facades\Cache::forget('public_queue_services');
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,

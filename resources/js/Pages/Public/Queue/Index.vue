@@ -71,6 +71,15 @@
                 <span>Login Pemohon</span>
               </Link>
 
+              <button
+                type="button"
+                @click="showRequirementsModal = true"
+                class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition cursor-pointer"
+              >
+                <ClipboardList class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <span>Persyaratan Berkas</span>
+              </button>
+
               <Link
                 :href="route('public.survey.index')"
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] sm:text-xs font-black shadow-sm transition active:scale-95 shrink-0"
@@ -301,14 +310,22 @@
                   :key="doc.id"
                   class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-start justify-between gap-3"
                 >
-                  <div class="flex items-start gap-2.5">
+                  <div class="flex items-start gap-2.5 min-w-0">
                     <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                       {{ idx + 1 }}
                     </span>
-                    <div>
-                      <p class="font-bold text-slate-800 dark:text-slate-200">{{ doc.label }}</p>
-                      <p v-if="doc.instruction" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-                        {{ doc.instruction }}
+                    <div class="space-y-0.5 min-w-0">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <p class="font-bold text-slate-800 dark:text-slate-200">{{ doc.label }}</p>
+                        <span
+                          v-if="doc.applicable_to && doc.applicable_to !== 'all'"
+                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
+                        >
+                          {{ doc.applicable_to === 'representative_only' ? 'Khusus Perwakilan' : 'Khusus Pemohon Langsung' }}
+                        </span>
+                      </div>
+                      <p v-if="doc.description || doc.instruction" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                        {{ doc.description || doc.instruction }}
                       </p>
                     </div>
                   </div>
@@ -334,7 +351,7 @@
                       class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition shadow-xs mt-1 cursor-pointer"
                     >
                       <FileDown class="w-3.5 h-3.5" />
-                      <span>Download Formulir</span>
+                      <span>{{ getDownloadButtonLabel(doc) }}</span>
                     </a>
                   </div>
                 </div>
@@ -393,7 +410,15 @@
 
           <div class="p-5 overflow-y-auto space-y-4 text-xs">
             <div v-for="srv in services" :key="srv.id" class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-3">
-              <h4 class="font-black text-sm text-slate-900 dark:text-white">{{ srv.name }}</h4>
+              <div class="flex items-center justify-between gap-2">
+                <h4 class="font-black text-sm text-slate-900 dark:text-white">{{ srv.name }}</h4>
+                <span
+                  v-if="srv.short_description"
+                  class="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 shrink-0"
+                >
+                  {{ srv.short_description }}
+                </span>
+              </div>
               
               <ul class="space-y-2 text-slate-700 dark:text-slate-300">
                 <li 
@@ -403,10 +428,21 @@
                 >
                   <div class="flex items-start gap-2 min-w-0">
                     <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div class="text-xs">
-                      <span class="font-bold text-slate-900 dark:text-slate-100">{{ doc.label }}</span>
-                      <span v-if="doc.is_required" class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                      <span v-else class="text-slate-600 dark:text-slate-400 text-[11px] ml-1">(Opsional)</span>
+                    <div class="space-y-0.5 min-w-0">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-bold text-slate-900 dark:text-slate-100">{{ doc.label }}</span>
+                        <span v-if="doc.is_required" class="text-rose-500 font-bold text-[11px]">(Wajib)</span>
+                        <span v-else class="text-slate-500 dark:text-slate-400 text-[11px]">(Opsional)</span>
+                        <span
+                          v-if="doc.applicable_to && doc.applicable_to !== 'all'"
+                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
+                        >
+                          {{ doc.applicable_to === 'representative_only' ? 'Khusus Perwakilan' : 'Khusus Pemohon Langsung' }}
+                        </span>
+                      </div>
+                      <p v-if="doc.description || doc.instruction" class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                        {{ doc.description || doc.instruction }}
+                      </p>
                     </div>
                   </div>
 
@@ -419,7 +455,7 @@
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-xs shrink-0 self-start sm:self-auto cursor-pointer"
                   >
                     <FileDown class="w-3.5 h-3.5" />
-                    <span>Download Formulir</span>
+                    <span>{{ getDownloadButtonLabel(doc) }}</span>
                   </a>
                 </li>
               </ul>
@@ -776,6 +812,14 @@ function scrollToTop() {
 function cleanPhone(phone) {
   if (!phone) return '6282124824114';
   return phone.replace(/[^0-9]/g, '');
+}
+
+function getDownloadButtonLabel(doc) {
+  const label = (doc?.label || '').toLowerCase();
+  if (label.includes('f-1.02') || label.includes('f1.02')) return 'Download Formulir F-1.02';
+  if (label.includes('f-1.07') || label.includes('f1.07') || label.includes('kuasa')) return 'Download Formulir F-1.07';
+  if (label.includes('f-1.06') || label.includes('f1.06') || label.includes('perubahan')) return 'Download Formulir F-1.06';
+  return 'Download Formulir';
 }
 
 function getDownloadLink(doc) {

@@ -104,6 +104,45 @@ class HandleInertiaRequests extends Middleware
                 'estimated_end' => \App\Models\Queue\QueueSetting::get('queue.maintenance_estimated_end', ''),
             ],
 
+            // Active queue service types with requirements and blanko templates (always in sync with CMS)
+            'queue_services' => fn () => Cache::remember('public_queue_services', 300, function () {
+                $hasIsActive = \Illuminate\Support\Facades\Schema::hasColumn('queue_service_documents', 'is_active');
+                return \App\Models\Queue\ServiceType::active()
+                    ->where('slug', 'not like', '%test%')
+                    ->where('name', 'not like', '%Test%')
+                    ->orderBy('sort_order', 'asc')
+                    ->orderBy('id', 'asc')
+                    ->with(['documents' => function ($q) use ($hasIsActive) {
+                        if ($hasIsActive) {
+                            $q->where('is_active', true);
+                        }
+                        $q->orderBy('sort_order', 'asc');
+                    }])
+                    ->get(['id', 'name', 'slug', 'short_description', 'color', 'quota_per_day', 'processing_days_label'])
+                    ->map(function ($service) {
+                        return [
+                            'id'                    => $service->id,
+                            'name'                  => $service->name,
+                            'slug'                  => $service->slug,
+                            'short_description'     => $service->short_description,
+                            'color'                 => $service->color,
+                            'quota_per_day'         => $service->quota_per_day,
+                            'processing_days_label' => $service->processing_days_label,
+                            'documents'             => $service->documents->map(function ($doc) {
+                                return [
+                                    'id'            => $doc->id,
+                                    'label'         => $doc->label,
+                                    'description'   => $doc->description,
+                                    'is_required'   => (bool) $doc->is_required,
+                                    'applicable_to' => $doc->applicable_to,
+                                    'template_url'  => $doc->template_url,
+                                ];
+                            })->values(),
+                        ];
+                    })
+                    ->values();
+            }),
+
             // Realtime count of items requiring officer verification for admin CMS
             'pending_verifications' => function () use ($user) {
                 if (!$user || !($user instanceof \App\Models\User)) {

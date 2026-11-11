@@ -103,228 +103,90 @@
             </button>
           </div>
 
-          <!-- Modal Body: Daftar Layanan & Persyaratan -->
+          <!-- Modal Body: Daftar Layanan & Persyaratan (Sync Otomatis dengan CMS) -->
           <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs">
-            <!-- Service 1: KTP-el Hilang -->
-            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-3">
-              <div class="flex items-center justify-between">
-                <h4 class="font-black text-sm text-slate-900 dark:text-white">KTP-el Hilang</h4>
-                <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
-                  Surat Hilang
-                </span>
-              </div>
-              <ul class="space-y-2 text-slate-700 dark:text-slate-300">
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">Surat Keterangan Hilang dari Kepolisian</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">Kartu Keluarga (KK) Asli / Fotokopi</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">Formulir F-1.02 Permohonan KTP-el</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
-                  <a
-                    href="/downloads/stream/19"
-                    target="_blank"
-                    download
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-xs shrink-0 self-start sm:self-auto cursor-pointer"
-                  >
-                    <FileDown class="w-3.5 h-3.5" />
-                    <span>Download Formulir F-1.02</span>
-                  </a>
-                </li>
-              </ul>
-              <div class="pt-1 flex justify-end">
-                <Link
-                  :href="route('queue.apply.create', { layanan: 'ktp-hilang' })"
-                  @click="showRequirementsModal = false"
-                  class="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  <span>Daftar Layanan Ini &rarr;</span>
-                </Link>
-              </div>
+            <div
+              v-if="!queueServices || queueServices.length === 0"
+              class="py-8 text-center text-slate-400"
+            >
+              <p>Memuat informasi persyaratan layanan...</p>
             </div>
 
-            <!-- Service 2: KTP-el Rusak -->
-            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-3">
-              <div class="flex items-center justify-between">
-                <h4 class="font-black text-sm text-slate-900 dark:text-white">KTP-el Rusak</h4>
-                <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300">
-                  Fisik Rusak/Pudar
-                </span>
-              </div>
-              <ul class="space-y-2 text-slate-700 dark:text-slate-300">
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">Fisik KTP-el Asli yang Rusak / Pudar</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">Kartu Keluarga (KK) Asli / Fotokopi</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">Formulir F-1.02 Permohonan KTP-el</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
-                  <a
-                    href="/downloads/stream/19"
-                    target="_blank"
-                    download
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-xs shrink-0 self-start sm:self-auto cursor-pointer"
-                  >
-                    <FileDown class="w-3.5 h-3.5" />
-                    <span>Download Formulir F-1.02</span>
-                  </a>
-                </li>
-              </ul>
-              <div class="pt-1 flex justify-end">
-                <Link
-                  :href="route('queue.apply.create', { layanan: 'ktp-rusak' })"
-                  @click="showRequirementsModal = false"
-                  class="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
+            <div
+              v-for="srv in queueServices"
+              :key="srv.id"
+              class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-3"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span
+                    class="w-2.5 h-2.5 rounded-full shrink-0"
+                    :style="{ backgroundColor: srv.color || '#2563eb' }"
+                  ></span>
+                  <h4 class="font-black text-sm text-slate-900 dark:text-white truncate">
+                    {{ srv.name }}
+                  </h4>
+                </div>
+                <span
+                  v-if="srv.short_description"
+                  class="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 shrink-0"
                 >
-                  <span>Daftar Layanan Ini &rarr;</span>
-                </Link>
-              </div>
-            </div>
-
-            <!-- Service 3: Perubahan Elemen Data -->
-            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-3">
-              <div class="flex items-center justify-between">
-                <h4 class="font-black text-sm text-slate-900 dark:text-white">Ubah Elemen Data</h4>
-                <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">
-                  Status / Alamat
+                  {{ srv.short_description }}
                 </span>
               </div>
+
+              <!-- List Persyaratan Dokumen dari CMS -->
               <ul class="space-y-2 text-slate-700 dark:text-slate-300">
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">KTP-el Asli Lama &amp; Kartu Keluarga Terbaru</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">Dokumen Pendukung (Buku Nikah / Ijazah / SK)</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">Formulir F-1.06 Perubahan Data</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
-                  <a
-                    href="/downloads/stream/23"
-                    target="_blank"
-                    download
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-xs shrink-0 self-start sm:self-auto cursor-pointer"
-                  >
-                    <FileDown class="w-3.5 h-3.5" />
-                    <span>Download Formulir F-1.06</span>
-                  </a>
-                </li>
-              </ul>
-              <div class="pt-1 flex justify-end">
-                <Link
-                  :href="route('queue.apply.create', { layanan: 'ubah-elemen-data' })"
-                  @click="showRequirementsModal = false"
-                  class="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                <li
+                  v-for="doc in srv.documents"
+                  :key="doc.id"
+                  class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                 >
-                  <span>Daftar Layanan Ini &rarr;</span>
-                </Link>
-              </div>
-            </div>
+                  <div class="flex items-start gap-2 min-w-0">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
+                    <div class="space-y-0.5">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-bold text-slate-900 dark:text-slate-100">{{ doc.label }}</span>
+                        <span
+                          :class="[
+                            'text-[10px] font-bold',
+                            doc.is_required
+                              ? 'text-rose-500 font-bold'
+                              : 'text-slate-500 dark:text-slate-400'
+                          ]"
+                        >
+                          {{ doc.is_required ? '(Wajib)' : '(Opsional)' }}
+                        </span>
+                        <span
+                          v-if="doc.applicable_to && doc.applicable_to !== 'all'"
+                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
+                        >
+                          {{ doc.applicable_to === 'representative_only' ? 'Khusus Perwakilan' : 'Khusus Pemohon Langsung' }}
+                        </span>
+                      </div>
+                      <p v-if="doc.description" class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                        {{ doc.description }}
+                      </p>
+                    </div>
+                  </div>
 
-            <!-- Service 4: Perekaman Baru -->
-            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-3">
-              <div class="flex items-center justify-between">
-                <h4 class="font-black text-sm text-slate-900 dark:text-white">Perekaman Baru</h4>
-                <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300">
-                  Pemula 16-17 Thn
-                </span>
-              </div>
-              <ul class="space-y-2 text-slate-700 dark:text-slate-300">
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">Kartu Keluarga (KK) Asli / Fotokopi</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">Foto Wajah Asli / Akta Kelahiran</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="p-2.5 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div class="flex items-start gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                    <div>
-                      <span class="font-bold text-slate-900 dark:text-slate-100">Formulir F-1.02 Pendaftaran KTP-el</span>
-                      <span class="text-rose-500 font-bold text-[11px] ml-1">(Wajib)</span>
-                    </div>
-                  </div>
+                  <!-- Download Blanko / Formulir Button -->
                   <a
-                    href="/downloads/stream/19"
+                    v-if="getDownloadLink(doc)"
+                    :href="getDownloadLink(doc)"
                     target="_blank"
                     download
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-xs shrink-0 self-start sm:self-auto cursor-pointer"
                   >
                     <FileDown class="w-3.5 h-3.5" />
-                    <span>Download Formulir F-1.02</span>
+                    <span>{{ getDownloadButtonLabel(doc) }}</span>
                   </a>
                 </li>
               </ul>
+
               <div class="pt-1 flex justify-end">
                 <Link
-                  :href="route('queue.apply.create', { layanan: 'perekaman-baru' })"
+                  :href="route('queue.apply.create', { layanan: srv.slug })"
                   @click="showRequirementsModal = false"
                   class="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
                 >
@@ -343,7 +205,7 @@
                 href="/downloads/stream/24"
                 target="_blank"
                 download
-                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-[11px] transition shadow-xs shrink-0 cursor-pointer"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-xs shrink-0 cursor-pointer"
               >
                 <FileDown class="w-3.5 h-3.5" />
                 <span>Formulir F-1.07</span>
@@ -539,6 +401,33 @@ const page = usePage()
 
 const showRequirementsModal = ref(false)
 const showTrackingModal = ref(false)
+
+const queueServices = computed(() => {
+  return page.props.queue_services || page.props.services || []
+})
+
+function getDownloadButtonLabel(doc) {
+  const label = (doc?.label || '').toLowerCase()
+  if (label.includes('f-1.02') || label.includes('f1.02')) return 'Download Formulir F-1.02'
+  if (label.includes('f-1.07') || label.includes('f1.07') || label.includes('kuasa')) return 'Download Formulir F-1.07'
+  if (label.includes('f-1.06') || label.includes('f1.06') || label.includes('perubahan')) return 'Download Formulir F-1.06'
+  return 'Download Formulir'
+}
+
+function getDownloadLink(doc) {
+  if (doc?.template_url) return doc.template_url
+  const label = (doc?.label || '').toLowerCase()
+  if (label.includes('f-1.02') || label.includes('f1.02') || label.includes('pendaftaran peristiwa')) {
+    return '/downloads/stream/19'
+  }
+  if (label.includes('f-1.07') || label.includes('f1.07') || label.includes('kuasa')) {
+    return '/downloads/stream/24'
+  }
+  if (label.includes('f-1.06') || label.includes('f1.06') || label.includes('perubahan elemen')) {
+    return '/downloads/stream/23'
+  }
+  return null
+}
 
 const trackingForm = useForm({
   query: '',

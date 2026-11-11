@@ -59,6 +59,14 @@ class ServiceType extends Model
                 $m->slug = Str::slug($m->name);
             }
         });
+
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('public_queue_services');
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('public_queue_services');
+        });
     }
 
     public function scopeActive($query)

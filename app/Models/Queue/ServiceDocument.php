@@ -30,6 +30,17 @@ class ServiceDocument extends Model
         'sort_order'  => 'integer',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('public_queue_services');
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('public_queue_services');
+        });
+    }
+
     public function scopeActive($query)
     {
         try {
