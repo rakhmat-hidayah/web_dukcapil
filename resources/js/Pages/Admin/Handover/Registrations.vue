@@ -217,6 +217,8 @@
               <tr>
                 <th class="px-5 py-4">No. Registrasi / Antrean</th>
                 <th class="px-5 py-4">Data Pemohon</th>
+                <th class="px-5 py-4">Pemilik Dokumen</th>
+                <th class="px-5 py-4">Status Hubungan (SHDK)</th>
                 <th class="px-5 py-4">Jenis Layanan</th>
                 <th class="px-5 py-4">Status Berkas</th>
                 <th class="px-5 py-4">Status Fisik KTP (Loket)</th>
@@ -245,15 +247,73 @@
                   </p>
                 </td>
 
-                <!-- Data Pemohon -->
+                <!-- Data Pemohon (Akun Pendaftar / Perwakilan) -->
                 <td class="px-5 py-3.5">
                   <div class="min-w-0">
-                    <div class="font-bold text-slate-900 dark:text-white truncate max-w-xs">
-                      {{ app.applicant_name }}
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="font-bold text-slate-900 dark:text-white truncate max-w-[170px]" :title="getApplicantName(app)">
+                        {{ getApplicantName(app) }}
+                      </span>
+                      <span
+                        v-if="isRepresented(app)"
+                        class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shrink-0"
+                        title="Mengajukan permohonan mewakili anggota keluarga"
+                      >
+                        Mewakili
+                      </span>
+                      <span
+                        v-else
+                        class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0"
+                      >
+                        Diri Sendiri
+                      </span>
                     </div>
                     <div class="font-mono text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
-                      <span>NIK: {{ maskNik(app.applicant_nik) }}</span>
+                      <span>NIK: {{ maskNik(getApplicantNik(app)) }}</span>
                     </div>
+                  </div>
+                </td>
+
+                <!-- Pemilik Dokumen (Yang Bersangkutan / YBS KTP-el) -->
+                <td class="px-5 py-3.5">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="font-bold text-slate-900 dark:text-white truncate max-w-[170px]" :title="getDocumentOwnerName(app)">
+                        {{ getDocumentOwnerName(app) }}
+                      </span>
+                      <span
+                        v-if="isRepresented(app)"
+                        class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0"
+                        title="Pemilik Dokumen KTP-el"
+                      >
+                        Pemilik KTP
+                      </span>
+                      <span
+                        v-else
+                        class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0"
+                      >
+                        Sama dgn Pemohon
+                      </span>
+                    </div>
+                    <div class="font-mono text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                      <span>NIK: {{ maskNik(getDocumentOwnerNik(app)) }}</span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Status Hubungan Dalam Keluarga (SHDK) -->
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                  <div v-if="isRepresented(app)">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-black uppercase bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
+                      {{ getFamilyShdk(app) }}
+                    </span>
+                    <span class="block text-[10px] text-slate-400 mt-0.5 font-medium">
+                      {{ app.representative_kk_status === 'same_kk' || !app.representative_kk_status ? 'Dalam 1 KK' : 'Luar KK' }}
+                    </span>
+                  </div>
+                  <div v-else class="text-slate-400">
+                    <span class="font-mono text-xs font-bold">-</span>
+                    <span class="block text-[10px] text-slate-400 italic">Diri Sendiri</span>
                   </div>
                 </td>
 
@@ -358,7 +418,7 @@
 
               <!-- Empty State -->
               <tr v-if="!applications.data || applications.data.length === 0">
-                <td colspan="6" class="px-6 py-16 text-center text-slate-400">
+                <td colspan="8" class="px-6 py-16 text-center text-slate-400">
                   <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center mx-auto mb-3 text-slate-400">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                   </div>
@@ -453,13 +513,38 @@
             <div class="p-5 bg-white dark:bg-slate-800 space-y-3.5">
               <div class="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Nama Lengkap</span>
-                  <span class="font-bold text-slate-900 dark:text-white text-sm block truncate">{{ previewPhotoApp.applicant_name }}</span>
+                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Pemilik Dokumen</span>
+                  <span class="font-bold text-slate-900 dark:text-white text-sm block truncate" :title="getDocumentOwnerName(previewPhotoApp)">
+                    {{ getDocumentOwnerName(previewPhotoApp) }}
+                  </span>
                 </div>
                 <div>
-                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">NIK Pemilik</span>
-                  <span class="font-mono font-bold text-slate-900 dark:text-white block">{{ previewPhotoApp.applicant_nik }}</span>
+                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">NIK Pemilik Dokumen</span>
+                  <span class="font-mono font-bold text-slate-900 dark:text-white block">
+                    {{ getDocumentOwnerNik(previewPhotoApp) }}
+                  </span>
                 </div>
+
+                <!-- If represented, show Representative and SHDK -->
+                <div v-if="isRepresented(previewPhotoApp)">
+                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Data Pemohon (Mewakili)</span>
+                  <span class="font-bold text-amber-600 dark:text-amber-400 text-xs block truncate" :title="getApplicantName(previewPhotoApp)">
+                    {{ getApplicantName(previewPhotoApp) }}
+                  </span>
+                  <span class="font-mono text-[10px] text-slate-400 block mt-0.5">
+                    NIK: {{ getApplicantNik(previewPhotoApp) }}
+                  </span>
+                </div>
+                <div v-if="isRepresented(previewPhotoApp)">
+                  <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Hubungan Keluarga (SHDK)</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-black uppercase bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 mt-0.5">
+                    {{ getFamilyShdk(previewPhotoApp) }}
+                  </span>
+                  <span class="block text-[10px] text-slate-400 mt-0.5">
+                    {{ previewPhotoApp.representative_kk_status === 'same_kk' || !previewPhotoApp.representative_kk_status ? 'Dalam 1 KK' : 'Luar KK' }}
+                  </span>
+                </div>
+
                 <div>
                   <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Jenis Layanan</span>
                   <span class="font-semibold text-blue-600 dark:text-blue-400 block truncate">{{ previewPhotoApp.service_type?.name }}</span>
@@ -587,6 +672,51 @@ const resetFilters = () => {
 const maskNik = (nik) => {
   if (!nik || nik.length < 16) return nik || '-';
   return nik.substring(0, 6) + '******' + nik.substring(12);
+};
+
+const isRepresented = (app) => {
+  if (!app) return false;
+  return Boolean(
+    app.is_represented ||
+    app.attendance_type === 'family_in_kk' ||
+    app.attendance_type === 'family_out_kk' ||
+    app.attendance_type === 'other' ||
+    app.attendance_type === 'representative' ||
+    app.attendance_type === 'PROXY' ||
+    app.family_shdk ||
+    (app.representative_name && app.representative_name.trim() !== '' && app.representative_name !== app.applicant_name)
+  );
+};
+
+const getApplicantName = (app) => {
+  if (!app) return '-';
+  if (isRepresented(app)) {
+    return app.representative_name || app.applicant_account?.name || app.applicant_name;
+  }
+  return app.applicant_name;
+};
+
+const getApplicantNik = (app) => {
+  if (!app) return '';
+  if (isRepresented(app)) {
+    return app.representative_nik || app.applicant_account?.nik || app.applicant_nik;
+  }
+  return app.applicant_nik;
+};
+
+const getDocumentOwnerName = (app) => {
+  if (!app) return '-';
+  return app.applicant_name;
+};
+
+const getDocumentOwnerNik = (app) => {
+  if (!app) return '';
+  return app.applicant_nik;
+};
+
+const getFamilyShdk = (app) => {
+  if (!app || !isRepresented(app)) return '-';
+  return app.family_shdk || app.representative_relationship || 'Keluarga (1 KK)';
 };
 
 const formatPhoneChunked = (phone) => {

@@ -100,8 +100,8 @@
                 </td>
                 <td class="py-4 text-slate-700 dark:text-slate-300">
                   {{ item.application?.service_type?.name }}
-                  <span v-if="item.application?.attendance_type === 'representative'" class="block text-[10px] text-amber-600 dark:text-amber-400 font-medium">
-                    (Dikuasakan ke: {{ item.application?.representative_name }})
+                  <span v-if="item.application?.attendance_type === 'representative' || item.application?.attendance_type === 'family_in_kk' || item.application?.is_represented || item.application?.family_shdk" class="block text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                    (Diwakilkan: {{ item.application?.representative_name || item.application?.applicant_account?.name || 'Keluarga' }} - {{ item.application?.family_shdk || item.application?.representative_relationship || '1 KK' }})
                   </span>
                 </td>
                 <td class="py-4 font-mono text-[11px] text-slate-600 dark:text-slate-300">

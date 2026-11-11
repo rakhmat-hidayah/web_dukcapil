@@ -288,7 +288,9 @@ class QueueApplication extends Model
 
     public function getIsRepresentedAttribute(): bool
     {
-        return in_array($this->attendance_type, ['family_in_kk', 'family_out_kk', 'other']);
+        return in_array($this->attendance_type, ['family_in_kk', 'family_out_kk', 'other', 'representative', 'PROXY'])
+            || !empty($this->family_shdk)
+            || (!empty($this->representative_name) && $this->representative_name !== $this->applicant_name);
     }
 
     public function getAttendanceLabelAttribute(): string

@@ -54,6 +54,7 @@ class KtpHandoverController extends Controller
             'slot.schedule',
             'handover.handoverUser',
             'documents.serviceDocument',
+            'applicantAccount',
         ])->latest('created_at');
 
         if ($search) {
@@ -63,7 +64,8 @@ class KtpHandoverController extends Controller
                   ->orWhere('applicant_name', 'like', "%{$search}%")
                   ->orWhere('applicant_nik', 'like', "%{$search}%")
                   ->orWhere('representative_name', 'like', "%{$search}%")
-                  ->orWhere('representative_nik', 'like', "%{$search}%");
+                  ->orWhere('representative_nik', 'like', "%{$search}%")
+                  ->orWhere('family_shdk', 'like', "%{$search}%");
             });
         }
 
