@@ -122,10 +122,6 @@
           <!-- Left details & typography -->
           <div class="space-y-3 max-w-2xl text-left">
             <div class="flex items-center gap-2">
-              <span class="px-3 py-1 bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider rounded-lg shadow-sm flex items-center gap-1">
-                <Ticket class="w-3.5 h-3.5" />
-                Sistem Antrian &amp; Pra-Verifikasi
-              </span>
               <span class="px-2.5 py-1 bg-white/10 text-white text-[10px] font-bold rounded-lg backdrop-blur-sm">
                 Pelayanan KTP-el
               </span>
