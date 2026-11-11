@@ -40,26 +40,6 @@
           </button>
         </div>
 
-        <!-- Mobile Mode Layar Penuh Banner (Hilangkan Bilah Alamat Atas & Navigasi Bawah) -->
-        <div 
-          v-if="!isStandalone" 
-          @click="showFullscreenGuide = true"
-          class="sm:hidden px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-primary-700 text-white flex items-center justify-between gap-2 shadow-sm cursor-pointer hover:opacity-95 transition active:scale-[0.99]"
-        >
-          <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-              <Smartphone class="w-4 h-4 text-white" />
-            </div>
-            <div class="min-w-0">
-              <p class="font-black text-[11px] leading-tight truncate">Mode Layar Penuh (App Mode)</p>
-              <p class="text-[9.5px] text-blue-100 leading-tight">Hilangkan bilah alamat atas &amp; navigasi bawah</p>
-            </div>
-          </div>
-          <span class="shrink-0 px-2.5 py-1 rounded-lg bg-white text-blue-700 font-black text-[10px] shadow-xs">
-            Buka
-          </span>
-        </div>
-
         <!-- 2. SECTION LAYANAN & SURVEY IKM BUTTON (Matching photo) -->
         <div class="space-y-2.5 sm:space-y-3.5">
           <div class="flex items-center justify-between px-0.5">

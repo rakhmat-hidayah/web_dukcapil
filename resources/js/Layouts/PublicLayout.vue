@@ -2,7 +2,10 @@
   <div :class="{ 'dark': isDark }" class="min-h-screen flex flex-col bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 transition-colors duration-200 overflow-x-hidden w-full max-w-full">
     
     <!-- Sticky Navigation Wrapper (Top Bar + Header Menu) -->
-    <div class="sticky top-0 z-50 shadow-md shadow-gray-200/40 dark:shadow-none print:hidden w-full overflow-x-hidden">
+    <div 
+      v-if="!isAppFullscreen"
+      class="sticky top-0 z-50 shadow-md shadow-gray-200/40 dark:shadow-none print:hidden w-full overflow-x-hidden hide-on-fullscreen"
+    >
       <!-- Top info bar (hidden on mobile, visible on desktop/tablet) -->
       <div class="hidden sm:flex bg-primary-900 text-white text-[10px] py-1.5 sm:py-2 px-3 sm:px-6 justify-end items-center font-medium w-full overflow-hidden">
         <div class="flex items-center gap-3 w-full justify-end">
@@ -221,18 +224,6 @@
           >
             <Sun v-if="isDark" class="w-4 h-4 text-amber-400" />
             <Moon v-else class="w-4 h-4 text-gray-600 dark:text-zinc-300" />
-          </button>
-
-          <!-- Mobile Mode Layar Penuh Button (Hilangkan Bilah Browser) -->
-          <button 
-            v-if="!isStandalone"
-            type="button"
-            @click="showFullscreenModal = true" 
-            class="sm:hidden p-1.5 hover:bg-blue-50 dark:hover:bg-zinc-800 text-blue-600 dark:text-blue-400 rounded-lg transition cursor-pointer"
-            title="Mode Layar Penuh (Hilangkan Bilah Browser)"
-            aria-label="Mode Layar Penuh"
-          >
-            <Smartphone class="w-4 h-4" />
           </button>
 
           <!-- Mobile menu trigger -->
@@ -561,7 +552,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Search, Sun, Moon, Menu, ChevronDown, Globe, ArrowUpRight, Ticket, UserCheck, LogIn, Smartphone } from '@lucide/vue';
 import MobileFullscreenGuideModal from '@/Components/MobileFullscreenGuideModal.vue';
@@ -585,6 +576,7 @@ const props = defineProps({
 const isDark = ref(false);
 const showFullscreenModal = ref(false);
 const isStandalone = ref(false);
+const isAppFullscreen = ref(false);
 const mobileMenuOpen = ref(false);
 const mobileAccordion = ref([]); // tracks which accordion items are open
 const searchQuery = ref('');
@@ -675,11 +667,29 @@ const handleSearch = () => {
   }
 };
 
+const updateFullscreenStatus = () => {
+  if (typeof window === 'undefined') return;
+  const isStandaloneMatch = window.matchMedia('(display-mode: standalone)').matches || 
+                            window.matchMedia('(display-mode: fullscreen)').matches ||
+                            window.matchMedia('(display-mode: minimal-ui)').matches ||
+                            window.navigator.standalone === true ||
+                            (typeof document.referrer === 'string' && document.referrer.includes('android-app://'));
+  const isHtmlFullscreen = !!(document.fullscreenElement || 
+                              document.webkitFullscreenElement || 
+                              document.mozFullScreenElement || 
+                              document.msFullscreenElement);
+  isStandalone.value = isStandaloneMatch;
+  isAppFullscreen.value = isStandaloneMatch || isHtmlFullscreen;
+};
+
 onMounted(() => {
+  updateFullscreenStatus();
   if (typeof window !== 'undefined') {
-    isStandalone.value = window.matchMedia('(display-mode: standalone)').matches || 
-                         window.navigator.standalone === true ||
-                         document.referrer.includes('android-app://');
+    window.addEventListener('resize', updateFullscreenStatus);
+    document.addEventListener('fullscreenchange', updateFullscreenStatus);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenStatus);
+    document.addEventListener('mozfullscreenchange', updateFullscreenStatus);
+    document.addEventListener('MSFullscreenChange', updateFullscreenStatus);
   }
   isDark.value = localStorage.getItem('public-dark-mode') === 'true' || 
                  (!('public-dark-mode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -687,6 +697,16 @@ onMounted(() => {
     document.documentElement.classList.add('dark');
   } else {
     document.documentElement.classList.remove('dark');
+  }
+});
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', updateFullscreenStatus);
+    document.removeEventListener('fullscreenchange', updateFullscreenStatus);
+    document.removeEventListener('webkitfullscreenchange', updateFullscreenStatus);
+    document.removeEventListener('mozfullscreenchange', updateFullscreenStatus);
+    document.removeEventListener('MSFullscreenChange', updateFullscreenStatus);
   }
 });
 </script>

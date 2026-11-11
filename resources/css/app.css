@@ -118,6 +118,30 @@
     }
 }
 
+/* Sembunyikan bilah menu navigasi saat mode layar penuh (PWA Standalone & Fullscreen API) */
+@media all and (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
+    .hide-on-fullscreen {
+        display: none !important;
+    }
+    main {
+        padding-top: max(0.5rem, env(safe-area-inset-top, 0px)) !important;
+    }
+}
+
+:fullscreen .hide-on-fullscreen,
+:-webkit-full-screen .hide-on-fullscreen,
+:-moz-full-screen .hide-on-fullscreen,
+:-ms-fullscreen .hide-on-fullscreen {
+    display: none !important;
+}
+
+:fullscreen main,
+:-webkit-full-screen main,
+:-moz-full-screen main,
+:-ms-fullscreen main {
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0px)) !important;
+}
+
 /* Custom transitions and utility styles */
 .transition-all-200 {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
