@@ -10,7 +10,7 @@
       <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-700 shadow-xl space-y-8">
         <div>
           <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-400 mb-2 inline-block">
-            Tahap 1, 2 & 3: Layanan & Identitas
+            Tahap 1 & 2: Layanan & Identitas
           </span>
           <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
             Formulir Permohonan Layanan KTP-el
@@ -411,263 +411,34 @@
             </div>
           </div>
 
-          <!-- TAHAP 3: DATA KEHADIRAN & PERWAKILAN -->
-          <div class="pt-6 border-t border-slate-100 dark:border-slate-700/60 space-y-4">
-            <div>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-                3. Kehadiran ke Kantor Disdukcapil <span class="text-rose-500">*</span>
-              </h3>
-              <p class="text-sm font-semibold text-slate-900 dark:text-white">
-                Siapa yang akan datang langsung ke kantor untuk mengambil KTP el ini?
-              </p>
-            </div>
-
-            <!-- Lock Notice if Biometric Recording -->
-            <div
-              v-if="selectedServiceObj && selectedServiceObj.is_biometric_first_recording"
-              class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-3"
-            >
-              <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-              <div>
-                <strong class="font-bold block mb-0.5">Perekaman Biometrik Pertama Wajib Hadir Sendiri</strong>
-                <p class="leading-relaxed">
-                  Layanan KTP-el Pemula tidak dapat diwakilkan karena memerlukan perekaman data fisik biometrik (sidik jari, iris mata, dan foto) pemilik dokumen secara langsung.
-                </p>
-              </div>
-            </div>
-
-            <!-- Attendance Radio Selection -->
-            <div id="field_attendance_type" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <!-- Option 1: Datang Sendiri -->
-              <label
-                :class="[
-                  'cursor-pointer rounded-2xl p-4 border transition-all flex flex-col justify-between gap-2',
-                  form.attendance_type === 'self'
-                    ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 ring-2 ring-blue-500/20'
-                    : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
-                ]"
-              >
-                <div class="flex items-start gap-2.5">
-                  <input
-                    type="radio"
-                    v-model="form.attendance_type"
-                    value="self"
-                    class="mt-0.5 text-blue-600 focus:ring-blue-500"
-                  />
-                  <div>
-                    <span class="text-xs font-bold text-slate-900 dark:text-white block">
-                      Saya Sendiri
-                    </span>
-                    <span class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight block mt-0.5">
-                      Pemilik dokumen hadir langsung ke loket.
-                    </span>
-                  </div>
-                </div>
-              </label>
-
-              <!-- Option 2: Diwakilkan Keluarga -->
-              <label
-                :class="[
-                  'rounded-2xl p-4 border transition-all flex flex-col justify-between gap-2',
-                  selectedServiceObj && selectedServiceObj.is_biometric_first_recording
-                    ? 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
-                    : 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-750',
-                  form.attendance_type === 'family_in_kk' || form.attendance_type === 'family_out_kk'
-                    ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 ring-2 ring-blue-500/20'
-                    : 'border-slate-200 dark:border-slate-700'
-                ]"
-              >
-                <div class="flex items-start gap-2.5">
-                  <input
-                    type="radio"
-                    v-model="form.attendance_type"
-                    value="family_in_kk"
-                    :disabled="selectedServiceObj && selectedServiceObj.is_biometric_first_recording"
-                    class="mt-0.5 text-blue-600 focus:ring-blue-500"
-                  />
-                  <div>
-                    <span class="text-xs font-bold text-slate-900 dark:text-white block">
-                      Anggota Keluarga
-                    </span>
-                    <span class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight block mt-0.5">
-                      Diwakilkan anggota keluarga dalam 1 KK.
-                    </span>
-                  </div>
-                </div>
-              </label>
-
-              <!-- Option 3: Diwakilkan Orang Lain / Kuasa -->
-              <label
-                :class="[
-                  'rounded-2xl p-4 border transition-all flex flex-col justify-between gap-2',
-                  (selectedServiceObj && (selectedServiceObj.is_biometric_first_recording || !selectedServiceObj.allow_other))
-                    ? 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
-                    : 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-750',
-                  form.attendance_type === 'other'
-                    ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 ring-2 ring-blue-500/20'
-                    : 'border-slate-200 dark:border-slate-700'
-                ]"
-              >
-                <div class="flex items-start gap-2.5">
-                  <input
-                    type="radio"
-                    v-model="form.attendance_type"
-                    value="other"
-                    :disabled="selectedServiceObj && (selectedServiceObj.is_biometric_first_recording || !selectedServiceObj.allow_other)"
-                    class="mt-0.5 text-blue-600 focus:ring-blue-500"
-                  />
-                  <div>
-                    <span class="text-xs font-bold text-slate-900 dark:text-white block">
-                      Pihak Lain / Kuasa
-                    </span>
-                    <span class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight block mt-0.5">
-                      Wajib surat kuasa bermeterai & KTP kuasa.
-                    </span>
-                  </div>
-                </div>
-              </label>
-            </div>
-            <p v-if="form.errors.attendance_type" class="text-xs text-rose-500 font-medium">
-              {{ form.errors.attendance_type }}
-            </p>
-
-            <!-- REPRESENTATIVE FORM DETAILS (IF REPRESENTED) -->
-            <div
-              v-if="form.attendance_type !== 'self'"
-              class="p-5 sm:p-6 rounded-2xl bg-blue-50/50 dark:bg-slate-900/80 border border-blue-200 dark:border-blue-900/60 space-y-4"
-            >
+          <!-- INFO PERWAKILAN KELUARGA (OTOMATIS DARI AKUN PEMOHON) -->
+          <div
+            v-if="form.application_target === 'family_in_kk'"
+            class="pt-6 border-t border-slate-100 dark:border-slate-700/60 space-y-3"
+          >
+            <div class="p-4 sm:p-5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 space-y-3">
               <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
                 <h4 class="text-xs font-bold uppercase tracking-wider text-blue-900 dark:text-blue-300">
-                  Data Identitas Orang yang Mewakili
+                  Data Pemohon yang Mewakili (Akun Terdaftar)
                 </h4>
               </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <!-- NIK Perwakilan -->
-                <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                      NIK Perwakilan (16 Digit) <span class="text-rose-500">*</span>
-                    </label>
-                    <span class="text-[10px] font-mono" :class="form.representative_nik.length === 16 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
-                      {{ form.representative_nik.length }}/16 Digit
-                    </span>
-                  </div>
-                  <input
-                    id="field_representative_nik"
-                    :value="form.representative_nik"
-                    @input="onRepresentativeNikInput"
-                    @keypress="filterNikKeypress"
-                    type="text"
-                    inputmode="numeric"
-                    pattern="[0-9]*"
-                    maxlength="16"
-                    autocomplete="off"
-                    placeholder="5205xxxxxxxxxxxx"
-                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
-                    :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.representative_nik}"
-                    required
-                  />
-                  <p v-if="form.errors.representative_nik" class="text-xs text-rose-500 font-medium mt-1">
-                    {{ form.errors.representative_nik }}
-                  </p>
-                  <p v-else-if="form.representative_nik.length > 0 && form.representative_nik.length < 16" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
-                    Kurang {{ 16 - form.representative_nik.length }} digit lagi. NIK wajib 16 digit angka.
-                  </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
+                  <span class="text-[10px] uppercase font-bold text-slate-400 block">Nama Pemohon (Mewakili)</span>
+                  <span class="font-bold text-slate-900 dark:text-white">{{ $page.props.auth?.applicant?.name || '-' }}</span>
                 </div>
-
-                <!-- Nama Perwakilan -->
-                <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                      Nama Lengkap Perwakilan <span class="text-rose-500">*</span>
-                    </label>
-                    <span
-                      class="text-[10px] font-mono font-semibold"
-                      :class="(form.representative_name || '').length >= 55 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'"
-                    >
-                      {{ (form.representative_name || '').length }}/60 Huruf
-                    </span>
-                  </div>
-                  <input
-                    id="field_representative_name"
-                    :value="form.representative_name"
-                    @input="onPersonNameInput('representative_name', $event)"
-                    @keydown="onPersonNameKeyDown($event)"
-                    @blur="onPersonNameBlur('representative_name')"
-                    type="text"
-                    maxlength="60"
-                    autocomplete="name"
-                    autocapitalize="characters"
-                    spellcheck="false"
-                    placeholder="CONTOH: SITI NURHALIZA"
-                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-semibold"
-                    required
-                  />
-                  <!-- Notice if numbers/symbols were stripped -->
-                  <p v-if="nameInputWarning['representative_name']" class="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1 flex items-center gap-1 animate-in fade-in">
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    <span>{{ nameInputWarning['representative_name'] }}</span>
-                  </p>
-                  <p v-if="form.errors.representative_name" class="text-xs text-rose-500 font-medium mt-1">
-                    {{ form.errors.representative_name }}
-                  </p>
-                  <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
-                    Wajib huruf kapital sesuai KTP-el perwakilan, tanpa angka (0-9) atau simbol.
-                  </p>
-                </div>
-
-                <!-- Hubungan Perwakilan -->
-                <div class="sm:col-span-2">
-                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-                    Hubungan dengan Pemilik Dokumen <span class="text-rose-500">*</span>
-                  </label>
-                  <select
-                    id="field_representative_relationship"
-                    v-model="form.representative_relationship"
-                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="" disabled>-- Pilih Hubungan --</option>
-                    <option value="Suami / Istri">Suami / Istri</option>
-                    <option value="Orang Tua (Ayah / Ibu)">Orang Tua (Ayah / Ibu)</option>
-                    <option value="Anak Kandung">Anak Kandung</option>
-                    <option value="Kakak / Adik Kandung">Kakak / Adik Kandung</option>
-                    <option value="Famili Lain dalam KK">Famili Lain dalam KK</option>
-                    <option value="Penerima Kuasa Khusus">Penerima Kuasa Khusus</option>
-                  </select>
-                  <p v-if="form.errors.representative_relationship" class="text-xs text-rose-500 font-medium mt-1">
-                    {{ form.errors.representative_relationship }}
-                  </p>
-                </div>
-
-                <!-- Alasan Berhalangan Hadir -->
-                <div class="sm:col-span-2">
-                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-                    Alasan Pemilik Dokumen Berhalangan Hadir <span class="text-rose-500">*</span>
-                  </label>
-                  <textarea
-                    id="field_absence_reason"
-                    v-model="form.absence_reason"
-                    rows="2"
-                    placeholder="Jelaskan alasan mengapa pemilik dokumen tidak dapat hadir sendiri (contoh: sakit, disabilitas, lansia, sedang di luar kota)..."
-                    class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  ></textarea>
-                  <p v-if="form.errors.absence_reason" class="text-xs text-rose-500 font-medium mt-1">
-                    {{ form.errors.absence_reason }}
-                  </p>
+                <div class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
+                  <span class="text-[10px] uppercase font-bold text-slate-400 block">NIK Pemohon (Mewakili)</span>
+                  <span class="font-mono font-bold text-slate-900 dark:text-white">{{ $page.props.auth?.applicant?.nik || '-' }}</span>
                 </div>
               </div>
-
-              <!-- Notice on Documents Needed for Representative -->
               <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-900 dark:text-amber-200 space-y-1">
                 <p class="font-medium">
-                  * Pada tahap berikutnya, Anda wajib mengunggah foto fisik KTP-el Asli Perwakilan dan Kartu Keluarga / Surat Kuasa.
+                  * Data perwakilan otomatis terhubung dengan akun pemohon yang sedang login. Pada Langkah 2, pemohon wajib melampirkan <strong>Surat Kuasa (Formulir F-1.07)</strong> dan foto <strong>Kartu Keluarga (KK) asli</strong>.
                 </p>
                 <p class="font-bold text-amber-950 dark:text-amber-100">
-                  ⚠️ Penegasan: Foto Selfie Wajah pada tahap berikutnya tetap <strong>wajib Foto Selfie Pemohon (pemilik dokumen asli)</strong>, bukan foto pihak yang mewakili atau dikuasakan.
+                  ⚠️ Penegasan: Foto Selfie Wajah pada tahap berikutnya tetap <strong>wajib Foto Selfie Pemilik Dokumen (yang bersangkutan)</strong>.
                 </p>
               </div>
             </div>
@@ -1138,94 +909,27 @@ function validateForm() {
     });
   }
 
-  // 5. Data Perwakilan (jika diwakilkan)
-  if (form.attendance_type !== 'self') {
-    if (!form.representative_nik) {
-      const msg = 'NIK orang yang mewakili wajib diisi.';
-      form.errors.representative_nik = msg;
+  // 5. Validasi Data Akun Pemohon jika mewakili anggota keluarga 1 KK
+  if (form.application_target === 'family_in_kk') {
+    const accNik = applicantAccount.value?.nik || form.representative_nik;
+    const accName = applicantAccount.value?.name || form.representative_name;
+    if (!accNik || accNik.length !== 16) {
+      const msg = 'Data NIK akun pemohon tidak valid. Pastikan profil akun Anda memiliki 16 digit NIK.';
+      form.errors.family_shdk = msg;
       errors.push({
-        field: 'representative_nik',
-        elementId: 'field_representative_nik',
-        label: 'NIK Perwakilan (16 Digit)',
-        message: msg,
-      });
-    } else if (form.representative_nik.length !== 16) {
-      const msg = `NIK perwakilan harus tepat 16 digit angka (saat ini ${form.representative_nik.length} digit).`;
-      form.errors.representative_nik = msg;
-      errors.push({
-        field: 'representative_nik',
-        elementId: 'field_representative_nik',
-        label: 'NIK Perwakilan (16 Digit)',
+        field: 'family_shdk',
+        elementId: 'field_family_shdk',
+        label: 'Identitas Akun Pemohon',
         message: msg,
       });
     }
-
-    const cleanRepName = (form.representative_name || '').trim();
-    if (!cleanRepName) {
-      const msg = 'Nama lengkap perwakilan sesuai KTP wajib diisi.';
-      form.errors.representative_name = msg;
+    if (!accName) {
+      const msg = 'Data nama akun pemohon tidak valid. Pastikan profil akun Anda lengkap.';
+      form.errors.family_shdk = msg;
       errors.push({
-        field: 'representative_name',
-        elementId: 'field_representative_name',
-        label: 'Nama Lengkap Perwakilan',
-        message: msg,
-      });
-    } else if (/\d/.test(cleanRepName)) {
-      const msg = 'Kaidah penulisan nama: Nama perwakilan tidak boleh memuat angka (0-9).';
-      form.errors.representative_name = msg;
-      errors.push({
-        field: 'representative_name',
-        elementId: 'field_representative_name',
-        label: 'Nama Lengkap Perwakilan',
-        message: msg,
-      });
-    } else if (!/^[A-Za-z\s'\-]+$/.test(cleanRepName)) {
-      const msg = 'Kaidah penulisan nama: Hanya huruf kapital, spasi, tanda petik (\') atau strip (-) yang diperbolehkan.';
-      form.errors.representative_name = msg;
-      errors.push({
-        field: 'representative_name',
-        elementId: 'field_representative_name',
-        label: 'Nama Lengkap Perwakilan',
-        message: msg,
-      });
-    } else if (cleanRepName.length < 2) {
-      const msg = 'Nama perwakilan minimal 2 huruf.';
-      form.errors.representative_name = msg;
-      errors.push({
-        field: 'representative_name',
-        elementId: 'field_representative_name',
-        label: 'Nama Lengkap Perwakilan',
-        message: msg,
-      });
-    } else if (cleanRepName.length > 60) {
-      const msg = 'Nama perwakilan maksimal 60 huruf sesuai Permendagri No. 73 Tahun 2022.';
-      form.errors.representative_name = msg;
-      errors.push({
-        field: 'representative_name',
-        elementId: 'field_representative_name',
-        label: 'Nama Lengkap Perwakilan',
-        message: msg,
-      });
-    }
-
-    if (!form.representative_relationship || !form.representative_relationship.trim()) {
-      const msg = 'Hubungan perwakilan dengan pemilik dokumen wajib dipilih.';
-      form.errors.representative_relationship = msg;
-      errors.push({
-        field: 'representative_relationship',
-        elementId: 'field_representative_relationship',
-        label: 'Hubungan Perwakilan',
-        message: msg,
-      });
-    }
-
-    if (!form.absence_reason || !form.absence_reason.trim()) {
-      const msg = 'Alasan pemilik dokumen tidak dapat hadir sendiri wajib dijelaskan.';
-      form.errors.absence_reason = msg;
-      errors.push({
-        field: 'absence_reason',
-        elementId: 'field_absence_reason',
-        label: 'Alasan Berhalangan Hadir',
+        field: 'family_shdk',
+        elementId: 'field_family_shdk',
+        label: 'Identitas Akun Pemohon',
         message: msg,
       });
     }
@@ -1259,12 +963,26 @@ function submitStep1() {
     return;
   }
 
+  const isFamily = form.application_target === 'family_in_kk';
+  const repNik = isFamily ? (applicantAccount.value?.nik || form.representative_nik) : null;
+  const repName = isFamily ? (applicantAccount.value?.name || form.representative_name) : null;
+  const repRel = isFamily ? (form.family_shdk || 'Anggota Keluarga 1 KK') : null;
+  const absReason = isFamily
+    ? ('Mewakili pengurusan dokumen KTP-el anggota keluarga dalam 1 Kartu Keluarga (KK)' + (form.family_shdk ? ' - ' + form.family_shdk : ''))
+    : null;
+
   form.transform((data) => ({
     ...data,
+    application_target: isFamily ? 'family_in_kk' : 'self',
+    attendance_type: isFamily ? 'family_in_kk' : 'self',
     applicant_name: data.applicant_name ? sanitizePersonName(data.applicant_name).trim() : '',
-    representative_name: data.representative_name ? sanitizePersonName(data.representative_name).trim() : '',
     applicant_email: applicantAccount.value?.email || null,
-    family_shdk: data.application_target === 'family_in_kk' ? (data.family_shdk || null) : null,
+    family_shdk: isFamily ? (data.family_shdk || null) : null,
+    representative_nik: repNik,
+    representative_name: repName ? sanitizePersonName(repName).trim() : null,
+    representative_relationship: repRel,
+    representative_kk_status: isFamily ? 'same_kk' : null,
+    absence_reason: absReason,
   })).post(route('queue.apply.store'), {
     onError: (serverErrors) => {
       const serverList = [];

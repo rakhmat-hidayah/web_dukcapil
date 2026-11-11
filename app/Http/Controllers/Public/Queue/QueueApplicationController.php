@@ -141,25 +141,29 @@ class QueueApplicationController extends Controller
                 ])->withInput();
             }
 
-            if (!$request->filled('attendance_type') || $request->input('attendance_type') === 'self') {
-                $request->merge(['attendance_type' => 'family_in_kk']);
+            $request->merge(['attendance_type' => 'family_in_kk']);
+            if ($applicantAccount) {
+                $request->merge([
+                    'representative_nik'  => $applicantAccount->nik,
+                    'representative_name' => $applicantAccount->name,
+                ]);
             }
-            if (!$request->filled('representative_nik') && $applicantAccount) {
-                $request->merge(['representative_nik' => $applicantAccount->nik]);
-            }
-            if (!$request->filled('representative_name') && $applicantAccount) {
-                $request->merge(['representative_name' => $applicantAccount->name]);
-            }
-            if (!$request->filled('representative_relationship') && $request->filled('family_shdk')) {
+            if ($request->filled('family_shdk')) {
                 $request->merge(['representative_relationship' => $request->input('family_shdk')]);
             }
-            if (!$request->filled('representative_kk_status')) {
-                $request->merge(['representative_kk_status' => 'same_kk']);
-            }
-            if (!$request->filled('absence_reason')) {
-                $shdkSuffix = $request->filled('family_shdk') ? ' - ' . $request->input('family_shdk') : '';
-                $request->merge(['absence_reason' => 'Mewakili pengurusan dokumen KTP-el anggota keluarga dalam 1 Kartu Keluarga (KK)' . $shdkSuffix]);
-            }
+            $request->merge(['representative_kk_status' => 'same_kk']);
+            $shdkSuffix = $request->filled('family_shdk') ? ' - ' . $request->input('family_shdk') : '';
+            $request->merge(['absence_reason' => 'Mewakili pengurusan dokumen KTP-el anggota keluarga dalam 1 Kartu Keluarga (KK)' . $shdkSuffix]);
+        } else {
+            $request->merge([
+                'attendance_type'             => 'self',
+                'representative_nik'          => null,
+                'representative_name'         => null,
+                'representative_relationship' => null,
+                'representative_kk_status'    => null,
+                'absence_reason'              => null,
+                'family_shdk'                 => null,
+            ]);
         }
 
         $validated = $request->validate([
