@@ -248,21 +248,8 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-            <!-- 1. Pra-Verifikasi Lolos -->
-            <Link
-              :href="route('admin.queue.applications.index', { status: 'PRE_VERIFIED' })"
-              class="p-3.5 rounded-2xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800 hover:shadow-md transition block group"
-            >
-              <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-cyan-700 dark:text-cyan-300 uppercase block">Pra-Verifikasi Lolos</span>
-                <span class="text-[10px] text-cyan-500 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
-              </div>
-              <p class="text-2xl font-black text-cyan-900 dark:text-cyan-200 font-mono mt-1">{{ stats.pre_verified }}</p>
-              <p class="text-[10px] text-cyan-600 dark:text-cyan-400 mt-0.5">Siap ambil jadwal</p>
-            </Link>
-
-            <!-- 2. Jadwal Terbit -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+            <!-- 1. Jadwal Terbit -->
             <Link
               :href="route('admin.queue.applications.index', { status: 'QUEUE_BOOKED' })"
               class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 hover:shadow-md transition block group"
@@ -275,20 +262,7 @@
               <p class="text-[10px] text-blue-600 dark:text-blue-400 mt-0.5">Menunggu hari kedatangan</p>
             </Link>
 
-            <!-- 3. Hadir di Loket -->
-            <Link
-              :href="route('admin.queue.applications.index', { status: 'ARRIVED' })"
-              class="p-3.5 rounded-2xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 hover:shadow-md transition block group"
-            >
-              <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-teal-700 dark:text-teal-300 uppercase block">Hadir di Loket</span>
-                <span class="text-[10px] text-teal-500 opacity-0 group-hover:opacity-100 transition">&rarr;</span>
-              </div>
-              <p class="text-2xl font-black text-teal-900 dark:text-teal-200 font-mono mt-1">{{ stats.arrived }}</p>
-              <p class="text-[10px] text-teal-600 dark:text-teal-400 mt-0.5">Pemeriksaan fisik asli</p>
-            </Link>
-
-            <!-- 4. Rekam / Antrean Cetak -->
+            <!-- 2. Rekam / Antrean Cetak -->
             <Link
               :href="route('admin.queue.applications.index', { status: 'PROCESSING' })"
               class="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 hover:shadow-md transition block group"
@@ -301,7 +275,7 @@
               <p class="text-[10px] text-purple-600 dark:text-purple-400 mt-0.5">Disetujui & antre cetak</p>
             </Link>
 
-            <!-- 5. Siap Diambil (KTP Selesai Dicetak) -->
+            <!-- 3. Siap Diambil (KTP Selesai Dicetak) -->
             <Link
               :href="route('admin.queue.applications.index', { status: 'READY_FOR_PICKUP' })"
               class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700 hover:shadow-md transition block group ring-1 ring-emerald-500/20"
@@ -314,7 +288,7 @@
               <p class="text-[10px] text-emerald-700 dark:text-emerald-400 mt-0.5">Di meja penyerahan</p>
             </Link>
 
-            <!-- 6. Selesai Diserahkan (Status Akhir) -->
+            <!-- 4. Selesai Diserahkan (Status Akhir) -->
             <Link
               :href="route('admin.queue.applications.index', { status: 'COMPLETED' })"
               class="p-3.5 rounded-2xl bg-green-50 dark:bg-green-950/40 border border-green-300 dark:border-green-700 hover:shadow-md transition block group ring-1 ring-green-500/20"
@@ -327,7 +301,7 @@
               <p class="text-[10px] text-green-700 dark:text-green-400 mt-0.5">Layanan tuntas (status akhir)</p>
             </Link>
 
-            <!-- 7. Perlu Perbaikan -->
+            <!-- 5. Perlu Perbaikan -->
             <Link
               :href="route('admin.queue.applications.index', { status: 'REVISION_REQUIRED' })"
               class="p-3.5 rounded-2xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 hover:shadow-md transition block group"
@@ -340,7 +314,7 @@
               <p class="text-[10px] text-orange-600 dark:text-orange-400 mt-0.5">Revisi dokumen</p>
             </Link>
 
-            <!-- 8. Ditolak -->
+            <!-- 6. Ditolak -->
             <Link
               :href="route('admin.queue.applications.index', { status: 'REJECTED' })"
               class="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 hover:shadow-md transition block group"

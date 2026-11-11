@@ -49,17 +49,17 @@
 
             <div class="space-y-1">
               <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
-                Password Akun
+                Alamat Email Terdaftar
               </label>
               <input
-                v-model="step1Form.password"
-                type="password"
-                placeholder="Password akun Anda..."
+                v-model="step1Form.email"
+                type="email"
+                placeholder="nama@email.com..."
                 class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500"
                 required
               />
-              <p v-if="step1Form.errors.password" class="text-xs text-rose-500 font-semibold">
-                {{ step1Form.errors.password }}
+              <p v-if="step1Form.errors.email" class="text-xs text-rose-500 font-semibold">
+                {{ step1Form.errors.email }}
               </p>
             </div>
 
@@ -104,6 +104,22 @@
               </p>
             </div>
 
+            <!-- Optional: Buat Password Baru (jika lupa password) -->
+            <div class="space-y-1 text-left pt-2 border-t border-slate-100 dark:border-slate-800">
+              <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
+                Password Baru <span class="text-slate-400 font-normal text-[10px]">(Opsional - isi jika ingin membuat password baru)</span>
+              </label>
+              <input
+                v-model="step2Form.password"
+                type="password"
+                placeholder="Password baru (minimal 6 karakter)..."
+                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500"
+              />
+              <p v-if="step2Form.errors.password" class="text-xs text-rose-500 font-semibold">
+                {{ step2Form.errors.password }}
+              </p>
+            </div>
+
             <button
               type="submit"
               :disabled="step2Form.processing || step2Form.otp.length !== 6"
@@ -118,7 +134,7 @@
 
         <!-- Help Notice -->
         <div class="pt-2.5 sm:pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-          <span>Tidak memiliki akses ke email atau lupa password? </span>
+          <span>Tidak memiliki akses ke email terdaftar? </span>
           <p class="mt-1 text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400">
             Silakan datang langsung ke loket pelayanan Disdukcapil Kabupaten Dompu untuk verifikasi identitas fisik oleh petugas.
           </p>
@@ -146,11 +162,12 @@ const maskedEmail = ref(page.props.flash?.maskedEmail || '')
 
 const step1Form = useForm({
   nik: '',
-  password: '',
+  email: '',
 })
 
 const step2Form = useForm({
   otp: '',
+  password: '',
 })
 
 const submitStep1 = () => {

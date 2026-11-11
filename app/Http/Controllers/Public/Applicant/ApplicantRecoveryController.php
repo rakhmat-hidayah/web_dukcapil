@@ -32,22 +32,26 @@ class ApplicantRecoveryController extends Controller
     }
 
     /**
-     * Step 1: Request recovery OTP using NIK and Password.
+     * Step 1: Request recovery OTP using NIK and Email.
      */
     public function requestRecoveryOtp(Request $request): RedirectResponse
     {
         $rawNik = preg_replace('/\D/', '', (string) $request->input('nik'));
-        $password = (string) $request->input('password');
+        $rawEmail = strtolower(trim((string) $request->input('email')));
 
-        $request->merge(['nik' => $rawNik]);
+        $request->merge([
+            'nik'   => $rawNik,
+            'email' => $rawEmail,
+        ]);
 
         $request->validate([
-            'nik'      => 'required|string|regex:/^[0-9]{16}$/',
-            'password' => 'required|string',
+            'nik'   => 'required|string|regex:/^[0-9]{16}$/',
+            'email' => 'required|string|email|max:150',
         ], [
-            'nik.required'      => 'Nomor Induk Kependudukan (NIK) wajib diisi.',
-            'nik.regex'         => 'NIK wajib tepat 16 digit angka.',
-            'password.required' => 'Password wajib diisi.',
+            'nik.required'   => 'Nomor Induk Kependudukan (NIK) wajib diisi.',
+            'nik.regex'      => 'NIK wajib tepat 16 digit angka.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email'    => 'Format alamat email tidak valid.',
         ]);
 
         $nikHash = ApplicantAccount::computeNikHash($rawNik);
@@ -62,10 +66,10 @@ class ApplicantRecoveryController extends Controller
 
         $account = ApplicantAccount::where('nik_hash', $nikHash)->first();
 
-        if (!$account || !Hash::check($password, $account->password)) {
+        if (!$account || strtolower(trim((string) $account->email_normalized)) !== $rawEmail) {
             RateLimiter::hit($limiterKey, 300);
             throw ValidationException::withMessages([
-                'nik' => 'Nomor Induk Kependudukan (NIK) atau password yang Anda masukkan salah.',
+                'nik' => 'Nomor Induk Kependudukan (NIK) atau alamat email yang Anda masukkan salah.',
             ]);
         }
 
@@ -106,10 +110,12 @@ class ApplicantRecoveryController extends Controller
         }
 
         $request->validate([
-            'otp' => 'required|string|size:6',
+            'otp'      => 'required|string|size:6',
+            'password' => 'nullable|string|min:6|max:100',
         ], [
             'otp.required' => 'Kode OTP pemulihan wajib diisi.',
             'otp.size'     => 'Kode OTP terdiri dari 6 digit angka.',
+            'password.min' => 'Password baru minimal 6 karakter.',
         ]);
 
         $otp = trim((string) $request->input('otp'));
@@ -118,6 +124,12 @@ class ApplicantRecoveryController extends Controller
         $this->otpService->verify($email, $otp, 'device_recovery');
 
         $account = ApplicantAccount::findOrFail($accountId);
+
+        // If applicant requested a new password during recovery, update it
+        if ($request->filled('password')) {
+            $account->password = Hash::make((string) $request->input('password'));
+            $account->save();
+        }
 
         // Revoke old device and bind current browser
         [$newDevice, $rawToken, $cookie] = $this->deviceService->recoverDevice(
@@ -132,8 +144,12 @@ class ApplicantRecoveryController extends Controller
         $request->session()->regenerate();
         Auth::guard('applicant')->login($account);
 
+        $successMsg = $request->filled('password')
+            ? 'Perangkat lama berhasil dilepaskan, password baru disimpan, dan browser ini telah diikat sebagai perangkat aktif Anda.'
+            : 'Perangkat lama berhasil dilepaskan dan browser ini telah diikat sebagai perangkat aktif Anda.';
+
         return redirect()->route('applicant.dashboard')
             ->withCookie($cookie)
-            ->with('success', 'Perangkat lama berhasil dilepaskan dan browser ini telah diikat sebagai perangkat aktif Anda.');
+            ->with('success', $successMsg);
     }
 }
