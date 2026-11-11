@@ -237,16 +237,18 @@
 
       <!-- Application Table -->
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
+        <div class="overflow-x-auto scrollbar-thin pb-2">
+          <table class="w-full text-left text-xs min-w-[1450px]">
             <thead class="bg-slate-50 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700 select-none">
               <tr>
-                <th class="px-4 py-3.5 whitespace-nowrap">No. Registrasi / Antrian</th>
-                <th class="px-4 py-3.5">Foto & Data Pemohon</th>
-                <th class="px-3.5 py-3.5">Jenis Layanan</th>
-                <th class="px-3.5 py-3.5 whitespace-nowrap">Jadwal Pelayanan</th>
-                <th class="px-3.5 py-3.5 text-center whitespace-nowrap">Status</th>
-                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-4 py-3.5 text-right whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)]">Aksi</th>
+                <th class="px-4 py-3.5 whitespace-nowrap min-w-[155px]">No. Registrasi / Antrian</th>
+                <th class="px-4 py-3.5 min-w-[260px]">Foto & Data Pemohon</th>
+                <th class="px-3.5 py-3.5 min-w-[170px]">Pemilik Dokumen</th>
+                <th class="px-3 py-3.5 text-center whitespace-nowrap min-w-[125px]">Status Hubungan (SHDK)</th>
+                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[175px]">Jenis Layanan</th>
+                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[155px]">Jadwal Pelayanan</th>
+                <th class="px-3.5 py-3.5 text-center whitespace-nowrap min-w-[175px]">Status</th>
+                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-4 py-3.5 text-center whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] min-w-[230px]">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium text-slate-700 dark:text-slate-200">
@@ -263,7 +265,7 @@
                 ]"
               >
                 <!-- Reg & Queue Number -->
-                <td class="px-4 py-3 whitespace-nowrap">
+                <td class="px-4 py-3 whitespace-nowrap min-w-[155px]">
                   <div class="font-mono font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <span>{{ app.reg_number }}</span>
                     <span
@@ -299,22 +301,22 @@
                 </td>
 
                 <!-- Applicant & NIK with Photo Preview -->
-                <td class="px-4 py-2.5">
+                <td class="px-4 py-2.5 min-w-[260px]">
                   <div class="flex items-center gap-3">
                     <!-- Case 1: Photo Available (Unverified, File exists) - BLURRED FOR PRIVACY -->
                     <div
                       v-if="app.selfie_thumbnail_url || app.selfie_url"
-                      class="group relative w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800 cursor-pointer"
+                      class="group/photo relative w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800 cursor-pointer"
                       title="Foto selfie disamarkan demi privasi pemohon (Arahkan kursor untuk melihat jelas)"
                     >
                       <img
                         :src="app.selfie_thumbnail_url || app.selfie_url"
-                        :alt="app.applicant_name"
-                        class="w-full h-full object-cover select-none pointer-events-none filter blur-[4px] group-hover:blur-none transition-all duration-300 scale-110 group-hover:scale-100"
+                        :alt="getApplicantName(app)"
+                        class="w-full h-full object-cover select-none pointer-events-none filter blur-[4px] group-hover/photo:blur-none transition-all duration-300 scale-110 group-hover/photo:scale-100"
                         loading="lazy"
                       />
                       <!-- Privacy icon badge overlay (dissolves on hover) -->
-                      <div class="absolute inset-0 flex items-center justify-center bg-black/15 group-hover:opacity-0 transition-opacity pointer-events-none">
+                      <div class="absolute inset-0 flex items-center justify-center bg-black/15 group-hover/photo:opacity-0 transition-opacity pointer-events-none">
                         <svg class="w-3.5 h-3.5 text-white drop-shadow-sm opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>
                         </svg>
@@ -367,39 +369,103 @@
                     <!-- Applicant Text Info -->
                     <div class="min-w-0">
                       <div class="flex items-center gap-1.5 flex-wrap">
-                        <div class="font-bold text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-[180px]">
-                          {{ app.applicant_name }}
-                        </div>
+                        <span class="font-bold text-slate-900 dark:text-white truncate max-w-[150px]" :title="getApplicantName(app)">
+                          {{ getApplicantName(app) }}
+                        </span>
                         <span
-                          v-if="app.selfie_verification || app.is_selfie_verified"
-                          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase shrink-0 border shadow-2xs"
+                          v-if="isRepresented(app)"
+                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shrink-0"
+                          title="Mengajukan permohonan mewakili anggota keluarga"
+                        >
+                          Mewakili
+                        </span>
+                        <span
+                          v-else
+                          class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0"
+                        >
+                          Diri Sendiri
+                        </span>
+                      </div>
+                      <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        <span>NIK: {{ maskNik(getApplicantNik(app)) }}</span>
+                      </div>
+                      <!-- Biometric Verification Pill if verified -->
+                      <div v-if="app.selfie_verification || app.is_selfie_verified" class="mt-1">
+                        <span
+                          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8.5px] font-black uppercase tracking-tight border shadow-2xs"
                           :class="app.selfie_verification?.decision === 'MATCH'
-                            ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
-                            : 'bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800'"
+                            ? 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+                            : 'bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800'"
                           :title="app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai (MATCH)' : 'Bukan Pemohon (MISMATCH)'"
                         >
                           <svg v-if="app.selfie_verification?.decision === 'MATCH'" class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                           <svg v-else class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
-                          <span>Terverifikasi: {{ app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai' : 'Bukan Pemohon' }}</span>
+                          <span>{{ app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai' : 'Bukan Pemohon' }}</span>
                         </span>
-                      </div>
-                      <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5 flex-wrap">
-                        <span>{{ maskNik(app.applicant_nik) }}</span>
-                        <span v-if="app.family_shdk" class="text-blue-600 dark:text-blue-400 font-sans font-bold">· SHDK: {{ app.family_shdk }}</span>
                       </div>
                     </div>
                   </div>
                 </td>
 
+                <!-- Pemilik Dokumen (Yang Bersangkutan / YBS KTP-el) -->
+                <td class="px-3.5 py-3 min-w-[170px]">
+                  <div class="min-w-0">
+                    <div v-if="isRepresented(app)">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-bold text-slate-900 dark:text-white truncate max-w-[150px]" :title="getDocumentOwnerName(app)">
+                          {{ getDocumentOwnerName(app) }}
+                        </span>
+                        <span
+                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0"
+                          title="Pemilik Dokumen KTP-el"
+                        >
+                          Pemilik KTP
+                        </span>
+                      </div>
+                      <div class="font-mono text-[10.5px] text-slate-400 mt-0.5">
+                        NIK: {{ maskNik(getDocumentOwnerNik(app)) }}
+                      </div>
+                    </div>
+                    <div v-else>
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[140px]" :title="getDocumentOwnerName(app)">
+                          {{ getDocumentOwnerName(app) }}
+                        </span>
+                        <span class="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0">
+                          Sama dgn Pemohon
+                        </span>
+                      </div>
+                      <div class="font-mono text-[10.5px] text-slate-400 mt-0.5">
+                        NIK: {{ maskNik(getDocumentOwnerNik(app)) }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Status Hubungan Dalam Keluarga (SHDK) -->
+                <td class="px-3 py-3 text-center whitespace-nowrap min-w-[125px]">
+                  <div v-if="isRepresented(app)" class="inline-flex flex-col items-center">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
+                      {{ getFamilyShdk(app) }}
+                    </span>
+                    <span class="text-[9px] text-slate-400 mt-0.5 font-medium">
+                      {{ app.representative_kk_status === 'same_kk' || !app.representative_kk_status ? 'Dalam 1 KK' : 'Luar KK' }}
+                    </span>
+                  </div>
+                  <div v-else class="text-slate-400 text-center">
+                    <span class="font-mono text-xs text-slate-300 dark:text-slate-600">-</span>
+                  </div>
+                </td>
+
                 <!-- Service Type -->
-                <td class="px-3.5 py-3">
-                  <span class="inline-block max-w-[170px] leading-snug px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[11px] font-semibold">
+                <td class="px-3.5 py-3 whitespace-nowrap min-w-[175px]">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold">
                     {{ app.service_type?.name || 'Pelayanan KTP-el' }}
                   </span>
                 </td>
 
                 <!-- Schedule Date -->
-                <td class="px-3.5 py-3 whitespace-nowrap">
+                <td class="px-3.5 py-3 whitespace-nowrap min-w-[155px]">
                   <div v-if="app.slot?.schedule?.schedule_date">
                     <p class="font-bold text-slate-900 dark:text-white text-xs">
                       {{ formatScheduleDate(app.slot.schedule.schedule_date) }}
@@ -414,7 +480,7 @@
                 </td>
 
                 <!-- Status Badge -->
-                <td class="px-3.5 py-3 text-center whitespace-nowrap">
+                <td class="px-3.5 py-3 text-center whitespace-nowrap min-w-[175px]">
                   <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping shrink-0"></span>
                     <span>Draf (Sisa {{ app.draft_remaining_minutes !== undefined ? app.draft_remaining_minutes : (draftTimeoutMinutes || 15) }} mnt)</span>
@@ -435,7 +501,7 @@
                 <!-- Actions -->
                 <td
                   :class="[
-                    'sticky right-0 z-10 px-3.5 py-3 text-right whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] transition',
+                    'sticky right-0 z-10 px-3.5 py-3 text-center whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] transition min-w-[230px]',
                     app.verification_urgency === 'overdue'
                       ? 'bg-rose-50/95 dark:bg-rose-950/95 group-hover:bg-rose-100/95 dark:group-hover:bg-rose-900/95'
                       : (app.verification_urgency === 'new'
@@ -443,7 +509,7 @@
                         : 'bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/80')
                   ]"
                 >
-                  <div class="flex items-center justify-end gap-1.5">
+                  <div class="flex items-center justify-center gap-1.5">
                     <!-- 1. Primary Action: Tinjau Berkas -->
                     <Link
                       v-if="app.verification_urgency === 'overdue'"
@@ -484,7 +550,7 @@
                       title="Eskalasi / Update Status Permohonan"
                     >
                       <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                      <span class="hidden sm:inline">Status</span>
+                      <span>Status</span>
                     </button>
 
                     <!-- 3. Super Admin Delete Button -->
@@ -503,7 +569,7 @@
 
               <!-- Empty State -->
               <tr v-if="!applications.data || applications.data.length === 0">
-                <td colspan="6" class="px-6 py-16 text-center text-slate-400">
+                <td colspan="8" class="px-6 py-16 text-center text-slate-400">
                   <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center mx-auto mb-3 text-slate-400">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                   </div>
@@ -995,6 +1061,51 @@ const formatPhoneChunked = (phone) => {
 const maskNik = (nik) => {
   if (!nik || nik.length < 8) return nik
   return nik.substring(0, 6) + '******' + nik.substring(12)
+}
+
+const isRepresented = (app) => {
+  if (!app) return false
+  return Boolean(
+    app.is_represented ||
+    app.attendance_type === 'family_in_kk' ||
+    app.attendance_type === 'family_out_kk' ||
+    app.attendance_type === 'other' ||
+    app.attendance_type === 'representative' ||
+    app.attendance_type === 'PROXY' ||
+    app.family_shdk ||
+    (app.representative_name && app.representative_name.trim() !== '' && app.representative_name !== app.applicant_name)
+  )
+}
+
+const getApplicantName = (app) => {
+  if (!app) return '-'
+  if (isRepresented(app)) {
+    return app.representative_name || app.applicant_account?.name || app.applicant_name
+  }
+  return app.applicant_name
+}
+
+const getApplicantNik = (app) => {
+  if (!app) return ''
+  if (isRepresented(app)) {
+    return app.representative_nik || app.applicant_account?.nik || app.applicant_nik
+  }
+  return app.applicant_nik
+}
+
+const getDocumentOwnerName = (app) => {
+  if (!app) return '-'
+  return app.applicant_name
+}
+
+const getDocumentOwnerNik = (app) => {
+  if (!app) return ''
+  return app.applicant_nik
+}
+
+const getFamilyShdk = (app) => {
+  if (!app || !isRepresented(app)) return '-'
+  return app.family_shdk || app.representative_relationship || 'Keluarga (1 KK)'
 }
 
 const formatDate = (dateString) => {
