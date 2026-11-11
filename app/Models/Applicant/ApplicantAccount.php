@@ -126,6 +126,11 @@ class ApplicantAccount extends Authenticatable
         return $maskedName . '@' . $domain;
     }
 
+    public function getEmailAttribute(): ?string
+    {
+        return $this->email_normalized;
+    }
+
     // ------------------------------------------------------------------
     // STATUS HELPERS
     // ------------------------------------------------------------------

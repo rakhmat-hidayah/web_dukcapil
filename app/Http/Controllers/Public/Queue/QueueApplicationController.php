@@ -155,6 +155,12 @@ class QueueApplicationController extends Controller
             $shdkSuffix = $request->filled('family_shdk') ? ' - ' . $request->input('family_shdk') : '';
             $request->merge(['absence_reason' => 'Mewakili pengurusan dokumen KTP-el anggota keluarga dalam 1 Kartu Keluarga (KK)' . $shdkSuffix]);
         } else {
+            if ($applicantAccount) {
+                $request->merge([
+                    'applicant_nik'  => $applicantAccount->nik,
+                    'applicant_name' => $applicantAccount->name,
+                ]);
+            }
             $request->merge([
                 'attendance_type'             => 'self',
                 'representative_nik'          => null,

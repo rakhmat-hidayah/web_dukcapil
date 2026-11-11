@@ -195,7 +195,7 @@
                     </span>
                   </div>
                   <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                    Dokumen KTP-el atas nama pemilik akun terdaftar ({{ $page.props.auth?.applicant?.name || 'Saya' }}).
+                    Dokumen KTP-el atas nama pemilik akun terdaftar ({{ $page.props.auth?.applicant?.name || 'Saya' }}<span v-if="$page.props.auth?.applicant?.masked_nik"> &bull; {{ $page.props.auth?.applicant?.masked_nik }}</span>).
                   </p>
                 </div>
               </label>
@@ -326,12 +326,16 @@
               </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- NIK Pemilik Dokumen -->
+            <!-- Form Input Anggota Keluarga (Hanya Tampil Jika Mewakili Anggota Keluarga 1 KK) -->
+            <div
+              v-if="form.application_target === 'family_in_kk'"
+              class="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in"
+            >
+              <!-- NIK Anggota Keluarga -->
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    {{ form.application_target === 'family_in_kk' ? 'NIK Anggota Keluarga (16 Digit)' : 'NIK Pemilik Dokumen (16 Digit)' }} <span class="text-rose-500">*</span>
+                    NIK Anggota Keluarga (16 Digit) <span class="text-rose-500">*</span>
                   </label>
                   <span class="text-[10px] font-mono" :class="form.applicant_nik.length === 16 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
                     {{ form.applicant_nik.length }}/16 Digit
@@ -347,7 +351,7 @@
                   pattern="[0-9]*"
                   maxlength="16"
                   autocomplete="off"
-                  :placeholder="form.application_target === 'family_in_kk' ? '5205xxxxxxxxxxxx (NIK Anggota KK)' : '5205xxxxxxxxxxxx'"
+                  placeholder="5205xxxxxxxxxxxx (NIK Anggota KK)"
                   class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
                   :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.applicant_nik}"
                   required
@@ -358,7 +362,7 @@
                 <p v-else-if="form.applicant_nik.length > 0 && form.applicant_nik.length < 16" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
                   Kurang {{ 16 - form.applicant_nik.length }} digit lagi. NIK wajib 16 digit angka.
                 </p>
-                <p v-else-if="form.application_target === 'family_in_kk' && form.applicant_nik && form.applicant_nik === $page.props.auth?.applicant?.nik" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                <p v-else-if="form.applicant_nik && form.applicant_nik === $page.props.auth?.applicant?.nik" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
                   Catatan: NIK yang Anda masukkan sama dengan NIK akun Anda. Jika permohonan ini untuk diri Anda sendiri, silakan pilih opsi "Pengajuan Untuk Diri Sendiri".
                 </p>
               </div>
@@ -367,7 +371,7 @@
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    {{ form.application_target === 'family_in_kk' ? 'Nama Anggota Keluarga Sesuai KK' : 'Nama Lengkap Sesuai KK' }} <span class="text-rose-500">*</span>
+                    Nama Anggota Keluarga Sesuai KK <span class="text-rose-500">*</span>
                   </label>
                   <span
                     class="text-[10px] font-mono font-semibold"
@@ -387,7 +391,7 @@
                   autocomplete="name"
                   autocapitalize="characters"
                   spellcheck="false"
-                  :placeholder="form.application_target === 'family_in_kk' ? 'CONTOH: SITI NURHALIZA' : 'CONTOH: AHMAD SUBARJO'"
+                  placeholder="CONTOH: SITI NURHALIZA"
                   class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-semibold"
                   required
                 />
@@ -633,9 +637,9 @@ function handleTargetChanged(target) {
   if (target === 'self') {
     form.application_target = 'self';
     form.family_shdk = '';
-    if (form.errors.family_shdk) {
-      delete form.errors.family_shdk;
-    }
+    if (form.errors.family_shdk) delete form.errors.family_shdk;
+    if (form.errors.applicant_nik) delete form.errors.applicant_nik;
+    if (form.errors.applicant_name) delete form.errors.applicant_name;
     if (applicantAccount.value) {
       form.applicant_nik = applicantAccount.value.nik || '';
       form.applicant_name = applicantAccount.value.name || '';
@@ -823,8 +827,15 @@ function validateForm() {
     });
   }
 
-  // 2. Status Hubungan Dalam Keluarga (SHDK) jika mewakili anggota keluarga
-  if (form.application_target === 'family_in_kk') {
+  // 2. Validasi subjek pengajuan
+  if (form.application_target === 'self') {
+    // Pengajuan untuk diri sendiri: Otomatis sinkronkan data identitas dari akun pemohon
+    if (applicantAccount.value) {
+      form.applicant_nik = applicantAccount.value.nik || form.applicant_nik;
+      form.applicant_name = applicantAccount.value.name || form.applicant_name;
+    }
+  } else if (form.application_target === 'family_in_kk') {
+    // Mewakili anggota keluarga 1 KK: Validasi SHDK, NIK Anggota, dan Nama Anggota
     if (!form.family_shdk) {
       const msg = 'Pilih Status Hubungan Dalam Keluarga (SHDK) sesuai Kartu Keluarga.';
       form.errors.family_shdk = msg;
@@ -835,82 +846,87 @@ function validateForm() {
         message: msg,
       });
     }
-  }
 
-  // 3. NIK Pemilik Dokumen
-  if (!form.applicant_nik) {
-    const msg = form.application_target === 'family_in_kk'
-      ? 'NIK anggota keluarga yang diurus wajib diisi.'
-      : 'NIK pemilik dokumen wajib diisi.';
-    form.errors.applicant_nik = msg;
-    errors.push({
-      field: 'applicant_nik',
-      elementId: 'field_applicant_nik',
-      label: form.application_target === 'family_in_kk' ? 'NIK Anggota Keluarga' : 'NIK Pemilik Dokumen',
-      message: msg,
-    });
-  } else if (form.applicant_nik.length !== 16) {
-    const msg = `NIK harus tepat 16 digit angka (saat ini ${form.applicant_nik.length} digit).`;
-    form.errors.applicant_nik = msg;
-    errors.push({
-      field: 'applicant_nik',
-      elementId: 'field_applicant_nik',
-      label: 'NIK (16 Digit)',
-      message: msg,
-    });
-  }
+    // NIK Anggota Keluarga
+    if (!form.applicant_nik) {
+      const msg = 'NIK anggota keluarga yang diurus wajib diisi.';
+      form.errors.applicant_nik = msg;
+      errors.push({
+        field: 'applicant_nik',
+        elementId: 'field_applicant_nik',
+        label: 'NIK Anggota Keluarga',
+        message: msg,
+      });
+    } else if (form.applicant_nik.length !== 16) {
+      const msg = `NIK harus tepat 16 digit angka (saat ini ${form.applicant_nik.length} digit).`;
+      form.errors.applicant_nik = msg;
+      errors.push({
+        field: 'applicant_nik',
+        elementId: 'field_applicant_nik',
+        label: 'NIK Anggota Keluarga (16 Digit)',
+        message: msg,
+      });
+    } else if (applicantAccount.value?.nik && form.applicant_nik === applicantAccount.value.nik) {
+      const msg = 'NIK yang Anda masukkan sama dengan NIK akun Anda. Jika permohonan ini untuk diri Anda sendiri, silakan pilih opsi "Pengajuan Untuk Diri Sendiri".';
+      form.errors.applicant_nik = msg;
+      errors.push({
+        field: 'applicant_nik',
+        elementId: 'field_applicant_nik',
+        label: 'NIK Anggota Keluarga',
+        message: msg,
+      });
+    }
 
-  // 4. Nama Lengkap Sesuai KK
-  const cleanApplicantName = (form.applicant_name || '').trim();
-  if (!cleanApplicantName) {
-    const msg = 'Nama lengkap sesuai Kartu Keluarga (KK) wajib diisi.';
-    form.errors.applicant_name = msg;
-    errors.push({
-      field: 'applicant_name',
-      elementId: 'field_applicant_name',
-      label: 'Nama Lengkap Sesuai KK',
-      message: msg,
-    });
-  } else if (/\d/.test(cleanApplicantName)) {
-    const msg = 'Kaidah penulisan nama: Nama tidak boleh memuat angka (0-9).';
-    form.errors.applicant_name = msg;
-    errors.push({
-      field: 'applicant_name',
-      elementId: 'field_applicant_name',
-      label: 'Nama Lengkap Sesuai KK',
-      message: msg,
-    });
-  } else if (!/^[A-Za-z\s'\-]+$/.test(cleanApplicantName)) {
-    const msg = 'Kaidah penulisan nama: Hanya huruf kapital, spasi, tanda petik (\') atau tanda hubung (-) yang diperbolehkan.';
-    form.errors.applicant_name = msg;
-    errors.push({
-      field: 'applicant_name',
-      elementId: 'field_applicant_name',
-      label: 'Nama Lengkap Sesuai KK',
-      message: msg,
-    });
-  } else if (cleanApplicantName.length < 2) {
-    const msg = 'Nama lengkap minimal 2 huruf.';
-    form.errors.applicant_name = msg;
-    errors.push({
-      field: 'applicant_name',
-      elementId: 'field_applicant_name',
-      label: 'Nama Lengkap Sesuai KK',
-      message: msg,
-    });
-  } else if (cleanApplicantName.length > 60) {
-    const msg = 'Nama lengkap maksimal 60 huruf sesuai Permendagri No. 73 Tahun 2022.';
-    form.errors.applicant_name = msg;
-    errors.push({
-      field: 'applicant_name',
-      elementId: 'field_applicant_name',
-      label: 'Nama Lengkap Sesuai KK',
-      message: msg,
-    });
-  }
+    // Nama Lengkap Anggota Keluarga Sesuai KK
+    const cleanApplicantName = (form.applicant_name || '').trim();
+    if (!cleanApplicantName) {
+      const msg = 'Nama lengkap anggota keluarga sesuai Kartu Keluarga (KK) wajib diisi.';
+      form.errors.applicant_name = msg;
+      errors.push({
+        field: 'applicant_name',
+        elementId: 'field_applicant_name',
+        label: 'Nama Anggota Keluarga Sesuai KK',
+        message: msg,
+      });
+    } else if (/\d/.test(cleanApplicantName)) {
+      const msg = 'Kaidah penulisan nama: Nama tidak boleh memuat angka (0-9).';
+      form.errors.applicant_name = msg;
+      errors.push({
+        field: 'applicant_name',
+        elementId: 'field_applicant_name',
+        label: 'Nama Anggota Keluarga Sesuai KK',
+        message: msg,
+      });
+    } else if (!/^[A-Za-z\s'\-]+$/.test(cleanApplicantName)) {
+      const msg = 'Kaidah penulisan nama: Hanya huruf kapital, spasi, tanda petik (\') atau tanda hubung (-) yang diperbolehkan.';
+      form.errors.applicant_name = msg;
+      errors.push({
+        field: 'applicant_name',
+        elementId: 'field_applicant_name',
+        label: 'Nama Anggota Keluarga Sesuai KK',
+        message: msg,
+      });
+    } else if (cleanApplicantName.length < 2) {
+      const msg = 'Nama lengkap anggota keluarga minimal 2 huruf.';
+      form.errors.applicant_name = msg;
+      errors.push({
+        field: 'applicant_name',
+        elementId: 'field_applicant_name',
+        label: 'Nama Anggota Keluarga Sesuai KK',
+        message: msg,
+      });
+    } else if (cleanApplicantName.length > 60) {
+      const msg = 'Nama lengkap anggota keluarga maksimal 60 huruf sesuai Permendagri No. 73 Tahun 2022.';
+      form.errors.applicant_name = msg;
+      errors.push({
+        field: 'applicant_name',
+        elementId: 'field_applicant_name',
+        label: 'Nama Anggota Keluarga Sesuai KK',
+        message: msg,
+      });
+    }
 
-  // 5. Validasi Data Akun Pemohon jika mewakili anggota keluarga 1 KK
-  if (form.application_target === 'family_in_kk') {
+    // Validasi Data Akun Pemohon Perwakilan
     const accNik = applicantAccount.value?.nik || form.representative_nik;
     const accName = applicantAccount.value?.name || form.representative_name;
     if (!accNik || accNik.length !== 16) {
@@ -964,6 +980,12 @@ function submitStep1() {
   }
 
   const isFamily = form.application_target === 'family_in_kk';
+  const targetNik = !isFamily
+    ? (applicantAccount.value?.nik || form.applicant_nik)
+    : form.applicant_nik;
+  const targetName = !isFamily
+    ? (applicantAccount.value?.name || form.applicant_name)
+    : (form.applicant_name ? sanitizePersonName(form.applicant_name).trim() : '');
   const repNik = isFamily ? (applicantAccount.value?.nik || form.representative_nik) : null;
   const repName = isFamily ? (applicantAccount.value?.name || form.representative_name) : null;
   const repRel = isFamily ? (form.family_shdk || 'Anggota Keluarga 1 KK') : null;
@@ -975,7 +997,8 @@ function submitStep1() {
     ...data,
     application_target: isFamily ? 'family_in_kk' : 'self',
     attendance_type: isFamily ? 'family_in_kk' : 'self',
-    applicant_name: data.applicant_name ? sanitizePersonName(data.applicant_name).trim() : '',
+    applicant_nik: targetNik,
+    applicant_name: targetName ? sanitizePersonName(targetName).trim() : '',
     applicant_email: applicantAccount.value?.email || null,
     family_shdk: isFamily ? (data.family_shdk || null) : null,
     representative_nik: repNik,

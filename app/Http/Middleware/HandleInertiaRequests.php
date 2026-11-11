@@ -86,7 +86,9 @@ class HandleInertiaRequests extends Middleware
                 'applicant' => \Illuminate\Support\Facades\Auth::guard('applicant')->user() ? [
                     'id'              => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->id,
                     'name'            => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->name,
+                    'nik'             => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->nik,
                     'masked_nik'      => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->masked_nik,
+                    'email'           => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->email,
                     'account_status'  => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->account_status,
                     'identity_status' => \Illuminate\Support\Facades\Auth::guard('applicant')->user()->identity_status,
                 ] : null,
