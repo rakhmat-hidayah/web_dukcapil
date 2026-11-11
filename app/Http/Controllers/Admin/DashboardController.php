@@ -136,16 +136,27 @@ class DashboardController extends Controller
             : 0;
 
         $newsPublishedCount = $hasTable('news') ? DB::table('news')->where('status', 'published')->count() : 0;
+        $newsDraftCount = $hasTable('news') ? DB::table('news')->where('status', 'draft')->count() : 0;
         $newsThisWeek = $hasTable('news') ? DB::table('news')->where('created_at', '>=', date('Y-m-d', strtotime('-7 days')))->count() : 0;
 
         $downloadsCount = $hasTable('downloads') ? DB::table('downloads')->count() : 0;
+        $downloadsPublishedCount = $hasTable('downloads') ? DB::table('downloads')->where('status', 'published')->count() : 0;
+        $downloadsDraftCount = $hasTable('downloads') ? DB::table('downloads')->where('status', '!=', 'published')->count() : 0;
 
+        $galleryAlbumsCount = $hasTable('gallery_albums') ? DB::table('gallery_albums')->count() : 0;
+        $galleryAlbumsDraft = $hasTable('gallery_albums') ? DB::table('gallery_albums')->where('is_published', 0)->count() : 0;
         $galleryCount = $hasTable('gallery_items') ? DB::table('gallery_items')->count() : 0;
+
         $faqCount = $hasTable('faqs') ? DB::table('faqs')->count() : 0;
+        $faqPublishedCount = $hasTable('faqs') ? DB::table('faqs')->where('is_published', 1)->count() : 0;
+
         $ppidDocsCount = $hasTable('ppid_documents') ? DB::table('ppid_documents')->count() : 0;
+        $ppidDocsPublished = $hasTable('ppid_documents') ? DB::table('ppid_documents')->where('is_published', 1)->count() : 0;
+        $ppidDocsDraft = $hasTable('ppid_documents') ? DB::table('ppid_documents')->where('is_published', 0)->count() : 0;
         $ppidDocsThisMonth = $hasTable('ppid_documents') ? DB::table('ppid_documents')->where('created_at', '>=', $thisMonthStart)->count() : 0;
 
         $innovationsCount = $hasTable('innovations') ? DB::table('innovations')->count() : 0;
+        $innovationsActiveCount = $hasTable('innovations') ? DB::table('innovations')->where('is_active', 1)->count() : 0;
         $complaintsCount = $hasTable('complaints') ? DB::table('complaints')->count() : 0;
         $complaintsResolved = $hasTable('complaints') ? DB::table('complaints')->whereIn('status', ['in_progress', 'resolved'])->count() : 0;
         $complaintRate = $complaintsCount > 0 ? round(($complaintsResolved / $complaintsCount) * 100) : 100;
@@ -224,7 +235,7 @@ class DashboardController extends Controller
                 'title' => 'BERITA & ARTIKEL',
                 'value' => number_format($newsPublishedCount, 0, ',', '.'),
                 'unit' => 'rilis',
-                'trend' => '100% Terpublikasi',
+                'trend' => $newsDraftCount > 0 ? "{$newsDraftCount} Draf" : '100% Terpublikasi',
                 'is_positive' => true,
                 'sparkline' => $sparklineNews,
                 'icon' => 'Newspaper',
@@ -235,7 +246,7 @@ class DashboardController extends Controller
                 'title' => 'UNDUHAN BERKAS',
                 'value' => number_format($downloadsCount, 0, ',', '.'),
                 'unit' => 'berkas',
-                'trend' => '22 Form & 17 Dokumen',
+                'trend' => $downloadsDraftCount > 0 ? "{$downloadsPublishedCount} Aktif ({$downloadsDraftCount} Draf)" : '100% Terpublikasi',
                 'is_positive' => true,
                 'sparkline' => $sparklineDownloads,
                 'icon' => 'Download',
@@ -246,7 +257,7 @@ class DashboardController extends Controller
                 'title' => 'FOTO & VIDEO GALERI',
                 'value' => number_format($galleryCount, 0, ',', '.'),
                 'unit' => 'item',
-                'trend' => '2 Album Kegiatan',
+                'trend' => "{$galleryAlbumsCount} Album Kegiatan",
                 'is_positive' => true,
                 'sparkline' => $sparklineGallery,
                 'icon' => 'Image',
@@ -257,7 +268,7 @@ class DashboardController extends Controller
                 'title' => 'TANYA JAWAB (FAQ)',
                 'value' => number_format($faqCount, 0, ',', '.'),
                 'unit' => 'soal',
-                'trend' => '100% Online',
+                'trend' => "{$faqPublishedCount} Soal Online",
                 'is_positive' => true,
                 'sparkline' => $sparklineFaqs,
                 'icon' => 'HelpCircle',
@@ -268,7 +279,7 @@ class DashboardController extends Controller
                 'title' => 'DOKUMEN PPID',
                 'value' => number_format($ppidDocsCount, 0, ',', '.'),
                 'unit' => 'dokumen',
-                'trend' => 'DIP 2024 - 2026',
+                'trend' => "{$ppidDocsPublished} Dokumen Terbit",
                 'is_positive' => true,
                 'sparkline' => $sparklinePpid,
                 'icon' => 'FileText',
@@ -279,7 +290,7 @@ class DashboardController extends Controller
                 'title' => 'INOVASI LAYANAN',
                 'value' => number_format($innovationsCount, 0, ',', '.'),
                 'unit' => 'program',
-                'trend' => '12 Inovasi Aktif',
+                'trend' => "{$innovationsActiveCount} Inovasi Aktif",
                 'is_positive' => true,
                 'sparkline' => $sparklineInnovations,
                 'icon' => 'Zap',
@@ -339,7 +350,7 @@ class DashboardController extends Controller
                 'title' => 'Galeri Foto & Video',
                 'route' => 'admin.gallery.index',
                 'published' => DB::table('gallery_items')->count(),
-                'draft' => 0,
+                'draft' => $galleryAlbumsDraft,
                 'total' => DB::table('gallery_items')->count(),
             ],
             'downloads' => [
@@ -352,8 +363,8 @@ class DashboardController extends Controller
             'ppid' => [
                 'title' => 'Dokumen PPID',
                 'route' => 'admin.ppid.documents.index',
-                'published' => DB::table('ppid_documents')->count(),
-                'draft' => 0,
+                'published' => DB::table('ppid_documents')->where('is_published', 1)->count(),
+                'draft' => DB::table('ppid_documents')->where('is_published', 0)->count(),
                 'total' => DB::table('ppid_documents')->count(),
             ],
             'faq' => [

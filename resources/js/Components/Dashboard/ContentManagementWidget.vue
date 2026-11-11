@@ -37,10 +37,10 @@
             </div>
 
             <div class="flex items-center gap-2 text-[10px] font-semibold">
-              <span v-if="mod.draft !== undefined" class="text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full">
+              <span v-if="mod.draft && mod.draft > 0" class="text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/40">
                 Draft: {{ mod.draft }}
               </span>
-              <span v-if="mod.archived" class="text-gray-500 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
+              <span v-if="mod.archived && mod.archived > 0" class="text-gray-500 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
                 Arsip: {{ mod.archived }}
               </span>
             </div>
