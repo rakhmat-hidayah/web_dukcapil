@@ -264,15 +264,15 @@
       </div>
 
       <!-- Main Applications Table -->
-      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-        <div class="overflow-x-auto scrollbar-thin pb-2">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm !mt-3.5">
+        <div class="overflow-x-auto scrollbar-thin">
           <table class="w-full text-left text-xs min-w-[1280px]">
             <thead class="bg-slate-50 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700 select-none">
               <tr>
                 <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[155px]">No. Registrasi / Antrean</th>
                 <th class="px-3.5 py-3.5 min-w-[155px]">Data Pemohon</th>
                 <th class="px-3.5 py-3.5 min-w-[155px]">Pemilik Dokumen</th>
-                <th class="px-3 py-3.5 text-center whitespace-nowrap min-w-[120px]">Hubungan (SHDK)</th>
+                <th class="px-3.5 py-3.5 text-center whitespace-nowrap min-w-[120px]">Hubungan (SHDK)</th>
                 <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[180px]">Jenis Layanan</th>
                 <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[150px]">Status Berkas</th>
                 <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[185px]">Status Fisik (Loket)</th>
@@ -364,7 +364,7 @@
                 </td>
 
                 <!-- Status Hubungan Dalam Keluarga (SHDK) -->
-                <td class="px-3 py-3 text-center whitespace-nowrap min-w-[120px]">
+                <td class="px-3.5 py-3 text-center whitespace-nowrap min-w-[120px]">
                   <div v-if="isRepresented(app)" class="inline-flex flex-col items-center">
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
                       {{ getFamilyShdk(app) }}
@@ -374,7 +374,7 @@
                     </span>
                   </div>
                   <div v-else class="text-slate-400 text-center">
-                    <span class="font-mono text-xs text-slate-300 dark:text-slate-600">-</span>
+                    <span class="font-mono text-xs text-slate-400 font-bold">-</span>
                   </div>
                 </td>
 

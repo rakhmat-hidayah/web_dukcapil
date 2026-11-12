@@ -236,19 +236,19 @@
       </div>
 
       <!-- Application Table -->
-      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-        <div class="overflow-x-auto scrollbar-thin pb-2">
-          <table class="w-full text-left text-xs min-w-[1450px]">
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm !mt-3.5">
+        <div class="overflow-x-auto scrollbar-thin">
+          <table class="w-full text-left text-xs min-w-[1260px]">
             <thead class="bg-slate-50 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700 select-none">
               <tr>
-                <th class="px-4 py-3.5 whitespace-nowrap min-w-[155px]">No. Registrasi / Antrian</th>
-                <th class="px-4 py-3.5 min-w-[260px]">Foto & Data Pemohon</th>
-                <th class="px-3.5 py-3.5 min-w-[170px]">Pemilik Dokumen</th>
-                <th class="px-3 py-3.5 text-center whitespace-nowrap min-w-[125px]">Status Hubungan (SHDK)</th>
-                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[175px]">Jenis Layanan</th>
-                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[155px]">Jadwal Pelayanan</th>
-                <th class="px-3.5 py-3.5 text-center whitespace-nowrap min-w-[175px]">Status</th>
-                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-4 py-3.5 text-center whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] min-w-[230px]">Aksi</th>
+                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[150px]">No. Registrasi / Antrian</th>
+                <th class="px-3.5 py-3.5 min-w-[210px]">Foto & Data Pemohon</th>
+                <th class="px-3.5 py-3.5 min-w-[155px]">Pemilik Dokumen</th>
+                <th class="px-3.5 py-3.5 text-center whitespace-nowrap min-w-[125px]">Status Hubungan (SHDK)</th>
+                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[165px]">Jenis Layanan</th>
+                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[145px]">Jadwal Pelayanan</th>
+                <th class="px-3.5 py-3.5 text-center whitespace-nowrap min-w-[155px]">Status</th>
+                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-3.5 py-3.5 text-center whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] min-w-[215px]">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium text-slate-700 dark:text-slate-200">
@@ -265,7 +265,7 @@
                 ]"
               >
                 <!-- Reg & Queue Number -->
-                <td class="px-4 py-3 whitespace-nowrap min-w-[155px]">
+                <td class="px-3.5 py-3 whitespace-nowrap min-w-[150px]">
                   <div class="font-mono font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <span>{{ app.reg_number }}</span>
                     <span
@@ -301,7 +301,7 @@
                 </td>
 
                 <!-- Applicant & NIK with Photo Preview -->
-                <td class="px-4 py-2.5 min-w-[260px]">
+                <td class="px-3.5 py-3 min-w-[210px]">
                   <div class="flex items-center gap-3">
                     <!-- Case 1: Photo Available (Unverified, File exists) - BLURRED FOR PRIVACY -->
                     <div
@@ -389,8 +389,8 @@
                       <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <span>NIK: {{ maskNik(getApplicantNik(app)) }}</span>
                       </div>
-                      <!-- Biometric Verification Pill if verified -->
-                      <div v-if="app.selfie_verification || app.is_selfie_verified" class="mt-1">
+                      <!-- Biometric Verification Pill if verified and photo preview is active -->
+                      <div v-if="(app.selfie_thumbnail_url || app.selfie_url) && (app.selfie_verification || app.is_selfie_verified)" class="mt-1">
                         <span
                           class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8.5px] font-black uppercase tracking-tight border shadow-2xs"
                           :class="app.selfie_verification?.decision === 'MATCH'
@@ -408,7 +408,7 @@
                 </td>
 
                 <!-- Pemilik Dokumen (Yang Bersangkutan / YBS KTP-el) -->
-                <td class="px-3.5 py-3 min-w-[170px]">
+                <td class="px-3.5 py-3 min-w-[155px]">
                   <div class="min-w-0">
                     <div v-if="isRepresented(app)">
                       <div class="flex items-center gap-1.5 flex-wrap">
@@ -443,7 +443,7 @@
                 </td>
 
                 <!-- Status Hubungan Dalam Keluarga (SHDK) -->
-                <td class="px-3 py-3 text-center whitespace-nowrap min-w-[125px]">
+                <td class="px-3.5 py-3 text-center whitespace-nowrap min-w-[125px]">
                   <div v-if="isRepresented(app)" class="inline-flex flex-col items-center">
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
                       {{ getFamilyShdk(app) }}
@@ -453,19 +453,19 @@
                     </span>
                   </div>
                   <div v-else class="text-slate-400 text-center">
-                    <span class="font-mono text-xs text-slate-300 dark:text-slate-600">-</span>
+                    <span class="font-mono text-xs text-slate-400 font-bold">-</span>
                   </div>
                 </td>
 
                 <!-- Service Type -->
-                <td class="px-3.5 py-3 whitespace-nowrap min-w-[175px]">
+                <td class="px-3.5 py-3 whitespace-nowrap min-w-[165px]">
                   <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold">
                     {{ app.service_type?.name || 'Pelayanan KTP-el' }}
                   </span>
                 </td>
 
                 <!-- Schedule Date -->
-                <td class="px-3.5 py-3 whitespace-nowrap min-w-[155px]">
+                <td class="px-3.5 py-3 whitespace-nowrap min-w-[145px]">
                   <div v-if="app.slot?.schedule?.schedule_date">
                     <p class="font-bold text-slate-900 dark:text-white text-xs">
                       {{ formatScheduleDate(app.slot.schedule.schedule_date) }}
@@ -480,7 +480,7 @@
                 </td>
 
                 <!-- Status Badge -->
-                <td class="px-3.5 py-3 text-center whitespace-nowrap min-w-[175px]">
+                <td class="px-3.5 py-3 text-center whitespace-nowrap min-w-[155px]">
                   <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping shrink-0"></span>
                     <span>Draf (Sisa {{ app.draft_remaining_minutes !== undefined ? app.draft_remaining_minutes : (draftTimeoutMinutes || 15) }} mnt)</span>
@@ -501,7 +501,7 @@
                 <!-- Actions -->
                 <td
                   :class="[
-                    'sticky right-0 z-10 px-3.5 py-3 text-center whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] transition min-w-[230px]',
+                    'sticky right-0 z-10 px-3.5 py-3 text-center whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] transition min-w-[215px]',
                     app.verification_urgency === 'overdue'
                       ? 'bg-rose-50/95 dark:bg-rose-950/95 group-hover:bg-rose-100/95 dark:group-hover:bg-rose-900/95'
                       : (app.verification_urgency === 'new'
