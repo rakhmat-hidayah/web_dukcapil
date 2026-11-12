@@ -147,7 +147,7 @@
             <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 border-b border-slate-200 dark:border-slate-700">
               <tr>
                 <th class="p-4 font-bold">Pemohon (Nama User & NIK Utuh)</th>
-                <th class="p-4 font-bold">Email</th>
+                <th class="p-4 font-bold">Kontak (Email & No. HP)</th>
                 <th class="p-4 font-bold">Status Akun</th>
                 <th class="p-4 font-bold">Status Identitas</th>
                 <th class="p-4 font-bold">Perangkat Aktif (1 Browser)</th>
@@ -171,7 +171,11 @@
                   </div>
                 </td>
                 <td class="p-4">
-                  <span class="font-mono text-slate-700 dark:text-slate-300 font-medium">{{ acc.email || acc.masked_email }}</span>
+                  <span class="font-mono text-slate-700 dark:text-slate-300 font-medium block">{{ acc.email || acc.masked_email }}</span>
+                  <div v-if="acc.formatted_phone || acc.phone" class="flex items-center gap-1.5 mt-1 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+                    <span class="text-xs">📱</span>
+                    <span>{{ acc.formatted_phone || acc.phone }}</span>
+                  </div>
                 </td>
                 <td class="p-4">
                   <span

@@ -83,6 +83,73 @@
             </p>
           </div>
 
+          <!-- Nomor Handphone Input (Wajib) -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
+                Nomor Handphone / WhatsApp <span class="text-rose-500">*</span>
+              </label>
+              <!-- Live Digit Counter -->
+              <span
+                :class="[
+                  'text-[10px] font-mono transition-colors',
+                  phoneDigitsCount >= 10 && phoneDigitsCount <= 13
+                    ? 'text-emerald-600 dark:text-emerald-400 font-bold'
+                    : (phoneDigitsCount > 0 ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-slate-400')
+                ]"
+              >
+                <template v-if="phoneDigitsCount >= 10 && phoneDigitsCount <= 13">
+                  ✓ {{ phoneDigitsCount }}/13 Digit
+                </template>
+                <template v-else-if="phoneDigitsCount > 0">
+                  {{ phoneDigitsCount }}/13 Digit (Min. 10)
+                </template>
+                <template v-else>
+                  10 - 13 Digit
+                </template>
+              </span>
+            </div>
+
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <Smartphone class="w-4 h-4" />
+              </div>
+              <input
+                id="field_applicant_phone"
+                :value="displayPhone"
+                @input="handlePhoneInput"
+                @keydown="handlePhoneKeydown"
+                @paste="handlePhonePaste"
+                type="text"
+                inputmode="numeric"
+                maxlength="16"
+                placeholder="08xx-xxxx-xxxx..."
+                class="w-full pl-10 pr-9 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-mono text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <button
+                v-if="form.phone"
+                type="button"
+                @click="clearPhone"
+                title="Hapus nomor HP"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-rose-500 transition cursor-pointer"
+              >
+                <X class="w-4 h-4" />
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
+              <span>Pemisah otomatis: <strong>08xx-xxxx-xxxx</strong> (Hanya angka)</span>
+              <span v-if="phoneDigitsCount > 0 && phoneDigitsCount < 10" class="text-amber-600 dark:text-amber-400 font-medium">
+                Kurang {{ 10 - phoneDigitsCount }} digit
+              </span>
+            </div>
+
+            <p v-if="form.errors.phone" class="text-xs text-rose-500 font-semibold">
+              {{ form.errors.phone }}
+            </p>
+          </div>
+
           <!-- Email Input -->
           <div class="space-y-1 sm:space-y-1.5">
             <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -238,24 +305,110 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
-import { ArrowRight, UserPlus, Sparkles, X, AlertCircle, Clock, Lock } from '@lucide/vue'
+import { ArrowRight, UserPlus, Sparkles, X, AlertCircle, Clock, Lock, Smartphone } from '@lucide/vue'
+
+const form = useForm({
+  nik: '',
+  name: '',
+  phone: '',
+  email: '',
+  password: '',
+  password_confirmation: '',
+})
+
+// Format digits with hyphen separators: 4-4-5 format (e.g. 0812-3456-7890 or 0812-3456-78901)
+const formatPhoneDisplay = (digits) => {
+  if (!digits) return ''
+  const clean = digits.replace(/\D/g, '').slice(0, 13)
+  if (clean.length <= 4) return clean
+  if (clean.length <= 8) return `${clean.slice(0, 4)}-${clean.slice(4)}`
+  return `${clean.slice(0, 4)}-${clean.slice(4, 8)}-${clean.slice(8)}`
+}
+
+const displayPhone = ref(formatPhoneDisplay(form.phone || ''))
+
+const phoneDigitsCount = computed(() => {
+  return (form.phone || '').replace(/\D/g, '').length
+})
 
 onMounted(() => {
   if (typeof window !== 'undefined') {
     window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
   }
+  if (form.phone) {
+    displayPhone.value = formatPhoneDisplay(form.phone)
+  }
 })
 
-const form = useForm({
-  nik: '',
-  name: '',
-  email: '',
-  password: '',
-  password_confirmation: '',
-})
+const handlePhoneInput = (e) => {
+  const input = e.target
+  const rawValue = input.value || ''
+  const digits = rawValue.replace(/\D/g, '').slice(0, 13)
+  form.phone = digits
+  displayPhone.value = formatPhoneDisplay(digits)
+  input.value = displayPhone.value
+
+  // Automatically clear error once user reaches a valid 10-13 digit number
+  if (form.errors.phone && digits.length >= 10 && digits.length <= 13) {
+    delete form.errors.phone
+  }
+}
+
+const handlePhoneKeydown = (e) => {
+  // Allow navigation, control keys, backspace, delete, tab, enter
+  if (
+    [
+      'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+      'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+      'Home', 'End'
+    ].includes(e.key) ||
+    ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x', 'z'].includes(e.key.toLowerCase()))
+  ) {
+    return
+  }
+
+  // Strictly block any character that is not a numeric digit 0-9
+  if (!/^[0-9]$/.test(e.key)) {
+    e.preventDefault()
+    return
+  }
+
+  // Block further typing if already 13 digits and no text selected
+  const currentDigits = (form.phone || '').replace(/\D/g, '')
+  const hasSelection = e.target.selectionStart !== e.target.selectionEnd
+  if (currentDigits.length >= 13 && !hasSelection) {
+    e.preventDefault()
+  }
+}
+
+const handlePhonePaste = (e) => {
+  e.preventDefault()
+  const pasted = (e.clipboardData || window.clipboardData)?.getData('text') || ''
+  const digits = pasted.replace(/\D/g, '').slice(0, 13)
+  if (digits) {
+    form.phone = digits
+    displayPhone.value = formatPhoneDisplay(digits)
+    if (e.target) {
+      e.target.value = displayPhone.value
+    }
+    if (form.errors.phone && digits.length >= 10 && digits.length <= 13) {
+      delete form.errors.phone
+    }
+  }
+}
+
+const clearPhone = () => {
+  form.phone = ''
+  displayPhone.value = ''
+  if (form.errors.phone) {
+    delete form.errors.phone
+  }
+  const el = document.getElementById('field_applicant_phone')
+  if (el) el.focus()
+}
 
 // Email domain helpers
 const emailUsernameOnly = computed(() => {
@@ -328,6 +481,29 @@ const normalizeEmail = () => {
 
 const submitRegister = () => {
   normalizeEmail()
+
+  const phoneDigits = (form.phone || '').replace(/\D/g, '')
+  if (!phoneDigits) {
+    form.errors.phone = 'Nomor Handphone wajib diisi.'
+    const el = document.getElementById('field_applicant_phone')
+    if (el) el.focus()
+    return
+  }
+  if (phoneDigits.length < 10) {
+    form.errors.phone = `Nomor Handphone minimal 10 digit (saat ini ${phoneDigits.length} digit).`
+    const el = document.getElementById('field_applicant_phone')
+    if (el) el.focus()
+    return
+  }
+  if (phoneDigits.length > 13) {
+    form.errors.phone = `Nomor Handphone maksimal 13 digit (saat ini ${phoneDigits.length} digit).`
+    const el = document.getElementById('field_applicant_phone')
+    if (el) el.focus()
+    return
+  }
+
+  form.phone = phoneDigits
+
   form.post(route('applicant.register.post'), {
     onFinish: () => form.reset('password', 'password_confirmation'),
   })

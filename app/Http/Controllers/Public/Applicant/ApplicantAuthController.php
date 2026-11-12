@@ -51,15 +51,17 @@ class ApplicantAuthController extends Controller
                 ->with('error', 'Pendaftaran akun pemohon baru sedang ditutup sementara karena layanan online sedang dalam pemeliharaan sistem.');
         }
 
-        // 1. Sanitize demographic and email inputs
+        // 1. Sanitize demographic, phone, and email inputs
         $rawNik = preg_replace('/\D/', '', (string) $request->input('nik'));
         $rawEmail = strtolower(trim((string) $request->input('email')));
         $rawName = mb_strtoupper(trim((string) $request->input('name')));
+        $rawPhone = preg_replace('/\D/', '', (string) $request->input('phone'));
 
         $request->merge([
             'nik'   => $rawNik,
             'email' => $rawEmail,
             'name'  => $rawName,
+            'phone' => $rawPhone,
         ]);
 
         $request->validate([
@@ -74,6 +76,13 @@ class ApplicantAuthController extends Controller
                 'min:2',
                 'max:60',
                 'regex:/^[A-Z\s\'\-]+$/',
+            ],
+            'phone' => [
+                'required',
+                'string',
+                'min:10',
+                'max:13',
+                'regex:/^[0-9]{10,13}$/',
             ],
             'email' => [
                 'required',
@@ -91,6 +100,10 @@ class ApplicantAuthController extends Controller
             'nik.regex'          => 'NIK wajib tepat 16 digit angka numerik.',
             'name.required'      => 'Nama lengkap wajib diisi sesuai KTP/KK.',
             'name.regex'         => 'Nama hanya boleh memuat huruf kapital, spasi, tanda petik (\'), atau tanda hubung (-).',
+            'phone.required'     => 'Nomor Handphone wajib diisi.',
+            'phone.regex'        => 'Nomor Handphone hanya boleh berisi angka (10 s.d. 13 digit).',
+            'phone.min'          => 'Nomor Handphone minimal terdiri dari 10 digit angka.',
+            'phone.max'          => 'Nomor Handphone maksimal terdiri dari 13 digit angka.',
             'email.required'     => 'Alamat email aktif wajib diisi untuk verifikasi OTP.',
             'email.email'        => 'Format alamat email tidak valid.',
             'password.required'  => 'Password wajib diisi.',
@@ -117,6 +130,7 @@ class ApplicantAuthController extends Controller
         $account = new ApplicantAccount();
         $account->name = $rawName;
         $account->email_normalized = $rawEmail;
+        $account->phone = $rawPhone;
         $account->nik = $rawNik; // Mutator automatically encrypts and sets blind index
         $account->password = Hash::make($request->password);
         $account->identity_status = ApplicantAccount::IDENTITY_PENDING;

@@ -32,6 +32,7 @@ class ApplicantAccount extends Authenticatable
         'nik_hash',
         'name',
         'email_normalized',
+        'phone',
         'email_verified_at',
         'password',
         'identity_status',
@@ -129,6 +130,56 @@ class ApplicantAccount extends Authenticatable
     public function getEmailAttribute(): ?string
     {
         return $this->email_normalized;
+    }
+
+    /**
+     * Set the applicant's phone number, cleaning non-numeric characters.
+     */
+    public function setPhoneAttribute(?string $phone): void
+    {
+        if (empty($phone)) {
+            $this->attributes['phone'] = null;
+            return;
+        }
+
+        $this->attributes['phone'] = preg_replace('/\D/', '', trim($phone));
+    }
+
+    /**
+     * Get formatted phone number (e.g. 0812-3456-7890).
+     */
+    public function getFormattedPhoneAttribute(): string
+    {
+        $phone = $this->phone;
+        if (!$phone) {
+            return '-';
+        }
+
+        $digits = preg_replace('/\D/', '', $phone);
+        $len = strlen($digits);
+
+        if ($len <= 4) {
+            return $digits;
+        }
+        if ($len <= 8) {
+            return substr($digits, 0, 4) . '-' . substr($digits, 4);
+        }
+
+        return substr($digits, 0, 4) . '-' . substr($digits, 4, 4) . '-' . substr($digits, 8);
+    }
+
+    /**
+     * Get masked phone number for safe public/semi-public display (e.g. 0812****789).
+     */
+    public function getMaskedPhoneAttribute(): string
+    {
+        $phone = $this->phone;
+        if (!$phone || strlen($phone) < 8) {
+            return $phone ?: '-';
+        }
+
+        $len = strlen($phone);
+        return substr($phone, 0, 4) . str_repeat('*', max(2, $len - 7)) . substr($phone, -3);
     }
 
     // ------------------------------------------------------------------

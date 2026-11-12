@@ -37,6 +37,10 @@ class ApplicantManagementController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email_normalized', 'like', "%" . strtolower($search) . "%");
 
+                if ($digits !== '') {
+                    $q->orWhere('phone', 'like', "%{$digits}%");
+                }
+
                 if (strlen($digits) === 16) {
                     $nikHash = ApplicantAccount::computeNikHash($digits);
                     $q->orWhere('nik_hash', $nikHash);
@@ -62,6 +66,9 @@ class ApplicantManagementController extends Controller
                 'masked_nik'          => $acc->masked_nik,
                 'email'               => $acc->email_normalized,
                 'masked_email'        => $acc->masked_email,
+                'phone'               => $acc->phone,
+                'formatted_phone'     => $acc->formatted_phone,
+                'masked_phone'        => $acc->masked_phone,
                 'identity_status'       => $acc->identity_status,
                 'identity_status_label' => self::translateIdentityStatus($acc->identity_status),
                 'account_status'        => $acc->account_status,
@@ -109,6 +116,8 @@ class ApplicantManagementController extends Controller
                 'masked_nik'           => $account->masked_nik,
                 'email'                => $account->email_normalized,
                 'masked_email'         => $account->masked_email,
+                'phone'                => $account->phone,
+                'formatted_phone'      => $account->formatted_phone,
                 'identity_status'       => $account->identity_status,
                 'identity_status_label' => self::translateIdentityStatus($account->identity_status),
                 'account_status'        => $account->account_status,

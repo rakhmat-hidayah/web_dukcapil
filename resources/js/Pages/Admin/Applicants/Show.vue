@@ -61,6 +61,22 @@
               <strong class="font-medium text-xs">{{ account.email || account.masked_email }}</strong>
             </div>
 
+            <!-- Nomor Handphone Utuh -->
+            <div class="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 px-3.5 py-2 rounded-2xl border border-emerald-200 dark:border-emerald-800 font-mono">
+              <span class="font-sans font-bold text-slate-500 dark:text-slate-400 text-[11px]">No. HP:</span>
+              <strong class="font-bold text-xs">{{ account.formatted_phone || account.phone || '-' }}</strong>
+              <button
+                v-if="account.phone"
+                type="button"
+                @click="copyText(account.phone, 'phone')"
+                class="p-1 text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 transition rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/60 cursor-pointer ml-1"
+                :title="copiedField === 'phone' ? 'No. HP berhasil disalin!' : 'Salin Nomor HP'"
+              >
+                <Check v-if="copiedField === 'phone'" class="w-3.5 h-3.5 text-emerald-600" />
+                <Copy v-else class="w-3.5 h-3.5" />
+              </button>
+            </div>
+
             <!-- Status Identitas -->
             <div
               class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border text-xs font-bold"
