@@ -335,7 +335,7 @@
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    NIK Anggota Keluarga (16 Digit) <span class="text-rose-500">*</span>
+                    NIK Anggota Keluarga Yang Dimohonkan (16 Digit) <span class="text-rose-500">*</span>
                   </label>
                   <span class="text-[10px] font-mono" :class="form.applicant_nik.length === 16 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400'">
                     {{ form.applicant_nik.length }}/16 Digit
@@ -351,7 +351,7 @@
                   pattern="[0-9]*"
                   maxlength="16"
                   autocomplete="off"
-                  placeholder="5205xxxxxxxxxxxx (NIK Anggota KK)"
+                  placeholder="Contoh: 5205xxxxxxxxxxxx"
                   class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider"
                   :class="{'border-rose-500 ring-1 ring-rose-500': form.errors.applicant_nik}"
                   required
@@ -365,13 +365,19 @@
                 <p v-else-if="form.applicant_nik && form.applicant_nik === $page.props.auth?.applicant?.nik" class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
                   Catatan: NIK yang Anda masukkan sama dengan NIK akun Anda. Jika permohonan ini untuk diri Anda sendiri, silakan pilih opsi "Pengajuan Untuk Diri Sendiri".
                 </p>
+
+                <!-- Guidance for NIK -->
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-start gap-1.5 leading-snug">
+                  <Info class="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
+                  <span>Keterangan: Masukkan 16 digit NIK anggota keluarga yang dimohonkan (tercantum pada kolom NIK Kartu Keluarga).</span>
+                </p>
               </div>
 
               <!-- Nama Lengkap Sesuai KK -->
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    Nama Anggota Keluarga Sesuai KK <span class="text-rose-500">*</span>
+                    Nama Anggota Keluarga Yang Dimohonkan Sesuai KK <span class="text-rose-500">*</span>
                   </label>
                   <span
                     class="text-[10px] font-mono font-semibold"
@@ -391,7 +397,7 @@
                   autocomplete="off"
                   autocapitalize="characters"
                   spellcheck="false"
-                  placeholder="CONTOH: NAMA ANGGOTA KELUARGA (ISTRI / ANAK / DLL)"
+                  placeholder="CONTOH: SITI FATIMAH..."
                   class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 uppercase font-semibold"
                   required
                 />
@@ -409,7 +415,7 @@
                 <!-- Guidance for proper name writing rules -->
                 <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-start gap-1.5 leading-snug">
                   <Info class="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
-                  <span>Kaidah Penulisan: Wajib huruf kapital sesuai KK, tanpa angka (0-9), gelar, atau singkatan yang tidak resmi (Permendagri No. 73/2022).</span>
+                  <span>Kaidah Penulisan: Masukkan nama lengkap anggota keluarga yang dimohonkan (wajib huruf kapital sesuai KK, tanpa angka, gelar, atau singkatan tidak resmi).</span>
                 </p>
               </div>
             </div>
@@ -823,12 +829,12 @@ function validateForm() {
 
     // NIK Anggota Keluarga
     if (!form.applicant_nik) {
-      const msg = 'NIK anggota keluarga yang diurus wajib diisi.';
+      const msg = 'NIK anggota keluarga yang dimohonkan wajib diisi.';
       form.errors.applicant_nik = msg;
       errors.push({
         field: 'applicant_nik',
         elementId: 'field_applicant_nik',
-        label: 'NIK Anggota Keluarga',
+        label: 'NIK Anggota Keluarga Yang Dimohonkan',
         message: msg,
       });
     } else if (form.applicant_nik.length !== 16) {
@@ -837,7 +843,7 @@ function validateForm() {
       errors.push({
         field: 'applicant_nik',
         elementId: 'field_applicant_nik',
-        label: 'NIK Anggota Keluarga (16 Digit)',
+        label: 'NIK Anggota Keluarga Yang Dimohonkan (16 Digit)',
         message: msg,
       });
     } else if (applicantAccount.value?.nik && form.applicant_nik === applicantAccount.value.nik) {
@@ -846,7 +852,7 @@ function validateForm() {
       errors.push({
         field: 'applicant_nik',
         elementId: 'field_applicant_nik',
-        label: 'NIK Anggota Keluarga',
+        label: 'NIK Anggota Keluarga Yang Dimohonkan',
         message: msg,
       });
     }
@@ -854,12 +860,12 @@ function validateForm() {
     // Nama Lengkap Anggota Keluarga Sesuai KK
     const cleanApplicantName = (form.applicant_name || '').trim();
     if (!cleanApplicantName) {
-      const msg = 'Nama lengkap anggota keluarga sesuai Kartu Keluarga (KK) wajib diisi.';
+      const msg = 'Nama lengkap anggota keluarga yang dimohonkan sesuai KK wajib diisi.';
       form.errors.applicant_name = msg;
       errors.push({
         field: 'applicant_name',
         elementId: 'field_applicant_name',
-        label: 'Nama Anggota Keluarga Sesuai KK',
+        label: 'Nama Anggota Keluarga Yang Dimohonkan Sesuai KK',
         message: msg,
       });
     } else if (/\d/.test(cleanApplicantName)) {
