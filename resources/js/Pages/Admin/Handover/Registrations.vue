@@ -276,7 +276,7 @@
                 <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">Jenis Layanan</th>
                 <th class="px-3 py-3 whitespace-nowrap min-w-[125px]">Status Berkas</th>
                 <th class="px-3 py-3 whitespace-nowrap min-w-[120px]">Status Fisik</th>
-                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-3 py-3 text-right whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] min-w-[110px]">Aksi</th>
+                <th class="px-3 py-3 text-right whitespace-nowrap min-w-[110px]">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium text-slate-700 dark:text-slate-200">
@@ -459,8 +459,8 @@
                   </div>
                 </td>
 
-                <!-- Actions (Sticky right column) -->
-                <td class="sticky right-0 z-10 bg-white group-hover:bg-slate-50/90 dark:bg-slate-800 dark:group-hover:bg-slate-700/80 px-3 py-2.5 text-right whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.06)] min-w-[110px]">
+                <!-- Actions -->
+                <td class="px-3 py-2.5 text-right whitespace-nowrap min-w-[110px]">
                   <div class="flex items-center justify-end gap-1.5">
                     <!-- Direct Serah Terima Action if Handover item exists -->
                     <Link

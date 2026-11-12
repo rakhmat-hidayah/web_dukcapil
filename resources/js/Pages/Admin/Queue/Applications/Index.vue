@@ -248,7 +248,7 @@
                 <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">Jenis Layanan</th>
                 <th class="px-3 py-3 whitespace-nowrap min-w-[115px]">Jadwal Pelayanan</th>
                 <th class="px-3 py-3 text-center whitespace-nowrap min-w-[130px]">Status</th>
-                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-3 py-3 text-center whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] min-w-[175px]">Aksi</th>
+                <th class="px-3 py-3 text-center whitespace-nowrap min-w-[175px]">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium text-slate-700 dark:text-slate-200">
@@ -499,16 +499,7 @@
                 </td>
 
                 <!-- Actions -->
-                <td
-                  :class="[
-                    'sticky right-0 z-10 px-2.5 py-2.5 text-center whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] transition min-w-[175px]',
-                    app.verification_urgency === 'overdue'
-                      ? 'bg-rose-50/95 dark:bg-rose-950/95 group-hover:bg-rose-100/95 dark:group-hover:bg-rose-900/95'
-                      : (app.verification_urgency === 'new'
-                        ? 'bg-amber-50/95 dark:bg-amber-950/95 group-hover:bg-amber-100/95 dark:group-hover:bg-amber-900/95'
-                        : 'bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/80')
-                  ]"
-                >
+                <td class="px-2.5 py-2.5 text-center whitespace-nowrap min-w-[175px]">
                   <div class="flex items-center justify-center gap-1">
                     <!-- 1. Primary Action: Tinjau Berkas -->
                     <Link
