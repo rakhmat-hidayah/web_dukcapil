@@ -411,6 +411,15 @@ const selectNode = (node) => {
   if (node) emit('select-node', node)
 }
 
+const isMatched = (node) => {
+  if (!props.searchQuery || !props.searchQuery.trim()) return false
+  const q = props.searchQuery.toLowerCase().trim()
+  const title = (node?.node_title || '').toLowerCase()
+  const name = (node?.official?.name || '').toLowerCase()
+  const nip = (node?.official?.nip || '').toLowerCase()
+  return title.includes(q) || name.includes(q) || nip.includes(q)
+}
+
 // Dynamic color resolution helper functions
 const getCardStyle = (node) => {
   const color = node?.color_code?.trim()
@@ -426,18 +435,29 @@ const getCardStyle = (node) => {
 }
 
 const getCardClass = (node, defaultClasses) => {
+  let classes = defaultClasses
   const color = node?.color_code?.trim()?.toLowerCase()
-  if (!color) return defaultClasses
-  if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) {
-    return 'border-2 text-white shadow-xl'
+  if (color) {
+    if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) {
+      classes = 'border-2 text-white shadow-xl'
+    } else if (color === 'pink' || color === 'magenta') {
+      classes = 'bg-gradient-to-r from-pink-600 via-rose-600 to-purple-700 shadow-lg shadow-pink-900/20 border-2 border-pink-300 text-white'
+    } else if (color === 'red' || color === 'rose') {
+      classes = 'bg-gradient-to-r from-rose-600 via-red-600 to-pink-700 shadow-lg shadow-rose-900/20 border-2 border-rose-300 text-white'
+    } else if (color === 'orange' || color === 'amber') {
+      classes = 'bg-gradient-to-r from-amber-600 via-amber-600 to-orange-700 shadow-lg shadow-amber-900/20 border-2 border-amber-300 text-white'
+    } else if (color === 'teal' || color === 'emerald') {
+      classes = 'bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 shadow-lg shadow-emerald-900/20 border-2 border-emerald-400 text-white'
+    } else if (color === 'blue' || color === 'indigo' || color === '#1e00ff') {
+      classes = 'bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 shadow-lg shadow-blue-900/20 border-2 border-blue-400 text-white'
+    }
   }
-  if (color === 'pink' || color === 'magenta') return 'bg-gradient-to-r from-pink-600 via-rose-600 to-purple-700 shadow-lg shadow-pink-900/20 border-2 border-pink-300 text-white'
-  if (color === 'red' || color === 'rose') return 'bg-gradient-to-r from-rose-600 via-red-600 to-pink-700 shadow-lg shadow-rose-900/20 border-2 border-rose-300 text-white'
-  if (color === 'orange' || color === 'amber') return 'bg-gradient-to-r from-amber-600 via-amber-600 to-orange-700 shadow-lg shadow-amber-900/20 border-2 border-amber-300 text-white'
-  if (color === 'teal' || color === 'emerald') return 'bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 shadow-lg shadow-emerald-900/20 border-2 border-emerald-400 text-white'
-  if (color === 'blue' || color === 'indigo' || color === '#1e00ff') return 'bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 shadow-lg shadow-blue-900/20 border-2 border-blue-400 text-white'
+
+  if (isMatched(node)) {
+    classes += ' ring-4 ring-amber-400 ring-offset-2 animate-pulse scale-105 z-30'
+  }
   
-  return defaultClasses
+  return classes
 }
 
 // Find nodes from tree prop
