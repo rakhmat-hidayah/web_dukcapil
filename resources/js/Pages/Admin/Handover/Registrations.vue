@@ -266,17 +266,17 @@
       <!-- Main Applications Table -->
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm !mt-3.5">
         <div class="overflow-x-auto scrollbar-thin">
-          <table class="w-full text-left text-xs min-w-[1280px]">
+          <table class="w-full text-left text-xs min-w-[920px]">
             <thead class="bg-slate-50 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700 select-none">
               <tr>
-                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[155px]">No. Registrasi / Antrean</th>
-                <th class="px-3.5 py-3.5 min-w-[155px]">Data Pemohon</th>
-                <th class="px-3.5 py-3.5 min-w-[155px]">Pemilik Dokumen</th>
-                <th class="px-3.5 py-3.5 text-center whitespace-nowrap min-w-[120px]">Hubungan (SHDK)</th>
-                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[180px]">Jenis Layanan</th>
-                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[150px]">Status Berkas</th>
-                <th class="px-3.5 py-3.5 whitespace-nowrap min-w-[185px]">Status Fisik (Loket)</th>
-                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-3.5 py-3.5 text-right whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] min-w-[130px]">Aksi</th>
+                <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">No. Registrasi / Antrean</th>
+                <th class="px-3 py-3 whitespace-nowrap min-w-[135px]">Data Pemohon</th>
+                <th class="px-3 py-3 whitespace-nowrap min-w-[135px]">Pemilik Dokumen</th>
+                <th class="px-3 py-3 text-center whitespace-nowrap min-w-[115px]">Hubungan (SHDK)</th>
+                <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">Jenis Layanan</th>
+                <th class="px-3 py-3 whitespace-nowrap min-w-[125px]">Status Berkas</th>
+                <th class="px-3 py-3 whitespace-nowrap min-w-[120px]">Status Fisik</th>
+                <th class="sticky right-0 z-20 bg-slate-50 dark:bg-slate-900 px-3 py-3 text-right whitespace-nowrap border-l border-slate-200 dark:border-slate-700 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.08)] min-w-[110px]">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium text-slate-700 dark:text-slate-200">
@@ -286,12 +286,12 @@
                 class="group hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition border-b border-slate-100 dark:border-slate-700/60"
               >
                 <!-- No Registrasi & Antrean -->
-                <td class="px-3.5 py-3 whitespace-nowrap min-w-[155px]">
+                <td class="px-3 py-2.5 whitespace-nowrap min-w-[140px]">
                   <div class="font-mono font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <span>{{ app.reg_number }}</span>
                     <span
                       v-if="app.queue_number"
-                      class="px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[11px] font-black font-mono border border-emerald-300 dark:border-emerald-800"
+                      class="px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[10.5px] font-black font-mono border border-emerald-300 dark:border-emerald-800"
                     >
                       {{ app.queue_number }}
                     </span>
@@ -302,61 +302,61 @@
                 </td>
 
                 <!-- Data Pemohon (Akun Pendaftar / Perwakilan) -->
-                <td class="px-3.5 py-3 min-w-[155px]">
+                <td class="px-3 py-2.5 min-w-[135px]">
                   <div class="min-w-0">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                      <span class="font-bold text-slate-900 dark:text-white truncate max-w-[160px]" :title="getApplicantName(app)">
+                    <div class="flex items-center gap-1 flex-wrap">
+                      <span class="font-bold text-slate-900 dark:text-white truncate max-w-[120px]" :title="getApplicantName(app)">
                         {{ getApplicantName(app) }}
                       </span>
                       <span
                         v-if="isRepresented(app)"
-                        class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shrink-0"
+                        class="px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shrink-0"
                         title="Mengajukan permohonan mewakili anggota keluarga"
                       >
                         Mewakili
                       </span>
                       <span
                         v-else
-                        class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0"
+                        class="px-1.5 py-0.2 rounded text-[8.5px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0"
                       >
                         Diri Sendiri
                       </span>
                     </div>
-                    <div class="font-mono text-[10.5px] text-slate-400 flex items-center gap-2 mt-0.5">
+                    <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
                       <span>NIK: {{ maskNik(getApplicantNik(app)) }}</span>
                     </div>
                   </div>
                 </td>
 
                 <!-- Pemilik Dokumen (Yang Bersangkutan / YBS KTP-el) -->
-                <td class="px-3.5 py-3 min-w-[155px]">
+                <td class="px-3 py-2.5 min-w-[135px]">
                   <div class="min-w-0">
                     <div v-if="isRepresented(app)">
-                      <div class="flex items-center gap-1.5 flex-wrap">
-                        <span class="font-bold text-slate-900 dark:text-white truncate max-w-[160px]" :title="getDocumentOwnerName(app)">
+                      <div class="flex items-center gap-1 flex-wrap">
+                        <span class="font-bold text-slate-900 dark:text-white truncate max-w-[120px]" :title="getDocumentOwnerName(app)">
                           {{ getDocumentOwnerName(app) }}
                         </span>
                         <span
-                          class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0"
+                          class="px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0"
                           title="Pemilik Dokumen KTP-el"
                         >
                           Pemilik KTP
                         </span>
                       </div>
-                      <div class="font-mono text-[10.5px] text-slate-400 mt-0.5">
+                      <div class="font-mono text-[10px] text-slate-400 mt-0.5">
                         NIK: {{ maskNik(getDocumentOwnerNik(app)) }}
                       </div>
                     </div>
                     <div v-else>
-                      <div class="flex items-center gap-1.5 flex-wrap">
-                        <span class="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[150px]" :title="getDocumentOwnerName(app)">
+                      <div class="flex items-center gap-1 flex-wrap">
+                        <span class="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[120px]" :title="getDocumentOwnerName(app)">
                           {{ getDocumentOwnerName(app) }}
                         </span>
-                        <span class="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0">
+                        <span class="px-1.5 py-0.2 rounded text-[8.5px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0">
                           Sama dgn Pemohon
                         </span>
                       </div>
-                      <div class="font-mono text-[10.5px] text-slate-400 mt-0.5">
+                      <div class="font-mono text-[10px] text-slate-400 mt-0.5">
                         NIK: {{ maskNik(getDocumentOwnerNik(app)) }}
                       </div>
                     </div>
@@ -364,9 +364,9 @@
                 </td>
 
                 <!-- Status Hubungan Dalam Keluarga (SHDK) -->
-                <td class="px-3.5 py-3 text-center whitespace-nowrap min-w-[120px]">
+                <td class="px-3 py-2.5 text-center whitespace-nowrap min-w-[115px]">
                   <div v-if="isRepresented(app)" class="inline-flex flex-col items-center">
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
                       {{ getFamilyShdk(app) }}
                     </span>
                     <span class="text-[9px] text-slate-400 mt-0.5 font-medium">
@@ -379,15 +379,15 @@
                 </td>
 
                 <!-- Jenis Layanan -->
-                <td class="px-3.5 py-3 whitespace-nowrap min-w-[180px]">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold">
+                <td class="px-3 py-2.5 whitespace-nowrap min-w-[140px]">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[11px] font-semibold">
                     {{ app.service_type?.name || 'Pelayanan KTP-el' }}
                   </span>
                 </td>
 
                 <!-- Status Berkas Administrasi -->
-                <td class="px-3.5 py-3 whitespace-nowrap min-w-[150px]">
-                  <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                <td class="px-3 py-2.5 whitespace-nowrap min-w-[125px]">
+                  <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping shrink-0"></span>
                     <span>Draf (Sisa {{ app.draft_remaining_minutes !== undefined ? app.draft_remaining_minutes : draftTimeoutMinutes }} mnt)</span>
                   </div>
@@ -395,64 +395,64 @@
                 </td>
 
                 <!-- Status Fisik KTP-el di Loket Serah Terima -->
-                <td class="px-3.5 py-3 whitespace-nowrap min-w-[185px]">
+                <td class="px-3 py-2.5 whitespace-nowrap min-w-[120px]">
                   <div v-if="app.status === 'DRAFT'">
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
                       Masa Pengisian Berkas
                     </span>
                   </div>
                   <div v-else-if="app.handover">
                     <span
                       v-if="app.handover.status === 'SUDAH_DISERAHKAN'"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
                     >
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                       Sudah Diserahkan
                     </span>
                     <span
                       v-else-if="app.handover.status === 'SIAP_DIAMBIL'"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
                     >
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                      Siap Diambil di Loket
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                      Siap Diambil
                     </span>
                     <span
                       v-else-if="app.handover.status === 'MENUNGGU_KETERSEDIAAN'"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
                     >
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                       Cek Fisik Kartu
                     </span>
                     <span
                       v-else-if="app.handover.status === 'KENDALA_PENGAMBILAN'"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
                     >
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                       Ada Kendala
                     </span>
                   </div>
                   <div v-else>
                     <span
                       v-if="['READY_FOR_PICKUP'].includes(app.status)"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-100 text-emerald-700"
                     >
                       Siap Diambil
                     </span>
                     <span
                       v-else-if="['APPROVED_FOR_SERVICE', 'PROCESSING'].includes(app.status)"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-sky-100 text-sky-700"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-sky-100 text-sky-700"
                     >
                       Proses Cetak / Rekam
                     </span>
                     <span
                       v-else-if="['REJECTED', 'EXPIRED', 'CANCELLED'].includes(app.status)"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-slate-100 text-slate-500"
                     >
                       Tidak Aktif
                     </span>
                     <span
                       v-else
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300"
                     >
                       Tahap Verifikasi
                     </span>
@@ -460,13 +460,13 @@
                 </td>
 
                 <!-- Actions (Sticky right column) -->
-                <td class="sticky right-0 z-10 bg-white group-hover:bg-slate-50/90 dark:bg-slate-800 dark:group-hover:bg-slate-700/80 px-3.5 py-3 text-right whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.06)] min-w-[130px]">
+                <td class="sticky right-0 z-10 bg-white group-hover:bg-slate-50/90 dark:bg-slate-800 dark:group-hover:bg-slate-700/80 px-3 py-2.5 text-right whitespace-nowrap border-l border-slate-100 dark:border-slate-700/60 shadow-[-6px_0_10px_-4px_rgba(0,0,0,0.06)] min-w-[110px]">
                   <div class="flex items-center justify-end gap-1.5">
                     <!-- Direct Serah Terima Action if Handover item exists -->
                     <Link
                       v-if="app.handover?.id"
                       :href="'/admin/handover/' + app.handover.id"
-                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition"
+                      class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition"
                       title="Buka Halaman Serah Terima KTP-el"
                     >
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
