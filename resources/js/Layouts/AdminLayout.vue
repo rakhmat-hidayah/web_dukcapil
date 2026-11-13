@@ -448,6 +448,8 @@ const showTimeoutWarning = ref(false);
 const countdownSeconds = ref(60);
 const isExtending = ref(false);
 let idleTimer = null;
+let lastRecordedTime = 0;
+let removeNavListener = null;
 const activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
 
 const formatCountdown = (seconds) => {
@@ -459,7 +461,13 @@ const formatCountdown = (seconds) => {
 const recordActivity = () => {
   if (!showTimeoutWarning.value) {
     const now = Date.now();
-    localStorage.setItem('admin_last_activity_time', now.toString());
+    // Throttle writing to localStorage to prevent high I/O on rapid events (e.g. mousemove)
+    if (now - lastRecordedTime > 2000) {
+      lastRecordedTime = now;
+      try {
+        localStorage.setItem('admin_last_activity_time', now.toString());
+      } catch (e) {}
+    }
   }
 };
 
@@ -469,7 +477,10 @@ const extendSession = async () => {
   try {
     await axios.post(route('admin.keep-alive'));
     const now = Date.now();
-    localStorage.setItem('admin_last_activity_time', now.toString());
+    lastRecordedTime = now;
+    try {
+      localStorage.setItem('admin_last_activity_time', now.toString());
+    } catch (e) {}
     showTimeoutWarning.value = false;
     countdownSeconds.value = 60;
   } catch (err) {
@@ -484,7 +495,9 @@ const extendSession = async () => {
 
 const logoutDueToInactivity = () => {
   showTimeoutWarning.value = false;
-  localStorage.removeItem('admin_last_activity_time');
+  try {
+    localStorage.removeItem('admin_last_activity_time');
+  } catch (e) {}
   router.post(route('admin.logout'), {}, {
     onFinish: () => {
       window.location.href = route('admin.login', { timeout: 1 });
@@ -495,9 +508,32 @@ const logoutDueToInactivity = () => {
 const checkIdleStatus = () => {
   if (!page.props.auth?.user) return;
 
-  const rawLastActivity = localStorage.getItem('admin_last_activity_time');
-  const lastActivity = rawLastActivity ? parseInt(rawLastActivity, 10) : Date.now();
-  const elapsed = Date.now() - lastActivity;
+  const now = Date.now();
+  let rawLastActivity = null;
+  try {
+    rawLastActivity = localStorage.getItem('admin_last_activity_time');
+  } catch (e) {}
+
+  // If no timestamp yet, initialize it with current time and skip timeout check
+  if (!rawLastActivity) {
+    lastRecordedTime = now;
+    try {
+      localStorage.setItem('admin_last_activity_time', now.toString());
+    } catch (e) {}
+    return;
+  }
+
+  const lastActivity = parseInt(rawLastActivity, 10);
+  // If invalid or in future, correct it
+  if (isNaN(lastActivity) || lastActivity > now) {
+    lastRecordedTime = now;
+    try {
+      localStorage.setItem('admin_last_activity_time', now.toString());
+    } catch (e) {}
+    return;
+  }
+
+  const elapsed = now - lastActivity;
 
   if (elapsed >= IDLE_TIMEOUT_MS) {
     logoutDueToInactivity();
@@ -1082,14 +1118,30 @@ onMounted(() => {
 
   // 15-Minute Inactivity Auto-Logout Watcher
   if (page.props.auth?.user) {
-    if (!localStorage.getItem('admin_last_activity_time')) {
-      localStorage.setItem('admin_last_activity_time', Date.now().toString());
-    }
+    // ALWAYS reset activity timestamp on fresh page mount.
+    // A fresh mount of AdminLayout means the user just logged in or loaded an authenticated page from the server.
+    // Stale timestamps from previous sessions or other devices must NEVER trigger an immediate logout!
+    const now = Date.now();
+    lastRecordedTime = now;
+    try {
+      localStorage.setItem('admin_last_activity_time', now.toString());
+    } catch (e) {}
 
     activityEvents.forEach(evt => {
       window.addEventListener(evt, recordActivity, { passive: true });
     });
     window.addEventListener('storage', handleStorageEvent);
+
+    // Refresh activity on any Inertia page navigation
+    removeNavListener = router.on('navigate', () => {
+      const navNow = Date.now();
+      lastRecordedTime = navNow;
+      try {
+        localStorage.setItem('admin_last_activity_time', navNow.toString());
+      } catch (e) {}
+      showTimeoutWarning.value = false;
+      countdownSeconds.value = 60;
+    });
 
     idleTimer = setInterval(checkIdleStatus, 1000);
   }
@@ -1098,6 +1150,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (idleTimer) clearInterval(idleTimer);
   if (verificationPollTimer) clearInterval(verificationPollTimer);
+  if (removeNavListener) removeNavListener();
   activityEvents.forEach(evt => {
     window.removeEventListener(evt, recordActivity);
   });

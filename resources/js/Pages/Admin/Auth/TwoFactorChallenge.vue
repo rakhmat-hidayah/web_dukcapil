@@ -184,6 +184,10 @@ const handleOtpInput = () => {
 };
 
 const submit = () => {
+  try {
+    localStorage.removeItem('admin_last_activity_time');
+  } catch (e) {}
+
   form.post(route('admin.login.two-factor.store'), {
     onFinish: () => {
       form.code = '';
@@ -192,6 +196,10 @@ const submit = () => {
 };
 
 onMounted(() => {
+  try {
+    localStorage.removeItem('admin_last_activity_time');
+  } catch (e) {}
+
   nextTick(() => {
     if (codeInputRef.value) codeInputRef.value.focus();
   });

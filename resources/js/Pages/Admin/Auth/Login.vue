@@ -197,6 +197,11 @@ const props = defineProps({
 const isTimeout = ref(false);
 
 onMounted(() => {
+  // Clear any stale inactivity timestamp from previous sessions/devices
+  try {
+    localStorage.removeItem('admin_last_activity_time');
+  } catch (e) {}
+
   if (typeof window !== 'undefined') {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('timeout') === '1') {
@@ -229,6 +234,10 @@ const refreshCaptcha = async () => {
 };
 
 const submit = () => {
+  try {
+    localStorage.removeItem('admin_last_activity_time');
+  } catch (e) {}
+
   form.post('/admin/login', {
     onFinish: () => {
       form.password = '';
