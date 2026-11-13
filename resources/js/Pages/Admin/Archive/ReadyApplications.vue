@@ -145,7 +145,7 @@
               <tr>
                 <th class="py-3 px-3 w-8"></th>
                 <th class="py-3 px-4">No. Registrasi</th>
-                <th class="py-3 px-4">Identitas Akun</th>
+                <th class="py-3 px-4">Pemilik Dokumen</th>
                 <th class="py-3 px-4">Jenis Layanan</th>
                 <th class="py-3 px-4">Status & Tanggal</th>
                 <th class="py-3 px-4">Kelengkapan Berkas Fisik</th>
