@@ -1,6 +1,6 @@
 <template>
-  <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[95vh]">
+  <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/90 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+    <div class="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[95dvh]" style="margin-bottom: env(safe-area-inset-bottom, 0px);">
       <!-- Header -->
       <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <div>
@@ -8,11 +8,14 @@
             <h3 class="font-bold text-slate-900 dark:text-white text-base">
               {{ headerTitle }}
             </h3>
-            <span v-if="isSelfie" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
-              Pemohon Asli
+            <span v-if="isSelfie" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border" :class="isRepresentative ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-700' : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'">
+              {{ isRepresentative ? 'Pemilik Dokumen' : 'Pemohon Asli' }}
             </span>
           </div>
-          <p v-if="isSelfie" class="text-xs font-semibold text-amber-700 dark:text-amber-300 mt-0.5">
+          <p v-if="isSelfie && isRepresentative" class="text-xs font-bold text-rose-600 dark:text-rose-400 mt-0.5">
+            ⚠️ Wajib Foto Pemilik Dokumen: {{ documentOwnerName || 'Yang Dimohonkan' }} (BUKAN Foto Yang Mewakili/Kuasa).
+          </p>
+          <p v-else-if="isSelfie" class="text-xs font-semibold text-amber-700 dark:text-amber-300 mt-0.5">
             ⚠️ Wajib Foto Pemohon Sendiri (Pemilik NIK & KTP-el), bukan yang diwakilkan/kuasa.
           </p>
           <p v-else class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
@@ -296,7 +299,16 @@
                 </div>
 
                 <!-- Warning Pill inside Oval -->
-                <div class="absolute bottom-6 px-3 py-1 bg-amber-500/95 text-slate-950 text-[10px] font-black rounded-full shadow text-center max-w-[85%] uppercase tracking-tight">
+                <div
+                  v-if="isRepresentative"
+                  class="absolute bottom-6 px-3 py-1 bg-rose-600 text-white text-[10px] font-black rounded-full shadow text-center max-w-[85%] uppercase tracking-tight"
+                >
+                  Wajib Wajah: {{ documentOwnerName || 'Pemilik Dokumen' }}
+                </div>
+                <div
+                  v-else
+                  class="absolute bottom-6 px-3 py-1 bg-amber-500/95 text-slate-950 text-[10px] font-black rounded-full shadow text-center max-w-[85%] uppercase tracking-tight"
+                >
                   Wajib Wajah Pemohon Asli
                 </div>
               </div>
@@ -404,7 +416,7 @@
       </div>
 
       <!-- Action Footer -->
-      <div class="px-5 py-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between gap-3">
+      <div class="px-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between gap-3" style="padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));">
         <!-- Left: Switch Camera (Front / Back) -->
         <div>
           <button
@@ -478,6 +490,18 @@ const props = defineProps({
   acceptedFormats: {
     type: String,
     default: 'jpg,jpeg,png',
+  },
+  isRepresentative: {
+    type: Boolean,
+    default: false,
+  },
+  documentOwnerName: {
+    type: String,
+    default: '',
+  },
+  representativeName: {
+    type: String,
+    default: '',
   },
 });
 

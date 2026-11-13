@@ -282,6 +282,10 @@
                     (Unggah berkas ini pada Langkah 2)
                   </span>
                 </div>
+
+                <p v-if="form.application_target === 'family_in_kk'" class="text-[11px] text-amber-900 dark:text-amber-200 font-semibold bg-amber-100/70 dark:bg-amber-950/60 p-2.5 rounded-xl border border-amber-300 dark:border-amber-800 mt-2">
+                  ℹ️ <strong>Ketentuan Foto Selfie Wajah (Langkah 2):</strong> Pada tahap unggah berkas nanti, yang wajib difoto selfie adalah <strong>anggota keluarga yang dimohonkan</strong> (pemilik dokumen), bukan foto orang yang mewakili.
+                </p>
               </div>
             </div>
 

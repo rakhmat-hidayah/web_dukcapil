@@ -842,6 +842,9 @@
       :document-label="activeRevisionCameraDoc.service_document?.label || 'Dokumen Revisi'"
       :capture-mode="activeRevisionCameraDoc.service_document?.capture_mode || 'environment'"
       :capture-hint="activeRevisionCameraDoc.service_document?.capture_hint"
+      :is-representative="application?.attendance_type && application.attendance_type !== 'self'"
+      :document-owner-name="application?.applicant_name || ''"
+      :representative-name="application?.representative_name || ''"
       @close="activeRevisionCameraDoc = null"
       @captured="handleRevisionPhotoCaptured"
     />

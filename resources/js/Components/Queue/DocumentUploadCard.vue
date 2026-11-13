@@ -39,6 +39,13 @@
           >
             Foto Selfie
           </span>
+
+          <span
+            v-if="isSelfieRequirement && isRepresentative"
+            class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800"
+          >
+            Wajib Wajah Pemilik Dokumen
+          </span>
         </div>
 
         <!-- Status Tag if uploaded -->
@@ -89,7 +96,31 @@
 
       <!-- Selfie-specific Detailed Guidelines -->
       <template v-if="isSelfieRequirement">
-        <p class="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+        <!-- Callout Banner Khusus Jika Pengajuan Diwakilkan -->
+        <div
+          v-if="isRepresentative"
+          class="mt-3 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-300 dark:border-rose-800 text-rose-950 dark:text-rose-100 flex items-start gap-3 shadow-xs"
+        >
+          <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5 font-bold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          </div>
+          <div class="space-y-1.5 flex-1 leading-relaxed text-xs">
+            <span class="font-black text-rose-800 dark:text-rose-300 uppercase tracking-wide block text-[11px] sm:text-xs">
+              PERHATIAN KHUSUS: MEWAKILI PEMILIK DOKUMEN
+            </span>
+            <p class="font-bold text-rose-950 dark:text-rose-100 text-xs sm:text-[13px] leading-snug">
+              Foto selfie yang wajib diambil adalah <span class="underline decoration-rose-500 decoration-2 font-black text-rose-700 dark:text-rose-300">FOTO PEMILIK DOKUMEN YANG DIMOHONKAN</span><span v-if="documentOwnerName"> (<strong class="uppercase">{{ documentOwnerName }}</strong>)</span>, <span class="underline font-bold text-rose-700 dark:text-rose-300">BUKAN</span> foto orang yang mewakili / yang mengurus.
+            </p>
+            <p class="text-[11.5px] text-rose-900/90 dark:text-rose-200/90 leading-relaxed">
+              Meskipun berkas permohonan diajukan oleh Anda<span v-if="representativeName"> ({{ representativeName }})</span>, sistem verifikasi online Disdukcapil mewajibkan foto wajah asli dari pemilik dokumen KTP-el. Hal ini untuk memastikan bahwa yang bersangkutan benar-benar mengetahui dan menyetujui pengurusan dokumen miliknya sesuai ketentuan UU Administrasi Kependudukan dan UU Pelindungan Data Pribadi.
+            </p>
+            <p class="text-[11px] text-rose-800 dark:text-rose-300 font-semibold italic pt-1 border-t border-rose-200 dark:border-rose-900">
+              *Foto selfie perwakilan/kuasa akan ditolak oleh petugas verifikator dan permohonan harus diulang/direvisi.
+            </p>
+          </div>
+        </div>
+
+        <p v-else class="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
           Foto wajah terbaru pemohon yang merupakan pemilik NIK dan KTP-el yang diajukan. Foto ini diperlukan sebagai salah satu sarana verifikasi awal oleh petugas untuk memastikan bahwa pemilik identitas mengetahui dan terlibat langsung dalam proses pengajuan permohonan.
         </p>
 
@@ -103,7 +134,10 @@
             <span>Petunjuk pengambilan foto:</span>
           </div>
           <ul class="space-y-1.5 text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 list-disc list-outside pl-4 leading-relaxed">
-            <li>Gunakan kamera depan handphone atau perangkat Anda.</li>
+            <li v-if="isRepresentative" class="font-bold text-rose-700 dark:text-rose-300">
+              Arahkan kamera ke wajah pemilik dokumen yang dimohonkan<span v-if="documentOwnerName"> ({{ documentOwnerName }})</span>, bukan wajah perwakilan.
+            </li>
+            <li>Gunakan kamera depan atau kamera belakang handphone/perangkat Anda.</li>
             <li>Pastikan wajah terlihat jelas, menghadap lurus ke kamera, dan berada di tempat dengan pencahayaan yang cukup.</li>
             <li>Lepaskan masker, kacamata hitam, atau penutup wajah yang menghalangi tampilan wajah.</li>
             <li>Foto harus diambil secara langsung melalui kamera pada halaman pengajuan, bukan menggunakan foto lama atau foto yang tersimpan di galeri.</li>
@@ -119,11 +153,14 @@
             <strong class="font-black text-amber-950 dark:text-amber-200 block text-xs uppercase tracking-wide">
               PENEGASAN PENTING
             </strong>
-            <p>
+            <p v-if="isRepresentative">
+              Dalam pengurusan yang diwakilkan: Foto selfie <strong>wajib merupakan foto pemilik dokumen yang dimohonkan<span v-if="documentOwnerName"> ({{ documentOwnerName }})</span></strong>, <span class="text-rose-700 dark:text-rose-300 font-bold underline">BUKAN</span> foto orang yang mewakili, penerima kuasa, atau pihak lain yang membantu pengurusan.
+            </p>
+            <p v-else>
               Selfie <strong>wajib merupakan foto pemohon sendiri</strong>, yaitu orang yang memiliki NIK dan KTP-el yang diajukan, bukan foto anggota keluarga, penerima kuasa, biro jasa, atau pihak lain yang membantu pengurusan.
             </p>
             <p>
-              Apabila pengisian formulir atau pengurusan administrasi dibantu oleh orang lain, pemilik identitas tetap wajib terlibat dan mengambil foto selfie sendiri. Surat kuasa hanya mengatur bantuan pengurusan administrasi dan tidak menggantikan keterlibatan pemilik identitas dalam permohonan ini.
+              Apabila pengisian formulir atau pengurusan administrasi dibantu oleh orang lain, pemilik identitas tetap wajib terlibat dan diambil foto wajahnya secara langsung. Surat kuasa hanya mengatur bantuan pengurusan administrasi dan tidak menggantikan keterlibatan pemilik identitas dalam permohonan ini.
             </p>
             <p class="font-bold pt-1.5 border-t border-amber-200/80 dark:border-amber-800/80 text-amber-900 dark:text-amber-200">
               Tujuan ketentuan ini adalah melindungi pemilik identitas agar data dan dokumen kependudukannya tidak digunakan untuk mengajukan permohonan tanpa sepengetahuan dan keterlibatannya.
@@ -228,6 +265,15 @@
 
       <!-- State 2: Document not yet uploaded -->
       <div v-else>
+        <!-- Notice if representative taking selfie -->
+        <p
+          v-if="isSelfieRequirement && isRepresentative"
+          class="text-[11px] text-rose-600 dark:text-rose-400 font-bold text-center mb-2 flex items-center justify-center gap-1"
+        >
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span>Wajib foto wajah: {{ documentOwnerName || 'Pemilik Dokumen yang Dimohonkan' }}</span>
+        </p>
+
         <!-- Direct Camera Capture Trigger -->
         <button
           type="button"
@@ -235,7 +281,11 @@
           class="w-full px-4 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-[0.99] text-white text-xs font-bold shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-2 cursor-pointer"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          {{ requirement.capture_mode === 'user' ? 'Ambil Foto Selfie Wajah' : 'Buka Kamera & Foto Dokumen' }}
+          {{
+            requirement.capture_mode === 'user'
+              ? (isRepresentative ? `Ambil Foto Selfie Pemilik Dokumen` : 'Ambil Foto Selfie Wajah')
+              : 'Buka Kamera & Foto Dokumen'
+          }}
         </button>
       </div>
     </div>
@@ -258,6 +308,18 @@ const props = defineProps({
   canEdit: {
     type: Boolean,
     default: true,
+  },
+  isRepresentative: {
+    type: Boolean,
+    default: false,
+  },
+  documentOwnerName: {
+    type: String,
+    default: '',
+  },
+  representativeName: {
+    type: String,
+    default: '',
   },
 });
 

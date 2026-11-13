@@ -270,7 +270,7 @@
             <thead class="bg-slate-50 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700 select-none">
               <tr>
                 <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">No. Registrasi / Antrean</th>
-                <th class="px-3 py-3 whitespace-nowrap min-w-[135px]">Data Pemohon</th>
+                <th class="px-3 py-3 whitespace-nowrap min-w-[185px]">Data Pemohon / Yang Dimohonkan</th>
                 <th class="px-3 py-3 whitespace-nowrap min-w-[135px]">Pemilik Dokumen</th>
                 <th class="px-3 py-3 text-center whitespace-nowrap min-w-[115px]">Hubungan (SHDK)</th>
                 <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">Jenis Layanan</th>

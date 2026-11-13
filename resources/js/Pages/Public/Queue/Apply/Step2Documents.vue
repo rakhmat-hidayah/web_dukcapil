@@ -126,6 +126,9 @@
                 :requirement="req"
                 :uploaded-doc="getUploadedDoc(req.id)"
                 :can-edit="true"
+                :is-representative="isRepresentative"
+                :document-owner-name="application.applicant_name"
+                :representative-name="application.representative_name"
                 @open-camera="openCameraModal(req)"
                 @preview="openPreviewModal"
                 @delete="handleDeleteDocument"
@@ -135,7 +138,7 @@
         </div>
 
         <!-- Statement of Integrity & Physical Verification Agreement (Tahap 5) -->
-        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-blue-200 dark:border-blue-900 shadow-md relative overflow-hidden">
+        <div id="statement_section" class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-blue-200 dark:border-blue-900 shadow-md relative overflow-hidden">
           <div class="flex items-start gap-3">
             <div class="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center shrink-0 mt-0.5 font-bold text-sm">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
@@ -171,6 +174,10 @@
               <p class="text-slate-600 dark:text-slate-300">
                 Saya menyatakan bahwa permohonan ini diketahui dan diajukan atas kehendak pemilik identitas yang bersangkutan. Foto selfie yang diunggah merupakan foto terbaru pemilik identitas/dokumen, bukan foto orang yang membantu atau mewakili pengurusan.
               </p>
+              <div v-if="isRepresentative" class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-950 dark:text-rose-200 font-semibold text-xs mt-2 flex items-start gap-2">
+                <svg class="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>Pengurusan Mewakili: Anda mengajukan permohonan untuk <strong>{{ application.applicant_name }}</strong>. Maka foto selfie yang diunggah wajib foto wajah asli <strong>{{ application.applicant_name }}</strong> (pemilik dokumen yang dimohonkan), BUKAN foto selfie Anda (perwakilan).</span>
+              </div>
               <p class="text-slate-600 dark:text-slate-300">
                 Apabila pengisian atau pengurusan administrasi dibantu oleh pihak lain, bantuan tersebut tidak menghilangkan hak dan keterlibatan pemilik identitas dalam permohonan ini.
               </p>
@@ -405,6 +412,9 @@
       :capture-mode="activeCameraReq.capture_mode"
       :capture-hint="activeCameraReq.capture_hint"
       :accepted-formats="activeCameraReq.accepted_formats"
+      :is-representative="isRepresentative"
+      :document-owner-name="application.applicant_name"
+      :representative-name="application.representative_name"
       @close="activeCameraReq = null"
       @captured="handleCameraPhotoCaptured"
     />
@@ -609,6 +619,10 @@ const canSubmit = computed(() => {
   return allRequiredUploaded.value && statementAgreed.value;
 });
 
+const isRepresentative = computed(() => {
+  return props.application?.attendance_type && props.application.attendance_type !== 'self';
+});
+
 const attendanceLabel = computed(() => {
   const map = {
     self: 'Saya Sendiri (Pemilik Dokumen)',
@@ -655,6 +669,27 @@ function handleCameraPhotoCaptured(rawFile) {
     is_staged: true,
     file: rawFile,
   };
+
+  // Auto-scroll ke dokumen wajib berikutnya yang belum diunggah
+  nextTick(() => {
+    setTimeout(() => {
+      const nextReq = props.requirements.find((r) => {
+        if (!r.is_required) return false;
+        if (r.id === req.id) return false;
+        const serverUploaded = docs.value.some((d) => d.service_document_id === r.id);
+        const staged = !!stagedFiles.value[r.id];
+        return !serverUploaded && !staged;
+      });
+      if (nextReq) {
+        const el = document.getElementById('doc_card_' + nextReq.id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Semua dokumen wajib sudah terisi, arahkan ke section pernyataan
+        const statementEl = document.getElementById('statement_section');
+        if (statementEl) statementEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 350);
+  });
 }
 
 async function handleDeleteDocument(doc) {
