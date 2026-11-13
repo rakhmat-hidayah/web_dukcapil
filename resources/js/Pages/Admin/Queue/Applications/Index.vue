@@ -242,7 +242,7 @@
             <thead class="bg-slate-50 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700 select-none">
               <tr>
                 <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">No. Registrasi / Antrian</th>
-                <th class="px-3 py-3 whitespace-nowrap min-w-[185px]">Foto/Data Pemohon atau Yang Dimohonkan</th>
+                <th class="px-3 py-3 whitespace-nowrap min-w-[185px]">Identitas Akun</th>
                 <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">Pemilik Dokumen</th>
                 <th class="px-3 py-3 text-center whitespace-nowrap min-w-[115px]">Hubungan (SHDK)</th>
                 <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">Jenis Layanan</th>
@@ -388,6 +388,12 @@
                       </div>
                       <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
                         <span>NIK: {{ maskNik(getApplicantNik(app)) }}</span>
+                      </div>
+                      <!-- Keterangan nama yang diwakili -->
+                      <div v-if="isRepresented(app) && getDocumentOwnerName(app) && getDocumentOwnerName(app) !== getApplicantName(app)" class="mt-0.5">
+                        <span class="text-[9.5px] text-slate-500 dark:text-slate-400 italic leading-tight">
+                          mewakili <span class="font-semibold text-amber-700 dark:text-amber-400 not-italic">{{ getDocumentOwnerName(app) }}</span>
+                        </span>
                       </div>
                       <!-- Biometric Verification Pill if verified and photo preview is active -->
                       <div v-if="(app.selfie_thumbnail_url || app.selfie_url) && (app.selfie_verification || app.is_selfie_verified)" class="mt-1">
