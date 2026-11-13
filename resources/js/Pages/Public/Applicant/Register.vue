@@ -277,6 +277,123 @@
             />
           </div>
 
+          <!-- Foto Selfie Wajah Pemohon (Wajib) -->
+          <div class="space-y-1.5 pt-1" id="field_applicant_selfie">
+            <div class="flex items-center justify-between">
+              <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
+                Foto Selfie Wajah Pemohon <span class="text-rose-500">*</span>
+              </label>
+              <span
+                v-if="selfiePreviewUrl"
+                class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1"
+              >
+                <CheckCircle2 class="w-3.5 h-3.5" />
+                <span>Foto Siap</span>
+              </span>
+              <span v-else class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+                Wajib Dilampirkan
+              </span>
+            </div>
+
+            <!-- Preview Card when photo is taken/uploaded -->
+            <div
+              v-if="selfiePreviewUrl"
+              class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-emerald-300 dark:border-emerald-800 flex items-center gap-3 relative overflow-hidden group shadow-xs"
+            >
+              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-black shrink-0 border border-slate-200 dark:border-slate-700 relative shadow-inner">
+                <img
+                  :src="selfiePreviewUrl"
+                  alt="Preview Selfie"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+
+              <div class="flex-1 min-w-0 space-y-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300">
+                    Foto Tersimpan
+                  </span>
+                  <span class="text-[10px] text-slate-400 font-mono">{{ selfieFileSize }}</span>
+                </div>
+                <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                  {{ selfieFileName || 'Foto-Selfie-Pemohon.jpg' }}
+                </p>
+                <div class="flex items-center gap-2 pt-0.5">
+                  <button
+                    type="button"
+                    @click="openSelfieCamera"
+                    class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <Camera class="w-3.5 h-3.5" />
+                    <span>Ambil Ulang</span>
+                  </button>
+                  <span class="text-slate-300 dark:text-slate-600">&bull;</span>
+                  <button
+                    type="button"
+                    @click="removeSelfie"
+                    class="text-[11px] font-bold text-rose-500 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <Trash2 class="w-3.5 h-3.5" />
+                    <span>Hapus</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload / Camera Buttons when no photo yet -->
+            <div
+              v-else
+              class="p-3.5 sm:p-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-400 bg-slate-50/70 dark:bg-slate-800/50 transition text-center space-y-2.5"
+            >
+              <div class="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-inner">
+                <Camera class="w-6 h-6" />
+              </div>
+              <div class="space-y-1">
+                <p class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                  Ambil Foto Selfie Wajah Anda
+                </p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+                  Pastikan wajah terlihat jelas, menghadap kamera lurus, dan tidak memakai masker/kacamata hitam.
+                </p>
+              </div>
+
+              <div class="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+                <button
+                  type="button"
+                  @click="openSelfieCamera"
+                  class="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Camera class="w-4 h-4" />
+                  <span>Buka Kamera Selfie</span>
+                </button>
+                <label
+                  class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-600"
+                >
+                  <Upload class="w-3.5 h-3.5" />
+                  <span>Pilih Berkas / Galeri</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    class="hidden"
+                    @change="handleFileInput"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <!-- Privacy Destruction Notice Banner -->
+            <div class="p-2.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/70 dark:border-blue-900/50 text-[10.5px] leading-relaxed text-blue-900 dark:text-blue-300 flex items-start gap-2">
+              <ShieldCheck class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+              <span>
+                <strong>Jaminan Privasi (UU PDP):</strong> Foto selfie hanya digunakan oleh verifikator Disdukcapil untuk pencocokan identitas pendaftar, dan akan <strong>otomatis dimusnahkan secara permanen</strong> dari server setelah akun selesai diverifikasi.
+              </span>
+            </div>
+
+            <p v-if="form.errors.selfie" class="text-xs text-rose-500 font-semibold">
+              {{ form.errors.selfie }}
+            </p>
+          </div>
+
           <div v-if="$page.props.queue_maintenance?.is_active" class="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-center font-bold text-xs text-amber-800 dark:text-amber-200 flex items-center justify-center gap-2 mt-1">
             <Lock class="w-4 h-4 text-amber-600 shrink-0" />
             <span>Pendaftaran Akun Baru Ditutup Sementara</span>
@@ -301,6 +418,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Camera Capture Modal for Selfie -->
+    <CameraCapture
+      v-if="showCameraModal"
+      document-label="Foto Selfie Wajah Pemohon (Pendaftaran Akun)"
+      capture-mode="user"
+      capture-hint="Posisikan wajah Anda tepat di dalam bingkai panduan kamera. Foto selfie hanya digunakan untuk verifikasi akun dan akan otomatis terhapus setelah verifikasi."
+      :is-representative="false"
+      @close="showCameraModal = false"
+      @captured="handleCameraCaptured"
+    />
   </PublicLayout>
 </template>
 
@@ -308,7 +436,22 @@
 import { ref, computed, onMounted } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
-import { ArrowRight, UserPlus, Sparkles, X, AlertCircle, Clock, Lock, Smartphone } from '@lucide/vue'
+import CameraCapture from '@/Components/Queue/CameraCapture.vue'
+import {
+  ArrowRight,
+  UserPlus,
+  Sparkles,
+  X,
+  AlertCircle,
+  Clock,
+  Lock,
+  Smartphone,
+  Camera,
+  CheckCircle2,
+  ShieldCheck,
+  Trash2,
+  Upload
+} from '@lucide/vue'
 
 const form = useForm({
   nik: '',
@@ -317,7 +460,59 @@ const form = useForm({
   email: '',
   password: '',
   password_confirmation: '',
+  selfie: null,
 })
+
+const showCameraModal = ref(false)
+const selfiePreviewUrl = ref(null)
+const selfieFileName = ref('')
+const selfieFileSize = ref('')
+
+const openSelfieCamera = () => {
+  if (form.errors.selfie) {
+    delete form.errors.selfie
+  }
+  showCameraModal.value = true
+}
+
+const handleCameraCaptured = (rawFile) => {
+  if (!rawFile) return
+  if (selfiePreviewUrl.value) {
+    URL.revokeObjectURL(selfiePreviewUrl.value)
+  }
+  form.selfie = rawFile
+  selfiePreviewUrl.value = URL.createObjectURL(rawFile)
+  selfieFileName.value = rawFile.name || 'foto-selfie-pemohon.jpg'
+  const kb = Math.round(rawFile.size / 1024)
+  selfieFileSize.value = kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`
+  delete form.errors.selfie
+  showCameraModal.value = false
+}
+
+const handleFileInput = (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  if (selfiePreviewUrl.value) {
+    URL.revokeObjectURL(selfiePreviewUrl.value)
+  }
+  form.selfie = file
+  selfiePreviewUrl.value = URL.createObjectURL(file)
+  selfieFileName.value = file.name
+  const kb = Math.round(file.size / 1024)
+  selfieFileSize.value = kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`
+  delete form.errors.selfie
+  e.target.value = ''
+}
+
+const removeSelfie = () => {
+  if (selfiePreviewUrl.value) {
+    URL.revokeObjectURL(selfiePreviewUrl.value)
+  }
+  form.selfie = null
+  selfiePreviewUrl.value = null
+  selfieFileName.value = ''
+  selfieFileSize.value = ''
+}
 
 // Format digits with hyphen separators: 4-4-5 format (e.g. 0812-3456-7890 or 0812-3456-78901)
 const formatPhoneDisplay = (digits) => {
@@ -502,9 +697,17 @@ const submitRegister = () => {
     return
   }
 
+  if (!form.selfie) {
+    form.errors.selfie = 'Foto selfie wajah pemohon wajib dilampirkan untuk verifikasi pendaftaran akun.'
+    const el = document.getElementById('field_applicant_selfie')
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return
+  }
+
   form.phone = phoneDigits
 
   form.post(route('applicant.register.post'), {
+    forceFormData: true,
     onFinish: () => form.reset('password', 'password_confirmation'),
   })
 }

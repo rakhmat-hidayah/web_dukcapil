@@ -33,6 +33,8 @@ class ApplicantAccount extends Authenticatable
         'name',
         'email_normalized',
         'phone',
+        'selfie_path',
+        'selfie_deleted_at',
         'email_verified_at',
         'password',
         'identity_status',
@@ -53,6 +55,7 @@ class ApplicantAccount extends Authenticatable
         return [
             'email_verified_at'    => 'datetime',
             'identity_verified_at' => 'datetime',
+            'selfie_deleted_at'    => 'datetime',
             'password'             => 'hashed',
         ];
     }

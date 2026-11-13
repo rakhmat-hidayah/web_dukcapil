@@ -515,6 +515,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Applicant Accounts Management (One Account One Device, Revocation & Identity Verification)
             Route::get('/applicants', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'index'])->name('applicants.index');
             Route::get('/applicants/{account}', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'show'])->name('applicants.show');
+            Route::get('/applicants/{account}/selfie', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'selfie'])->name('applicants.selfie');
             Route::post('/applicants/{account}/revoke-device', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'revokeDevice'])->name('applicants.revoke-device');
             Route::post('/applicants/{account}/update-status', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'updateStatus'])->name('applicants.update-status');
             Route::post('/applicants/{account}/verify-identity', [\App\Http\Controllers\Admin\Applicant\ApplicantManagementController::class, 'verifyIdentity'])->name('applicants.verify-identity');

@@ -143,6 +143,72 @@
         </div>
       </div>
 
+      <!-- Card: Foto Selfie Wajah Pemohon (Biometrik Pendaftaran) -->
+      <div class="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+        <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-700">
+          <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <Camera class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span>Foto Selfie Wajah Pemohon (Biometrik Pendaftaran)</span>
+          </h2>
+          <span
+            v-if="account.has_selfie"
+            class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900"
+          >
+            Tersimpan Sementara (Menunggu Verifikasi)
+          </span>
+          <span
+            v-else-if="account.is_selfie_destroyed"
+            class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900 flex items-center gap-1"
+          >
+            <ShieldCheck class="w-3.5 h-3.5" />
+            <span>Foto Dimusnahkan Pasca Verifikasi (Aman)</span>
+          </span>
+        </div>
+
+        <!-- If Selfie exists -->
+        <div v-if="account.has_selfie && account.selfie_url" class="flex flex-col sm:flex-row items-center gap-5">
+          <div class="w-36 h-36 rounded-2xl overflow-hidden bg-black border-2 border-slate-200 dark:border-slate-700 shadow-md shrink-0">
+            <img
+              :src="account.selfie_url"
+              :alt="account.name"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="space-y-0.5">
+              <p class="font-black text-slate-900 dark:text-white text-sm">Foto Verifikasi Identitas Akun</p>
+              <p class="text-slate-500 leading-relaxed">
+                Foto selfie diunggah pemohon saat pendaftaran untuk dicocokkan dengan identitas kependudukan SIAK.
+              </p>
+            </div>
+            <div class="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-900 dark:text-amber-200 text-[11px] leading-relaxed flex items-start gap-2">
+              <ShieldAlert class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>Perlindungan Privasi Otomatis (UU PDP):</strong> Berkas foto selfie ini akan <strong>otomatis dihapus secara permanen dari server</strong> segera setelah petugas menyelesaikan verifikasi identitas (Setujui atau Tolak).
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- If Selfie destroyed -->
+        <div v-else-if="account.is_selfie_destroyed" class="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 text-xs flex items-start gap-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+            <ShieldCheck class="w-5 h-5" />
+          </div>
+          <div class="space-y-0.5">
+            <p class="font-bold text-emerald-800 dark:text-emerald-200">Berkas Foto Selfie Telah Dimusnahkan Dari Server Storage</p>
+            <p class="text-[11px] text-emerald-700 dark:text-emerald-300 leading-relaxed">
+              Sesuai dengan ketentuan UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP), berkas foto biometrik pemohon telah dihapus permanen secara otomatis setelah proses verifikasi identitas selesai dilakukan{{ account.selfie_deleted_at ? ' pada ' + account.selfie_deleted_at : '' }}.
+            </p>
+          </div>
+        </div>
+
+        <!-- If no selfie on legacy record -->
+        <div v-else class="text-xs text-slate-400 italic py-2 text-center">
+          Tidak ada berkas foto selfie yang tersimpan untuk akun pemohon ini.
+        </div>
+      </div>
+
       <!-- Grid: Devices & Applications -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Card 1: Perangkat Terikat & Riwayat Perangkat -->
@@ -401,6 +467,28 @@
             <p class="font-mono font-black text-blue-600 dark:text-blue-400 text-sm tracking-widest select-all">{{ account.nik || account.masked_nik }}</p>
           </div>
 
+          <!-- Selfie Photo Preview in Verify Modal -->
+          <div v-if="account.has_selfie && account.selfie_url" class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
+            <p class="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <Camera class="w-3.5 h-3.5 text-blue-600" />
+              <span>Foto Selfie Wajah Pemohon</span>
+            </p>
+            <div class="flex justify-center">
+              <img
+                :src="account.selfie_url"
+                :alt="account.name"
+                class="w-36 h-36 rounded-2xl object-cover border-2 border-slate-300 dark:border-slate-600 shadow-md"
+              />
+            </div>
+            <p class="text-[10px] text-amber-700 dark:text-amber-300 text-center leading-tight">
+              ⚠️ Foto akan otomatis dimusnahkan secara permanen dari server setelah keputusan disimpan (UU PDP).
+            </p>
+          </div>
+          <div v-else-if="account.is_selfie_destroyed" class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-[10.5px] text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+            <ShieldCheck class="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Foto selfie biometrik telah dimusnahkan secara aman dari server storage.</span>
+          </div>
+
           <form @submit.prevent="submitVerifyIdentity" class="space-y-4">
             <div class="space-y-1">
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Keputusan</label>
@@ -536,6 +624,7 @@ import {
   ArrowLeft,
   Smartphone,
   ShieldAlert,
+  ShieldCheck,
   FileText,
   History,
   Trash2,
@@ -543,6 +632,8 @@ import {
   CheckCircle2,
   Copy,
   Check,
+  Camera,
+  Eye,
 } from '@lucide/vue'
 
 const props = defineProps({

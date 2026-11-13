@@ -7,11 +7,15 @@ use App\Models\Applicant\ApplicantAccount;
 use App\Models\Applicant\ApplicantDeviceAuditLog;
 use App\Services\Applicant\ApplicantDeviceService;
 use App\Services\Applicant\ApplicantOtpService;
+use App\Services\Queue\QueueDocumentStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ApplicantManagementController extends Controller
 {
@@ -59,24 +63,33 @@ class ApplicantManagementController extends Controller
         $accounts = $query->latest('id')
             ->paginate(15)
             ->withQueryString()
-            ->through(fn(ApplicantAccount $acc) => [
-                'id'                  => $acc->id,
-                'name'                => $acc->name,
-                'nik'                 => $acc->nik,
-                'masked_nik'          => $acc->masked_nik,
-                'email'               => $acc->email_normalized,
-                'masked_email'        => $acc->masked_email,
-                'phone'               => $acc->phone,
-                'formatted_phone'     => $acc->formatted_phone,
-                'masked_phone'        => $acc->masked_phone,
-                'identity_status'       => $acc->identity_status,
-                'identity_status_label' => self::translateIdentityStatus($acc->identity_status),
-                'account_status'        => $acc->account_status,
-                'account_status_label'  => self::translateAccountStatus($acc->account_status),
-                'active_device_label' => $acc->activeDevice?->device_label,
-                'active_device_seen'  => $acc->activeDevice?->last_seen_at?->translatedFormat('d M Y, H:i'),
-                'created_at'          => $acc->created_at?->translatedFormat('d M Y, H:i'),
-            ]);
+            ->through(function (ApplicantAccount $acc) {
+                $hasSelfie = !empty($acc->selfie_path) && Storage::disk(QueueDocumentStorage::DISK)->exists($acc->selfie_path);
+                $isDestroyed = !empty($acc->selfie_deleted_at) || (!$hasSelfie && in_array($acc->identity_status, [ApplicantAccount::IDENTITY_VERIFIED, ApplicantAccount::IDENTITY_REJECTED]));
+
+                return [
+                    'id'                    => $acc->id,
+                    'name'                  => $acc->name,
+                    'nik'                   => $acc->nik,
+                    'masked_nik'            => $acc->masked_nik,
+                    'email'                 => $acc->email_normalized,
+                    'masked_email'          => $acc->masked_email,
+                    'phone'                 => $acc->phone,
+                    'formatted_phone'       => $acc->formatted_phone,
+                    'masked_phone'          => $acc->masked_phone,
+                    'has_selfie'            => $hasSelfie,
+                    'selfie_url'            => $hasSelfie ? route('admin.queue.applicants.selfie', $acc->id) : null,
+                    'selfie_deleted_at'     => $acc->selfie_deleted_at?->translatedFormat('d M Y, H:i'),
+                    'is_selfie_destroyed'   => $isDestroyed,
+                    'identity_status'       => $acc->identity_status,
+                    'identity_status_label' => self::translateIdentityStatus($acc->identity_status),
+                    'account_status'        => $acc->account_status,
+                    'account_status_label'  => self::translateAccountStatus($acc->account_status),
+                    'active_device_label'   => $acc->activeDevice?->device_label,
+                    'active_device_seen'    => $acc->activeDevice?->last_seen_at?->translatedFormat('d M Y, H:i'),
+                    'created_at'            => $acc->created_at?->translatedFormat('d M Y, H:i'),
+                ];
+            });
 
         $stats = [
             'total'            => ApplicantAccount::count(),
@@ -108,6 +121,9 @@ class ApplicantManagementController extends Controller
             'verifiedByAdmin',
         ]);
 
+        $hasSelfie = !empty($account->selfie_path) && Storage::disk(QueueDocumentStorage::DISK)->exists($account->selfie_path);
+        $isDestroyed = !empty($account->selfie_deleted_at) || (!$hasSelfie && in_array($account->identity_status, [ApplicantAccount::IDENTITY_VERIFIED, ApplicantAccount::IDENTITY_REJECTED]));
+
         return Inertia::render('Admin/Applicants/Show', [
             'account' => [
                 'id'                   => $account->id,
@@ -118,6 +134,10 @@ class ApplicantManagementController extends Controller
                 'masked_email'         => $account->masked_email,
                 'phone'                => $account->phone,
                 'formatted_phone'      => $account->formatted_phone,
+                'has_selfie'           => $hasSelfie,
+                'selfie_url'           => $hasSelfie ? route('admin.queue.applicants.selfie', $account->id) : null,
+                'selfie_deleted_at'    => $account->selfie_deleted_at?->translatedFormat('d M Y, H:i'),
+                'is_selfie_destroyed'  => $isDestroyed,
                 'identity_status'       => $account->identity_status,
                 'identity_status_label' => self::translateIdentityStatus($account->identity_status),
                 'account_status'        => $account->account_status,
@@ -223,6 +243,28 @@ class ApplicantManagementController extends Controller
     }
 
     /**
+     * Stream applicant selfie photo securely from private storage disk.
+     */
+    public function selfie(ApplicantAccount $account): StreamedResponse
+    {
+        if (empty($account->selfie_path) || !Storage::disk(QueueDocumentStorage::DISK)->exists($account->selfie_path)) {
+            abort(404, 'Foto selfie pemohon tidak ditemukan atau telah dimusnahkan pasca verifikasi demi pelindungan privasi.');
+        }
+
+        $path = $account->selfie_path;
+        $filename = 'selfie_' . ($account->nik ?: $account->id) . '.jpg';
+
+        return Storage::disk(QueueDocumentStorage::DISK)->response($path, $filename, [
+            'Content-Type' => 'image/jpeg',
+            'Content-Disposition' => "inline; filename=\"{$filename}\"",
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'no-cache, private, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
+    }
+
+    /**
      * Verify or reject applicant demographic identity.
      */
     public function verifyIdentity(Request $request, ApplicantAccount $account): RedirectResponse
@@ -245,20 +287,48 @@ class ApplicantManagementController extends Controller
             $updateData['account_status'] = ApplicantAccount::STATUS_ACTIVE;
         }
 
+        // Automatic permanent physical destruction of selfie file upon verification completion
+        $selfieDestroyed = false;
+        if (!empty($account->selfie_path)) {
+            try {
+                if (Storage::disk(QueueDocumentStorage::DISK)->exists($account->selfie_path)) {
+                    Storage::disk(QueueDocumentStorage::DISK)->delete($account->selfie_path);
+                    $selfieDestroyed = true;
+                }
+            } catch (\Throwable $e) {
+                Log::warning("Gagal memusnahkan fisik foto selfie akun {$account->id}: " . $e->getMessage());
+            }
+
+            $updateData['selfie_path'] = null;
+            $updateData['selfie_deleted_at'] = now();
+        }
+
         $account->update($updateData);
+
+        $auditReason = "Verifikasi identitas pemohon: {$decision}. Catatan: {$notes}";
+        if ($selfieDestroyed) {
+            $auditReason .= " [Foto selfie biometrik pendaftaran otomatis dimusnahkan]";
+        }
 
         ApplicantDeviceAuditLog::logEvent(
             applicantAccountId: $account->id,
             eventType: 'identity_verification_' . strtolower($decision),
             actorType: 'admin',
             actorId: Auth::id(),
-            reason: mb_substr("Verifikasi identitas pemohon: {$decision}. Catatan: {$notes}", 0, 255)
+            reason: mb_substr($auditReason, 0, 255)
         );
 
         // Dispatch notification email to applicant's registered email
         $this->otpService->sendVerificationResultEmail($account, $decision, $notes);
 
-        return back()->with('success', "Identitas pemohon berhasil diverifikasi ({$decision}) dan pemberitahuan telah dikirimkan ke email pemohon.");
+        $successMsg = "Identitas pemohon berhasil diverifikasi ({$decision})";
+        if ($selfieDestroyed) {
+            $successMsg .= " dan berkas foto selfie telah otomatis dimusnahkan secara aman dari server storage.";
+        } else {
+            $successMsg .= " dan pemberitahuan telah dikirimkan ke email pemohon.";
+        }
+
+        return back()->with('success', $successMsg);
     }
 
     /**
@@ -276,6 +346,17 @@ class ApplicantManagementController extends Controller
             actorType: 'admin',
             actorId: Auth::id()
         );
+
+        // Delete physical selfie photo if still present
+        if (!empty($account->selfie_path)) {
+            try {
+                if (Storage::disk(QueueDocumentStorage::DISK)->exists($account->selfie_path)) {
+                    Storage::disk(QueueDocumentStorage::DISK)->delete($account->selfie_path);
+                }
+            } catch (\Throwable $e) {
+                Log::warning("Gagal menghapus berkas selfie saat akun {$account->id} dihapus: " . $e->getMessage());
+            }
+        }
 
         // Permanently force delete to release NIK & email unique indexes
         $account->forceDelete();

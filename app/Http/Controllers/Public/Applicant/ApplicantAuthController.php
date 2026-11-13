@@ -8,11 +8,14 @@ use App\Models\Applicant\ApplicantDeviceAuditLog;
 use App\Models\Queue\QueueSetting;
 use App\Services\Applicant\ApplicantDeviceService;
 use App\Services\Applicant\ApplicantOtpService;
+use App\Services\Queue\QueueDocumentStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -95,6 +98,13 @@ class ApplicantAuthController extends Controller
                 'min:8',
                 'confirmed',
             ],
+            'selfie' => [
+                'required',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:5120',
+            ],
         ], [
             'nik.required'       => 'Nomor Induk Kependudukan (NIK) wajib diisi.',
             'nik.regex'          => 'NIK wajib tepat 16 digit angka numerik.',
@@ -109,6 +119,11 @@ class ApplicantAuthController extends Controller
             'password.required'  => 'Password wajib diisi.',
             'password.min'       => 'Password minimal terdiri dari 8 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'selfie.required'    => 'Foto selfie wajah pemohon wajib diambil untuk verifikasi pendaftaran akun.',
+            'selfie.file'        => 'Berkas foto selfie tidak valid.',
+            'selfie.image'       => 'Berkas selfie wajib berupa format foto gambar (JPG, JPEG, PNG, atau WEBP).',
+            'selfie.mimes'       => 'Format foto selfie yang diperbolehkan adalah JPG, JPEG, PNG, atau WEBP.',
+            'selfie.max'         => 'Ukuran foto selfie maksimal 5 MB.',
         ]);
 
         // 2. Check NIK uniqueness using keyed blind index HMAC
@@ -126,12 +141,27 @@ class ApplicantAuthController extends Controller
             ]);
         }
 
-        // 4. Create applicant account with EMAIL_PENDING status
+        // 4. Save uploaded selfie securely to private storage disk
+        $selfiePath = null;
+        if ($request->hasFile('selfie')) {
+            $selfieFile = $request->file('selfie');
+            $extension = strtolower($selfieFile->getClientOriginalExtension() ?: 'jpg');
+            if (!in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
+                $extension = 'jpg';
+            }
+            $filename = 'selfie_' . Str::uuid()->toString() . '.' . $extension;
+            $selfiePath = 'applicant_selfies/' . $filename;
+
+            Storage::disk(QueueDocumentStorage::DISK)->putFileAs('applicant_selfies', $selfieFile, $filename);
+        }
+
+        // 5. Create applicant account with EMAIL_PENDING status
         $account = new ApplicantAccount();
         $account->name = $rawName;
         $account->email_normalized = $rawEmail;
         $account->phone = $rawPhone;
         $account->nik = $rawNik; // Mutator automatically encrypts and sets blind index
+        $account->selfie_path = $selfiePath;
         $account->password = Hash::make($request->password);
         $account->identity_status = ApplicantAccount::IDENTITY_PENDING;
         $account->account_status = ApplicantAccount::STATUS_EMAIL_PENDING;
