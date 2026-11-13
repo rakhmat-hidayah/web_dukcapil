@@ -300,72 +300,9 @@
                   </div>
                 </td>
 
-                <!-- Applicant & NIK with Photo Preview -->
+                <!-- Identitas Akun (Pemohon / Perwakilan) -->
                 <td class="px-3 py-2.5 min-w-[165px]">
                   <div class="flex items-center gap-2.5">
-                    <!-- Case 1: Photo Available (Unverified, File exists) - BLURRED FOR PRIVACY -->
-                    <div
-                      v-if="app.selfie_thumbnail_url || app.selfie_url"
-                      class="group/photo relative w-9 h-9 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800 cursor-pointer"
-                      title="Foto selfie disamarkan demi privasi pemohon (Arahkan kursor untuk melihat jelas)"
-                    >
-                      <img
-                        :src="app.selfie_thumbnail_url || app.selfie_url"
-                        :alt="getApplicantName(app)"
-                        class="w-full h-full object-cover select-none pointer-events-none filter blur-[4px] group-hover/photo:blur-none transition-all duration-300 scale-110 group-hover/photo:scale-100"
-                        loading="lazy"
-                      />
-                      <!-- Privacy icon badge overlay (dissolves on hover) -->
-                      <div class="absolute inset-0 flex items-center justify-center bg-black/15 group-hover/photo:opacity-0 transition-opacity pointer-events-none">
-                        <svg class="w-3.5 h-3.5 text-white drop-shadow-sm opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>
-                        </svg>
-                      </div>
-                    </div>
-
-                    <!-- Case 2: Photo Examined & Verified (Biometric Verified, File Safely Destroyed) - NEAT & POLISHED -->
-                    <div
-                      v-else-if="app.selfie_verification || app.is_selfie_verified"
-                      class="relative w-9 h-9 rounded-xl border flex flex-col items-center justify-center shrink-0 shadow-xs select-none transition-all"
-                      :class="app.selfie_verification?.decision === 'MATCH'
-                        ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400'"
-                      :title="app.selfie_verification?.decision === 'MATCH'
-                        ? 'Foto Telah Terverifikasi: SESUAI PEMOHON (MATCH). Berkas fisik telah dimusnahkan secara aman.'
-                        : 'Foto Telah Terverifikasi: BUKAN PEMOHON (MISMATCH). Berkas fisik telah dimusnahkan secara aman.'"
-                    >
-                      <!-- Styled Pill Icon -->
-                      <div
-                        class="w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0"
-                        :class="app.selfie_verification?.decision === 'MATCH'
-                          ? 'bg-emerald-500 text-white'
-                          : 'bg-rose-500 text-white'"
-                      >
-                        <svg v-if="app.selfie_verification?.decision === 'MATCH'" class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <svg v-else class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </div>
-                      <span
-                        class="text-[7px] font-black uppercase tracking-tight leading-none mt-0.5 text-center"
-                        :class="app.selfie_verification?.decision === 'MATCH' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'"
-                      >
-                        {{ app.selfie_verification?.decision === 'MATCH' ? 'Sesuai' : 'Bukan' }}
-                      </span>
-                    </div>
-
-                    <!-- Case 3: No Photo Uploaded / Empty -->
-                    <div
-                      v-else
-                      class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 shrink-0 select-none"
-                      title="Belum ada foto selfie pemohon"
-                    >
-                      <svg class="w-3.5 h-3.5 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                      <span class="text-[7px] font-bold text-slate-400 mt-0.5 leading-none">Kosong</span>
-                    </div>
-
                     <!-- Applicant Text Info -->
                     <div class="min-w-0">
                       <div class="flex items-center gap-1 flex-wrap">
@@ -415,7 +352,54 @@
 
                 <!-- Pemilik Dokumen (Yang Bersangkutan / YBS KTP-el) -->
                 <td class="px-3 py-2.5 min-w-[140px]">
-                  <div class="min-w-0">
+                  <div class="flex items-center gap-2.5">
+                    <!-- Foto Selfie Pemilik Dokumen -->
+                    <!-- Case 1: Photo Available -->
+                    <div
+                      v-if="app.selfie_thumbnail_url || app.selfie_url"
+                      class="group/photo relative w-9 h-9 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800 cursor-pointer"
+                      title="Foto selfie disamarkan demi privasi (Arahkan kursor untuk melihat jelas)"
+                    >
+                      <img
+                        :src="app.selfie_thumbnail_url || app.selfie_url"
+                        :alt="getDocumentOwnerName(app)"
+                        class="w-full h-full object-cover select-none pointer-events-none filter blur-[4px] group-hover/photo:blur-none transition-all duration-300 scale-110 group-hover/photo:scale-100"
+                        loading="lazy"
+                      />
+                      <div class="absolute inset-0 flex items-center justify-center bg-black/15 group-hover/photo:opacity-0 transition-opacity pointer-events-none">
+                        <svg class="w-3.5 h-3.5 text-white drop-shadow-sm opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <!-- Case 2: Verified (file destroyed) -->
+                    <div
+                      v-else-if="app.selfie_verification || app.is_selfie_verified"
+                      class="relative w-9 h-9 rounded-xl border flex flex-col items-center justify-center shrink-0 shadow-xs select-none"
+                      :class="app.selfie_verification?.decision === 'MATCH'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800'
+                        : 'bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800'"
+                      :title="app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai (MATCH)' : 'Bukan Pemilik (MISMATCH)'"
+                    >
+                      <div class="w-3.5 h-3.5 rounded-full flex items-center justify-center" :class="app.selfie_verification?.decision === 'MATCH' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'">
+                        <svg v-if="app.selfie_verification?.decision === 'MATCH'" class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        <svg v-else class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
+                      </div>
+                      <span class="text-[7px] font-black uppercase tracking-tight leading-none mt-0.5" :class="app.selfie_verification?.decision === 'MATCH' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'">
+                        {{ app.selfie_verification?.decision === 'MATCH' ? 'Sesuai' : 'Bukan' }}
+                      </span>
+                    </div>
+                    <!-- Case 3: No Photo -->
+                    <div
+                      v-else
+                      class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 shrink-0 select-none"
+                      title="Belum ada foto selfie"
+                    >
+                      <svg class="w-3.5 h-3.5 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                      <span class="text-[7px] font-bold text-slate-400 mt-0.5 leading-none">Kosong</span>
+                    </div>
+
+                    <div class="min-w-0">
                     <div v-if="isRepresented(app)">
                       <div class="flex items-center gap-1 flex-wrap">
                         <span class="font-bold text-slate-900 dark:text-white truncate max-w-[115px]" :title="getDocumentOwnerName(app)">
@@ -444,6 +428,7 @@
                       <div class="font-mono text-[10px] text-slate-400 mt-0.5">
                         NIK: {{ maskNik(getDocumentOwnerNik(app)) }}
                       </div>
+                    </div>
                     </div>
                   </div>
                 </td>
