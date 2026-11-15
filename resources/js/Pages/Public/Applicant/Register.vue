@@ -277,119 +277,153 @@
             />
           </div>
 
-          <!-- Foto Selfie Wajah Pemohon (Wajib) -->
-          <div class="space-y-1.5 pt-1" id="field_applicant_selfie">
-            <div class="flex items-center justify-between">
-              <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
-                Foto Selfie Wajah Pemohon <span class="text-rose-500">*</span>
-              </label>
-              <span
-                v-if="selfiePreviewUrl"
-                class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1"
-              >
-                <CheckCircle2 class="w-3.5 h-3.5" />
-                <span>Foto Siap</span>
-              </span>
-              <span v-else class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
-                Wajib Dilampirkan
-              </span>
-            </div>
+          <!-- Persyaratan & Pengambilan Foto Selfie Pemohon Akun (Wajib) -->
+          <div class="space-y-2 pt-1" id="field_applicant_selfie">
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border-2 border-slate-200 dark:border-slate-700 space-y-3">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <Camera class="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-tight">
+                      Persyaratan Foto Selfie Pemohon <span class="text-rose-500">*</span>
+                    </h3>
+                    <p class="text-[10.5px] text-slate-500 dark:text-slate-400">
+                      Wajib untuk validasi identitas NIK pendaftaran akun
+                    </p>
+                  </div>
+                </div>
 
-            <!-- Preview Card when photo is taken/uploaded -->
-            <div
-              v-if="selfiePreviewUrl"
-              class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-emerald-300 dark:border-emerald-800 flex items-center gap-3 relative overflow-hidden group shadow-xs"
-            >
-              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-black shrink-0 border border-slate-200 dark:border-slate-700 relative shadow-inner">
-                <img
-                  :src="selfiePreviewUrl"
-                  alt="Preview Selfie"
-                  class="w-full h-full object-cover"
-                />
+                <span
+                  v-if="selfiePreviewUrl"
+                  class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 flex items-center gap-1 border border-emerald-300 dark:border-emerald-700"
+                >
+                  <CheckCircle2 class="w-3.5 h-3.5" />
+                  <span>Foto Siap</span>
+                </span>
+                <span
+                  v-else
+                  class="px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                >
+                  Wajib Diambil
+                </span>
               </div>
 
-              <div class="flex-1 min-w-0 space-y-1">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300">
-                    Foto Tersimpan
-                  </span>
-                  <span class="text-[10px] text-slate-400 font-mono">{{ selfieFileSize }}</span>
-                </div>
-                <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
-                  {{ selfieFileName || 'Foto-Selfie-Pemohon.jpg' }}
+              <!-- Petunjuk / Persyaratan Foto -->
+              <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 text-[11px] text-slate-600 dark:text-slate-300 space-y-1.5">
+                <p class="font-bold text-slate-900 dark:text-white text-[11px] flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span>Ketentuan Foto Selfie yang Diterima:</span>
                 </p>
-                <div class="flex items-center gap-2 pt-0.5">
+                <ul class="space-y-1 pl-1 text-[10.5px] sm:text-[11px] leading-relaxed">
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-emerald-500 font-bold shrink-0">✓</span>
+                    <span>Wajah menghadap lurus ke depan dan tampak jelas (tidak terpotong).</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-emerald-500 font-bold shrink-0">✓</span>
+                    <span>Pencahayaan terang, tidak gelap, dan foto tidak buram (fokus).</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-emerald-500 font-bold shrink-0">✓</span>
+                    <span>Tidak menggunakan kacamata hitam, masker, topi, atau filter kamera.</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-emerald-500 font-bold shrink-0">✓</span>
+                    <span>Foto wajib diri sendiri asli (sesuai NIK yang didaftarkan).</span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Preview Card when photo is taken/uploaded -->
+              <div
+                v-if="selfiePreviewUrl"
+                class="p-3 rounded-xl bg-white dark:bg-slate-900 border-2 border-emerald-400 dark:border-emerald-700 flex items-center gap-3 relative overflow-hidden group shadow-xs"
+              >
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-black shrink-0 border border-slate-200 dark:border-slate-700 relative shadow-inner">
+                  <img
+                    :src="selfiePreviewUrl"
+                    alt="Preview Selfie"
+                    class="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div class="flex-1 min-w-0 space-y-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300">
+                      Foto Tersimpan
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">{{ selfieFileSize }}</span>
+                  </div>
+                  <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                    {{ selfieFileName || 'Foto-Selfie-Pemohon.jpg' }}
+                  </p>
+                  <div class="flex items-center gap-2 pt-0.5">
+                    <button
+                      type="button"
+                      @click="openSelfieCamera"
+                      class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      <Camera class="w-3.5 h-3.5" />
+                      <span>Ambil Ulang</span>
+                    </button>
+                    <span class="text-slate-300 dark:text-slate-600">&bull;</span>
+                    <button
+                      type="button"
+                      @click="removeSelfie"
+                      class="text-[11px] font-bold text-rose-500 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      <Trash2 class="w-3.5 h-3.5" />
+                      <span>Hapus</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Upload / Camera Buttons when no photo yet -->
+              <div
+                v-else
+                class="p-3.5 sm:p-4 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-400 bg-white/70 dark:bg-slate-900/60 transition text-center space-y-2.5"
+              >
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight">
+                  Pilih cara pengambilan foto selfie wajah Anda:
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-2 pt-0.5">
                   <button
                     type="button"
                     @click="openSelfieCamera"
-                    class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <Camera class="w-3.5 h-3.5" />
-                    <span>Ambil Ulang</span>
+                    <Camera class="w-4 h-4" />
+                    <span>Buka Kamera Selfie (Foto Sekarang)</span>
                   </button>
-                  <span class="text-slate-300 dark:text-slate-600">&bull;</span>
-                  <button
-                    type="button"
-                    @click="removeSelfie"
-                    class="text-[11px] font-bold text-rose-500 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  <label
+                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-600"
                   >
-                    <Trash2 class="w-3.5 h-3.5" />
-                    <span>Hapus</span>
-                  </button>
+                    <Upload class="w-3.5 h-3.5" />
+                    <span>Pilih Berkas / Galeri</span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      class="hidden"
+                      @change="handleFileInput"
+                    />
+                  </label>
                 </div>
               </div>
-            </div>
 
-            <!-- Upload / Camera Buttons when no photo yet -->
-            <div
-              v-else
-              class="p-3.5 sm:p-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-400 bg-slate-50/70 dark:bg-slate-800/50 transition text-center space-y-2.5"
-            >
-              <div class="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-inner">
-                <Camera class="w-6 h-6" />
-              </div>
-              <div class="space-y-1">
-                <p class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  Ambil Foto Selfie Wajah Anda
-                </p>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-                  Pastikan wajah terlihat jelas, menghadap kamera lurus, dan tidak memakai masker/kacamata hitam.
-                </p>
-              </div>
-
-              <div class="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
-                <button
-                  type="button"
-                  @click="openSelfieCamera"
-                  class="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Camera class="w-4 h-4" />
-                  <span>Buka Kamera Selfie</span>
-                </button>
-                <label
-                  class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-600"
-                >
-                  <Upload class="w-3.5 h-3.5" />
-                  <span>Pilih Berkas / Galeri</span>
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    class="hidden"
-                    @change="handleFileInput"
-                  />
-                </label>
+              <!-- Privacy Destruction Notice Banner -->
+              <div class="p-2.5 rounded-xl bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-[10.5px] leading-relaxed text-blue-900 dark:text-blue-300 flex items-start gap-2">
+                <ShieldCheck class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Jaminan Pelindungan Privasi (UU PDP):</strong> Berkas foto selfie ini hanya digunakan petugas untuk memvalidasi akun Anda, dan akan <strong>otomatis terhapus permanen dari server</strong> segera setelah diverifikasi.
+                </span>
               </div>
             </div>
 
-            <!-- Privacy Destruction Notice Banner -->
-            <div class="p-2.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/70 dark:border-blue-900/50 text-[10.5px] leading-relaxed text-blue-900 dark:text-blue-300 flex items-start gap-2">
-              <ShieldCheck class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-              <span>
-                <strong>Jaminan Privasi (UU PDP):</strong> Foto selfie hanya digunakan oleh verifikator Disdukcapil untuk pencocokan identitas pendaftar, dan akan <strong>otomatis dimusnahkan secara permanen</strong> dari server setelah akun selesai diverifikasi.
-              </span>
-            </div>
-
-            <p v-if="form.errors.selfie" class="text-xs text-rose-500 font-semibold">
+            <p v-if="form.errors.selfie" class="text-xs text-rose-500 font-semibold px-1">
               {{ form.errors.selfie }}
             </p>
           </div>

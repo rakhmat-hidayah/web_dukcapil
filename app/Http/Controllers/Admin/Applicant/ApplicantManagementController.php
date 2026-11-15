@@ -295,6 +295,20 @@ class ApplicantManagementController extends Controller
                     Storage::disk(QueueDocumentStorage::DISK)->delete($account->selfie_path);
                     $selfieDestroyed = true;
                 }
+                if (Storage::disk('local')->exists($account->selfie_path)) {
+                    Storage::disk('local')->delete($account->selfie_path);
+                    $selfieDestroyed = true;
+                }
+                $privPath = storage_path('app/private/' . $account->selfie_path);
+                if (file_exists($privPath)) {
+                    @unlink($privPath);
+                    $selfieDestroyed = true;
+                }
+                $appPath = storage_path('app/' . $account->selfie_path);
+                if (file_exists($appPath)) {
+                    @unlink($appPath);
+                    $selfieDestroyed = true;
+                }
             } catch (\Throwable $e) {
                 Log::warning("Gagal memusnahkan fisik foto selfie akun {$account->id}: " . $e->getMessage());
             }

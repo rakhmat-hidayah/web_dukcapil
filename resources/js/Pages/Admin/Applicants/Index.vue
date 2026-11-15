@@ -146,7 +146,8 @@
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th class="p-4 font-bold">Foto & Pemohon (Nama & NIK)</th>
+                <th class="p-4 font-bold text-center w-24">Foto</th>
+                <th class="p-4 font-bold">Pemohon (Nama User & NIK Utuh)</th>
                 <th class="p-4 font-bold">Kontak (Email & No. HP)</th>
                 <th class="p-4 font-bold">Status Akun</th>
                 <th class="p-4 font-bold">Status Identitas</th>
@@ -157,81 +158,79 @@
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-300">
               <tr v-if="accounts.data.length === 0">
-                <td colspan="7" class="p-8 text-center text-slate-400">
+                <td colspan="8" class="p-8 text-center text-slate-400">
                   Tidak ada data pendaftar pemohon yang sesuai kriteria pencarian.
                 </td>
               </tr>
               <tr v-for="acc in accounts.data" :key="acc.id" class="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition">
-                <td class="p-4">
-                  <div class="flex items-start gap-3">
-                    <!-- Selfie Thumbnail / Privacy Status -->
-                    <div class="shrink-0 pt-0.5">
-                      <div
-                        v-if="acc.has_selfie && acc.selfie_url"
-                        class="relative group cursor-pointer"
-                        @click="openSelfiePreviewModal(acc)"
-                        title="Klik untuk melihat foto selfie pendaftar"
-                      >
-                        <div class="w-12 h-12 rounded-2xl overflow-hidden bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-xs relative">
-                          <img
-                            :src="acc.selfie_url"
-                            :alt="acc.name"
-                            class="w-full h-full object-cover transition duration-300 filter blur-xs group-hover:blur-none"
-                            loading="lazy"
-                          />
-                          <div class="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition flex items-center justify-center">
-                            <Eye class="w-3.5 h-3.5 text-white/90 drop-shadow-md group-hover:opacity-0 transition" />
-                          </div>
+                <!-- Kolom Foto -->
+                <td class="p-4 text-center">
+                  <div class="flex flex-col items-center justify-center">
+                    <div
+                      v-if="acc.has_selfie && acc.selfie_url"
+                      class="relative group cursor-pointer"
+                      @click="openSelfiePreviewModal(acc)"
+                      title="Klik untuk melihat foto selfie pendaftar"
+                    >
+                      <div class="w-12 h-12 rounded-2xl overflow-hidden bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-xs relative">
+                        <img
+                          :src="acc.selfie_url"
+                          :alt="acc.name"
+                          class="w-full h-full object-cover transition duration-300 filter blur-xs group-hover:blur-none"
+                          loading="lazy"
+                        />
+                        <div class="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition flex items-center justify-center">
+                          <Eye class="w-3.5 h-3.5 text-white/90 drop-shadow-md group-hover:opacity-0 transition" />
                         </div>
-                        <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xs" title="Foto Selfie Tersedia">
-                          <Camera class="w-2.5 h-2.5" />
-                        </span>
                       </div>
-
-                      <!-- Badge if deleted / destroyed pasca-verifikasi -->
-                      <div
-                        v-else-if="acc.is_selfie_destroyed"
-                        class="w-12 h-12 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 flex flex-col items-center justify-center text-center p-1"
-                        :title="acc.selfie_deleted_at ? `Foto selfie telah dimusnahkan secara aman pada ${acc.selfie_deleted_at}` : 'Foto biometrik telah dimusnahkan pasca verifikasi (UU PDP)'"
-                      >
-                        <ShieldCheck class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                        <span class="text-[7px] font-black text-emerald-700 dark:text-emerald-300 leading-none mt-1">DIMUSNAHKAN</span>
-                      </div>
-
-                      <!-- Placeholder if no selfie -->
-                      <div
-                        v-else
-                        class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400"
-                        title="Tanpa foto selfie"
-                      >
-                        <User class="w-5 h-5 opacity-50" />
-                      </div>
+                      <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xs" title="Foto Selfie Tersedia">
+                        <Camera class="w-2.5 h-2.5" />
+                      </span>
                     </div>
 
-                    <!-- Name and NIK -->
-                    <div class="min-w-0 flex-1">
-                      <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Nama User</p>
-                      <p class="font-black text-slate-900 dark:text-white text-sm truncate">{{ acc.name }}</p>
-                      <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="text-[10px] font-bold text-slate-400">NIK:</span>
-                        <span class="font-mono text-xs text-blue-600 dark:text-blue-400 font-bold tracking-wider select-all">{{ acc.nik || acc.masked_nik }}</span>
-                      </div>
-                      <div v-if="acc.has_selfie" class="mt-1">
-                        <button
-                          type="button"
-                          @click="openSelfiePreviewModal(acc)"
-                          class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-                        >
-                          <Eye class="w-3 h-3" />
-                          <span>Lihat Foto Selfie</span>
-                        </button>
-                      </div>
-                      <div v-else-if="acc.is_selfie_destroyed" class="mt-0.5">
-                        <span class="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
-                          <span>✓ Berkas Dimusnahkan (UU PDP)</span>
-                        </span>
-                      </div>
+                    <!-- Badge if deleted / destroyed pasca-verifikasi -->
+                    <div
+                      v-else-if="acc.is_selfie_destroyed"
+                      class="w-12 h-12 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 flex flex-col items-center justify-center text-center p-1"
+                      :title="acc.selfie_deleted_at ? `Foto selfie telah dimusnahkan secara aman pada ${acc.selfie_deleted_at}` : 'Foto biometrik telah dimusnahkan pasca verifikasi (UU PDP)'"
+                    >
+                      <ShieldCheck class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <span class="text-[7px] font-black text-emerald-700 dark:text-emerald-300 leading-none mt-1">DIMUSNAHKAN</span>
                     </div>
+
+                    <!-- Placeholder if no selfie -->
+                    <div
+                      v-else
+                      class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400"
+                      title="Tanpa foto selfie"
+                    >
+                      <User class="w-5 h-5 opacity-50" />
+                    </div>
+
+                    <button
+                      v-if="acc.has_selfie"
+                      type="button"
+                      @click="openSelfiePreviewModal(acc)"
+                      class="mt-1 text-[9.5px] font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                    >
+                      Lihat Foto
+                    </button>
+                    <span
+                      v-else-if="acc.is_selfie_destroyed"
+                      class="mt-0.5 text-[8.5px] font-bold text-emerald-600 dark:text-emerald-400"
+                    >
+                      Terhapus (PDP)
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Kolom Pemohon (Nama User & NIK Utuh) -->
+                <td class="p-4">
+                  <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Nama User</p>
+                  <p class="font-black text-slate-900 dark:text-white text-sm">{{ acc.name }}</p>
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="text-[10px] font-bold text-slate-400">NIK:</span>
+                    <span class="font-mono text-xs text-blue-600 dark:text-blue-400 font-bold tracking-wider select-all">{{ acc.nik || acc.masked_nik }}</span>
                   </div>
                 </td>
                 <td class="p-4">
