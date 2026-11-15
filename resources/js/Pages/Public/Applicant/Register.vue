@@ -333,10 +333,14 @@
                     <span class="text-emerald-500 font-bold shrink-0">✓</span>
                     <span>Foto wajib diri sendiri asli (sesuai NIK yang didaftarkan).</span>
                   </li>
+                  <li class="flex items-start gap-1.5 font-semibold text-emerald-700 dark:text-emerald-300">
+                    <span class="text-emerald-500 font-bold shrink-0">✓</span>
+                    <span>Wajib difoto langsung via kamera (tidak dapat memilih berkas dari galeri).</span>
+                  </li>
                 </ul>
               </div>
 
-              <!-- Preview Card when photo is taken/uploaded -->
+              <!-- Preview Card when photo is taken via camera -->
               <div
                 v-if="selfiePreviewUrl"
                 class="p-3 rounded-xl bg-white dark:bg-slate-900 border-2 border-emerald-400 dark:border-emerald-700 flex items-center gap-3 relative overflow-hidden group shadow-xs"
@@ -381,36 +385,23 @@
                 </div>
               </div>
 
-              <!-- Upload / Camera Buttons when no photo yet -->
+              <!-- Camera Action when no photo yet -->
               <div
                 v-else
-                class="p-3.5 sm:p-4 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-400 bg-white/70 dark:bg-slate-900/60 transition text-center space-y-2.5"
+                class="p-4 rounded-xl border-2 border-dashed border-emerald-300 dark:border-emerald-800/80 bg-emerald-50/40 dark:bg-emerald-950/20 transition text-center space-y-2.5"
               >
-                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight">
-                  Pilih cara pengambilan foto selfie wajah Anda:
-                </p>
+                <button
+                  type="button"
+                  @click="openSelfieCamera"
+                  class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold text-xs sm:text-sm transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Camera class="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Buka Kamera Selfie (Foto Sekarang)</span>
+                </button>
 
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-2 pt-0.5">
-                  <button
-                    type="button"
-                    @click="openSelfieCamera"
-                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <Camera class="w-4 h-4" />
-                    <span>Buka Kamera Selfie (Foto Sekarang)</span>
-                  </button>
-                  <label
-                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-600"
-                  >
-                    <Upload class="w-3.5 h-3.5" />
-                    <span>Pilih Berkas / Galeri</span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      class="hidden"
-                      @change="handleFileInput"
-                    />
-                  </label>
+                <div class="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  <ShieldAlert class="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>Wajib foto langsung via kamera (Pilihan galeri dinonaktifkan demi keaslian data).</span>
                 </div>
               </div>
 
@@ -483,8 +474,8 @@ import {
   Camera,
   CheckCircle2,
   ShieldCheck,
-  Trash2,
-  Upload
+  ShieldAlert,
+  Trash2
 } from '@lucide/vue'
 
 const form = useForm({
@@ -521,21 +512,6 @@ const handleCameraCaptured = (rawFile) => {
   selfieFileSize.value = kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`
   delete form.errors.selfie
   showCameraModal.value = false
-}
-
-const handleFileInput = (e) => {
-  const file = e.target.files?.[0]
-  if (!file) return
-  if (selfiePreviewUrl.value) {
-    URL.revokeObjectURL(selfiePreviewUrl.value)
-  }
-  form.selfie = file
-  selfiePreviewUrl.value = URL.createObjectURL(file)
-  selfieFileName.value = file.name
-  const kb = Math.round(file.size / 1024)
-  selfieFileSize.value = kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`
-  delete form.errors.selfie
-  e.target.value = ''
 }
 
 const removeSelfie = () => {
