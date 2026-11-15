@@ -238,7 +238,8 @@ class ApplicantAuthController extends Controller
         $rawNik = $account->nik;
 
         return redirect()->route('applicant.login', $rawNik ? ['nik' => $rawNik] : [])
-            ->with('success', 'Pendaftaran akun Anda berhasil dan email telah terverifikasi! Silakan masuk menggunakan NIK dan Password yang telah Anda daftarkan.');
+            ->with('registered_pending_verification', true)
+            ->with('success', 'Pendaftaran akun Anda berhasil dan email telah terverifikasi! Data identitas dan foto selfie Anda saat ini sedang dalam proses verifikasi oleh petugas Disdukcapil Kabupaten Dompu. Silakan tunggu proses verifikasi selesai untuk mulai masuk (login).');
     }
 
     /**
@@ -342,6 +343,20 @@ class ApplicantAuthController extends Controller
             session(['applicant_verification_email' => $account->email_normalized]);
             return redirect()->route('applicant.verify-otp')
                 ->with('warning', 'Alamat email Anda belum diverifikasi. Masukkan kode OTP yang telah dikirimkan.');
+        }
+
+        // Check if identity verification is pending or rejected
+        if ($account->identity_status === ApplicantAccount::IDENTITY_REJECTED) {
+            $reason = $account->status_reason ? " Catatan: {$account->status_reason}" : '';
+            throw ValidationException::withMessages([
+                'nik' => "Verifikasi pendaftaran akun Anda ditolak oleh petugas Disdukcapil.{$reason} Silakan hubungi kantor Disdukcapil Kabupaten Dompu.",
+            ]);
+        }
+
+        if ($account->account_status === ApplicantAccount::STATUS_IDENTITY_PENDING || !$account->isIdentityVerified()) {
+            throw ValidationException::withMessages([
+                'nik' => 'Akun Anda masih dalam proses verifikasi identitas & foto selfie oleh petugas Disdukcapil Kabupaten Dompu. Silakan tunggu hingga proses verifikasi selesai untuk mulai masuk (login).',
+            ]);
         }
 
         // Check account suspension or lock

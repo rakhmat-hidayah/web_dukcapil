@@ -195,11 +195,21 @@
           <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
             <ShieldCheck class="w-5 h-5" />
           </div>
-          <div class="space-y-0.5">
+          <div class="space-y-1.5 flex-1 min-w-0">
             <p class="font-bold text-emerald-800 dark:text-emerald-200">Berkas Foto Selfie Telah Dimusnahkan Dari Server Storage</p>
             <p class="text-[11px] text-emerald-700 dark:text-emerald-300 leading-relaxed">
-              Sesuai dengan ketentuan UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP), berkas foto biometrik pemohon telah dihapus permanen secara otomatis setelah proses verifikasi identitas selesai dilakukan{{ account.selfie_deleted_at ? ' pada ' + account.selfie_deleted_at : '' }}.
+              Sesuai dengan ketentuan UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP), berkas foto biometrik pemohon telah dihapus permanen secara otomatis setelah proses verifikasi identitas wajah selesai dilakukan{{ account.selfie_deleted_at ? ' pada ' + account.selfie_deleted_at : '' }}.
             </p>
+            <div class="flex items-center gap-2 flex-wrap pt-1 text-[11px]">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-100/90 dark:bg-emerald-900/60 text-emerald-900 dark:text-emerald-100 font-bold border border-emerald-300 dark:border-emerald-700">
+                <UserCheck class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>Petugas Verifikator Wajah: {{ account.identity_verified_by || 'Petugas Administrator' }}</span>
+              </span>
+              <span v-if="account.identity_verified_at || account.selfie_deleted_at" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700">
+                <Clock class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span>Waktu Verifikasi: {{ account.identity_verified_at || account.selfie_deleted_at }}</span>
+              </span>
+            </div>
           </div>
         </div>
 
@@ -634,6 +644,7 @@ import {
   Check,
   Camera,
   Eye,
+  Clock,
 } from '@lucide/vue'
 
 const props = defineProps({

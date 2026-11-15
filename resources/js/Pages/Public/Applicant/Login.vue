@@ -61,9 +61,40 @@
           </p>
         </div>
 
+        <!-- Flash Notice: Registered & Waiting for Identity Verification -->
+        <div
+          v-if="$page.props.flash?.registered_pending_verification"
+          class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-amber-50/95 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/70 shadow-sm animate-fade-in space-y-2.5"
+        >
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 text-[10px] font-bold border border-emerald-300 dark:border-emerald-700">
+              <CheckCircle2 class="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+              Pendaftaran Berhasil
+            </span>
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 text-[10px] font-bold border border-amber-300 dark:border-amber-700">
+              <Clock class="w-3 h-3 text-amber-600 dark:text-amber-400" />
+              Menunggu Verifikasi Petugas
+            </span>
+          </div>
+
+          <div class="flex items-start gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-amber-200/80 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 flex items-center justify-center shrink-0 mt-0.5">
+              <Clock class="w-4 h-4 text-amber-700 dark:text-amber-300" />
+            </div>
+            <div class="space-y-1.5 text-slate-800 dark:text-slate-200">
+              <p class="text-[11.5px] sm:text-xs font-medium leading-relaxed">
+                Data NIK & foto selfie biometrik pendaftaran Anda telah kami terima dan saat ini sedang dalam <strong>antrean verifikasi identitas</strong> oleh petugas Disdukcapil Kab. Dompu.
+              </p>
+              <div class="text-[10.5px] sm:text-[11px] leading-relaxed text-amber-900 dark:text-amber-200 bg-amber-100/70 dark:bg-amber-900/40 p-2.5 rounded-xl border border-amber-200/80 dark:border-amber-800/60 font-semibold">
+                ⏳ <strong>Harap Menunggu:</strong> Demi keamanan data kependudukan, Anda baru dapat masuk (login) ke layanan setelah akun disetujui & diverifikasi oleh petugas.
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Flash Success Notification (Registration / Verification Success) -->
         <div
-          v-if="$page.props.flash?.success"
+          v-else-if="$page.props.flash?.success"
           class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 flex items-start gap-2.5 text-emerald-900 dark:text-emerald-100 shadow-sm animate-fade-in"
         >
           <CheckCircle2 class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
@@ -126,9 +157,14 @@
                 required
               />
             </div>
-            <p v-if="form.errors.nik" class="text-xs text-rose-500 font-semibold">
-              {{ form.errors.nik }}
-            </p>
+            <div
+              v-if="form.errors.nik"
+              class="mt-1.5 p-2.5 rounded-xl text-xs font-medium leading-relaxed"
+              :class="form.errors.nik.includes('verifikasi') ? 'bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 flex items-start gap-2' : 'text-rose-500'"
+            >
+              <Clock v-if="form.errors.nik.includes('verifikasi')" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <span>{{ form.errors.nik }}</span>
+            </div>
           </div>
 
           <!-- Password Input -->

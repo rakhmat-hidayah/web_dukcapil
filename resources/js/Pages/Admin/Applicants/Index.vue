@@ -215,12 +215,17 @@
                     >
                       Lihat Foto
                     </button>
-                    <span
+                    <div
                       v-else-if="acc.is_selfie_destroyed"
-                      class="mt-0.5 text-[8.5px] font-bold text-emerald-600 dark:text-emerald-400"
+                      class="mt-1 flex flex-col items-center"
                     >
-                      Terhapus (PDP)
-                    </span>
+                      <span class="text-[8.5px] font-bold text-emerald-600 dark:text-emerald-400 leading-tight">
+                        Terhapus (PDP)
+                      </span>
+                      <span v-if="acc.identity_verified_by" class="text-[8px] text-slate-400 dark:text-slate-500 line-clamp-1 text-center" :title="`Diverifikasi oleh: ${acc.identity_verified_by}`">
+                        oleh {{ acc.identity_verified_by }}
+                      </span>
+                    </div>
                   </div>
                 </td>
 
@@ -263,6 +268,10 @@
                   >
                     {{ acc.identity_status_label || acc.identity_status }}
                   </span>
+                  <p v-if="acc.identity_verified_by && acc.identity_status === 'VERIFIED'" class="text-[9.5px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                    <UserCheck class="w-3 h-3 text-emerald-600 shrink-0" />
+                    <span>Petugas: <strong class="text-slate-700 dark:text-slate-300">{{ acc.identity_verified_by }}</strong></span>
+                  </p>
                 </td>
                 <td class="p-4">
                   <div v-if="acc.active_device_label" class="space-y-0.5">

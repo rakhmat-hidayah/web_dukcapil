@@ -60,7 +60,8 @@ class ApplicantManagementController extends Controller
             $query->where('identity_status', $identityStatus);
         }
 
-        $accounts = $query->latest('id')
+        $accounts = $query->with(['activeDevice', 'verifiedByAdmin'])
+            ->latest('id')
             ->paginate(15)
             ->withQueryString()
             ->through(function (ApplicantAccount $acc) {
@@ -83,6 +84,8 @@ class ApplicantManagementController extends Controller
                     'is_selfie_destroyed'   => $isDestroyed,
                     'identity_status'       => $acc->identity_status,
                     'identity_status_label' => self::translateIdentityStatus($acc->identity_status),
+                    'identity_verified_at'  => $acc->identity_verified_at?->translatedFormat('d M Y, H:i'),
+                    'identity_verified_by'  => $acc->verifiedByAdmin?->name,
                     'account_status'        => $acc->account_status,
                     'account_status_label'  => self::translateAccountStatus($acc->account_status),
                     'active_device_label'   => $acc->activeDevice?->device_label,
@@ -124,6 +127,19 @@ class ApplicantManagementController extends Controller
         $hasSelfie = !empty($account->selfie_path) && Storage::disk(QueueDocumentStorage::DISK)->exists($account->selfie_path);
         $isDestroyed = !empty($account->selfie_deleted_at) || (!$hasSelfie && in_array($account->identity_status, [ApplicantAccount::IDENTITY_VERIFIED, ApplicantAccount::IDENTITY_REJECTED]));
 
+        $verifierName = $account->verifiedByAdmin?->name;
+        if (!$verifierName && ($isDestroyed || $account->isIdentityVerified())) {
+            $verifyLog = $account->auditLogs
+                ->whereIn('event_type', ['identity_verification_verified', 'identity_verification_rejected'])
+                ->first();
+            if ($verifyLog && $verifyLog->actor_id) {
+                $adminUser = \App\Models\User::find($verifyLog->actor_id);
+                if ($adminUser) {
+                    $verifierName = $adminUser->name;
+                }
+            }
+        }
+
         return Inertia::render('Admin/Applicants/Show', [
             'account' => [
                 'id'                   => $account->id,
@@ -145,7 +161,7 @@ class ApplicantManagementController extends Controller
                 'status_reason'        => $account->status_reason,
                 'email_verified_at'    => $account->email_verified_at?->translatedFormat('d M Y, H:i'),
                 'identity_verified_at' => $account->identity_verified_at?->translatedFormat('d M Y, H:i'),
-                'identity_verified_by' => $account->verifiedByAdmin?->name,
+                'identity_verified_by' => $verifierName,
                 'created_at'           => $account->created_at?->translatedFormat('d M Y, H:i'),
             ],
             'devices' => $account->devices->map(fn($d) => [
