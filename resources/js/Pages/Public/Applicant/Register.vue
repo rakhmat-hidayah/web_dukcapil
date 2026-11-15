@@ -251,13 +251,24 @@
             <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
               Password Baru (Minimal 8 Karakter)
             </label>
-            <input
-              v-model="form.password"
-              type="password"
-              placeholder="Buat password yang kuat..."
-              class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <div class="relative">
+              <input
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Buat password yang kuat..."
+                class="w-full pl-3.5 pr-10 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <button
+                type="button"
+                @click="showPassword = !showPassword"
+                class="absolute right-3 top-2.5 sm:top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer p-0.5"
+                :title="showPassword ? 'Sembunyikan password' : 'Lihat password'"
+              >
+                <EyeOff v-if="showPassword" class="w-4 h-4" />
+                <Eye v-else class="w-4 h-4" />
+              </button>
+            </div>
             <p v-if="form.errors.password" class="text-xs text-rose-500 font-semibold">
               {{ form.errors.password }}
             </p>
@@ -268,13 +279,27 @@
             <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
               Konfirmasi Password Baru
             </label>
-            <input
-              v-model="form.password_confirmation"
-              type="password"
-              placeholder="Ulangi password di atas..."
-              class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <div class="relative">
+              <input
+                v-model="form.password_confirmation"
+                :type="showPasswordConfirmation ? 'text' : 'password'"
+                placeholder="Ulangi password di atas..."
+                class="w-full pl-3.5 pr-10 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <button
+                type="button"
+                @click="showPasswordConfirmation = !showPasswordConfirmation"
+                class="absolute right-3 top-2.5 sm:top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer p-0.5"
+                :title="showPasswordConfirmation ? 'Sembunyikan password' : 'Lihat password'"
+              >
+                <EyeOff v-if="showPasswordConfirmation" class="w-4 h-4" />
+                <Eye v-else class="w-4 h-4" />
+              </button>
+            </div>
+            <p v-if="form.password && form.password_confirmation && form.password !== form.password_confirmation" class="text-[11px] text-rose-500 font-semibold">
+              Konfirmasi password tidak cocok dengan password di atas.
+            </p>
           </div>
 
           <!-- Persyaratan & Pengambilan Foto Selfie Pemohon Akun (Wajib) -->
@@ -475,7 +500,9 @@ import {
   CheckCircle2,
   ShieldCheck,
   ShieldAlert,
-  Trash2
+  Trash2,
+  Eye,
+  EyeOff
 } from '@lucide/vue'
 
 const form = useForm({
@@ -488,6 +515,8 @@ const form = useForm({
   selfie: null,
 })
 
+const showPassword = ref(false)
+const showPasswordConfirmation = ref(false)
 const showCameraModal = ref(false)
 const selfiePreviewUrl = ref(null)
 const selfieFileName = ref('')

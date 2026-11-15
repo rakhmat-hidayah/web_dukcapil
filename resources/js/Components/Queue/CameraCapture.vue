@@ -1,39 +1,45 @@
 <template>
-  <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/90 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
-    <div class="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[95dvh]" style="margin-bottom: env(safe-area-inset-bottom, 0px);">
-      <!-- Header -->
-      <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-        <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <h3 class="font-bold text-slate-900 dark:text-white text-base">
-              {{ headerTitle }}
-            </h3>
-            <span v-if="isSelfie" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border" :class="isRepresentative ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-700' : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'">
-              {{ isRepresentative ? 'Pemilik Dokumen' : 'Pemohon Asli' }}
-            </span>
+  <Teleport to="body">
+    <div
+      class="fixed inset-0 z-[999] bg-slate-950/95 sm:bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 overflow-hidden select-none"
+      style="padding-bottom: env(safe-area-inset-bottom, 0px);"
+    >
+      <div
+        class="bg-white dark:bg-slate-900 w-full h-[100dvh] sm:h-auto sm:max-h-[94vh] sm:max-w-xl sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col"
+      >
+        <!-- Header -->
+        <div class="px-4 py-2.5 sm:px-5 sm:py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900 z-10">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
+                {{ headerTitle }}
+              </h3>
+              <span v-if="isSelfie" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border" :class="isRepresentative ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-700' : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'">
+                {{ isRepresentative ? 'Pemilik Dokumen' : 'Pemohon Asli' }}
+              </span>
+            </div>
+            <p v-if="isSelfie && isRepresentative" class="text-[11px] sm:text-xs font-bold text-rose-600 dark:text-rose-400 mt-0.5">
+              ⚠️ Wajib Foto Pemilik Dokumen: {{ documentOwnerName || 'Yang Dimohonkan' }} (BUKAN Foto Yang Mewakili/Kuasa).
+            </p>
+            <p v-else-if="isSelfie" class="text-[11px] sm:text-xs font-semibold text-amber-700 dark:text-amber-300 mt-0.5">
+              ⚠️ Wajib Foto Pemohon Sendiri (Pemilik NIK & KTP-el), bukan yang diwakilkan/kuasa.
+            </p>
+            <p v-else class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+              {{ documentLabel }}
+            </p>
           </div>
-          <p v-if="isSelfie && isRepresentative" class="text-xs font-bold text-rose-600 dark:text-rose-400 mt-0.5">
-            ⚠️ Wajib Foto Pemilik Dokumen: {{ documentOwnerName || 'Yang Dimohonkan' }} (BUKAN Foto Yang Mewakili/Kuasa).
-          </p>
-          <p v-else-if="isSelfie" class="text-xs font-semibold text-amber-700 dark:text-amber-300 mt-0.5">
-            ⚠️ Wajib Foto Pemohon Sendiri (Pemilik NIK & KTP-el), bukan yang diwakilkan/kuasa.
-          </p>
-          <p v-else class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
-            {{ documentLabel }}
-          </p>
+          <button
+            @click="closeModal"
+            class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
         </div>
-        <button
-          @click="closeModal"
-          class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
 
-      <!-- Main Body -->
-      <div class="p-3 sm:p-4 flex-1 overflow-y-auto flex flex-col items-center">
-        <!-- Capture Viewfinder / Preview Container -->
-        <div class="w-full relative rounded-2xl overflow-hidden bg-black h-[63vh] max-h-[580px] min-h-[420px] sm:h-[510px] flex items-center justify-center shadow-inner">
+        <!-- Main Body -->
+        <div class="p-2 sm:p-4 flex-1 min-h-0 flex flex-col items-center justify-between overflow-hidden">
+          <!-- Capture Viewfinder / Preview Container -->
+          <div class="w-full flex-1 min-h-0 relative rounded-2xl overflow-hidden bg-black flex items-center justify-center shadow-inner">
           <!-- 1. LIVE CAMERA STREAM (Always kept in DOM for smooth hardware stream) -->
           <video
             ref="videoRef"
@@ -66,8 +72,8 @@
           >
             <!-- Top Controls: Document Mode Pills & Zoom Toggles -->
             <div class="w-full flex flex-col items-center gap-1.5 z-20 pointer-events-none">
-              <!-- Interactive Document Frame Selector Pills -->
-              <div class="flex items-center justify-center gap-1 bg-slate-950/85 backdrop-blur-md p-1 rounded-2xl border border-white/20 shadow-xl max-w-[98%] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
+              <!-- Interactive Document Frame Selector Pills (Hidden in Selfie mode) -->
+              <div v-if="!isSelfie" class="flex items-center justify-center gap-1 bg-slate-950/85 backdrop-blur-md p-1 rounded-2xl border border-white/20 shadow-xl max-w-[98%] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
                 <!-- 1. Kertas F4 / A4 (Tegak) -->
                 <button
                   type="button"
@@ -333,11 +339,29 @@
               </div>
             </div>
 
-            <!-- Bottom Auto-Crop Indicator Pill -->
-            <div class="z-10 bg-slate-950/85 backdrop-blur-md px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-emerald-300 border border-emerald-500/30 text-center max-w-[94%] shadow flex items-center justify-center gap-1.5">
+            <!-- Bottom Auto-Crop Indicator Pill (Hidden in Selfie mode) -->
+            <div
+              v-if="!isSelfie"
+              class="z-10 bg-slate-950/85 backdrop-blur-md px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-emerald-300 border border-emerald-500/30 text-center max-w-[94%] shadow flex items-center justify-center gap-1.5"
+            >
               <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
               <span>Foto otomatis dipotong pas di dalam bingkai hijau agar hasil dokumen tajam & dekat</span>
             </div>
+          </div>
+
+          <!-- Floating Round Shutter Button on Mobile Viewfinder -->
+          <div
+            v-if="isCameraActive && !capturedBlob"
+            class="sm:hidden absolute bottom-3 inset-x-0 flex items-center justify-center z-20 pointer-events-auto"
+          >
+            <button
+              type="button"
+              @click="takeSnapshot"
+              class="w-13 h-13 rounded-full border-4 border-white bg-blue-600 active:scale-95 shadow-2xl flex items-center justify-center cursor-pointer transition hover:bg-blue-500"
+              title="Ambil Foto Sekarang"
+            >
+              <div class="w-4 h-4 rounded-full bg-white animate-pulse"></div>
+            </button>
           </div>
 
           <!-- 2. CAPTURED PREVIEW -->
@@ -393,11 +417,11 @@
           </div>
         </div>
 
-        <!-- Guidance Banner -->
-        <div class="w-full mt-2.5 px-3 py-2 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-100 dark:border-blue-900/40 flex items-start gap-2.5">
-          <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-            <span class="font-semibold">Petunjuk:</span> {{ captureHint || 'Dekatkan kamera ke dokumen agar tulisan terbaca jelas. Sistem akan memotong foto otomatis mengikuti bingkai hijau.' }}
+        <!-- Guidance Banner (Compact, never forces overflow) -->
+        <div class="w-full mt-2 px-3 py-1.5 sm:py-2 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-100 dark:border-blue-900/40 flex items-center gap-2 shrink-0">
+          <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <p class="text-[10.5px] sm:text-xs text-blue-800 dark:text-blue-300 leading-tight line-clamp-2">
+            <span class="font-bold">Petunjuk:</span> {{ captureHint || 'Dekatkan kamera ke dokumen agar tulisan terbaca jelas.' }}
           </p>
         </div>
 
@@ -416,7 +440,10 @@
       </div>
 
       <!-- Action Footer -->
-      <div class="px-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between gap-3" style="padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));">
+      <div
+        class="px-4 py-3 sm:px-5 sm:py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between gap-2.5 shrink-0 z-30"
+        style="padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));"
+      >
         <!-- Left: Switch Camera (Front / Back) -->
         <div>
           <button
@@ -432,7 +459,7 @@
         </div>
 
         <!-- Right: Actions (Ambil Foto / Retake / Confirm) -->
-        <div class="flex items-center gap-2 ml-auto">
+        <div class="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
           <!-- Retake Button -->
           <button
             v-if="capturedBlob"
@@ -448,11 +475,11 @@
             v-if="isCameraActive && !capturedBlob"
             type="button"
             @click="takeSnapshot"
-            class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white text-xs font-bold transition shadow-lg shadow-blue-600/30 flex items-center gap-2 cursor-pointer"
+            class="w-full sm:w-auto px-5 py-3 sm:px-6 sm:py-3 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white text-xs sm:text-sm font-bold transition shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 cursor-pointer"
           >
-            <div class="w-3 h-3 rounded-full bg-white animate-pulse"></div>
+            <div class="w-3.5 h-3.5 rounded-full bg-white animate-pulse"></div>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            Ambil Foto Sekarang
+            <span>Ambil Foto Sekarang</span>
           </button>
 
           <!-- Confirm & Use Photo Button -->
@@ -460,15 +487,16 @@
             v-if="capturedBlob"
             type="button"
             @click="confirmPhoto"
-            class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white text-xs font-bold transition shadow-lg shadow-emerald-600/30 flex items-center gap-1.5 cursor-pointer"
+            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white text-xs sm:text-sm font-bold transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-            Gunakan Foto Ini & Lanjut
+            <span>Gunakan Foto Ini & Lanjut</span>
           </button>
         </div>
       </div>
     </div>
   </div>
+</Teleport>
 </template>
 
 <script setup>
