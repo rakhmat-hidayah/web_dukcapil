@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Queue;
 
 use App\Http\Controllers\Controller;
 use App\Models\Queue\ServiceType;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -62,6 +63,10 @@ class ServiceTypeController extends Controller
 
         $service = ServiceType::create($validated);
 
+        try {
+            ActivityLogger::log("Menambahkan jenis layanan adminduk: {$service->name} (Kuota: {$service->quota_per_day}/hari)", $service, 'create_service_type');
+        } catch (\Throwable $e) {}
+
         return redirect()->route('admin.queue.service-types.edit', $service->id)
             ->with('success', "Jenis layanan {$service->name} berhasil dibuat. Silakan kelola berkas persyaratannya.");
     }
@@ -113,6 +118,10 @@ class ServiceTypeController extends Controller
 
         $serviceType->update($validated);
 
+        try {
+            ActivityLogger::log("Memperbarui jenis layanan adminduk: {$serviceType->name}", $serviceType, 'update_service_type');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', "Jenis layanan {$serviceType->name} berhasil diperbarui.");
     }
 
@@ -127,6 +136,10 @@ class ServiceTypeController extends Controller
         $name = $serviceType->name;
         $serviceType->delete();
 
+        try {
+            ActivityLogger::log("Menghapus jenis layanan adminduk: {$name}", null, 'delete_service_type');
+        } catch (\Throwable $e) {}
+
         return redirect()->route('admin.queue.service-types.index')
             ->with('success', "Jenis layanan {$name} berhasil dihapus.");
     }
@@ -137,6 +150,11 @@ class ServiceTypeController extends Controller
         $serviceType->update(['is_active' => !$serviceType->is_active]);
 
         $statusStr = $serviceType->is_active ? 'diaktifkan' : 'dinonaktifkan';
+
+        try {
+            ActivityLogger::log("Status jenis layanan {$serviceType->name} {$statusStr}", $serviceType, 'toggle_service_type');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', "Layanan {$serviceType->name} berhasil {$statusStr}.");
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Queue;
 
 use App\Http\Controllers\Controller;
 use App\Models\Queue\QueueRejectionTemplate;
+use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,6 +55,10 @@ class QueueRejectionTemplateController extends Controller
             'created_by' => Auth::id(),
         ]);
 
+        try {
+            ActivityLogger::log("Menambahkan template alasan penolakan/revisi: {$template->title}", $template, 'create_rejection_template');
+        } catch (\Throwable $e) {}
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success'  => true,
@@ -91,6 +96,10 @@ class QueueRejectionTemplateController extends Controller
             'is_active'  => $request->has('is_active') ? $request->boolean('is_active') : $template->is_active,
         ]);
 
+        try {
+            ActivityLogger::log("Memperbarui template alasan penolakan/revisi: {$template->title}", $template, 'update_rejection_template');
+        } catch (\Throwable $e) {}
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success'  => true,
@@ -110,6 +119,10 @@ class QueueRejectionTemplateController extends Controller
         $template = QueueRejectionTemplate::findOrFail($id);
         $title = $template->title;
         $template->delete();
+
+        try {
+            ActivityLogger::log("Menghapus template alasan penolakan/revisi: {$title}", null, 'delete_rejection_template');
+        } catch (\Throwable $e) {}
 
         if ($request->wantsJson()) {
             return response()->json([

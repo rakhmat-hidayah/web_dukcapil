@@ -261,19 +261,18 @@ class ArchiveService
             $baseCode = "ARSIP_{$period}_{$singleApp->reg_number}";
             $packageCode = $baseCode;
             $c = 1;
-            while (ArchivePackage::where('package_code', $packageCode)->exists()) {
+            while (ArchivePackage::withTrashed()->where('package_code', $packageCode)->exists()) {
                 $packageCode = "{$baseCode}_V{$c}";
                 $c++;
             }
         } else {
             // Determine next batch sequence for the month
-            $currentMonthCount = ArchivePackage::where('archive_period', $period)->count();
-            $seq = str_pad($currentMonthCount + 1, 4, '0', STR_PAD_LEFT);
-            $packageCode = "ARSIP_PERMOHONAN_{$period}_BATCH-{$seq}";
-            while (ArchivePackage::where('package_code', $packageCode)->exists()) {
-                $seq = str_pad(++$currentMonthCount, 4, '0', STR_PAD_LEFT);
+            $currentMonthCount = ArchivePackage::withTrashed()->where('archive_period', $period)->count();
+            do {
+                $currentMonthCount++;
+                $seq = str_pad($currentMonthCount, 4, '0', STR_PAD_LEFT);
                 $packageCode = "ARSIP_PERMOHONAN_{$period}_BATCH-{$seq}";
-            }
+            } while (ArchivePackage::withTrashed()->where('package_code', $packageCode)->exists());
         }
 
         // Validate completeness of all applications

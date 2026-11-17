@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Queue;
 use App\Http\Controllers\Controller;
 use App\Models\Queue\ServiceDocument;
 use App\Models\Queue\ServiceType;
+use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,6 +46,15 @@ class ServiceDocumentController extends Controller
         }
 
         $document = $serviceType->documents()->create($validated);
+
+        try {
+            ActivityLogger::log(
+                "Menambahkan syarat dokumen \"{$document->label}\" pada layanan {$serviceType->name}",
+                $document,
+                'create_service_document',
+                ['service_type' => $serviceType->name, 'label' => $document->label]
+            );
+        } catch (\Throwable $e) {}
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -94,6 +104,15 @@ class ServiceDocumentController extends Controller
 
         $document->update($validated);
 
+        try {
+            ActivityLogger::log(
+                "Memperbarui syarat dokumen \"{$document->label}\" pada layanan {$serviceType->name}",
+                $document,
+                'update_service_document',
+                ['service_type' => $serviceType->name, 'label' => $document->label]
+            );
+        } catch (\Throwable $e) {}
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
@@ -118,6 +137,11 @@ class ServiceDocumentController extends Controller
         $document->save();
 
         $statusLabel = $document->is_active ? 'diaktifkan' : 'dinonaktifkan';
+
+        try {
+            $serviceName = $document->serviceType?->name ?? 'Layanan';
+            ActivityLogger::log("Syarat dokumen \"{$document->label}\" pada {$serviceName} {$statusLabel}", $document, 'toggle_service_document');
+        } catch (\Throwable $e) {}
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -144,6 +168,11 @@ class ServiceDocumentController extends Controller
 
         $statusLabel = $document->is_required ? 'Wajib' : 'Opsional';
 
+        try {
+            $serviceName = $document->serviceType?->name ?? 'Layanan';
+            ActivityLogger::log("Ketentuan syarat dokumen \"{$document->label}\" pada {$serviceName} diubah menjadi {$statusLabel}", $document, 'toggle_required_service_document');
+        } catch (\Throwable $e) {}
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success'     => true,
@@ -165,8 +194,13 @@ class ServiceDocumentController extends Controller
             ->firstOrFail();
 
         $label = $document->label;
+        $serviceName = $document->serviceType?->name ?? 'Layanan';
         $document->applicationDocuments()->delete();
         $document->delete();
+
+        try {
+            ActivityLogger::log("Menghapus syarat dokumen \"{$label}\" pada {$serviceName}", null, 'delete_service_document');
+        } catch (\Throwable $e) {}
 
         if ($request->wantsJson()) {
             return response()->json([

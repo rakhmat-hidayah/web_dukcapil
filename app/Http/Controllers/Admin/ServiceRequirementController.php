@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ServiceRequirement;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -40,7 +41,11 @@ class ServiceRequirementController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        ServiceRequirement::create($data);
+        $service = ServiceRequirement::create($data);
+
+        try {
+            ActivityLogger::log("Menambahkan persyaratan layanan adminduk: {$service->title}", $service, 'create_service_requirement');
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Persyaratan layanan berhasil ditambahkan.');
     }
@@ -64,6 +69,10 @@ class ServiceRequirementController extends Controller
 
         $serviceRequirement->update($data);
 
+        try {
+            ActivityLogger::log("Memperbarui persyaratan layanan adminduk: {$serviceRequirement->title}", $serviceRequirement, 'update_service_requirement');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Persyaratan layanan berhasil diperbarui.');
     }
 
@@ -72,7 +81,12 @@ class ServiceRequirementController extends Controller
      */
     public function destroy(ServiceRequirement $serviceRequirement): RedirectResponse
     {
+        $title = $serviceRequirement->title;
         $serviceRequirement->delete();
+
+        try {
+            ActivityLogger::log("Menghapus persyaratan layanan adminduk: {$title}", null, 'delete_service_requirement');
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Persyaratan layanan berhasil dihapus.');
     }

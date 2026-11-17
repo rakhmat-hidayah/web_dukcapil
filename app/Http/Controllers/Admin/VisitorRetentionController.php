@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\VisitorCleanupLog;
 use App\Models\VisitorLog;
 use App\Models\WebsiteSetting;
+use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -93,6 +94,10 @@ class VisitorRetentionController extends Controller
 
         WebsiteSetting::clearCache();
 
+        try {
+            ActivityLogger::log("Memperbarui konfigurasi kebijakan retensi log pengunjung & auto cleanup", null, 'update_visitor_retention_settings');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Pengaturan Visitor Analytics berhasil diperbarui!');
     }
 
@@ -126,6 +131,10 @@ class VisitorRetentionController extends Controller
                 '--force'        => true,
                 '--triggered-by' => 'manual',
             ]);
+
+            try {
+                ActivityLogger::log("Menjalankan pembersihan (cleanup) log pengunjung secara manual", null, 'cleanup_visitor_analytics');
+            } catch (\Throwable $e) {}
 
             return response()->json([
                 'success' => true,

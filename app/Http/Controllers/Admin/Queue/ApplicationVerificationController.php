@@ -9,6 +9,7 @@ use App\Models\Queue\QueueApplication;
 use App\Models\Queue\QueueSlot;
 use App\Models\Queue\ServiceType;
 use App\Models\Queue\VerificationHistory;
+use App\Services\ActivityLogger;
 use App\Services\Queue\QueueSlotService;
 use App\Services\Queue\QueueVerificationService;
 use Illuminate\Http\JsonResponse;
@@ -357,6 +358,19 @@ class ApplicationVerificationController extends Controller
                     'ip'     => request()->ip(),
                 ],
             ]);
+
+            try {
+                ActivityLogger::log(
+                    "Memulihkan permohonan antrean {$application->reg_number} ({$application->applicant_name}) dari status terhapus",
+                    $application,
+                    'restore_application',
+                    [
+                        'application_id' => $application->id,
+                        'reg_number'     => $application->reg_number,
+                        'applicant_name' => $application->applicant_name,
+                    ]
+                );
+            } catch (\Throwable $e) {}
         }
 
         return redirect()->back()->with('success', "Permohonan {$application->reg_number} ({$application->applicant_name}) berhasil dipulihkan.");
@@ -708,6 +722,21 @@ class ApplicationVerificationController extends Controller
                     'action'     => 'MANUAL_STATUS_ESCALATION',
                 ],
             ]);
+
+            try {
+                ActivityLogger::log(
+                    "Pembaruan status permohonan {$application->reg_number} ({$application->applicant_name}) dari {$fromStatus} menjadi {$toStatus}: {$notes}",
+                    $application,
+                    'update_application_status',
+                    [
+                        'application_id' => $application->id,
+                        'reg_number'     => $application->reg_number,
+                        'from_status'    => $fromStatus,
+                        'to_status'      => $toStatus,
+                        'notes'          => $notes,
+                    ]
+                );
+            } catch (\Throwable $e) {}
         });
 
         $message = "Status permohonan {$application->reg_number} berhasil diperbarui dari '{$fromStatus}' ke '{$toStatus}'.";

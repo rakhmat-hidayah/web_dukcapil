@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Applicant;
 use App\Http\Controllers\Controller;
 use App\Models\Applicant\ApplicantAccount;
 use App\Models\Applicant\ApplicantDeviceAuditLog;
+use App\Services\ActivityLogger;
 use App\Services\Applicant\ApplicantDeviceService;
 use App\Services\Applicant\ApplicantOtpService;
 use App\Services\Queue\QueueDocumentStorage;
@@ -216,6 +217,20 @@ class ApplicantManagementController extends Controller
             actorId: Auth::id()
         );
 
+        try {
+            ActivityLogger::log(
+                "Mencabut perangkat aktif pemohon {$account->name} ({$account->masked_nik}): {$reason}",
+                $account,
+                'revoke_applicant_device',
+                [
+                    'account_id'   => $account->id,
+                    'masked_nik'   => $account->masked_nik,
+                    'name'         => $account->name,
+                    'reason'       => $reason,
+                ]
+            );
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Perangkat aktif pemohon berhasil dicabut.');
     }
 
@@ -254,6 +269,21 @@ class ApplicantManagementController extends Controller
             actorId: Auth::id(),
             reason: "Status akun diubah menjadi {$status}: {$reason}"
         );
+
+        try {
+            ActivityLogger::log(
+                "Mengubah status akun pemohon {$account->name} ({$account->masked_nik}) menjadi {$status}: {$reason}",
+                $account,
+                'update_applicant_status',
+                [
+                    'account_id' => $account->id,
+                    'masked_nik' => $account->masked_nik,
+                    'name'       => $account->name,
+                    'status'     => $status,
+                    'reason'     => $reason,
+                ]
+            );
+        } catch (\Throwable $e) {}
 
         return back()->with('success', "Status akun berhasil diperbarui menjadi {$status}.");
     }
@@ -348,6 +378,25 @@ class ApplicantManagementController extends Controller
             reason: mb_substr($auditReason, 0, 255)
         );
 
+        try {
+            $isVerified = $decision === ApplicantAccount::IDENTITY_VERIFIED;
+            $event = $isVerified ? 'verify_applicant_identity' : 'reject_applicant_identity';
+            $decisionLabel = $isVerified ? 'Disetujui (Terverifikasi Sah)' : 'Ditolak';
+            $desc = "Verifikasi identitas & biometrik selfie pemohon {$account->name} ({$account->masked_nik}): {$decisionLabel}";
+            if ($notes) {
+                $desc .= " - Catatan: {$notes}";
+            }
+
+            ActivityLogger::log($desc, $account, $event, [
+                'account_id'       => $account->id,
+                'applicant_name'   => $account->name,
+                'masked_nik'       => $account->masked_nik,
+                'decision'         => $decision,
+                'notes'            => $notes,
+                'selfie_destroyed' => $selfieDestroyed,
+            ]);
+        } catch (\Throwable $e) {}
+
         // Dispatch notification email to applicant's registered email
         $this->otpService->sendVerificationResultEmail($account, $decision, $notes);
 
@@ -390,6 +439,18 @@ class ApplicantManagementController extends Controller
 
         // Permanently force delete to release NIK & email unique indexes
         $account->forceDelete();
+
+        try {
+            ActivityLogger::log(
+                "Menghapus permanen akun pemohon: {$applicantName} ({$maskedNik})",
+                null,
+                'delete_applicant_account',
+                [
+                    'applicant_name' => $applicantName,
+                    'masked_nik'     => $maskedNik,
+                ]
+            );
+        } catch (\Throwable $e) {}
 
         return redirect()->route('admin.queue.applicants.index')
             ->with('success', "Akun pemohon {$applicantName} ({$maskedNik}) berhasil dihapus dari sistem.");

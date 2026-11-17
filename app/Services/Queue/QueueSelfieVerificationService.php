@@ -8,6 +8,7 @@ use App\Models\Queue\QueueApplication;
 use App\Models\Queue\QueueSelfieVerification;
 use App\Models\Queue\VerificationHistory;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -147,6 +148,22 @@ class QueueSelfieVerificationService
         // Immediately execute secure physical file deletion and disk verification
         $this->deletePhysicalSelfie($verification, $selfieDoc);
 
+        try {
+            $isMatch = $decision === QueueSelfieVerification::DECISION_MATCH;
+            $event = $isMatch ? 'verify_selfie_match' : 'verify_selfie_mismatch';
+            $decisionLabel = $isMatch ? 'FOTO SESUAI (MATCH)' : 'BUKAN PEMOHON (MISMATCH)';
+            $desc = "Pemeriksaan foto wajah pemohon pada permohonan {$application->reg_number} ({$application->applicant_name}): {$decisionLabel}";
+
+            ActivityLogger::log($desc, $application, $event, [
+                'application_id'    => $application->id,
+                'reg_number'        => $application->reg_number,
+                'applicant_name'    => $application->applicant_name,
+                'decision'          => $decision,
+                'statement_version' => $statementVersion,
+                'officer_name'      => $officer->name,
+            ]);
+        } catch (\Throwable $e) {}
+
         return $verification->fresh(['officer', 'document']);
     }
 
@@ -203,6 +220,21 @@ class QueueSelfieVerificationService
             ]);
 
             Log::info("Selfie photo permanently destroyed: App {$verification->application_id}, Doc {$document->id}, Officer {$verification->verified_by_name} [Decision: {$verification->decision}]");
+
+            try {
+                $app = $verification->application;
+                ActivityLogger::log(
+                    "Pemusnahan berkas foto selfie biometrik pemohon " . ($app ? "({$app->reg_number})" : "#{$verification->application_id}") . " otomatis selesai dari storage (UU PDP)",
+                    $verification,
+                    'destroy_selfie_file',
+                    [
+                        'verification_id' => $verification->id,
+                        'application_id'  => $verification->application_id,
+                        'reg_number'      => $app?->reg_number,
+                    ]
+                );
+            } catch (\Throwable $e) {}
+
             return true;
         } catch (\Throwable $e) {
             Log::error("Failed to destroy selfie photo [App {$verification->application_id}, Doc {$document->id}]: " . $e->getMessage());

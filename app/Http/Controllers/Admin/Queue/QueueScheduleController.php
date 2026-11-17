@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Queue\QueueSchedule;
 use App\Models\Queue\QueueSlot;
 use App\Models\Queue\ServiceType;
+use App\Services\ActivityLogger;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -91,6 +92,20 @@ class QueueScheduleController extends Controller
         }
 
         $dateDisplay = $schedule->schedule_date_indonesia ?? Carbon::parse($schedule->schedule_date)->format('d/m/Y');
+
+        try {
+            ActivityLogger::log(
+                "Menyimpan jadwal dan kuota pelayanan antrean untuk tanggal {$dateDisplay} (Total kuota: {$schedule->total_quota})",
+                $schedule,
+                'create_queue_schedule',
+                [
+                    'schedule_id'   => $schedule->id,
+                    'schedule_date' => $schedule->schedule_date,
+                    'total_quota'   => $schedule->total_quota,
+                ]
+            );
+        } catch (\Throwable $e) {}
+
         return back()->with('success', "Jadwal dan kuota tanggal {$dateDisplay} berhasil disimpan.");
     }
 
@@ -165,6 +180,19 @@ class QueueScheduleController extends Controller
             $current->addDay();
         }
 
+        try {
+            ActivityLogger::log(
+                "Membuat jadwal kuota antrean massal untuk rentang {$startDate} s/d {$endDate} ({$createdCount} hari operasional)",
+                null,
+                'bulk_create_queue_schedules',
+                [
+                    'start_date'    => $startDate,
+                    'end_date'      => $endDate,
+                    'created_count' => $createdCount,
+                ]
+            );
+        } catch (\Throwable $e) {}
+
         return back()->with('success', "Berhasil menyimpan jadwal untuk {$createdCount} hari operasional pelayanan.");
     }
 
@@ -182,7 +210,17 @@ class QueueScheduleController extends Controller
             return back()->with('error', "Jadwal tanggal {$dateStr} tidak dapat dihapus karena sudah ada pemohon yang memiliki nomor antrian. Anda dapat menandainya sebagai Hari Libur atau Menutupnya.");
         }
 
+        $scheduleDate = $schedule->schedule_date;
         $schedule->delete();
+
+        try {
+            ActivityLogger::log(
+                "Menghapus jadwal kuota pelayanan antrean tanggal {$dateStr}",
+                null,
+                'delete_queue_schedule',
+                ['schedule_date' => $scheduleDate]
+            );
+        } catch (\Throwable $e) {}
 
         return back()->with('success', "Jadwal tanggal {$dateStr} berhasil dihapus.");
     }

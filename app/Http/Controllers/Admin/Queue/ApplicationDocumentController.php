@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Queue\ApplicationDocument;
 use App\Models\Queue\QueueApplication;
 use App\Models\Queue\QueueSelfieVerification;
+use App\Services\ActivityLogger;
 use App\Services\Queue\QueueDocumentStorage;
 use App\Services\Queue\QueueSelfieVerificationService;
 use App\Services\Queue\QueueVerificationService;
@@ -138,6 +139,19 @@ class ApplicationDocumentController extends Controller
                 'reviewed_by' => $user?->id,
                 'reviewed_at' => now(),
             ]);
+
+        try {
+            ActivityLogger::log(
+                "Menyetujui seluruh berkas persyaratan permohonan {$application->reg_number} ({$application->applicant_name})",
+                $application,
+                'approve_all_documents',
+                [
+                    'application_id' => $application->id,
+                    'reg_number'     => $application->reg_number,
+                    'applicant_name' => $application->applicant_name,
+                ]
+            );
+        } catch (\Throwable $e) {}
 
         if (request()->wantsJson()) {
             return response()->json([

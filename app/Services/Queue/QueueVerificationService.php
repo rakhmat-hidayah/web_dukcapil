@@ -8,6 +8,7 @@ use App\Models\Queue\KtpHandoverLog;
 use App\Models\Queue\QueueApplication;
 use App\Models\Queue\VerificationHistory;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -526,6 +527,30 @@ class QueueVerificationService
             'reviewed_at'   => now(),
         ]);
 
+        try {
+            $docName = $document->serviceDocumentRequirement?->document_name ?? 'Dokumen Persyaratan';
+            $regNum = $document->application?->reg_number ?? "#{$document->application_id}";
+            $isApproved = $status === ApplicationDocument::STATUS_APPROVED;
+            $event = $isApproved ? 'approve_document' : 'reject_document';
+            $statusLabel = $isApproved ? 'Disetujui (Sah)' : 'Perlu Perbaikan (Ditolak)';
+
+            $desc = "Verifikasi dokumen \"{$docName}\" pada permohonan {$regNum}: {$statusLabel}";
+            if ($note) {
+                $desc .= " - Catatan: {$note}";
+            }
+
+            ActivityLogger::log($desc, $document, $event, [
+                'document_id'    => $document->id,
+                'application_id' => $document->application_id,
+                'document_name'  => $docName,
+                'reg_number'     => $regNum,
+                'status'         => $status,
+                'notes'          => $note,
+            ]);
+        } catch (\Throwable $e) {
+            // Non-blocking for audit log
+        }
+
         return $document;
     }
 
@@ -549,5 +574,50 @@ class QueueVerificationService
                 'user_agent' => substr(request()->userAgent() ?? '', 0, 150),
             ],
         ]);
+
+        try {
+            $event = match ($to) {
+                QueueApplication::STATUS_PRE_VERIFIED => 'pre_verify_application',
+                QueueApplication::STATUS_APPROVED => 'approve_application',
+                QueueApplication::STATUS_REVISION => 'revision_application',
+                QueueApplication::STATUS_REJECTED => 'reject_application',
+                QueueApplication::STATUS_CHECKED_IN => 'checkin_application',
+                QueueApplication::STATUS_VERIFIED => 'physical_verify_application',
+                QueueApplication::STATUS_PROCESSING => 'process_application',
+                QueueApplication::STATUS_READY_FOR_PICKUP => 'ready_application',
+                QueueApplication::STATUS_COMPLETED => 'complete_application',
+                default => 'update_application_status',
+            };
+
+            $eventDesc = match ($to) {
+                QueueApplication::STATUS_PRE_VERIFIED => 'Pra-verifikasi permohonan disetujui (siap pilih jadwal)',
+                QueueApplication::STATUS_APPROVED => 'Permohonan disetujui & nomor antrean diterbitkan',
+                QueueApplication::STATUS_REVISION => 'Permintaan perbaikan / revisi berkas dikirim ke pemohon',
+                QueueApplication::STATUS_REJECTED => 'Permohonan ditolak permanen',
+                QueueApplication::STATUS_CHECKED_IN => 'Check-in kehadiran pemohon di loket',
+                QueueApplication::STATUS_VERIFIED => 'Verifikasi fisik berkas selesai di loket',
+                QueueApplication::STATUS_PROCESSING => 'Mulai pemrosesan / pencetakan dokumen',
+                QueueApplication::STATUS_READY_FOR_PICKUP => 'Dokumen / KTP-el siap diambil pemohon',
+                QueueApplication::STATUS_COMPLETED => 'Pelayanan permohonan selesai',
+                default => "Pembaruan status permohonan ({$from} → {$to})",
+            };
+
+            $desc = "{$eventDesc} untuk {$application->reg_number} ({$application->applicant_name})";
+            if ($notes) {
+                $desc .= " - Catatan: {$notes}";
+            }
+
+            ActivityLogger::log($desc, $application, $event, [
+                'application_id' => $application->id,
+                'reg_number'     => $application->reg_number,
+                'queue_number'   => $application->queue_number,
+                'applicant_name' => $application->applicant_name,
+                'from_status'    => $from,
+                'to_status'      => $to,
+                'notes'          => $notes,
+            ]);
+        } catch (\Throwable $e) {
+            // Non-blocking
+        }
     }
 }

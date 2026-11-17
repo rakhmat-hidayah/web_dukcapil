@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Archive\ArchiveAuditLog;
 use App\Models\Archive\ArchivePackage;
 use App\Models\Archive\ArchiveSetting;
+use App\Services\ActivityLogger;
 use App\Services\Archive\ArchiveAuditService;
 use App\Services\Archive\Storage\ArchiveStorageManager;
 use Illuminate\Http\JsonResponse;
@@ -97,6 +98,19 @@ class ArchivePermanentStorageController extends Controller
                 'bytes_transferred' => $result['bytes_transferred'],
             ]);
 
+            try {
+                ActivityLogger::log(
+                    "Mentransfer paket arsip [{$package->package_code}] ke penyimpanan permanen: {$result['destination']}",
+                    $package,
+                    'transfer_archive_storage',
+                    [
+                        'package_id'   => $package->id,
+                        'package_code' => $package->package_code,
+                        'destination'  => $result['destination'],
+                    ]
+                );
+            } catch (\Throwable $e) {}
+
             return back()->with('success', $result['message']);
         }
 
@@ -107,6 +121,15 @@ class ArchivePermanentStorageController extends Controller
         ArchiveAuditService::log('TRANSFER_FAILED', $package->id, null, [
             'error' => $result['message'],
         ]);
+
+        try {
+            ActivityLogger::log(
+                "Gagal mentransfer paket arsip [{$package->package_code}] ke penyimpanan permanen: {$result['message']}",
+                $package,
+                'transfer_archive_failed',
+                ['package_code' => $package->package_code, 'error' => $result['message']]
+            );
+        } catch (\Throwable $e) {}
 
         return back()->with('error', $result['message']);
     }
@@ -128,6 +151,15 @@ class ArchivePermanentStorageController extends Controller
                 'remote_checksum' => $result['remote_checksum'],
             ]);
 
+            try {
+                ActivityLogger::log(
+                    "Verifikasi remote checksum paket arsip [{$package->package_code}] di penyimpanan permanen: VALID",
+                    $package,
+                    'verify_permanent_storage',
+                    ['package_code' => $package->package_code, 'checksum' => $result['remote_checksum']]
+                );
+            } catch (\Throwable $e) {}
+
             return back()->with('success', $result['message']);
         }
 
@@ -138,6 +170,15 @@ class ArchivePermanentStorageController extends Controller
         ArchiveAuditService::log('TRANSFER_VERIFICATION_FAILED', $package->id, null, [
             'error' => $result['message'],
         ]);
+
+        try {
+            ActivityLogger::log(
+                "Verifikasi remote checksum paket arsip [{$package->package_code}] di penyimpanan permanen: GAGAL",
+                $package,
+                'verify_permanent_storage_failed',
+                ['package_code' => $package->package_code, 'error' => $result['message']]
+            );
+        } catch (\Throwable $e) {}
 
         return back()->with('error', $result['message']);
     }

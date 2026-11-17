@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\PpidDocument;
 use App\Models\PpidPage;
 use App\Models\PpidRequest;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -41,6 +43,10 @@ class PpidController extends Controller
         ]);
 
         $page->update($validated);
+
+        try {
+            ActivityLogger::log("Memperbarui halaman profil PPID: {$page->title}", $page, 'update_ppid_page');
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Halaman PPID berhasil diperbarui.');
     }
@@ -99,7 +105,11 @@ class PpidController extends Controller
 
         $validated['created_by'] = auth()->id();
 
-        PpidDocument::create($validated);
+        $doc = PpidDocument::create($validated);
+
+        try {
+            ActivityLogger::log("Menambahkan dokumen PPID baru: {$doc->title}", $doc, 'create_ppid_document');
+        } catch (\Throwable $e) {}
 
         return redirect()->route('admin.ppid.documents.index')
             ->with('success', 'Dokumen PPID berhasil ditambahkan.');
@@ -146,14 +156,23 @@ class PpidController extends Controller
 
         $document->update($validated);
 
+        try {
+            ActivityLogger::log("Memperbarui dokumen PPID: {$document->title}", $document, 'update_ppid_document');
+        } catch (\Throwable $e) {}
+
         return redirect()->route('admin.ppid.documents.index')
             ->with('success', 'Dokumen PPID berhasil diperbarui.');
     }
 
     public function documentsDestroy(PpidDocument $document): RedirectResponse
     {
+        $docTitle = $document->title;
         if ($document->file_path) \App\Services\MediaStorage::delete($document->file_path);
         $document->delete();
+
+        try {
+            ActivityLogger::log("Menghapus dokumen PPID: {$docTitle}", null, 'delete_ppid_document');
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Dokumen berhasil dihapus.');
     }
@@ -216,12 +235,33 @@ class PpidController extends Controller
 
         $ppidRequest->update($validated);
 
+        try {
+            ActivityLogger::log(
+                "Menanggapi permohonan informasi PPID: {$ppidRequest->ticket_number} ({$ppidRequest->name}) dengan status [{$validated['status']}]",
+                $ppidRequest,
+                'respond_ppid_request',
+                [
+                    'request_id'    => $ppidRequest->id,
+                    'ticket_number' => $ppidRequest->ticket_number,
+                    'status'        => $validated['status'],
+                    'notes'         => $validated['response_notes'] ?? null,
+                ]
+            );
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Permohonan PPID berhasil direspons.');
     }
 
     public function requestsDestroy(PpidRequest $request): RedirectResponse
     {
+        $ticket = $request->ticket_number;
+        $name = $request->name;
         $request->delete();
+
+        try {
+            ActivityLogger::log("Menghapus permohonan informasi PPID: {$ticket} ({$name})", null, 'delete_ppid_request');
+        } catch (\Throwable $e) {}
+
         return redirect()->route('admin.ppid.requests.index')
             ->with('success', 'Permohonan PPID berhasil dihapus.');
     }

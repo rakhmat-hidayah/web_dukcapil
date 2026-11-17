@@ -21,10 +21,12 @@ class AuditLogController extends Controller
         $query = Activity::with('causer')->latest();
 
         if ($search) {
-            $query->whereHas('causer', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            })->orWhere('description', 'like', "%{$search}%");
+            $query->where(function ($sub) use ($search) {
+                $sub->whereHas('causer', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                })->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
         if ($event) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessVisitorGeolocationJob;
 use App\Models\VisitorLog;
+use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -542,7 +543,12 @@ class VisitorAnalyticsController extends Controller
                 \App\Models\VisitorGeolocation::where('visitor_log_id', $log->id)->delete();
             }
 
+            $ip = $log->ip_address;
             $log->delete();
+
+            try {
+                ActivityLogger::log("Menghapus log kunjungan #{$id} (IP: {$ip})", null, 'delete_visitor_log');
+            } catch (\Throwable $e) {}
 
             return back()->with('success', 'Log kunjungan #' . $id . ' berhasil dihapus.');
         } catch (\Throwable $e) {
@@ -583,6 +589,10 @@ class VisitorAnalyticsController extends Controller
             } else {
                 VisitorLog::where('is_robot', true)->delete();
             }
+
+            try {
+                ActivityLogger::log("Menghapus {$count} log pemindaian keamanan (security scanner/probe)", null, 'delete_security_scans');
+            } catch (\Throwable $e) {}
 
             return back()->with('success', "Sebanyak {$count} log pemindaian keamanan berhasil dihapus dan dibersihkan.");
         } catch (\Throwable $e) {

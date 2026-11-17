@@ -223,27 +223,67 @@ const formatEventName = (event) => {
 };
 
 const getEventBadgeClass = (event) => {
-  switch (event) {
-    case 'login':
-    case 'login_failed':
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30';
-    case 'logout':
-      return 'bg-zinc-50 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700';
-    case 'create_user':
-    case 'create_folder':
-    case 'upload_file':
-      return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30';
-    case 'update_user':
-    case 'update_theme':
-    case 'upload_version':
-      return 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30';
-    case 'delete_user':
-    case 'delete_folder':
-    case 'delete_file':
+  if (!event) return 'bg-zinc-50 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700';
+
+  const ev = String(event).toLowerCase();
+
+  // Emerald: Verification success, approvals, creations, restores
+  if (
+    ev.startsWith('verify_') ||
+    ev.startsWith('approve_') ||
+    ev.startsWith('create_') ||
+    ev.startsWith('upload_') ||
+    ev.startsWith('restore_') ||
+    ev === 'handover_complete' ||
+    ev === '2fa_success'
+  ) {
+    if (ev.includes('mismatch') || ev.includes('failed') || ev.includes('reject')) {
       return 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-100 dark:border-red-900/30';
-    default:
-      return 'bg-zinc-50 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700';
+    }
+    return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30';
   }
+
+  // Red: Deletions, rejections, revocations, failures
+  if (
+    ev.startsWith('delete_') ||
+    ev.startsWith('destroy_') ||
+    ev.startsWith('reject_') ||
+    ev.startsWith('revoke_') ||
+    ev.includes('failed') ||
+    ev.includes('mismatch')
+  ) {
+    return 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-100 dark:border-red-900/30';
+  }
+
+  // Amber: Updates, modifications, responses, assignments, cleanup
+  if (
+    ev.startsWith('update_') ||
+    ev.startsWith('rebuild_') ||
+    ev.startsWith('respond_') ||
+    ev.startsWith('reply_') ||
+    ev.startsWith('assign_') ||
+    ev.startsWith('toggle_') ||
+    ev.startsWith('revision_') ||
+    ev.startsWith('cleanup_')
+  ) {
+    return 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30';
+  }
+
+  // Blue: Logins, handovers, queues, checkins, processing
+  if (
+    ev.startsWith('handover_') ||
+    ev.startsWith('checkin_') ||
+    ev.startsWith('pre_verify_') ||
+    ev.startsWith('process_') ||
+    ev.startsWith('ready_') ||
+    ev.startsWith('complete_') ||
+    ev === 'login' ||
+    ev.includes('challenge')
+  ) {
+    return 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30';
+  }
+
+  return 'bg-zinc-50 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700';
 };
 
 const openDetails = (log) => {

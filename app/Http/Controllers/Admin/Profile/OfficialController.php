@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Profile;
 
 use App\Http\Controllers\Controller;
 use App\Models\Profile\Official;
+use App\Services\ActivityLogger;
 use App\Services\MediaStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -69,6 +70,10 @@ class OfficialController extends Controller
 
         $official = Official::create($data);
 
+        try {
+            ActivityLogger::log("Menambahkan data pejabat: {$official->name} ({$official->position_title})", $official, 'create_official');
+        } catch (\Throwable $e) {}
+
         return redirect()->route('admin.profile.officials.index')->with('success', 'Data pejabat ' . $official->name . ' berhasil ditambahkan.');
     }
 
@@ -115,13 +120,22 @@ class OfficialController extends Controller
 
         $official->update($data);
 
+        try {
+            ActivityLogger::log("Memperbarui data pejabat: {$official->name} ({$official->position_title})", $official, 'update_official');
+        } catch (\Throwable $e) {}
+
         return redirect()->route('admin.profile.officials.index')->with('success', 'Data pejabat ' . $official->name . ' berhasil diperbarui.');
     }
 
     public function destroy(Official $official): RedirectResponse
     {
         $name = $official->name;
+        $pos = $official->position_title;
         $official->delete();
+
+        try {
+            ActivityLogger::log("Menghapus data pejabat: {$name} ({$pos})", null, 'delete_official');
+        } catch (\Throwable $e) {}
 
         return redirect()->back()->with('success', 'Data pejabat ' . $name . ' berhasil dihapus.');
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Profile\OrganizationNode;
 use App\Models\Profile\OrganizationPosition;
 use App\Models\Profile\Official;
+use App\Services\ActivityLogger;
 use App\Services\Profile\OrganizationChartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,8 +42,12 @@ class OrganizationChartController extends Controller
             'sort_order' => 'integer',
         ]);
 
-        OrganizationNode::create($data);
+        $createdNode = OrganizationNode::create($data);
         $chartService->clearCache();
+
+        try {
+            ActivityLogger::log("Menambahkan simpul bagan organisasi: {$createdNode->node_title}", $createdNode, 'create_org_node');
+        } catch (\Throwable $e) {}
 
         return redirect()->back()->with('success', 'Simpul organisasi berhasil ditambahkan.');
     }
@@ -63,6 +68,10 @@ class OrganizationChartController extends Controller
         $node->update($data);
         $chartService->clearCache();
 
+        try {
+            ActivityLogger::log("Memperbarui simpul bagan organisasi: {$node->node_title}", $node, 'update_org_node');
+        } catch (\Throwable $e) {}
+
         return redirect()->back()->with('success', 'Simpul organisasi ' . $node->node_title . ' berhasil diperbarui.');
     }
 
@@ -71,6 +80,10 @@ class OrganizationChartController extends Controller
         $title = $node->node_title;
         $node->delete();
         $chartService->clearCache();
+
+        try {
+            ActivityLogger::log("Menghapus simpul bagan organisasi: {$title}", null, 'delete_org_node');
+        } catch (\Throwable $e) {}
 
         return redirect()->back()->with('success', 'Simpul organisasi ' . $title . ' berhasil dihapus.');
     }

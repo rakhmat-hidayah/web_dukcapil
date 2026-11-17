@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Queue;
 
 use App\Http\Controllers\Controller;
 use App\Models\Queue\QueueSetting;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -58,6 +59,10 @@ class QueueSettingsController extends Controller
 
             QueueSetting::set($key, (string) $value, $group);
         }
+
+        try {
+            ActivityLogger::log("Memperbarui pengaturan sistem antrean online & kebijakan kuota", null, 'update_queue_settings');
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Pengaturan antrian online berhasil disimpan.');
     }

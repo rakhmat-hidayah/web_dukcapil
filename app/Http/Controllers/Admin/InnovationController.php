@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Innovation;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -44,7 +45,15 @@ class InnovationController extends Controller
             $data['youtube_url'] = $this->convertToEmbedUrl($data['youtube_url']);
         }
 
-        Innovation::create($data);
+        $created = Innovation::create($data);
+
+        try {
+            ActivityLogger::log("Menambahkan data inovasi: {$created->title}", $created, 'create_innovation', [
+                'innovation_id' => $created->id,
+                'title' => $created->title,
+                'is_active' => $created->is_active,
+            ]);
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Inovasi baru berhasil ditambahkan.');
     }
@@ -71,6 +80,14 @@ class InnovationController extends Controller
 
         $innovation->update($data);
 
+        try {
+            ActivityLogger::log("Memperbarui data inovasi: {$innovation->title}", $innovation, 'update_innovation', [
+                'innovation_id' => $innovation->id,
+                'title' => $innovation->title,
+                'is_active' => $innovation->is_active,
+            ]);
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Data inovasi berhasil diperbarui.');
     }
 
@@ -79,7 +96,16 @@ class InnovationController extends Controller
      */
     public function destroy(Innovation $innovation): RedirectResponse
     {
+        $title = $innovation->title;
+        $id = $innovation->id;
         $innovation->delete();
+
+        try {
+            ActivityLogger::log("Menghapus data inovasi: {$title}", null, 'delete_innovation', [
+                'innovation_id' => $id,
+                'title' => $title,
+            ]);
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Inovasi berhasil dihapus.');
     }

@@ -7,6 +7,7 @@ use App\Models\DemographicDataset;
 use App\Models\Desa;
 use App\Models\Kecamatan;
 use App\Models\WebsiteSetting;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -66,7 +67,11 @@ class DemographicController extends Controller
             'notes'            => 'nullable|string',
         ]);
 
-        Kecamatan::create($data);
+        $kec = Kecamatan::create($data);
+
+        try {
+            ActivityLogger::log("Menambahkan wilayah kecamatan: {$kec->name}", $kec, 'create_kecamatan');
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Kecamatan berhasil ditambahkan.');
     }
@@ -87,12 +92,22 @@ class DemographicController extends Controller
 
         $kecamatan->update($data);
 
+        try {
+            ActivityLogger::log("Memperbarui wilayah kecamatan: {$kecamatan->name}", $kecamatan, 'update_kecamatan');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Data kecamatan diperbarui.');
     }
 
     public function destroyKecamatan(Kecamatan $kecamatan): RedirectResponse
     {
+        $name = $kecamatan->name;
         $kecamatan->delete();
+
+        try {
+            ActivityLogger::log("Menghapus wilayah kecamatan: {$name}", null, 'delete_kecamatan');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Kecamatan dihapus.');
     }
 
@@ -111,11 +126,18 @@ class DemographicController extends Controller
             'sort_order'       => 'nullable|integer|min:0',
         ]);
 
-        Desa::create($data);
+        $desa = Desa::create($data);
 
         // Update desa_count on parent kecamatan
-        $data['kecamatan_id'] && Kecamatan::find($data['kecamatan_id'])
-            ?->update(['desa_count' => Desa::where('kecamatan_id', $data['kecamatan_id'])->count()]);
+        $parentKec = $data['kecamatan_id'] ? Kecamatan::find($data['kecamatan_id']) : null;
+        if ($parentKec) {
+            $parentKec->update(['desa_count' => Desa::where('kecamatan_id', $data['kecamatan_id'])->count()]);
+        }
+
+        try {
+            $kecName = $parentKec ? $parentKec->name : '';
+            ActivityLogger::log("Menambahkan desa/kelurahan: {$desa->name} (Kec. {$kecName})", $desa, 'create_desa');
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Desa/Kelurahan berhasil ditambahkan.');
     }
@@ -135,16 +157,25 @@ class DemographicController extends Controller
 
         $desa->update($data);
 
+        try {
+            ActivityLogger::log("Memperbarui desa/kelurahan: {$desa->name}", $desa, 'update_desa');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Data desa diperbarui.');
     }
 
     public function destroyDesa(Desa $desa): RedirectResponse
     {
         $kecamatanId = $desa->kecamatan_id;
+        $name = $desa->name;
         $desa->delete();
 
         Kecamatan::find($kecamatanId)
             ?->update(['desa_count' => Desa::where('kecamatan_id', $kecamatanId)->count()]);
+
+        try {
+            ActivityLogger::log("Menghapus desa/kelurahan: {$name}", null, 'delete_desa');
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Desa/Kelurahan dihapus.');
     }
@@ -280,7 +311,7 @@ class DemographicController extends Controller
             $kecamatanId = $kec?->id;
         }
 
-        DemographicDataset::create([
+        $dataset = DemographicDataset::create([
             'kecamatan_id' => $kecamatanId,
             'region_level' => $data['region_level'],
             'region_code'  => $data['region_code'],
@@ -296,6 +327,10 @@ class DemographicController extends Controller
             'file_type'    => $fileType,
             'published_at' => $data['status'] === 'published' ? now() : null,
         ]);
+
+        try {
+            ActivityLogger::log("Menambahkan dataset kependudukan: {$dataset->title} ({$dataset->year} Sem {$dataset->semester})", $dataset, 'create_demographic_dataset');
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Dataset berhasil disimpan.');
     }
@@ -350,15 +385,25 @@ class DemographicController extends Controller
             'published_at' => $data['status'] === 'published' && !$dataset->published_at ? now() : $dataset->published_at,
         ]);
 
+        try {
+            ActivityLogger::log("Memperbarui dataset kependudukan: {$dataset->title}", $dataset, 'update_demographic_dataset');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Dataset diperbarui.');
     }
 
     public function destroyDataset(DemographicDataset $dataset): RedirectResponse
     {
+        $title = $dataset->title;
         if ($dataset->file_path) {
             \App\Services\MediaStorage::delete($dataset->file_path);
         }
         $dataset->delete();
+
+        try {
+            ActivityLogger::log("Menghapus dataset kependudukan: {$title}", null, 'delete_demographic_dataset');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Dataset dihapus.');
     }
 

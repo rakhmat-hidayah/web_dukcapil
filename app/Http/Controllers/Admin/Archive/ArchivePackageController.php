@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Archive;
 use App\Http\Controllers\Controller;
 use App\Models\Archive\ArchivePackage;
 use App\Models\Queue\ServiceType;
+use App\Services\ActivityLogger;
 use App\Services\Archive\ArchiveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -83,6 +84,19 @@ class ArchivePackageController extends Controller
         try {
             $package = $this->archiveService->createPackage($validated, $request->user());
 
+            try {
+                ActivityLogger::log(
+                    "Membuat paket arsip digital baru [{$package->package_code}] (" . count($validated['application_ids'] ?? []) . " permohonan)",
+                    $package,
+                    'create_archive_package',
+                    [
+                        'package_id'   => $package->id,
+                        'package_code' => $package->package_code,
+                        'status'       => $package->status,
+                    ]
+                );
+            } catch (\Throwable $e) {}
+
             if ($package->status === ArchivePackage::STATUS_INCOMPLETE) {
                 return redirect()->route('admin.archive.packages.show', $package->id)
                     ->with('error', 'Paket arsip berhasil dicatat, namun ditandai TIDAK LENGKAP karena ada dokumen fisik yang hilang/rusak.');
@@ -115,6 +129,19 @@ class ArchivePackageController extends Controller
             $request->user()
         );
 
+        try {
+            ActivityLogger::log(
+                "Mengonfirmasi penyimpanan arsip offline untuk paket [{$package->package_code}]",
+                $package,
+                'confirm_archive_package',
+                [
+                    'package_id'   => $package->id,
+                    'package_code' => $package->package_code,
+                    'notes'        => $request->input('storage_location_notes'),
+                ]
+            );
+        } catch (\Throwable $e) {}
+
         return back()->with('success', "Konfirmasi penyimpanan arsip oleh operator untuk paket [{$package->package_code}] berhasil dicatat.");
     }
 
@@ -122,6 +149,20 @@ class ArchivePackageController extends Controller
     {
         $package = ArchivePackage::findOrFail($id);
         $result = $this->archiveService->verifyPackageIntegrity($package);
+
+        try {
+            $statusStr = $result['valid'] ? 'VALID (Sesuai)' : 'INVALID (Mismatch)';
+            ActivityLogger::log(
+                "Memverifikasi integritas hash checksum paket arsip [{$package->package_code}]: {$statusStr}",
+                $package,
+                'verify_archive_integrity',
+                [
+                    'package_id'   => $package->id,
+                    'package_code' => $package->package_code,
+                    'is_valid'     => $result['valid'],
+                ]
+            );
+        } catch (\Throwable $e) {}
 
         if (request()->wantsJson()) {
             return response()->json($result);
@@ -141,6 +182,19 @@ class ArchivePackageController extends Controller
         try {
             $updated = $this->archiveService->rebuildPackage($package, $request->user());
 
+            try {
+                ActivityLogger::log(
+                    "Mengemas ulang (rebuild) paket arsip [{$updated->package_code}] ({$updated->total_files} berkas)",
+                    $updated,
+                    'rebuild_archive_package',
+                    [
+                        'package_id'   => $updated->id,
+                        'package_code' => $updated->package_code,
+                        'total_files'  => $updated->total_files,
+                    ]
+                );
+            } catch (\Throwable $e) {}
+
             if ($updated->status === ArchivePackage::STATUS_INCOMPLETE) {
                 return back()->with('error', 'Proses ulang selesai, namun tidak ditemukan berkas fisik yang lengkap di storage server untuk permohonan pada paket ini.');
             }
@@ -158,6 +212,16 @@ class ArchivePackageController extends Controller
 
         try {
             $this->archiveService->deletePackage($package, $request->user());
+
+            try {
+                ActivityLogger::log(
+                    "Menghapus paket arsip digital [{$code}]",
+                    null,
+                    'delete_archive_package',
+                    ['package_code' => $code]
+                );
+            } catch (\Throwable $e) {}
+
             return redirect()->route('admin.archive.packages.index')
                 ->with('success', "Paket arsip [{$code}] berhasil dihapus.");
         } catch (\Throwable $e) {

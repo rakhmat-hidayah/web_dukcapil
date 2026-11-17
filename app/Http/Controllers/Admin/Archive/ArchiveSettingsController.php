@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Archive;
 use App\Http\Controllers\Controller;
 use App\Models\Archive\ArchiveSetting;
 use App\Models\Queue\QueueApplication;
+use App\Services\ActivityLogger;
 use App\Services\Archive\ArchiveAuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -113,6 +114,10 @@ class ArchiveSettingsController extends Controller
             \Log::warning("Retention cleanup on update error: " . $e->getMessage());
         }
 
+        try {
+            ActivityLogger::log("Memperbarui konfigurasi sistem pengarsipan & retensi arsip digital", null, 'update_archive_settings');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Konfigurasi modul pengarsipan berhasil diperbarui.');
     }
 
@@ -123,6 +128,16 @@ class ArchiveSettingsController extends Controller
     {
         try {
             $cleanup = app(\App\Services\Archive\ArchiveService::class)->cleanupExpiredArchives();
+
+            try {
+                ActivityLogger::log(
+                    "Menjalankan pembersihan retensi berkas arsip kedaluwarsa ({$cleanup['purged_packages_count']} paket, {$cleanup['freed_bytes_formatted']} dibebaskan)",
+                    null,
+                    'cleanup_archive_retention',
+                    $cleanup
+                );
+            } catch (\Throwable $e) {}
+
             $messages = [];
             if ($cleanup['purged_packages_count'] > 0) {
                 $messages[] = "{$cleanup['purged_packages_count']} paket arsip ZIP";

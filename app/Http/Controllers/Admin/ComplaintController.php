@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Complaint;
 use App\Models\ComplaintCategory;
 use App\Models\ComplaintReply;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -136,6 +137,20 @@ class ComplaintController extends Controller
             'is_visible_to_submitter' => $data['is_visible_to_submitter'] ?? true,
         ]);
 
+        try {
+            ActivityLogger::log(
+                "Membalas pengaduan tiket #{$complaint->ticket_number} ({$complaint->name})" . (!($data['is_visible_to_submitter'] ?? true) ? ' [Catatan Internal]' : ''),
+                $complaint,
+                'reply_complaint',
+                [
+                    'complaint_id'   => $complaint->id,
+                    'ticket_number'  => $complaint->ticket_number,
+                    'name'           => $complaint->name,
+                    'is_visible'     => $data['is_visible_to_submitter'] ?? true,
+                ]
+            );
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Balasan berhasil dikirim.');
     }
 
@@ -172,6 +187,23 @@ class ComplaintController extends Controller
             'is_visible_to_submitter' => true,
         ]);
 
+        try {
+            $fromLabel = Complaint::STATUS_LABELS[$oldStatus] ?? $oldStatus;
+            $toLabel = Complaint::STATUS_LABELS[$newStatus] ?? $newStatus;
+            ActivityLogger::log(
+                "Mengubah status pengaduan #{$complaint->ticket_number} ({$complaint->name}) dari {$fromLabel} ke {$toLabel}" . ($data['note'] ? " - Catatan: {$data['note']}" : ''),
+                $complaint,
+                'update_complaint_status',
+                [
+                    'complaint_id'  => $complaint->id,
+                    'ticket_number' => $complaint->ticket_number,
+                    'from_status'   => $oldStatus,
+                    'to_status'     => $newStatus,
+                    'note'          => $data['note'] ?? null,
+                ]
+            );
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Status pengaduan berhasil diperbarui.');
     }
 
@@ -185,6 +217,21 @@ class ComplaintController extends Controller
         ]);
 
         $complaint->update(['assigned_to' => $data['assigned_to']]);
+
+        try {
+            $assigneeName = $complaint->fresh('assignee')->assignee?->name ?? 'Belum Ditugaskan';
+            ActivityLogger::log(
+                "Mendisposisikan penanganan pengaduan #{$complaint->ticket_number} ({$complaint->name}) kepada: {$assigneeName}",
+                $complaint,
+                'assign_complaint',
+                [
+                    'complaint_id'  => $complaint->id,
+                    'ticket_number' => $complaint->ticket_number,
+                    'assigned_to'   => $data['assigned_to'],
+                    'assignee_name' => $assigneeName,
+                ]
+            );
+        } catch (\Throwable $e) {}
 
         return back()->with('success', 'Pengaduan berhasil ditugaskan.');
     }
@@ -215,7 +262,12 @@ class ComplaintController extends Controller
             'sort_order'  => 'nullable|integer|min:0',
         ]);
 
-        ComplaintCategory::create($data);
+        $cat = ComplaintCategory::create($data);
+
+        try {
+            ActivityLogger::log("Menambahkan kategori pengaduan baru: {$cat->name}", $cat, 'create_complaint_category');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Kategori berhasil ditambahkan.');
     }
 
@@ -231,6 +283,11 @@ class ComplaintController extends Controller
         ]);
 
         $category->update($data);
+
+        try {
+            ActivityLogger::log("Memperbarui kategori pengaduan: {$category->name}", $category, 'update_complaint_category');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Kategori diperbarui.');
     }
 
@@ -239,7 +296,14 @@ class ComplaintController extends Controller
         if ($category->complaints()->count() > 0) {
             return back()->with('error', 'Kategori tidak dapat dihapus karena masih memiliki pengaduan terkait.');
         }
+
+        $catName = $category->name;
         $category->delete();
+
+        try {
+            ActivityLogger::log("Menghapus kategori pengaduan: {$catName}", null, 'delete_complaint_category');
+        } catch (\Throwable $e) {}
+
         return back()->with('success', 'Kategori dihapus.');
     }
 }

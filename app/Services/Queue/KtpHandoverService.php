@@ -7,6 +7,7 @@ use App\Models\Queue\KtpHandoverLog;
 use App\Models\Queue\QueueApplication;
 use App\Models\Queue\VerificationHistory;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -151,6 +152,21 @@ class KtpHandoverService
 
             $this->notificationService->dispatch($app, 'ready_for_pickup');
 
+            try {
+                ActivityLogger::log(
+                    "Menandai fisik KTP-el pemohon {$app->applicant_name} ({$app->reg_number}) SIAP DIAMBIL di loket",
+                    $handover,
+                    'handover_mark_ready',
+                    [
+                        'handover_id'    => $handover->id,
+                        'application_id' => $app->id,
+                        'reg_number'     => $app->reg_number,
+                        'applicant_name' => $app->applicant_name,
+                        'notes'          => $notes,
+                    ]
+                );
+            } catch (\Throwable $e) {}
+
             return $handover->fresh(['application.serviceType', 'readyMarkedUser']);
         });
     }
@@ -192,6 +208,21 @@ class KtpHandoverService
                 'user_id'        => $officer?->id,
                 'notes'          => "Kendala pengambilan KTP-el: {$reason}",
             ]);
+
+            try {
+                ActivityLogger::log(
+                    "Mencatat kendala pengambilan KTP-el {$app->reg_number} ({$app->applicant_name}): {$reason}",
+                    $handover,
+                    'handover_report_exception',
+                    [
+                        'handover_id'    => $handover->id,
+                        'application_id' => $app->id,
+                        'reg_number'     => $app->reg_number,
+                        'applicant_name' => $app->applicant_name,
+                        'reason'         => $reason,
+                    ]
+                );
+            } catch (\Throwable $e) {}
 
             return $handover->fresh(['application.serviceType', 'exceptionReportedUser']);
         });
@@ -244,6 +275,21 @@ class KtpHandoverService
             ]);
 
             $this->notificationService->dispatch($app, 'ready_for_pickup');
+
+            try {
+                ActivityLogger::log(
+                    "Menyelesaikan kendala KTP-el {$app->reg_number} ({$app->applicant_name}) kembali ke Siap Diambil: {$resolutionNotes}",
+                    $handover,
+                    'handover_resolve_exception',
+                    [
+                        'handover_id'      => $handover->id,
+                        'application_id'   => $app->id,
+                        'reg_number'       => $app->reg_number,
+                        'applicant_name'   => $app->applicant_name,
+                        'resolution_notes' => $resolutionNotes,
+                    ]
+                );
+            } catch (\Throwable $e) {}
 
             return $handover->fresh(['application.serviceType', 'exceptionResolvedUser']);
         });
@@ -345,6 +391,22 @@ class KtpHandoverService
                 'user_id'        => $officer?->id,
                 'notes'          => "Fisik KTP-el telah diserahkan kepada {$receiverName} ({$relationship}) dengan dokumentasi foto penyerahan terverifikasi. Pelayanan selesai.",
             ]);
+
+            try {
+                ActivityLogger::log(
+                    "Menyelesaikan serah terima fisik KTP-el {$app->reg_number} kepada {$receiverName} ({$relationship})",
+                    $handover,
+                    'handover_complete',
+                    [
+                        'handover_id'    => $handover->id,
+                        'application_id' => $app->id,
+                        'reg_number'     => $app->reg_number,
+                        'receiver_name'  => $receiverName,
+                        'receiver_type'  => $receiverType,
+                        'relationship'   => $relationship,
+                    ]
+                );
+            } catch (\Throwable $e) {}
 
             return $handover->fresh(['application.serviceType', 'handoverUser']);
         });
