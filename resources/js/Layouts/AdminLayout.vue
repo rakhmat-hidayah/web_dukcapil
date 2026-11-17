@@ -436,7 +436,7 @@ import {
   Settings, UsersRound, Users, Network, Palette, BarChart3, Radio, Activity, Sliders,
   Map, BarChart2, DatabaseZap, MessageSquareWarning, ShieldCheck, ArrowDownUp, HelpCircle, Bell,
   FileCheck, CalendarDays, UserCheck, Clock, CheckCircle2, History, AlertTriangle, PackageCheck,
-  FolderArchive, HardDrive, FileArchive
+  FolderArchive, HardDrive, FileArchive, Inbox, Layers, FileSpreadsheet, CreditCard
 } from '@lucide/vue';
 
 const page = usePage();
@@ -779,6 +779,19 @@ const menuGroups = [
     ]
   },
   {
+    title: 'Persediaan Blangko KTP-el',
+    items: [
+      { label: 'Dashboard Persediaan', route: 'admin.blank-stocks.dashboard', icon: LayoutDashboard },
+      { label: 'Penerimaan Blangko', route: 'admin.blank-stocks.receipts.index', icon: Inbox },
+      { label: 'Laporan Penggunaan', route: 'admin.blank-stocks.usage.index', icon: ClipboardList },
+      { label: 'Kartu Persediaan', route: 'admin.blank-stocks.ledger.index', icon: History },
+      { label: 'Stok Opname Fisik', route: 'admin.blank-stocks.opname.index', icon: PackageCheck },
+      { label: 'Penyesuaian & Koreksi', route: 'admin.blank-stocks.adjustments.index', icon: Layers },
+      { label: 'Laporan & Rekapitulasi', route: 'admin.blank-stocks.reports.index', icon: FileSpreadsheet },
+      { label: 'Pengaturan Batas Stok', route: 'admin.blank-stocks.settings.index', icon: Settings },
+    ]
+  },
+  {
     title: 'Pengarsipan',
     items: [
       { label: 'Dashboard Pengarsipan', route: 'admin.archive.dashboard', icon: LayoutDashboard },
@@ -848,6 +861,8 @@ const isQueueVerifier = computed(() => userRoles.value.includes('Queue Verifier'
 const isHandoverOfficer = computed(() => userRoles.value.includes('petugas_pengambilan_ktpel') || userRoles.value.includes('Petugas Pengambilan KTP-el'));
 const isArchiveOperator = computed(() => userRoles.value.includes('operator_arsip') || userRoles.value.includes('Petugas Pengarsipan'));
 const isKtpSupervisor = computed(() => userRoles.value.includes('Supervisor Layanan KTP-el') || userRoles.value.includes('supervisor_layanan_ktpel'));
+const isBendaharaBarang = computed(() => userRoles.value.includes('Bendahara Barang') || userRoles.value.includes('bendahara_barang'));
+const isOperatorCetak = computed(() => userRoles.value.includes('Operator Cetak KTP-el') || userRoles.value.includes('operator_cetak_ktpel'));
 const userPermissions = computed(() => page.props.auth?.permissions || []);
 
 const filteredMenuGroups = computed(() => {
@@ -976,6 +991,32 @@ const filteredMenuGroups = computed(() => {
         }
       }
 
+      // Persediaan Blangko KTP-el allowed items
+      if (r && r.startsWith('admin.blank-stocks.')) {
+        if (isSuperAdmin.value || isWebsiteAdmin.value) return true;
+        if (isKtpSupervisor.value) {
+          return r !== 'admin.blank-stocks.settings.index';
+        }
+        if (isBendaharaBarang.value) {
+          return [
+            'admin.blank-stocks.dashboard',
+            'admin.blank-stocks.receipts.index',
+            'admin.blank-stocks.usage.index',
+            'admin.blank-stocks.ledger.index',
+            'admin.blank-stocks.opname.index',
+            'admin.blank-stocks.adjustments.index',
+            'admin.blank-stocks.reports.index',
+          ].includes(r);
+        }
+        if (isOperatorCetak.value) {
+          return [
+            'admin.blank-stocks.dashboard',
+            'admin.blank-stocks.usage.index',
+          ].includes(r);
+        }
+        return userPermissions.value.some(p => p.startsWith('blank_stocks.'));
+      }
+
       return false;
     });
 
@@ -989,6 +1030,7 @@ const activePageName = computed(() => {
   if (currentRouteName?.startsWith('admin.handover.')) return 'Serah Terima KTP-el';
   if (currentRouteName?.startsWith('admin.queue.')) return 'Antrian Online KTP-el';
   if (currentRouteName?.startsWith('admin.archive.')) return 'Pengarsipan Permohonan';
+  if (currentRouteName?.startsWith('admin.blank-stocks.')) return 'Persediaan Blangko KTP-el';
   if (currentRouteName?.startsWith('admin.complaints.')) return 'Layanan Pengaduan';
   if (currentRouteName?.startsWith('admin.ppid.')) return 'Layanan PPID';
   if (currentRouteName?.startsWith('admin.news.')) return 'Berita & Artikel';

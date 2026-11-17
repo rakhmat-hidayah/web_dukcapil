@@ -163,6 +163,16 @@
         svg {
             max-width: 100%;
         }
+        .animate-float svg,
+        main svg[viewBox="0 0 400 400"],
+        .illustration-container svg {
+            width: 100% !important;
+            max-width: 260px !important;
+            max-height: 260px !important;
+            height: auto !important;
+            margin: 0 auto !important;
+            display: block !important;
+        }
         .text-sky-200 svg, header svg, main .gradient-badge-error svg, main .web-card svg, main a svg, main button svg {
             width: 1rem;
             height: 1rem;

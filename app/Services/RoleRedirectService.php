@@ -20,7 +20,17 @@ class RoleRedirectService
             return route('admin.dashboard');
         }
 
-        // 0. Supervisor Layanan KTP-el (Semua modul KTP-el aktif, mendarat di Dashboard Antrian KTP-el)
+        // 0. Bendahara Barang (Mendarat di Dashboard Persediaan Blangko KTP-el)
+        if ($user->hasRole('Bendahara Barang') || $user->hasRole('bendahara_barang')) {
+            return route('admin.blank-stocks.dashboard');
+        }
+
+        // 0a. Operator Cetak KTP-el (Mendarat di Form Laporan Penggunaan Blangko KTP-el)
+        if ($user->hasRole('Operator Cetak KTP-el') || $user->hasRole('operator_cetak_ktpel')) {
+            return route('admin.blank-stocks.usage.index');
+        }
+
+        // 0b. Supervisor Layanan KTP-el (Semua modul KTP-el aktif, mendarat di Dashboard Antrian KTP-el)
         if ($user->hasRole('Supervisor Layanan KTP-el') || $user->hasRole('supervisor_layanan_ktpel')) {
             return route('admin.queue.dashboard');
         }

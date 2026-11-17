@@ -1,10 +1,19 @@
 import '../css/app.css';
 
 import { createApp, h } from 'vue';
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { createPinia } from 'pinia';
+
+// Prevent raw modal iframe when 403 or desktop policy rejection occurs during Inertia navigation
+router.on('invalid', (event) => {
+    const status = event?.detail?.response?.status;
+    if (status === 403) {
+        event.preventDefault();
+        window.location.href = '/layanan/pemohon/masuk';
+    }
+});
 
 // Ensure mobile browsers never restore an offset horizontal scroll on reload
 if (typeof window !== 'undefined') {

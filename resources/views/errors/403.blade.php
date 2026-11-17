@@ -6,7 +6,7 @@
 @section('message', 'Anda tidak memiliki hak akses untuk membuka halaman atau fitur ini. Silakan pastikan Anda telah login menggunakan akun resmi dengan hak otorisasi yang sesuai.')
 
 @section('illustration')
-<svg class="w-full h-full max-w-[340px] max-h-[340px]" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg class="w-full h-full max-w-[260px] max-h-[260px]" style="max-width: 260px; max-height: 260px; width: 100%; height: auto; margin: 0 auto; display: block;" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="200" cy="200" r="160" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="8 8" opacity="0.3" class="animate-spin-slow" />
     
     <!-- Shield Security Lock Center -->

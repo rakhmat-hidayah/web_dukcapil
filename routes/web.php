@@ -145,6 +145,10 @@ Route::get('/layanan/survei', [\App\Http\Controllers\Public\PublicSurveyControll
 Route::post('/layanan/survei', [\App\Http\Controllers\Public\PublicSurveyController::class, 'store'])->name('public.survey.store');
 Route::get('/layanan/mobile', [\App\Http\Controllers\Public\MobileServiceController::class, 'index'])->name('public.mobile-services.index');
 Route::redirect('/layanan/mobil', '/layanan/mobile');
+
+// Public KTP-el Blank Stock Availability (Official Live Counter)
+Route::get('/layanan/ketersediaan-blangko', [\App\Http\Controllers\Public\PublicBlankStockController::class, 'index'])->name('public.blangko.index');
+
 Route::get('/layanan/{slug}', [\App\Http\Controllers\Public\ServiceRequirementController::class, 'show'])->name('public.services.show');
 Route::get('/inovasi', [\App\Http\Controllers\Public\InnovationController::class, 'index'])->name('public.innovations.index');
 Route::get('/inovasi/{slug}', [\App\Http\Controllers\Public\InnovationController::class, 'show'])->name('public.innovations.show');
@@ -587,6 +591,82 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/settings', [\App\Http\Controllers\Admin\Archive\ArchiveSettingsController::class, 'update'])->name('settings.update');
                 Route::post('/settings/cleanup-retention', [\App\Http\Controllers\Admin\Archive\ArchiveSettingsController::class, 'runRetentionCleanup'])->name('settings.cleanup-retention');
             });
+        });
+
+        // ── Modul Manajemen Persediaan Blangko KTP-el ───────────────────
+        Route::prefix('blank-stocks')->name('blank-stocks.')->group(function () {
+            // Dashboard & Ringkasan Real-Time
+            Route::get('/', [\App\Http\Controllers\Admin\BlankStock\BlankStockDashboardController::class, 'index'])
+                ->middleware('permission:blank_stocks.dashboard')
+                ->name('dashboard');
+
+            // Penerimaan Blangko (Bendahara Barang & Admin)
+            Route::get('/receipts', [\App\Http\Controllers\Admin\BlankStock\BlankStockReceiptController::class, 'index'])
+                ->middleware('permission:blank_stocks.receipts.view')
+                ->name('receipts.index');
+            Route::post('/receipts', [\App\Http\Controllers\Admin\BlankStock\BlankStockReceiptController::class, 'store'])
+                ->middleware('permission:blank_stocks.receipts.create')
+                ->name('receipts.store');
+
+            // Laporan Penggunaan Harian Multi-Operator
+            Route::get('/usage', [\App\Http\Controllers\Admin\BlankStock\BlankStockUsageController::class, 'index'])
+                ->middleware('permission:blank_stocks.usage.view_own|blank_stocks.usage.view_all')
+                ->name('usage.index');
+            Route::post('/usage', [\App\Http\Controllers\Admin\BlankStock\BlankStockUsageController::class, 'store'])
+                ->middleware('permission:blank_stocks.usage.create')
+                ->name('usage.store');
+            Route::post('/usage/{report}/submit', [\App\Http\Controllers\Admin\BlankStock\BlankStockUsageController::class, 'submitDraft'])
+                ->middleware('permission:blank_stocks.usage.create')
+                ->name('usage.submit-draft');
+            Route::post('/usage/{report}/approve', [\App\Http\Controllers\Admin\BlankStock\BlankStockUsageController::class, 'approve'])
+                ->middleware('permission:blank_stocks.usage.approve')
+                ->name('usage.approve');
+            Route::post('/usage/{report}/reverse', [\App\Http\Controllers\Admin\BlankStock\BlankStockUsageController::class, 'reverse'])
+                ->middleware('permission:blank_stocks.usage.approve')
+                ->name('usage.reverse');
+
+            // Kartu Persediaan / Immutable Ledger
+            Route::get('/ledger', [\App\Http\Controllers\Admin\BlankStock\BlankStockLedgerController::class, 'index'])
+                ->middleware('permission:blank_stocks.ledger.view')
+                ->name('ledger.index');
+
+            // Stok Opname Fisik
+            Route::get('/opname', [\App\Http\Controllers\Admin\BlankStock\BlankStockOpnameController::class, 'index'])
+                ->middleware('permission:blank_stocks.opname.view')
+                ->name('opname.index');
+            Route::post('/opname', [\App\Http\Controllers\Admin\BlankStock\BlankStockOpnameController::class, 'store'])
+                ->middleware('permission:blank_stocks.opname.create')
+                ->name('opname.store');
+            Route::post('/opname/{opname}/approve', [\App\Http\Controllers\Admin\BlankStock\BlankStockOpnameController::class, 'approve'])
+                ->middleware('permission:blank_stocks.opname.approve')
+                ->name('opname.approve');
+
+            // Penyesuaian / Koreksi Stok Resmi
+            Route::get('/adjustments', [\App\Http\Controllers\Admin\BlankStock\BlankStockAdjustmentController::class, 'index'])
+                ->middleware('permission:blank_stocks.adjustment.create|blank_stocks.adjustment.approve')
+                ->name('adjustments.index');
+            Route::post('/adjustments', [\App\Http\Controllers\Admin\BlankStock\BlankStockAdjustmentController::class, 'store'])
+                ->middleware('permission:blank_stocks.adjustment.create')
+                ->name('adjustments.store');
+            Route::post('/adjustments/{adjustment}/approve', [\App\Http\Controllers\Admin\BlankStock\BlankStockAdjustmentController::class, 'approve'])
+                ->middleware('permission:blank_stocks.adjustment.approve')
+                ->name('adjustments.approve');
+
+            // Laporan, Rekapitulasi & Ekspor CSV
+            Route::get('/reports', [\App\Http\Controllers\Admin\BlankStock\BlankStockReportController::class, 'index'])
+                ->middleware('permission:blank_stocks.reports.export')
+                ->name('reports.index');
+            Route::get('/reports/export', [\App\Http\Controllers\Admin\BlankStock\BlankStockReportController::class, 'exportCsv'])
+                ->middleware('permission:blank_stocks.reports.export')
+                ->name('reports.export');
+
+            // Pengaturan Batas Stok & Kebijakan Publik
+            Route::get('/settings', [\App\Http\Controllers\Admin\BlankStock\BlankStockSettingController::class, 'index'])
+                ->middleware('permission:blank_stocks.settings.manage')
+                ->name('settings.index');
+            Route::post('/settings', [\App\Http\Controllers\Admin\BlankStock\BlankStockSettingController::class, 'update'])
+                ->middleware('permission:blank_stocks.settings.manage')
+                ->name('settings.update');
         });
     });
 });

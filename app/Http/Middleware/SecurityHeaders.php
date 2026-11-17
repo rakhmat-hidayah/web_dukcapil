@@ -40,8 +40,8 @@ class SecurityHeaders
 
         $cspParts = [
             "default-src 'self';",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com;",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com;",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://cdn.tailwindcss.com;",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdn.tailwindcss.com;",
             "img-src 'self' data: blob: https://images.unsplash.com"
                 . " https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org"
                 . " https://c.tile.openstreetmap.org"
