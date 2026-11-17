@@ -51,7 +51,7 @@ class VisitorAnalyticsController extends Controller
 
         $hasIntelCols = Schema::hasColumn('visitor_logs', 'visitor_category');
 
-        // Auto-fix historical records that were set to is_human = 1 by default migration
+        // Auto-fix historical records that were set to is_human = 1 by default migration or direct probes
         if ($hasIntelCols) {
             try {
                 VisitorLog::where('is_robot', true)
@@ -62,6 +62,26 @@ class VisitorAnalyticsController extends Controller
                         'visitor_category' => 'unknown_bot',
                         'bot_name'         => 'Automated Crawler / Robot',
                         'detection_reason' => 'Historical Robot Record',
+                    ]);
+
+                // Auto-fix historical direct socket / ping probes without browser and OS (e.g. 103.152.36.54)
+                VisitorLog::where('is_human', true)
+                    ->where(function ($q) {
+                        $q->where('browser', 'like', '%Direct%')
+                          ->orWhere('browser', 'like', '%Unknown%')
+                          ->orWhereNull('browser');
+                    })
+                    ->where(function ($q) {
+                        $q->where('operating_system', 'Unknown OS')
+                          ->orWhereNull('operating_system');
+                    })
+                    ->limit(2000)
+                    ->update([
+                        'is_human'         => false,
+                        'is_robot'         => true,
+                        'visitor_category' => 'monitoring_bot',
+                        'bot_name'         => 'Automated Healthcheck / Ping Script',
+                        'detection_reason' => 'Direct Ping Script without standard browser/OS',
                     ]);
             } catch (\Throwable) {}
         }
@@ -121,8 +141,8 @@ class VisitorAnalyticsController extends Controller
                 'security_scans'  => $securityQuery->count(),
                 'online_visitors' => VisitorLog::where('created_at', '>=', $fiveMinsAgo)
                     ->when($hasIntelCols, fn ($q) => $q->where('is_human', true)->where('is_robot', false))
-                    ->distinct('visitor_uuid')
-                    ->count('visitor_uuid'),
+                    ->distinct('ip_address')
+                    ->count('ip_address'),
                 'top_bot'         => $topBotRow->bot_name ?? ($hasIntelCols ? 'Tidak ada bot' : 'N/A'),
             ];
         } catch (\Throwable) {
@@ -145,14 +165,22 @@ class VisitorAnalyticsController extends Controller
             // Apply Traffic Type Filter (human | online | bots | security | all) - Default: human
             $trafficType = $request->get('traffic_type', 'human');
             if ($trafficType === 'online') {
-                $query->where('created_at', '>=', now()->subMinutes(5));
+                $onlineQuery = VisitorLog::where('created_at', '>=', $fiveMinsAgo);
                 if ($hasIntelCols) {
-                    $query->where('is_human', true)
-                          ->where('is_robot', false)
-                          ->where(fn ($q) => $q->whereNull('visitor_category')->orWhere('visitor_category', 'human'));
+                    $onlineQuery->where('is_human', true)
+                                ->where('is_robot', false)
+                                ->where(fn ($q) => $q->whereNull('visitor_category')->orWhere('visitor_category', 'human'));
                 } else {
-                    $query->where('is_robot', false);
+                    $onlineQuery->where('is_robot', false);
                 }
+
+                // Deduplicate by IP: only show latest request ID per active IP to prevent repetitive rows
+                $latestOnlineIds = (clone $onlineQuery)
+                    ->selectRaw('MAX(id) as id')
+                    ->groupBy('ip_address')
+                    ->pluck('id');
+
+                $query->whereIn('id', $latestOnlineIds);
             } elseif ($hasIntelCols) {
                 if ($trafficType === 'human') {
                     $query->where('is_human', true)
@@ -208,7 +236,17 @@ class VisitorAnalyticsController extends Controller
                 }
             }
 
-            $logs = $query->paginate(25)->withQueryString()->through(function ($log) {
+            // Pre-calculate latest log ID for each online IP (within last 5 minutes)
+            // So that ONLY the latest request from each active IP receives the `LIVE ONLINE` badge
+            $latestOnlineIdsMap = VisitorLog::where('created_at', '>=', $fiveMinsAgo)
+                ->when($hasIntelCols, fn ($q) => $q->where('is_human', true)->where('is_robot', false))
+                ->selectRaw('MAX(id) as id')
+                ->groupBy('ip_address')
+                ->pluck('id')
+                ->flip()
+                ->all();
+
+            $logs = $query->paginate(25)->withQueryString()->through(function ($log) use ($latestOnlineIdsMap) {
                 $geo = self::geoTableExists() ? ($log->geolocation ?? null) : null;
                 return [
                     'id'                       => $log->id,
@@ -226,7 +264,7 @@ class VisitorAnalyticsController extends Controller
                     'device_type'              => $log->device_type ?? $log->device ?? 'Desktop',
                     'is_robot'                 => (bool) $log->is_robot,
                     'is_human'                 => isset($log->is_human) ? (bool) $log->is_human : ! (bool) $log->is_robot,
-                    'is_online'                => $log->created_at ? (now()->diffInSeconds($log->created_at) <= 300) : false,
+                    'is_online'                => isset($latestOnlineIdsMap[$log->id]),
                     'visitor_category'         => $log->visitor_category ?? ((bool) $log->is_robot ? 'unknown_bot' : 'human'),
                     'bot_name'                 => $log->bot_name ?? null,
                     'detection_reason'         => $log->detection_reason ?? ((bool) $log->is_robot ? 'Matched User Agent: Robot' : 'Legitimate Human Session'),
@@ -298,7 +336,7 @@ class VisitorAnalyticsController extends Controller
 
     /**
      * Fetch active online visitors within last 5 minutes.
-     * Grouped by visitor_uuid with their latest activity and geolocation.
+     * Grouped and deduplicated by ip_address (1 device/IP counted once) with hits count and latest activity.
      */
     public static function getOnlineVisitorsList(int $limit = 60): array
     {
@@ -319,10 +357,14 @@ class VisitorAnalyticsController extends Controller
                     $q->where('is_robot', false);
                 })
                 ->orderByDesc('id')
-                ->limit($limit * 3)
+                ->limit($limit * 5)
                 ->get();
 
-            return $logs->unique('visitor_uuid')->take($limit)->values()->map(function ($log) {
+            // Total request count for each IP in the last 5 minutes
+            $ipHits = $logs->groupBy('ip_address')->map->count();
+
+            // Deduplicate by IP: Each unique IP/device appears only once (with its most recent log)
+            return $logs->unique('ip_address')->take($limit)->values()->map(function ($log) use ($ipHits) {
                 $geo = self::geoTableExists() ? ($log->geolocation ?? null) : null;
                 $createdAt = $log->created_at;
                 return [
@@ -333,6 +375,7 @@ class VisitorAnalyticsController extends Controller
                     'masked_ip'                => $log->masked_ip,
                     'url'                      => $log->url,
                     'method'                   => $log->method,
+                    'hits_count'               => $ipHits[$log->ip_address] ?? 1,
                     'browser'                  => $log->browser ?? 'Unknown',
                     'browser_version'          => $log->browser_version,
                     'operating_system'         => $log->operating_system ?? $log->platform ?? 'Unknown',
@@ -387,6 +430,8 @@ class VisitorAnalyticsController extends Controller
 
             $geo = self::geoTableExists() ? ($log->geolocation ?? null) : null;
 
+            $isLatestForIp = !VisitorLog::where('ip_address', $log->ip_address)->where('id', '>', $log->id)->exists();
+
             return response()->json([
                 'success' => true,
                 'data'    => [
@@ -406,7 +451,7 @@ class VisitorAnalyticsController extends Controller
                     'device_type'              => $log->device_type ?? $log->device,
                     'is_robot'                 => (bool) $log->is_robot,
                     'is_human'                 => isset($log->is_human) ? (bool) $log->is_human : ! (bool) $log->is_robot,
-                    'is_online'                => $log->created_at ? (now()->diffInSeconds($log->created_at) <= 300) : false,
+                    'is_online'                => $log->created_at ? (now()->diffInSeconds($log->created_at) <= 300 && $isLatestForIp) : false,
                     'visitor_category'         => $log->visitor_category ?? ((bool) $log->is_robot ? 'unknown_bot' : 'human'),
                     'bot_name'                 => $log->bot_name ?? null,
                     'detection_reason'         => $log->detection_reason ?? ((bool) $log->is_robot ? 'Matched User Agent: Robot' : 'Legitimate Human Session'),
@@ -516,12 +561,18 @@ class VisitorAnalyticsController extends Controller
         $hasIntelCols = Schema::hasColumn('visitor_logs', 'visitor_category');
 
         if ($trafficType === 'online') {
-            $query->where('created_at', '>=', now()->subMinutes(5));
+            $onlineQuery = VisitorLog::where('created_at', '>=', now()->subMinutes(5));
             if ($hasIntelCols) {
-                $query->where('is_human', true)->where('is_robot', false);
+                $onlineQuery->where('is_human', true)->where('is_robot', false);
             } else {
-                $query->where('is_robot', false);
+                $onlineQuery->where('is_robot', false);
             }
+            $latestOnlineIds = (clone $onlineQuery)
+                ->selectRaw('MAX(id) as id')
+                ->groupBy('ip_address')
+                ->pluck('id');
+
+            $query->whereIn('id', $latestOnlineIds);
         } elseif ($trafficType === 'human') {
             if ($hasIntelCols) {
                 $query->where('is_human', true)->where('is_robot', false);

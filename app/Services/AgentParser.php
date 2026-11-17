@@ -17,16 +17,22 @@ class AgentParser
                 'browser_version'          => null,
                 'operating_system'         => 'Unknown OS',
                 'operating_system_version' => null,
-                'device_type'              => 'Desktop',
-                'device'                   => 'Desktop',
+                'device_type'              => 'Robot',
+                'device'                   => 'Robot',
                 'platform'                 => 'Unknown OS',
-                'is_robot'                 => false,
+                'is_robot'                 => true,
             ];
         }
 
         $isRobot = self::isRobot($ua);
         $browser = self::getBrowserInfo($ua);
         $os = self::getOsInfo($ua);
+
+        // If UA lacks any recognizable browser AND operating system, classify as automated script/probe
+        if ($browser['name'] === 'Browser Direct / Unknown' && $os['name'] === 'Unknown OS') {
+            $isRobot = true;
+        }
+
         $device = self::getDeviceType($ua, $isRobot);
 
         return [
@@ -156,7 +162,7 @@ class AgentParser
      */
     private static function isRobot(string $ua): bool
     {
-        $robotsPattern = '/bot|crawl|slurp|spider|mediapartners|facebookexternalhit|twitterbot|lighthouse|googlebot|bingbot|yandexbot|duckduckbot|baiduspider|curl|postman|python|guzzle|wget/i';
+        $robotsPattern = '/bot|crawl|slurp|spider|mediapartners|facebookexternalhit|twitterbot|lighthouse|googlebot|bingbot|yandexbot|duckduckbot|baiduspider|curl|postman|python|guzzle|wget|uptime|monitor|ping|probe|check|health|scanner|headless|phantom|selenium|puppeteer|playwright|httpclient|java|apache|go-http|okhttp|axios/i';
         return (bool) preg_match($robotsPattern, $ua);
     }
 

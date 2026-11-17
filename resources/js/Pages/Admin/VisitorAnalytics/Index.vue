@@ -926,11 +926,11 @@
                   <h3 class="text-sm sm:text-base font-black">Detail Pengunjung Online</h3>
                   <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500 text-emerald-950">
                     <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
-                    {{ onlineVisitorsData.length }} Pengunjung Aktif
+                    {{ onlineVisitorsData.length }} Perangkat Aktif
                   </span>
                 </div>
                 <p class="text-[11px] text-emerald-200/80">
-                  Data aktivitas manusia asli dalam 5 menit terakhir (Pembaruan Real-Time)
+                  Deduplikasi 1 IP/perangkat aktif dalam 5 menit terakhir (Pembaruan Real-Time)
                 </p>
               </div>
             </div>
@@ -981,10 +981,18 @@
               >
                 <!-- Top Row: Status, Active Time, Device -->
                 <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200/50 dark:border-zinc-700/50 pb-2.5">
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-2 flex-wrap">
                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                       <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                       AKTIF SEKARANG
+                    </span>
+                    <span 
+                      v-if="visitor.hits_count && visitor.hits_count > 1" 
+                      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-300 dark:border-sky-800"
+                      :title="`Perangkat ini melakukan total ${visitor.hits_count} hit/halaman dalam 5 menit terakhir`"
+                    >
+                      <Activity class="w-3 h-3 text-sky-600 dark:text-sky-400" />
+                      {{ visitor.hits_count }}x Aktivitas (5m)
                     </span>
                     <span class="text-[11px] font-semibold text-slate-500 dark:text-zinc-400">
                       {{ visitor.visited_time_ago }} ({{ visitor.visited_at }})

@@ -39,13 +39,28 @@ class VisitorIntelligenceService
         if (empty($ua)) {
             return [
                 'is_human'         => false,
-                'visitor_category' => 'unknown_bot',
-                'bot_name'         => 'Empty User-Agent',
+                'visitor_category' => 'monitoring_bot',
+                'bot_name'         => 'Empty User-Agent / Direct Probe',
                 'detection_reason' => 'Missing User-Agent Header',
             ];
         }
 
-        // 4. Agent Parser Robot fallback
+        // 4. Direct HTTP ping/probe without recognizable browser AND OS
+        $browserName = $agentData['browser'] ?? '';
+        $osName = $agentData['operating_system'] ?? '';
+        if (
+            (str_contains($browserName, 'Direct') || str_contains($browserName, 'Unknown')) &&
+            ($osName === 'Unknown OS' || empty($osName))
+        ) {
+            return [
+                'is_human'         => false,
+                'visitor_category' => 'monitoring_bot',
+                'bot_name'         => 'Automated Healthcheck / Ping Script',
+                'detection_reason' => 'Direct HTTP Ping without standard Browser/OS signature',
+            ];
+        }
+
+        // 5. Agent Parser Robot fallback
         if (!empty($agentData['is_robot'])) {
             return [
                 'is_human'         => false,
@@ -55,7 +70,7 @@ class VisitorIntelligenceService
             ];
         }
 
-        // 5. Default: Legitimate Human Visitor
+        // 6. Default: Legitimate Human Visitor
         return [
             'is_human'         => true,
             'visitor_category' => 'human',
@@ -241,6 +256,17 @@ class VisitorIntelligenceService
             'BetterUptime'    => 'Better Uptime Bot',
             'HetrixTools'     => 'HetrixTools Uptime',
             'Site24x7'        => 'Site24x7 Monitoring',
+            'NodePing'        => 'NodePing Monitor',
+            'Freshping'       => 'Freshping Monitor',
+            'Monitis'         => 'Monitis Probe',
+            'Montastic'       => 'Montastic Uptime',
+            'AlertBot'        => 'AlertBot Monitor',
+            'Updown'          => 'Updown.io Bot',
+            'Checkly'         => 'Checkly Synthetic',
+            'HealthCheck'     => 'Healthcheck Probe',
+            'Ping'            => 'Ping Monitor',
+            'Probe'           => 'Network Probe',
+            'Synthetic'       => 'Synthetic Monitor',
         ];
 
         foreach ($monitoringBots as $pattern => $name) {
