@@ -76,11 +76,11 @@ class NotificationSettingController extends Controller
         ]);
 
         try {
-            ConfigurationService::set('complaint_notification_email_enabled', $data['complaint_notification_email_enabled'] ? '1' : '0', 'notifications', $user->id, 'Update Status Notifikasi Pengaduan');
-            ConfigurationService::set('complaint_notification_email_primary', $data['complaint_notification_email_primary'] ?? '', 'notifications', $user->id, 'Update Email Utama Notifikasi');
-            ConfigurationService::set('complaint_notification_email_additional', $data['complaint_notification_email_additional'] ?? '', 'notifications', $user->id, 'Update Email Tambahan Notifikasi');
-            ConfigurationService::set('complaint_notification_email_on_created', ($data['complaint_notification_email_on_created'] ?? true) ? '1' : '0', 'notifications', $user->id, 'Update Event Notifikasi Pengaduan Baru');
-            ConfigurationService::set('complaint_notification_email_on_status_changed', ($data['complaint_notification_email_on_status_changed'] ?? false) ? '1' : '0', 'notifications', $user->id, 'Update Event Notifikasi Ubah Status');
+            ConfigurationService::set('complaint_notification_email_enabled', $data['complaint_notification_email_enabled'] ? '1' : '0', 'notifications', $user->id, 'Update Status Notifikasi Pengaduan', true);
+            ConfigurationService::set('complaint_notification_email_primary', $data['complaint_notification_email_primary'] ?? '', 'notifications', $user->id, 'Update Email Utama Notifikasi', true);
+            ConfigurationService::set('complaint_notification_email_additional', $data['complaint_notification_email_additional'] ?? '', 'notifications', $user->id, 'Update Email Tambahan Notifikasi', true);
+            ConfigurationService::set('complaint_notification_email_on_created', ($data['complaint_notification_email_on_created'] ?? true) ? '1' : '0', 'notifications', $user->id, 'Update Event Notifikasi Pengaduan Baru', true);
+            ConfigurationService::set('complaint_notification_email_on_status_changed', ($data['complaint_notification_email_on_status_changed'] ?? false) ? '1' : '0', 'notifications', $user->id, 'Update Event Notifikasi Ubah Status', true);
 
             ActivityLogger::log("Memperbarui Pengaturan Notifikasi Email Pengaduan CMS", null, 'update_notification_settings');
 

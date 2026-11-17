@@ -38,6 +38,11 @@ class OfficeContactController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        $user = $request->user();
+        if (!$user || (!$user->hasAnyRole(['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website']) && !$user->can('office_contact.manage') && !$user->can('settings.manage'))) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengelola kontak kantor.');
+        }
+
         $data = $request->validate([
             'office_address'    => 'required|string|max:500',
             'office_email'      => 'required|email|max:255',
@@ -51,7 +56,7 @@ class OfficeContactController extends Controller
 
         try {
             foreach ($data as $key => $val) {
-                \App\Services\ConfigurationService::set($key, $val, 'office_contact', auth()->id(), 'Update via Pengaturan Kontak CMS');
+                \App\Services\ConfigurationService::set($key, $val, 'office_contact', auth()->id(), 'Update via Pengaturan Kontak CMS', true);
             }
 
             // Keep queue settings in sync with office contact settings

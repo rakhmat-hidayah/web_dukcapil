@@ -42,12 +42,34 @@ class ConfigurationService
 
     /**
      * Set a setting with ActivityLog audit trail (old and new values in JSON properties).
-     * Respects APP_PRODUCTION_LOCK mode.
+     * Respects APP_PRODUCTION_LOCK mode, while allowing authorized administrators to manage settings via web interface.
      */
-    public static function set(string $key, mixed $value, string $group = 'general', ?int $userId = null, ?string $reason = null): WebsiteSetting
+    public static function set(string $key, mixed $value, string $group = 'general', ?int $userId = null, ?string $reason = null, bool $force = false): WebsiteSetting
     {
-        if (self::isProductionLocked()) {
-            throw new \RuntimeException("Production Lock Mode (APP_PRODUCTION_LOCK) is active. Configuration changes are blocked.");
+        if (self::isProductionLocked() && !$force) {
+            $isAuthorizedAdmin = false;
+
+            if (auth()->check()) {
+                $authUser = auth()->user();
+                if ($authUser->hasAnyRole(['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website'])
+                    || $authUser->can('notifications.manage')
+                    || $authUser->can('settings.manage')
+                    || $authUser->can('office_contact.manage')) {
+                    $isAuthorizedAdmin = true;
+                }
+            } elseif ($userId) {
+                $targetUser = \App\Models\User::find($userId);
+                if ($targetUser && ($targetUser->hasAnyRole(['Super Administrator', 'Administrator Utama', 'Website Administrator', 'Administrator Website'])
+                    || $targetUser->can('notifications.manage')
+                    || $targetUser->can('settings.manage')
+                    || $targetUser->can('office_contact.manage'))) {
+                    $isAuthorizedAdmin = true;
+                }
+            }
+
+            if (!$isAuthorizedAdmin) {
+                throw new \RuntimeException("Production Lock Mode (APP_PRODUCTION_LOCK) is active. Configuration changes are blocked.");
+            }
         }
 
         $newVal = is_null($value) ? '' : (string) $value;
