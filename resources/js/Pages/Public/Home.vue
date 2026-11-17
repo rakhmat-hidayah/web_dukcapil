@@ -295,6 +295,134 @@
         </div>
       </div>
 
+      <!-- Informasi Ketersediaan Blangko KTP-el Real-Time Widget -->
+      <div 
+        v-if="blankStock && blankStock.is_active"
+        class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 shadow-lg shadow-gray-100/70 dark:shadow-none space-y-5 text-left relative overflow-hidden"
+      >
+        <!-- Top Status Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-zinc-800">
+          <div class="flex items-center gap-2">
+            <span 
+              class="w-2.5 h-2.5 rounded-full animate-pulse"
+              :class="{
+                'bg-emerald-500': blankStock.status === 'TERSEDIA',
+                'bg-amber-500': blankStock.status === 'PERSEDIAAN TERBATAS',
+                'bg-rose-500': blankStock.status === 'STOK KOSONG',
+              }"
+            ></span>
+            <div class="flex items-center gap-2">
+              <CreditCard class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <h4 class="text-xs font-black text-gray-800 dark:text-zinc-200 uppercase tracking-widest font-mono">
+                Ketersediaan Blangko KTP-el
+              </h4>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 text-[10px] sm:text-xs font-mono text-gray-400 dark:text-zinc-500">
+            <Clock class="w-3.5 h-3.5 text-gray-400" />
+            <span>Pembaruan: <strong class="text-gray-600 dark:text-zinc-300 font-bold">{{ blankStock.last_updated_formatted }}</strong></span>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <!-- Left: Stock Number & Status (Col 7) -->
+          <div class="lg:col-span-7 space-y-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span 
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border shadow-2xs"
+                :class="{
+                  'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800': blankStock.status === 'TERSEDIA',
+                  'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800': blankStock.status === 'PERSEDIAAN TERBATAS',
+                  'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800': blankStock.status === 'STOK KOSONG',
+                }"
+              >
+                <span 
+                  class="w-2 h-2 rounded-full animate-ping"
+                  :class="{
+                    'bg-emerald-500': blankStock.status === 'TERSEDIA',
+                    'bg-amber-500': blankStock.status === 'PERSEDIAAN TERBATAS',
+                    'bg-rose-500': blankStock.status === 'STOK KOSONG',
+                  }"
+                ></span>
+                <span>STATUS: {{ blankStock.status }}</span>
+              </span>
+
+              <span class="text-[10px] text-gray-400 font-semibold font-mono">
+                Disdukcapil Kabupaten Dompu
+              </span>
+            </div>
+
+            <!-- Big Number -->
+            <div class="flex items-baseline gap-3 pt-1">
+              <span class="text-4xl sm:text-6xl font-black font-mono tracking-tight text-gray-900 dark:text-zinc-50">
+                {{ formatNumber(blankStock.available_stock || blankStock.current_stock) }}
+              </span>
+              <div class="text-left">
+                <span class="text-base sm:text-xl font-bold font-sans text-gray-800 dark:text-zinc-200 block">Keping Blangko</span>
+                <span class="text-[10px] text-gray-400 dark:text-zinc-500 font-semibold">Persediaan Fisik Siap Cetak</span>
+              </div>
+            </div>
+
+            <!-- Advisory message -->
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-zinc-400 leading-relaxed font-medium">
+              <template v-if="blankStock.status === 'TERSEDIA'">
+                Persediaan blangko KTP-el mencukupi untuk melayani seluruh permohonan baru, rusak, dan perubahan elemen data di kantor Disdukcapil Kabupaten Dompu.
+              </template>
+              <template v-else-if="blankStock.status === 'PERSEDIAAN TERBATAS'">
+                Persediaan blangko KTP-el dalam jumlah terbatas. Layanan pencetakan diutamakan untuk kebutuhan darurat, perekaman pemula, dan kepentingan mendesak.
+              </template>
+              <template v-else>
+                Persediaan fisik blangko KTP-el saat ini kosong. Disdukcapil sedang dalam proses pengajuan alokasi tambahan ke Ditjen Dukcapil Kemendagri.
+              </template>
+            </p>
+          </div>
+
+          <!-- Right: Monthly Highlights & Actions (Col 5) -->
+          <div class="lg:col-span-5 flex flex-col justify-between gap-4 bg-gray-50/70 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800/60 rounded-2xl p-4 sm:p-5">
+            <div class="grid grid-cols-2 gap-3 text-center sm:text-left">
+              <!-- Penerimaan Bulan Ini -->
+              <div class="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-2xs">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider font-mono block">Masuk ({{ blankStock.month_name }})</span>
+                <p class="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
+                  +{{ formatNumber(blankStock.month_received || blankStock.received_this_month || 0) }}
+                </p>
+                <span class="text-[9px] text-gray-400 font-medium">Keping Diterima</span>
+              </div>
+
+              <!-- Penggunaan Bulan Ini -->
+              <div class="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-2xs">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider font-mono block">Cetak ({{ blankStock.month_name }})</span>
+                <p class="text-lg sm:text-xl font-black text-blue-600 dark:text-blue-400 font-mono mt-0.5">
+                  -{{ formatNumber(blankStock.month_used || blankStock.used_this_month || 0) }}
+                </p>
+                <span class="text-[9px] text-gray-400 font-medium">Keping Tercetak</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center gap-2 pt-1">
+              <Link
+                href="/layanan/ketersediaan-blangko"
+                class="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-white dark:bg-zinc-900 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-800 dark:text-zinc-200 font-bold text-xs text-center transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-2xs"
+              >
+                <span>Detail Ketersediaan</span>
+                <ArrowRight class="w-3.5 h-3.5 text-gray-500" />
+              </Link>
+
+              <Link
+                href="/layanan/antrian/daftar"
+                class="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs text-center shadow-sm shadow-emerald-600/20 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+              >
+                <Ticket class="w-3.5 h-3.5 text-white" />
+                <span>Daftar Layanan</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Dynamic Emergency Alert Popup Modal (client-controlled) -->
       <div 
         v-if="popup && popupOpen" 
@@ -620,7 +748,7 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import InformasiLayananWidget from '@/Components/InformasiLayananWidget.vue';
 import { storageUrl } from '@/utils/storage';
-import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar, Download, FileText, ArrowRight, Ticket } from '@lucide/vue';
+import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar, Download, FileText, ArrowRight, Ticket, CreditCard, Clock } from '@lucide/vue';
 
 const props = defineProps({
   banners: [Array, Object],
@@ -631,6 +759,7 @@ const props = defineProps({
   downloadShortcuts: [Array, Object],
   stats: Object,
   ikmWidget: Object,
+  blankStock: Object,
 });
 
 const safeBanners = computed(() => Array.isArray(props.banners) ? props.banners : []);
@@ -671,7 +800,7 @@ const formatDate = (dateStr) => {
 };
 
 const formatNumber = (num) => {
-  return new Intl.NumberFormat('id-ID').format(num);
+  return new Intl.NumberFormat('id-ID').format(num || 0);
 };
 
 const goToComplaints = () => {

@@ -219,6 +219,14 @@ class HomeController extends Controller
             return null;
         });
 
+        // 8. KTP-el Blank Stock Public Summary for homepage widget
+        $blankStock = null;
+        try {
+            $blankStock = app(\App\Services\BlankStock\BlankStockService::class)->getPublicStockSummary();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('HomeController blank stock summary error: ' . $e->getMessage());
+        }
+
         return Inertia::render('Public/Home', [
             'banners' => $banners,
             'tickers' => $tickers,
@@ -228,6 +236,7 @@ class HomeController extends Controller
             'downloadShortcuts' => $downloadShortcuts,
             'stats' => $demographicSummary,
             'ikmWidget' => $ikmWidget,
+            'blankStock' => $blankStock,
         ]);
     }
 }
