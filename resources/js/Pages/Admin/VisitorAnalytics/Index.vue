@@ -521,6 +521,9 @@
                         <span>{{ log.device_type || 'Desktop' }}</span>
                       </span>
                     </div>
+                    <p v-if="log.user_agent" class="text-[9px] text-gray-400 font-mono truncate max-w-[220px]" :title="`User-Agent Lengkap: ${log.user_agent}`">
+                      UA: {{ log.user_agent }}
+                    </p>
                   </div>
                 </td>
 
@@ -999,11 +1002,16 @@
                     </span>
                   </div>
 
-                  <div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-700 dark:text-zinc-200">
-                    <Smartphone v-if="visitor.device_type === 'Mobile'" class="w-3.5 h-3.5 text-blue-500" />
-                    <Tablet v-else-if="visitor.device_type === 'Tablet'" class="w-3.5 h-3.5 text-purple-500" />
-                    <Laptop v-else class="w-3.5 h-3.5 text-slate-500" />
-                    <span>{{ visitor.browser }} &bull; {{ visitor.operating_system }}</span>
+                  <div class="flex flex-col items-end gap-0.5">
+                    <div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-700 dark:text-zinc-200">
+                      <Smartphone v-if="visitor.device_type === 'Mobile'" class="w-3.5 h-3.5 text-blue-500" />
+                      <Tablet v-else-if="visitor.device_type === 'Tablet'" class="w-3.5 h-3.5 text-purple-500" />
+                      <Laptop v-else class="w-3.5 h-3.5 text-slate-500" />
+                      <span>{{ visitor.browser }} &bull; {{ visitor.operating_system }}</span>
+                    </div>
+                    <span v-if="visitor.user_agent" class="text-[9px] text-gray-400 font-mono truncate max-w-[200px]" :title="visitor.user_agent">
+                      {{ visitor.user_agent }}
+                    </span>
                   </div>
                 </div>
 

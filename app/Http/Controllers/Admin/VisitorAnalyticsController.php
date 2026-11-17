@@ -51,22 +51,45 @@ class VisitorAnalyticsController extends Controller
 
         $hasIntelCols = Schema::hasColumn('visitor_logs', 'visitor_category');
 
-        // Auto-fix historical records that were set to is_human = 1 by default migration or direct probes
+        // Auto-fix historical records and re-parse valid User-Agent strings (e.g. Chrome Android)
         if ($hasIntelCols) {
             try {
-                VisitorLog::where('is_robot', true)
-                    ->where('is_human', true)
-                    ->limit(1000)
-                    ->update([
-                        'is_human'         => false,
-                        'visitor_category' => 'unknown_bot',
-                        'bot_name'         => 'Automated Crawler / Robot',
-                        'detection_reason' => 'Historical Robot Record',
-                    ]);
+                // 1. Auto-reparse historical logs that have a valid user_agent string
+                // to correctly detect Android, Chrome, and Mobile devices
+                $unparsedLogs = VisitorLog::where(function ($q) {
+                        $q->where('browser', 'like', '%Unknown%')
+                          ->orWhere('browser', 'like', '%Direct%')
+                          ->orWhere('operating_system', 'Unknown OS')
+                          ->orWhereNull('browser');
+                    })
+                    ->whereNotNull('user_agent')
+                    ->where('user_agent', '!=', '')
+                    ->where('user_agent', '!=', '-')
+                    ->limit(500)
+                    ->get();
 
-                // Auto-fix historical direct socket / ping probes without browser and OS (e.g. 103.152.36.54)
-                VisitorLog::where('is_human', true)
-                    ->where(function ($q) {
+                foreach ($unparsedLogs as $log) {
+                    $parsed = \App\Services\AgentParser::parse($log->user_agent);
+                    if ($parsed['browser'] !== 'Browser Direct / Unknown' && $parsed['browser'] !== 'Direct / Unknown') {
+                        $isHuman = !$parsed['is_robot'];
+                        $log->update([
+                            'browser'                  => $parsed['browser'],
+                            'browser_version'          => $parsed['browser_version'],
+                            'operating_system'         => $parsed['operating_system'],
+                            'operating_system_version' => $parsed['operating_system_version'],
+                            'device_type'              => $parsed['device_type'],
+                            'device'                   => $parsed['device'],
+                            'is_robot'                 => $parsed['is_robot'],
+                            'is_human'                 => $isHuman,
+                            'visitor_category'         => $isHuman ? 'human' : 'unknown_bot',
+                            'bot_name'                 => $isHuman ? null : $parsed['browser'],
+                            'detection_reason'         => $isHuman ? 'Re-parsed Legitimate Mobile/Browser Session' : 'Re-parsed Robot User Agent',
+                        ]);
+                    }
+                }
+
+                // 2. Mark genuinely empty/probe records without browser and OS as monitoring bot
+                VisitorLog::where(function ($q) {
                         $q->where('browser', 'like', '%Direct%')
                           ->orWhere('browser', 'like', '%Unknown%')
                           ->orWhereNull('browser');
@@ -75,6 +98,12 @@ class VisitorAnalyticsController extends Controller
                         $q->where('operating_system', 'Unknown OS')
                           ->orWhereNull('operating_system');
                     })
+                    ->where(function ($q) {
+                        $q->whereNull('user_agent')
+                          ->orWhere('user_agent', '')
+                          ->orWhere('user_agent', '-');
+                    })
+                    ->where('is_human', true)
                     ->limit(2000)
                     ->update([
                         'is_human'         => false,
@@ -82,6 +111,17 @@ class VisitorAnalyticsController extends Controller
                         'visitor_category' => 'monitoring_bot',
                         'bot_name'         => 'Automated Healthcheck / Ping Script',
                         'detection_reason' => 'Direct Ping Script without standard browser/OS',
+                    ]);
+
+                // 3. Auto-fix historical robot records
+                VisitorLog::where('is_robot', true)
+                    ->where('is_human', true)
+                    ->limit(1000)
+                    ->update([
+                        'is_human'         => false,
+                        'visitor_category' => 'unknown_bot',
+                        'bot_name'         => 'Automated Crawler / Robot',
+                        'detection_reason' => 'Historical Robot Record',
                     ]);
             } catch (\Throwable) {}
         }
@@ -257,6 +297,7 @@ class VisitorAnalyticsController extends Controller
                     'url'                      => $log->url,
                     'referrer'                 => $log->referrer,
                     'method'                   => $log->method,
+                    'user_agent'               => $log->user_agent,
                     'browser'                  => $log->browser ?? 'Unknown',
                     'browser_version'          => $log->browser_version,
                     'operating_system'         => $log->operating_system ?? $log->platform ?? 'Unknown',
@@ -375,6 +416,7 @@ class VisitorAnalyticsController extends Controller
                     'masked_ip'                => $log->masked_ip,
                     'url'                      => $log->url,
                     'method'                   => $log->method,
+                    'user_agent'               => $log->user_agent,
                     'hits_count'               => $ipHits[$log->ip_address] ?? 1,
                     'browser'                  => $log->browser ?? 'Unknown',
                     'browser_version'          => $log->browser_version,

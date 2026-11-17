@@ -30,11 +30,22 @@ class VisitorLoggerService
             $url = Str::limit($request->fullUrl(), 500);
             $referer = Str::limit($request->headers->get('referer') ?? '', 500);
             $method = $request->method();
-            $userAgent = Str::limit($request->userAgent() ?? '', 500);
+            $rawUa = $request->userAgent()
+                ?: $request->header('User-Agent')
+                ?: $request->header('X-User-Agent')
+                ?: $request->header('X-Original-User-Agent')
+                ?: $request->server('HTTP_USER_AGENT')
+                ?: '';
+            $userAgent = Str::limit($rawUa, 500);
 
-            // 3. Parse User Agent & Analyze Traffic Intelligence
-            $agentData = AgentParser::parse($userAgent);
+            // 3. Parse User Agent & Analyze Traffic Intelligence (including Client Hints: sec-ch-ua, platform, mobile)
+            $headers = $request->headers->all();
+            $agentData = AgentParser::parse($userAgent, $headers);
             $intelligence = VisitorIntelligenceService::analyze($request, $agentData);
+
+            if (empty($userAgent) && $agentData['browser'] !== 'Direct / Unknown' && $agentData['browser'] !== 'Browser Direct / Unknown') {
+                $userAgent = "{$agentData['browser']} on {$agentData['operating_system']} (via Client Hints)";
+            }
 
             // 4. Record to visitor_logs table
             $visitorLog = VisitorLog::create([
