@@ -43,7 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.auth' => \App\Http\Middleware\AuthenticateApiKey::class,
             'api.log' => \App\Http\Middleware\LogApiRequests::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'permission' => \App\Http\Middleware\SafeRoleOrPermissionMiddleware::class,
             'role_or_permission' => \App\Http\Middleware\SafeRoleOrPermissionMiddleware::class,
             '2fa' => \App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
             'record.visitor' => \App\Http\Middleware\RecordVisitor::class,

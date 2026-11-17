@@ -18,11 +18,41 @@ use Illuminate\Validation\ValidationException;
 
 class BlankStockService
 {
+    public function __construct()
+    {
+        self::ensureDatabaseSchema();
+    }
+
+    /**
+     * Ensure database migrations and permission tables exist.
+     */
+    public static function ensureDatabaseSchema(): void
+    {
+        static $checked = false;
+        if ($checked) {
+            return;
+        }
+        $checked = true;
+
+        try {
+            if (!\Illuminate\Support\Facades\Schema::hasTable('ktp_blank_stocks')) {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            }
+
+            if (!\Spatie\Permission\Models\Permission::where('name', 'blank_stocks.dashboard')->exists()) {
+                (new \Database\Seeders\KtpBlankStockPermissionSeeder())->run();
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('BlankStock auto-migrate/schema sync warning: ' . $e->getMessage());
+        }
+    }
+
     /**
      * Get the authoritative singleton stock record.
      */
     public function getAuthoritativeStock(): KtpBlankStock
     {
+        self::ensureDatabaseSchema();
         return KtpBlankStock::getSingleton();
     }
 

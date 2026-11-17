@@ -43,6 +43,8 @@ class KtpBlankStock extends Model
      */
     public static function getSingleton(): self
     {
+        \App\Services\BlankStock\BlankStockService::ensureDatabaseSchema();
+
         return self::firstOrCreate(
             ['id' => 1],
             [

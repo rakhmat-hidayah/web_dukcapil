@@ -26,6 +26,9 @@ class AutoRoleSync
         'petugas_pengambilan_ktpel' => 'Petugas Pengambilan KTP-el',
         'operator_arsip'        => 'Petugas Pengarsipan',
         'supervisor_layanan_ktpel' => 'Supervisor Layanan KTP-el',
+        'bendahara_barang'      => 'Bendahara Barang',
+        'operator_cetak_ktpel'  => 'Operator Cetak KTP-el',
+        'supervisor_persediaan_blangko' => 'Supervisor Persediaan Blangko',
     ];
 
     /**
@@ -47,17 +50,17 @@ class AutoRoleSync
     public static function sync(bool $force = false): void
     {
         // Avoid running 30+ DB queries and clearing Spatie cache on every web request
-        if (!$force && Cache::has('auto_role_sync_v9_done')) {
+        if (!$force && Cache::has('auto_role_sync_v14_done') && \Illuminate\Support\Facades\Schema::hasTable('ktp_blank_stocks')) {
             return;
         }
 
-        Cache::put('auto_role_sync_v9_done', true, now()->addHours(24));
+        Cache::put('auto_role_sync_v14_done', true, now()->addHours(24));
 
-        // 1. Run pending migrations safely if not yet cached as completed
+        // 1. Run pending migrations safely if not yet cached as completed or ktp_blank_stocks missing
         try {
-            if (!Cache::has('db_auto_migrations_v13')) {
+            if (!\Illuminate\Support\Facades\Schema::hasTable('ktp_blank_stocks') || !Cache::has('db_auto_migrations_v14')) {
                 Artisan::call('migrate', ['--force' => true]);
-                Cache::put('db_auto_migrations_v13', true, now()->addDays(7));
+                Cache::put('db_auto_migrations_v14', true, now()->addDays(7));
             }
         } catch (\Throwable $e) {
             Log::warning('AutoRoleSync migration warning: ' . $e->getMessage());
@@ -77,6 +80,15 @@ class AutoRoleSync
     public static function ensureIndonesianRoles(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // 1. Ensure KTP-el Blank Stock permissions & roles exist
+        try {
+            if (!Permission::where('name', 'blank_stocks.dashboard')->exists() || !Role::where('name', 'Bendahara Barang')->exists()) {
+                (new \Database\Seeders\KtpBlankStockPermissionSeeder())->run();
+            }
+        } catch (\Throwable $e) {
+            Log::warning('AutoRoleSync KtpBlankStockPermissionSeeder warning: ' . $e->getMessage());
+        }
 
         // 1. Explicitly guarantee Supervisor Layanan KTP-el is active
         $supervisorRole = Role::firstOrCreate(['name' => 'Supervisor Layanan KTP-el', 'guard_name' => 'web']);
