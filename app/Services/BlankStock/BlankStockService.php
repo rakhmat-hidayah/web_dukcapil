@@ -866,6 +866,11 @@ class BlankStockService
             ];
         }
 
+        $lastOpname = KtpBlankOpname::where('status', KtpBlankOpname::STATUS_APPROVED)->latest('opname_date')->first() 
+            ?? KtpBlankOpname::latest('opname_date')->first();
+
+        $formattedLastUpdated = $stock->last_transaction_at ? $stock->last_transaction_at->format('d M Y, H:i') : '-';
+
         return [
             'stock' => [
                 'current_stock'        => $stock->current_stock,
@@ -874,11 +879,30 @@ class BlankStockService
                 'total_damaged'        => $stock->total_damaged,
                 'total_adjusted'       => $stock->total_adjusted,
                 'status'               => $stock->availability_status,
+                'availability_status'  => $stock->availability_status,
                 'status_color'         => $stock->status_color,
                 'min_stock_alert'      => $stock->min_stock_alert,
                 'critical_stock_alert' => $stock->critical_stock_alert,
-                'last_transaction_at'  => $stock->last_transaction_at ? $stock->last_transaction_at->format('d M Y, H:i') : '-',
+                'last_transaction_at'  => $formattedLastUpdated,
+                'last_updated'         => $formattedLastUpdated,
             ],
+            'metrics' => [
+                'today_used'           => $todayUsed,
+                'today_damaged'        => $todayDamaged,
+                'today_received'       => $todayReceived,
+                'month_used'           => $monthUsed,
+                'month_damaged'        => $monthDamaged,
+                'month_received'       => $monthReceived,
+            ],
+            'operators_status' => [
+                'reported_today'       => $operatorsReportedToday,
+                'pending_today'        => $operatorsPendingToday,
+            ],
+            'pending_adjustments_count' => $pendingAdjustmentsCount,
+            'last_opname' => $lastOpname ? [
+                'date'       => Carbon::parse($lastOpname->opname_date)->format('d M Y'),
+                'difference' => (int) $lastOpname->difference,
+            ] : null,
             'today' => [
                 'received'                  => $todayReceived,
                 'used'                      => $todayUsed,

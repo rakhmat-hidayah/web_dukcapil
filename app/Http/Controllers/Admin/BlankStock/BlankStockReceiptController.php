@@ -69,6 +69,7 @@ class BlankStockReceiptController extends Controller
                 'end_date'   => $endDate,
             ],
             'currentStock' => $stock->current_stock,
+            'canCreate'    => $request->user()->can('blank_stocks.receipts.create') || $request->user()->hasRole(['Super Administrator', 'Administrator Utama', 'Bendahara Barang']),
         ]);
     }
 

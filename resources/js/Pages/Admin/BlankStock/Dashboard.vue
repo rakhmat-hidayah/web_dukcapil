@@ -10,7 +10,7 @@
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-3 border shadow-xs"
                  :class="statusBadgeClasses">
               <span class="w-2 h-2 rounded-full animate-ping" :class="statusDotClasses"></span>
-              <span>Status Stok: {{ summary.stock.availability_status }}</span>
+              <span>Status Stok: {{ currentStockStatus }}</span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
               <Layers class="w-8 h-8 text-sky-400 shrink-0" />
@@ -94,11 +94,11 @@
           </div>
           <div>
             <div class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-zinc-100 tracking-tight font-mono">
-              {{ formatNumber(summary.stock.current_stock) }}
+              {{ formatNumber(summary?.stock?.current_stock) }}
               <span class="text-xs font-bold text-gray-400 dark:text-zinc-500">keping</span>
             </div>
             <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-1 flex items-center gap-1">
-              <span>Batas Kritis: <strong>{{ summary.stock.min_stock_alert }}</strong> keping</span>
+              <span>Batas Kritis: <strong>{{ summary?.stock?.min_stock_alert || 0 }}</strong> keping</span>
             </p>
           </div>
         </div>
@@ -113,11 +113,11 @@
           </div>
           <div>
             <div class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-zinc-100 tracking-tight font-mono">
-              {{ formatNumber(summary.metrics.today_used) }}
+              {{ formatNumber(todayUsed) }}
               <span class="text-xs font-bold text-gray-400 dark:text-zinc-500">keping</span>
             </div>
             <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-1">
-              Rusak hari ini: <span class="font-bold text-rose-600 dark:text-rose-400">{{ summary.metrics.today_damaged }} keping</span>
+              Rusak hari ini: <span class="font-bold text-rose-600 dark:text-rose-400">{{ todayDamaged }} keping</span>
             </p>
           </div>
         </div>
@@ -132,11 +132,11 @@
           </div>
           <div>
             <div class="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight font-mono">
-              +{{ formatNumber(summary.metrics.month_received) }}
+              +{{ formatNumber(monthReceived) }}
               <span class="text-xs font-bold text-gray-400 dark:text-zinc-500">keping</span>
             </div>
             <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-1">
-              Total riwayat masuk: {{ formatNumber(summary.stock.total_received) }}
+              Total riwayat masuk: {{ formatNumber(summary?.stock?.total_received) }}
             </p>
           </div>
         </div>
@@ -151,11 +151,11 @@
           </div>
           <div>
             <div class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-zinc-100 tracking-tight font-mono">
-              {{ formatNumber(summary.metrics.month_used + summary.metrics.month_damaged) }}
+              {{ formatNumber(monthUsed + monthDamaged) }}
               <span class="text-xs font-bold text-gray-400 dark:text-zinc-500">keping</span>
             </div>
             <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-1">
-              Cetakan: {{ formatNumber(summary.metrics.month_used) }} | Rusak: {{ formatNumber(summary.metrics.month_damaged) }}
+              Cetakan: {{ formatNumber(monthUsed) }} | Rusak: {{ formatNumber(monthDamaged) }}
             </p>
           </div>
         </div>
@@ -173,19 +173,19 @@
               </h3>
             </div>
             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-800">
-              {{ summary.operators_status.reported_today }} / {{ summary.operators_status.reported_today + summary.operators_status.pending_today }} Operator
+              {{ operatorsReported }} / {{ operatorsReported + operatorsPending }} Operator
             </span>
           </div>
 
           <div class="space-y-2 pt-1 text-xs">
             <div class="flex justify-between items-center py-1 border-b border-gray-100 dark:border-zinc-800">
               <span class="text-gray-600 dark:text-zinc-400">Sudah Lapor Hari Ini</span>
-              <span class="font-extrabold text-emerald-600 dark:text-emerald-400">{{ summary.operators_status.reported_today }} Operator</span>
+              <span class="font-extrabold text-emerald-600 dark:text-emerald-400">{{ operatorsReported }} Operator</span>
             </div>
             <div class="flex justify-between items-center py-1">
               <span class="text-gray-600 dark:text-zinc-400">Belum Lapor Hari Ini</span>
-              <span class="font-extrabold" :class="summary.operators_status.pending_today > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500'">
-                {{ summary.operators_status.pending_today }} Operator
+              <span class="font-extrabold" :class="operatorsPending > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500'">
+                {{ operatorsPending }} Operator
               </span>
             </div>
           </div>
@@ -200,7 +200,7 @@
                 Rekonsiliasi Fisik
               </h3>
             </div>
-            <span v-if="summary.pending_adjustments_count > 0" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-700 animate-pulse">
+            <span v-if="(summary?.pending_adjustments_count || 0) > 0" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-700 animate-pulse">
               {{ summary.pending_adjustments_count }} Usulan Pending
             </span>
           </div>
@@ -209,13 +209,13 @@
             <div class="flex justify-between items-center py-1 border-b border-gray-100 dark:border-zinc-800">
               <span class="text-gray-600 dark:text-zinc-400">Opname Fisik Terakhir</span>
               <span class="font-bold text-gray-800 dark:text-zinc-200">
-                {{ summary.last_opname ? summary.last_opname.date : 'Belum pernah' }}
+                {{ summary?.last_opname ? summary.last_opname.date : 'Belum pernah' }}
               </span>
             </div>
             <div class="flex justify-between items-center py-1">
               <span class="text-gray-600 dark:text-zinc-400">Selisih Fisik Terakhir</span>
-              <span class="font-bold" :class="summary.last_opname && summary.last_opname.difference !== 0 ? 'text-rose-500' : 'text-emerald-500'">
-                {{ summary.last_opname ? (summary.last_opname.difference > 0 ? '+' : '') + summary.last_opname.difference + ' keping' : '-' }}
+              <span class="font-bold" :class="summary?.last_opname && summary.last_opname.difference !== 0 ? 'text-rose-500' : 'text-emerald-500'">
+                {{ summary?.last_opname ? (summary.last_opname.difference > 0 ? '+' : '') + summary.last_opname.difference + ' keping' : '-' }}
               </span>
             </div>
           </div>
@@ -238,11 +238,11 @@
           <div class="space-y-2 pt-1 text-xs">
             <div class="flex justify-between items-center py-1 border-b border-gray-100 dark:border-zinc-800">
               <span class="text-gray-600 dark:text-zinc-400">Keping Ditampilkan Publik</span>
-              <span class="font-mono font-black text-gray-900 dark:text-zinc-100">{{ formatNumber(summary.stock.current_stock) }}</span>
+              <span class="font-mono font-black text-gray-900 dark:text-zinc-100">{{ formatNumber(summary?.stock?.current_stock) }}</span>
             </div>
             <div class="flex justify-between items-center py-1">
               <span class="text-gray-600 dark:text-zinc-400">Pembaruan Valid Terakhir</span>
-              <span class="font-bold text-gray-600 dark:text-zinc-400">{{ summary.stock.last_updated }}</span>
+              <span class="font-bold text-gray-600 dark:text-zinc-400">{{ summary?.stock?.last_updated || summary?.stock?.last_transaction_at || '-' }}</span>
             </div>
           </div>
         </div>
@@ -276,7 +276,7 @@
           <!-- Simple Bar Chart Representation -->
           <div class="h-48 flex items-end justify-between gap-1 sm:gap-2 pt-6 border-b border-gray-100 dark:border-zinc-800 pb-2">
             <div
-              v-for="(day, idx) in summary.daily_chart"
+              v-for="(day, idx) in (summary?.daily_chart || [])"
               :key="idx"
               class="flex-1 flex flex-col items-center gap-1 h-full justify-end group relative"
             >
@@ -311,13 +311,13 @@
             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Multi-Operator</span>
           </div>
 
-          <div v-if="summary.operator_breakdown.length === 0" class="text-center py-8 text-xs text-gray-400">
+          <div v-if="!summary?.operator_breakdown || summary.operator_breakdown.length === 0" class="text-center py-8 text-xs text-gray-400">
             Belum ada data pemakaian operator pada bulan ini.
           </div>
 
           <div v-else class="space-y-3 max-h-56 overflow-y-auto pr-1">
             <div
-              v-for="op in summary.operator_breakdown"
+              v-for="op in (summary?.operator_breakdown || [])"
               :key="op.operator_id"
               class="p-3 rounded-2xl bg-gray-50 dark:bg-zinc-800/60 border border-gray-100 dark:border-zinc-800 flex items-center justify-between gap-3 text-xs"
             >
@@ -365,7 +365,7 @@
 
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
-            <thead class="bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 font-extrabold text-[11px] uppercase tracking-wider">
+            <thead class="bg-gray-50 dark:zinc-800 text-gray-600 dark:text-zinc-300 font-extrabold text-[11px] uppercase tracking-wider">
               <tr>
                 <th class="py-3 px-4 rounded-l-xl">No. Transaksi</th>
                 <th class="py-3 px-3">Tanggal</th>
@@ -378,13 +378,13 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
-              <tr v-if="summary.recent_transactions.length === 0">
+              <tr v-if="!summary?.recent_transactions || summary.recent_transactions.length === 0">
                 <td colspan="8" class="text-center py-8 text-gray-400">
                   Belum ada riwayat transaksi kartu persediaan.
                 </td>
               </tr>
               <tr
-                v-for="trx in summary.recent_transactions"
+                v-for="trx in (summary?.recent_transactions || [])"
                 :key="trx.id"
                 class="hover:bg-gray-50/70 dark:hover:bg-zinc-800/40 transition"
               >
@@ -447,14 +447,50 @@ const props = defineProps({
 
 const page = usePage();
 const userRoles = computed(() => page.props.auth?.roles || []);
+const isSuperAdmin = computed(() => page.props.auth?.is_super_admin || false);
 const isSuperOrAdmin = computed(() => 
+  isSuperAdmin.value ||
   userRoles.value.includes('Super Administrator') || 
   userRoles.value.includes('Administrator Utama') || 
-  userRoles.value.includes('Bendahara Barang')
+  userRoles.value.includes('Bendahara Barang') ||
+  userRoles.value.includes('Supervisor Layanan KTP-el') ||
+  userRoles.value.includes('Supervisor Persediaan Blangko')
 );
 
+const currentStockStatus = computed(() => {
+  return props.summary?.stock?.status || props.summary?.stock?.availability_status || 'STOK KOSONG';
+});
+
+const todayUsed = computed(() => {
+  return props.summary?.metrics?.today_used ?? props.summary?.today?.used ?? 0;
+});
+
+const todayDamaged = computed(() => {
+  return props.summary?.metrics?.today_damaged ?? props.summary?.today?.damaged ?? 0;
+});
+
+const monthReceived = computed(() => {
+  return props.summary?.metrics?.month_received ?? props.summary?.this_month?.received ?? 0;
+});
+
+const monthUsed = computed(() => {
+  return props.summary?.metrics?.month_used ?? props.summary?.this_month?.used ?? 0;
+});
+
+const monthDamaged = computed(() => {
+  return props.summary?.metrics?.month_damaged ?? props.summary?.this_month?.damaged ?? 0;
+});
+
+const operatorsReported = computed(() => {
+  return props.summary?.operators_status?.reported_today ?? props.summary?.today?.operators_reported ?? 0;
+});
+
+const operatorsPending = computed(() => {
+  return props.summary?.operators_status?.pending_today ?? props.summary?.today?.operators_pending ?? 0;
+});
+
 const statusBadgeClasses = computed(() => {
-  switch (props.summary.stock.availability_status) {
+  switch (currentStockStatus.value) {
     case 'TERSEDIA':
       return 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30';
     case 'PERSEDIAAN TERBATAS':
@@ -465,7 +501,7 @@ const statusBadgeClasses = computed(() => {
 });
 
 const statusDotClasses = computed(() => {
-  switch (props.summary.stock.availability_status) {
+  switch (currentStockStatus.value) {
     case 'TERSEDIA':
       return 'bg-emerald-400';
     case 'PERSEDIAAN TERBATAS':
@@ -482,7 +518,8 @@ const formatNumber = (num) => {
 
 const getBarHeight = (val) => {
   if (!val || val <= 0) return 4;
-  const max = Math.max(...props.summary.daily_chart.map(d => d.used + d.damaged), 50);
+  const list = props.summary?.daily_chart || [];
+  const max = Math.max(...list.map(d => (d?.used || 0) + (d?.damaged || 0)), 50);
   return Math.min(100, Math.max(6, Math.round((val / max) * 100)));
 };
 

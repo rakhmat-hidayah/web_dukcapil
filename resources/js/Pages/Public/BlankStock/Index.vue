@@ -48,7 +48,7 @@
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider shadow-sm"
                  :class="badgeStyles">
               <span class="w-2.5 h-2.5 rounded-full animate-ping" :class="dotColorClass"></span>
-              <span>{{ summary.status }}</span>
+              <span>{{ summary?.status || 'STOK KOSONG' }}</span>
             </div>
 
             <!-- Main Stock Display -->
@@ -57,7 +57,7 @@
                 Jumlah Persediaan Blangko
               </span>
               <div class="text-4xl sm:text-6xl font-black font-mono tracking-tight text-gray-950 dark:text-white mt-1">
-                {{ formatNumber(summary.current_stock) }}
+                {{ formatNumber(summary?.current_stock) }}
                 <span class="text-base sm:text-xl font-bold font-sans text-gray-500 dark:text-zinc-400">Keping</span>
               </div>
             </div>
@@ -70,7 +70,7 @@
             <!-- Valid Timestamp -->
             <div class="pt-2 flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-400">
               <Clock class="w-3.5 h-3.5 text-gray-400 shrink-0" />
-              <span>Data resmi diperbarui per: <strong>{{ summary.last_updated_formatted }}</strong></span>
+              <span>Data resmi diperbarui per: <strong>{{ summary?.last_updated_formatted || '-' }}</strong></span>
             </div>
           </div>
 
@@ -113,7 +113,7 @@
           <div>
             <span class="text-xs font-bold text-gray-500 dark:text-zinc-400 block">Penerimaan Blangko Bulan Ini</span>
             <div class="text-2xl sm:text-3xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
-              +{{ formatNumber(summary.received_this_month) }} <span class="text-xs font-bold text-gray-400">keping</span>
+              +{{ formatNumber(summary?.received_this_month ?? summary?.month_received ?? 0) }} <span class="text-xs font-bold text-gray-400">keping</span>
             </div>
           </div>
         </div>
@@ -126,7 +126,7 @@
           <div>
             <span class="text-xs font-bold text-gray-500 dark:text-zinc-400 block">KTP-el Dicetak Bulan Ini</span>
             <div class="text-2xl sm:text-3xl font-black font-mono text-gray-900 dark:text-zinc-100 mt-0.5">
-              {{ formatNumber(summary.used_this_month) }} <span class="text-xs font-bold text-gray-400">keping</span>
+              {{ formatNumber(summary?.used_this_month ?? summary?.month_used ?? 0) }} <span class="text-xs font-bold text-gray-400">keping</span>
             </div>
           </div>
         </div>
@@ -210,7 +210,7 @@ const props = defineProps({
 });
 
 const statusCardStyles = computed(() => {
-  switch (props.summary.status) {
+  switch (props.summary?.status) {
     case 'TERSEDIA':
       return 'bg-gradient-to-br from-emerald-50/90 via-teal-50/50 to-white dark:from-emerald-950/30 dark:via-zinc-900 dark:to-zinc-900 border-emerald-300 dark:border-emerald-800/60 shadow-emerald-500/5';
     case 'PERSEDIAAN TERBATAS':
@@ -221,7 +221,7 @@ const statusCardStyles = computed(() => {
 });
 
 const badgeStyles = computed(() => {
-  switch (props.summary.status) {
+  switch (props.summary?.status) {
     case 'TERSEDIA':
       return 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700';
     case 'PERSEDIAAN TERBATAS':
@@ -232,7 +232,7 @@ const badgeStyles = computed(() => {
 });
 
 const dotColorClass = computed(() => {
-  switch (props.summary.status) {
+  switch (props.summary?.status) {
     case 'TERSEDIA':
       return 'bg-emerald-500';
     case 'PERSEDIAAN TERBATAS':
@@ -243,7 +243,7 @@ const dotColorClass = computed(() => {
 });
 
 const glowColorClass = computed(() => {
-  switch (props.summary.status) {
+  switch (props.summary?.status) {
     case 'TERSEDIA':
       return 'bg-emerald-400';
     case 'PERSEDIAAN TERBATAS':
@@ -254,7 +254,7 @@ const glowColorClass = computed(() => {
 });
 
 const advisoryMessage = computed(() => {
-  switch (props.summary.status) {
+  switch (props.summary?.status) {
     case 'TERSEDIA':
       return 'Pelayanan pencetakan fisik KTP-el di Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu saat ini berjalan normal. Pemohon dapat melakukan pengajuan layanan online atau mendatangi loket pelayanan.';
     case 'PERSEDIAAN TERBATAS':
