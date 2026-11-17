@@ -365,8 +365,8 @@
 
     <!-- MODAL: Cabut Perangkat -->
     <Teleport to="body">
-      <div v-if="showRevokeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
-        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl">
+      <div v-if="showRevokeModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm overflow-hidden" @click.self="showRevokeModal = false">
+        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
           <h3 class="text-base font-black text-slate-900 dark:text-white">Cabut Akses Perangkat Aktif</h3>
           <p class="text-xs text-slate-500 leading-relaxed">
             Perangkat pemohon akan langsung kehilangan akses dan cookie perangkat akan dibatalkan di server.
@@ -410,8 +410,8 @@
 
     <!-- MODAL: Ubah Status Akun -->
     <Teleport to="body">
-      <div v-if="showStatusModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
-        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl">
+      <div v-if="showStatusModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm overflow-hidden" @click.self="showStatusModal = false">
+        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
           <h3 class="text-base font-black text-slate-900 dark:text-white">Ubah Status Akun Pemohon</h3>
 
           <form @submit.prevent="submitStatusChange" class="space-y-4">
@@ -463,112 +463,144 @@
 
     <!-- MODAL: Verifikasi Identitas -->
     <Teleport to="body">
-      <div v-if="showVerifyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
-        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 space-y-4 border border-slate-200 dark:border-slate-800 shadow-2xl">
-          <h3 class="text-base font-black text-slate-900 dark:text-white">Verifikasi Identitas Pemohon</h3>
-          <p class="text-xs text-slate-500 leading-relaxed">
-            Menyetujui verifikasi akan mengubah status identitas menjadi <strong>VERIFIED</strong> dan mengaktifkan akun menjadi <strong>ACTIVE</strong> untuk pengajuan layanan online.
-          </p>
-
-          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 space-y-1 text-xs">
-            <p class="text-slate-500 font-bold text-[11px]">Nama User / Pemohon:</p>
-            <p class="font-black text-slate-900 dark:text-white text-sm">{{ account.name }}</p>
-            <p class="text-slate-500 font-bold text-[11px] pt-1">NIK Utuh (16 Digit):</p>
-            <p class="font-mono font-black text-blue-600 dark:text-blue-400 text-sm tracking-widest select-all">{{ account.nik || account.masked_nik }}</p>
-          </div>
-
-          <!-- Selfie Photo Preview in Verify Modal -->
-          <div v-if="account.has_selfie && account.selfie_url" class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
-            <p class="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-              <Camera class="w-3.5 h-3.5 text-blue-600" />
-              <span>Foto Selfie Wajah Pemohon</span>
-            </p>
-            <div class="flex justify-center">
-              <img
-                :src="account.selfie_url"
-                :alt="account.name"
-                class="w-36 h-36 rounded-2xl object-cover border-2 border-slate-300 dark:border-slate-600 shadow-md"
-              />
-            </div>
-            <p class="text-[10px] text-amber-700 dark:text-amber-300 text-center leading-tight">
-              ⚠️ Foto akan otomatis dimusnahkan secara permanen dari server setelah keputusan disimpan (UU PDP).
-            </p>
-          </div>
-          <div v-else-if="account.is_selfie_destroyed" class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-[10.5px] text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-            <ShieldCheck class="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Foto selfie biometrik telah dimusnahkan secara aman dari server storage.</span>
-          </div>
-
-          <form @submit.prevent="submitVerifyIdentity" class="space-y-4">
-            <div class="space-y-1">
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Keputusan</label>
-              <select
-                v-model="verifyForm.decision"
-                @change="handleDecisionChange"
-                class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="VERIFIED">TERIMA (VERIFIED) - Sah & Aktifkan Pengajuan</option>
-                <option value="REJECTED">TOLAK (REJECTED) - Data Tidak Sesuai</option>
-              </select>
-            </div>
-
-            <!-- Template Kalimat Penolakan (Dropdown) -->
-            <div 
-              v-if="verifyForm.decision === 'REJECTED'" 
-              class="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-2 animate-in fade-in duration-150"
-            >
-              <div class="flex items-center justify-between">
-                <label class="block text-xs font-black text-rose-900 dark:text-rose-200">
-                  Pilih Template Alasan Penolakan:
-                </label>
-                <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400">Otomatis Isi</span>
-              </div>
-              <select
-                v-model="selectedRejectTemplate"
-                @change="applyRejectTemplate"
-                class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-rose-300 dark:border-rose-800 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500 font-medium cursor-pointer"
-              >
-                <option value="">-- Pilih Kalimat Penolakan Cepat --</option>
-                <option v-for="(tpl, idx) in rejectionTemplates" :key="idx" :value="tpl">
-                  {{ tpl }}
-                </option>
-              </select>
-              <p class="text-[10.5px] text-rose-700/80 dark:text-rose-300/80 leading-tight">
-                Memilih salah satu template di atas akan langsung mengisi kolom Catatan di bawah ini. Anda tetap dapat mengedit teksnya sesuai kebutuhan.
+      <div 
+        v-if="showVerifyModal" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm overflow-hidden"
+        @click.self="showVerifyModal = false"
+      >
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden my-auto">
+          <!-- Header Sticky -->
+          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900 z-10">
+            <div>
+              <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <UserCheck class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <span>Verifikasi Identitas</span>
+              </h3>
+              <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+                Validasi identitas pendaftar & status akun
               </p>
             </div>
+            <button
+              type="button"
+              @click="showVerifyModal = false"
+              class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              title="Tutup Modal"
+            >
+              <X class="w-5 h-5" />
+            </button>
+          </div>
 
-            <div class="space-y-1">
-              <div class="flex items-center justify-between">
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Catatan Petugas {{ verifyForm.decision === 'REJECTED' ? '(Alasan Penolakan)' : '(Opsional)' }}
-                </label>
-                <span v-if="verifyForm.decision === 'REJECTED'" class="text-[10px] font-bold text-rose-600 dark:text-rose-400">
-                  *Dikirim ke email pemohon
-                </span>
+          <!-- Form wraps scrollable body + sticky footer -->
+          <form @submit.prevent="submitVerifyIdentity" class="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <!-- Scrollable Body Content -->
+            <div class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5 space-y-4">
+              <p class="text-xs text-slate-500 leading-relaxed">
+                Menyetujui verifikasi akan mengubah status identitas menjadi <strong>VERIFIED</strong> dan mengaktifkan akun menjadi <strong>ACTIVE</strong> untuk pengajuan layanan online.
+              </p>
+
+              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 space-y-1 text-xs">
+                <p class="text-slate-500 font-bold text-[11px]">Nama User / Pemohon:</p>
+                <p class="font-black text-slate-900 dark:text-white text-sm">{{ account.name }}</p>
+                <p class="text-slate-500 font-bold text-[11px] pt-1">NIK Utuh (16 Digit):</p>
+                <p class="font-mono font-black text-blue-600 dark:text-blue-400 text-sm tracking-widest select-all">{{ account.nik || account.masked_nik }}</p>
               </div>
-              <textarea
-                v-model="verifyForm.notes"
-                rows="3"
-                :placeholder="verifyForm.decision === 'REJECTED' ? 'Pilih template di atas atau ketik alasan penolakan di sini...' : 'Contoh: Sesuai dokumen fisik / SIAK terkonfirmasi...'"
-                class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              ></textarea>
+
+              <!-- Selfie Photo Preview in Verify Modal -->
+              <div v-if="account.has_selfie && account.selfie_url" class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
+                <p class="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <Camera class="w-3.5 h-3.5 text-blue-600" />
+                  <span>Foto Selfie Wajah Pemohon</span>
+                </p>
+                <div class="flex justify-center">
+                  <img
+                    :src="account.selfie_url"
+                    :alt="account.name"
+                    class="w-32 h-32 rounded-2xl object-cover border-2 border-slate-300 dark:border-slate-600 shadow-md"
+                  />
+                </div>
+                <p class="text-[10px] text-amber-700 dark:text-amber-300 text-center leading-tight">
+                  ⚠️ Foto akan otomatis dimusnahkan secara permanen dari server setelah keputusan disimpan (UU PDP).
+                </p>
+              </div>
+              <div v-else-if="account.is_selfie_destroyed" class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-[10.5px] text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                <ShieldCheck class="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Foto selfie biometrik telah dimusnahkan secara aman dari server storage.</span>
+              </div>
+
+              <div class="space-y-4">
+                <div class="space-y-1">
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Keputusan</label>
+                  <select
+                    v-model="verifyForm.decision"
+                    @change="handleDecisionChange"
+                    class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="VERIFIED">TERIMA (VERIFIED) - Sah & Aktifkan Pengajuan</option>
+                    <option value="REJECTED">TOLAK (REJECTED) - Data Tidak Sesuai</option>
+                  </select>
+                </div>
+
+                <!-- Template Kalimat Penolakan (Dropdown) -->
+                <div 
+                  v-if="verifyForm.decision === 'REJECTED'" 
+                  class="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-2 animate-in fade-in duration-150"
+                >
+                  <div class="flex items-center justify-between">
+                    <label class="block text-xs font-black text-rose-900 dark:text-rose-200">
+                      Pilih Template Alasan Penolakan:
+                    </label>
+                    <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400">Otomatis Isi</span>
+                  </div>
+                  <select
+                    v-model="selectedRejectTemplate"
+                    @change="applyRejectTemplate"
+                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-rose-300 dark:border-rose-800 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500 font-medium cursor-pointer"
+                  >
+                    <option value="">-- Pilih Kalimat Penolakan Cepat --</option>
+                    <option v-for="(tpl, idx) in rejectionTemplates" :key="idx" :value="tpl">
+                      {{ tpl }}
+                    </option>
+                  </select>
+                  <p class="text-[10.5px] text-rose-700/80 dark:text-rose-300/80 leading-tight">
+                    Memilih salah satu template di atas akan langsung mengisi kolom Catatan di bawah ini. Anda tetap dapat mengedit teksnya sesuai kebutuhan.
+                  </p>
+                </div>
+
+                <div class="space-y-1">
+                  <div class="flex items-center justify-between">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Catatan Petugas {{ verifyForm.decision === 'REJECTED' ? '(Alasan Penolakan)' : '(Opsional)' }}
+                    </label>
+                    <span v-if="verifyForm.decision === 'REJECTED'" class="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                      *Dikirim ke email pemohon
+                    </span>
+                  </div>
+                  <textarea
+                    v-model="verifyForm.notes"
+                    rows="3"
+                    :placeholder="verifyForm.decision === 'REJECTED' ? 'Pilih template di atas atau ketik alasan penolakan di sini...' : 'Contoh: Sesuai dokumen fisik / SIAK terkonfirmasi...'"
+                    class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  ></textarea>
+                </div>
+              </div>
             </div>
 
-            <div class="flex justify-end gap-2 pt-2">
+            <!-- Sticky Footer Action Buttons (Selalu terlihat di HP) -->
+            <div class="shrink-0 p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-800/95 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5 z-10">
               <button
                 type="button"
                 @click="showVerifyModal = false"
-                class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold"
+                class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-600 transition shadow-xs cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 :disabled="verifyForm.processing"
-                class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-xs"
+                class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-md disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
               >
-                Simpan Keputusan
+                <UserCheck class="w-4 h-4" />
+                <span>{{ verifyForm.processing ? 'Menyimpan...' : 'Simpan Keputusan' }}</span>
               </button>
             </div>
           </form>
@@ -578,8 +610,8 @@
 
     <!-- MODAL: Hapus Akun Pemohon -->
     <Teleport to="body">
-      <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm" @click.self="showDeleteModal = false">
-        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 space-y-4 border border-rose-200 dark:border-rose-900 shadow-2xl">
+      <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm overflow-hidden" @click.self="showDeleteModal = false">
+        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 space-y-4 border border-rose-200 dark:border-rose-900 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
           <div class="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-inner">
             <Trash2 class="w-6 h-6" />
           </div>
@@ -645,6 +677,7 @@ import {
   Camera,
   Eye,
   Clock,
+  X,
 } from '@lucide/vue'
 
 const props = defineProps({

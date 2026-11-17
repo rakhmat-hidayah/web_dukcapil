@@ -352,154 +352,176 @@
     <Teleport to="body">
       <div 
         v-if="selectedApplicantForVerify"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm overflow-hidden"
         @click.self="selectedApplicantForVerify = null"
       >
-        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
-          <div>
-            <h3 class="text-lg font-black text-slate-900 dark:text-white">
-              Verifikasi Identitas Pendaftar Baru
-            </h3>
-            <p class="text-xs text-slate-500 mt-1">
-              Validasi kesesuaian identitas pemohon kependudukan berdasarkan data Disdukcapil.
-            </p>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 space-y-1 text-xs">
-            <p class="text-slate-500 font-bold text-[11px]">Nama User / Pemohon:</p>
-            <p class="font-black text-slate-900 dark:text-white text-sm">{{ selectedApplicantForVerify.name }}</p>
-            <p class="text-slate-500 font-bold text-[11px] pt-1">NIK Utuh (16 Digit):</p>
-            <p class="font-mono font-black text-blue-600 dark:text-blue-400 text-sm tracking-widest select-all">{{ selectedApplicantForVerify.nik || selectedApplicantForVerify.masked_nik }}</p>
-          </div>
-
-          <!-- Selfie Photo Display in Quick Verify Modal -->
-          <div v-if="selectedApplicantForVerify.has_selfie && selectedApplicantForVerify.selfie_url" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <Camera class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                <span>Foto Selfie Wajah Pendaftar</span>
-              </span>
-              <button
-                type="button"
-                @click="openSelfiePreviewModal(selectedApplicantForVerify)"
-                class="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <Eye class="w-3 h-3" />
-                <span>Perbesar Foto</span>
-              </button>
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden my-auto">
+          <!-- Header Modal (Sticky Top) -->
+          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white dark:bg-slate-900 z-10">
+            <div>
+              <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <UserCheck class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <span>Verifikasi Identitas</span>
+              </h3>
+              <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+                Validasi kesesuaian data pendaftar baru
+              </p>
             </div>
+            <button
+              type="button"
+              @click="selectedApplicantForVerify = null"
+              class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              title="Tutup Modal"
+            >
+              <X class="w-5 h-5" />
+            </button>
+          </div>
 
-            <div class="flex items-center justify-center">
-              <div
-                @click="openSelfiePreviewModal(selectedApplicantForVerify)"
-                class="relative rounded-2xl overflow-hidden border-2 border-slate-300 dark:border-slate-600 shadow-md group cursor-pointer max-w-[190px] w-full aspect-square bg-black"
-                title="Klik untuk memperbesar foto selfie"
-              >
-                <img
-                  :src="selectedApplicantForVerify.selfie_url"
-                  :alt="selectedApplicantForVerify.name"
-                  class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                />
-                <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-bold gap-1">
-                  <Eye class="w-4 h-4" />
-                  <span>Lihat Penuh</span>
+          <!-- Form wraps scrollable body + sticky footer -->
+          <form @submit.prevent="submitQuickVerify" class="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <!-- Scrollable Content Body -->
+            <div class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5 space-y-4">
+              <!-- Info Pemohon & NIK -->
+              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 space-y-1 text-xs">
+                <p class="text-slate-500 font-bold text-[11px]">Nama User / Pemohon:</p>
+                <p class="font-black text-slate-900 dark:text-white text-sm">{{ selectedApplicantForVerify.name }}</p>
+                <p class="text-slate-500 font-bold text-[11px] pt-1">NIK Utuh (16 Digit):</p>
+                <p class="font-mono font-black text-blue-600 dark:text-blue-400 text-sm tracking-widest select-all">{{ selectedApplicantForVerify.nik || selectedApplicantForVerify.masked_nik }}</p>
+              </div>
+
+              <!-- Selfie Photo Display in Quick Verify Modal -->
+              <div v-if="selectedApplicantForVerify.has_selfie && selectedApplicantForVerify.selfie_url" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Camera class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                    <span>Foto Selfie Wajah Pendaftar</span>
+                  </span>
+                  <button
+                    type="button"
+                    @click="openSelfiePreviewModal(selectedApplicantForVerify)"
+                    class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Eye class="w-3.5 h-3.5" />
+                    <span>Perbesar Foto</span>
+                  </button>
+                </div>
+
+                <div class="flex items-center justify-center">
+                  <div
+                    @click="openSelfiePreviewModal(selectedApplicantForVerify)"
+                    class="relative rounded-2xl overflow-hidden border-2 border-slate-300 dark:border-slate-600 shadow-md group cursor-pointer max-w-[150px] w-full aspect-square bg-black"
+                    title="Klik untuk memperbesar foto selfie"
+                  >
+                    <img
+                      :src="selectedApplicantForVerify.selfie_url"
+                      :alt="selectedApplicantForVerify.name"
+                      class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    />
+                    <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-bold gap-1">
+                      <Eye class="w-4 h-4" />
+                      <span>Lihat Penuh</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Auto Delete Notice -->
+                <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-[10.5px] text-amber-900 dark:text-amber-200 flex items-start gap-2 leading-relaxed">
+                  <ShieldAlert class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Ketentuan Privasi:</strong> Berkas foto selfie ini akan <strong>otomatis dihapus permanen dari server</strong> saat Anda menyimpan keputusan verifikasi (UU Perlindungan Data Pribadi).
+                  </span>
+                </div>
+              </div>
+
+              <!-- If Selfie already destroyed -->
+              <div v-else-if="selectedApplicantForVerify.is_selfie_destroyed" class="p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-900/60 flex items-center gap-2.5 text-[11px] text-emerald-800 dark:text-emerald-300">
+                <ShieldCheck class="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Foto selfie biometrik pendaftar telah <strong>dimusnahkan secara aman</strong> dari server storage.</span>
+              </div>
+
+              <!-- Email notification info -->
+              <div class="p-3 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center gap-2.5 text-[11px] text-blue-800 dark:text-blue-200">
+                <Mail class="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                <span>Pemberitahuan hasil verifikasi akun akan otomatis dikirimkan ke email pemohon.</span>
+              </div>
+
+              <!-- Form Controls -->
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Keputusan Verifikasi
+                  </label>
+                  <select
+                    v-model="quickVerifyForm.decision"
+                    @change="handleDecisionChange"
+                    class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="VERIFIED">VERIFIED (Setujui & Aktifkan Akun)</option>
+                    <option value="REJECTED">REJECTED (Tolak Identitas)</option>
+                  </select>
+                </div>
+
+                <!-- Template Kalimat Penolakan (Dropdown) -->
+                <div 
+                  v-if="quickVerifyForm.decision === 'REJECTED'" 
+                  class="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-2 animate-in fade-in duration-150"
+                >
+                  <div class="flex items-center justify-between">
+                    <label class="block text-xs font-black text-rose-900 dark:text-rose-200">
+                      Pilih Template Alasan Penolakan:
+                    </label>
+                    <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400">Otomatis Isi</span>
+                  </div>
+                  <select
+                    v-model="selectedRejectTemplate"
+                    @change="applyRejectTemplate"
+                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-rose-300 dark:border-rose-800 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500 font-medium cursor-pointer"
+                  >
+                    <option value="">-- Pilih Kalimat Penolakan Cepat --</option>
+                    <option v-for="(tpl, idx) in rejectionTemplates" :key="idx" :value="tpl">
+                      {{ tpl }}
+                    </option>
+                  </select>
+                  <p class="text-[10.5px] text-rose-700/80 dark:text-rose-300/80 leading-tight">
+                    Memilih salah satu template di atas akan langsung mengisi kolom Catatan di bawah ini. Anda tetap dapat mengedit teksnya sesuai kebutuhan.
+                  </p>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Catatan Verifikasi {{ quickVerifyForm.decision === 'REJECTED' ? '(Alasan Penolakan)' : '(Opsional)' }}
+                    </label>
+                    <span v-if="quickVerifyForm.decision === 'REJECTED'" class="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                      *Dikirim via email
+                    </span>
+                  </div>
+                  <textarea
+                    v-model="quickVerifyForm.notes"
+                    rows="3"
+                    :placeholder="quickVerifyForm.decision === 'REJECTED' ? 'Pilih template di atas atau ketik alasan penolakan di sini...' : 'Contoh: Telah sesuai dokumen SIAK / fisik KTP-el'"
+                    class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  ></textarea>
                 </div>
               </div>
             </div>
 
-            <!-- Auto Delete Notice -->
-            <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-[10.5px] text-amber-900 dark:text-amber-200 flex items-start gap-2 leading-relaxed">
-              <ShieldAlert class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <span>
-                <strong>Ketentuan Privasi:</strong> Berkas foto selfie ini akan <strong>otomatis dihapus permanen dari server</strong> saat Anda menyimpan keputusan verifikasi (UU Perlindungan Data Pribadi).
-              </span>
-            </div>
-          </div>
-
-          <!-- If Selfie already destroyed -->
-          <div v-else-if="selectedApplicantForVerify.is_selfie_destroyed" class="p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-900/60 flex items-center gap-2.5 text-[11px] text-emerald-800 dark:text-emerald-300">
-            <ShieldCheck class="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Foto selfie biometrik pendaftar telah <strong>dimusnahkan secara aman</strong> dari server storage.</span>
-          </div>
-
-          <!-- Email notification info -->
-          <div class="p-3 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center gap-2.5 text-[11px] text-blue-800 dark:text-blue-200">
-            <Mail class="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
-            <span>Pemberitahuan hasil verifikasi akun akan otomatis dikirimkan ke email pemohon.</span>
-          </div>
-
-          <form @submit.prevent="submitQuickVerify" class="space-y-4">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Keputusan Verifikasi
-              </label>
-              <select
-                v-model="quickVerifyForm.decision"
-                @change="handleDecisionChange"
-                class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="VERIFIED">VERIFIED (Setujui & Aktifkan Akun)</option>
-                <option value="REJECTED">REJECTED (Tolak Identitas)</option>
-              </select>
-            </div>
-
-            <!-- Template Kalimat Penolakan (Dropdown) -->
-            <div 
-              v-if="quickVerifyForm.decision === 'REJECTED'" 
-              class="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-2 animate-in fade-in duration-150"
-            >
-              <div class="flex items-center justify-between">
-                <label class="block text-xs font-black text-rose-900 dark:text-rose-200">
-                  Pilih Template Alasan Penolakan:
-                </label>
-                <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400">Otomatis Isi</span>
-              </div>
-              <select
-                v-model="selectedRejectTemplate"
-                @change="applyRejectTemplate"
-                class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-rose-300 dark:border-rose-800 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500 font-medium cursor-pointer"
-              >
-                <option value="">-- Pilih Kalimat Penolakan Cepat --</option>
-                <option v-for="(tpl, idx) in rejectionTemplates" :key="idx" :value="tpl">
-                  {{ tpl }}
-                </option>
-              </select>
-              <p class="text-[10.5px] text-rose-700/80 dark:text-rose-300/80 leading-tight">
-                Memilih salah satu template di atas akan langsung mengisi kolom Catatan di bawah ini. Anda tetap dapat mengedit teksnya sesuai kebutuhan.
-              </p>
-            </div>
-
-            <div>
-              <div class="flex items-center justify-between mb-1">
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Catatan Verifikasi {{ quickVerifyForm.decision === 'REJECTED' ? '(Alasan Penolakan)' : '(Opsional)' }}
-                </label>
-                <span v-if="quickVerifyForm.decision === 'REJECTED'" class="text-[10px] font-bold text-rose-600 dark:text-rose-400">
-                  *Dikirim via email
-                </span>
-              </div>
-              <textarea
-                v-model="quickVerifyForm.notes"
-                rows="3"
-                :placeholder="quickVerifyForm.decision === 'REJECTED' ? 'Pilih template di atas atau ketik alasan penolakan di sini...' : 'Contoh: Telah sesuai dokumen SIAK / fisik KTP-el'"
-                class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              ></textarea>
-            </div>
-
-            <div class="flex items-center justify-end gap-2 pt-2">
+            <!-- Sticky Footer Action Buttons (Selalu terlihat di HP) -->
+            <div class="shrink-0 p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-800/95 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5 z-10">
               <button
                 type="button"
                 @click="selectedApplicantForVerify = null"
-                class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-xs transition"
+                class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-200 dark:border-slate-600 transition shadow-xs cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 :disabled="quickVerifyForm.processing"
-                class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-sm disabled:opacity-50"
+                class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-md disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
               >
-                {{ quickVerifyForm.processing ? 'Menyimpan...' : 'Simpan Verifikasi' }}
+                <UserCheck class="w-4 h-4" />
+                <span>{{ quickVerifyForm.processing ? 'Menyimpan...' : 'Simpan Verifikasi' }}</span>
               </button>
             </div>
           </form>
@@ -511,10 +533,10 @@
     <Teleport to="body">
       <div 
         v-if="selectedApplicantForDelete"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm overflow-hidden"
         @click.self="selectedApplicantForDelete = null"
       >
-        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-rose-200 dark:border-rose-900 space-y-4">
+        <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-2xl border border-rose-200 dark:border-rose-900 space-y-4 max-h-[92vh] overflow-y-auto my-auto">
           <div class="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-inner">
             <Trash2 class="w-6 h-6" />
           </div>
