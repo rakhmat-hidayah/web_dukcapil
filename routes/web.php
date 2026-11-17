@@ -281,7 +281,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/visitor-analytics', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'index'])->name('visitor-analytics.index');
             Route::get('/visitor-analytics/export', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'export'])->name('visitor-analytics.export');
             Route::get('/visitor-analytics/online', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'onlineVisitors'])->name('visitor-analytics.online');
+            Route::delete('/visitor-analytics/security-scans', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'clearSecurityScans'])->name('visitor-analytics.clear-security-scans');
             Route::get('/visitor-analytics/{id}', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'show'])->name('visitor-analytics.show');
+            Route::delete('/visitor-analytics/{id}', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'destroy'])->name('visitor-analytics.destroy');
             Route::post('/visitor-analytics/{id}/retry-geolocation', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'retryGeolocation'])->name('visitor-analytics.retry-geolocation');
 
             // Visitor Analytics Retention Settings

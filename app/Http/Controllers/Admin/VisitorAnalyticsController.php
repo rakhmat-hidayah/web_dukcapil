@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\ProcessVisitorGeolocationJob;
 use App\Models\VisitorLog;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
@@ -440,6 +441,66 @@ class VisitorAnalyticsController extends Controller
         }
 
         return back()->with('success', 'Queue Geolocation berhasil dikirim ulang untuk IP ' . $log->ip_address);
+    }
+
+    /**
+     * Delete a single visitor log record.
+     */
+    public function destroy(int $id): RedirectResponse
+    {
+        try {
+            $log = VisitorLog::findOrFail($id);
+
+            if (self::geoTableExists()) {
+                \App\Models\VisitorGeolocation::where('visitor_log_id', $log->id)->delete();
+            }
+
+            $log->delete();
+
+            return back()->with('success', 'Log kunjungan #' . $id . ' berhasil dihapus.');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal menghapus log: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Clear all security scanner logs (probes, scanners, wp-login attempts).
+     */
+    public function clearSecurityScans(): RedirectResponse
+    {
+        try {
+            $hasIntelCols = Schema::hasColumn('visitor_logs', 'visitor_category');
+
+            $query = VisitorLog::query();
+            if ($hasIntelCols) {
+                $query->where('visitor_category', 'security_scanner');
+            } else {
+                $query->where('is_robot', true);
+            }
+
+            $count = $query->count();
+
+            if ($count === 0) {
+                return back()->with('info', 'Tidak ada log pemindaian keamanan yang perlu dihapus.');
+            }
+
+            if (self::geoTableExists()) {
+                $ids = $query->pluck('id')->toArray();
+                if (!empty($ids)) {
+                    \App\Models\VisitorGeolocation::whereIn('visitor_log_id', $ids)->delete();
+                }
+            }
+
+            if ($hasIntelCols) {
+                VisitorLog::where('visitor_category', 'security_scanner')->delete();
+            } else {
+                VisitorLog::where('is_robot', true)->delete();
+            }
+
+            return back()->with('success', "Sebanyak {$count} log pemindaian keamanan berhasil dihapus dan dibersihkan.");
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal membersihkan log pemindaian keamanan: ' . $e->getMessage());
+        }
     }
 
     /**

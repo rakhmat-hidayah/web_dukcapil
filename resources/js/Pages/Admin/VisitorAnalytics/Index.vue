@@ -376,6 +376,41 @@
         </div>
       </div>
 
+      <!-- Banner Khusus Mode Pemindaian Keamanan -->
+      <div 
+        v-if="filterForm.traffic_type === 'security'" 
+        class="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-rose-950 via-slate-900 to-indigo-950 text-white shadow-lg border border-rose-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in"
+      >
+        <div class="flex items-start sm:items-center gap-3">
+          <div class="p-3 bg-rose-500/20 text-rose-400 rounded-2xl border border-rose-400/30 shrink-0">
+            <ShieldAlert class="w-6 h-6 animate-pulse" />
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-sm sm:text-base font-black">Analisis Intelijen: Pemindaian Keamanan (Security Probes)</h3>
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500 text-emerald-950">
+                Status: Aman / Zero Impact
+              </span>
+            </div>
+            <p class="text-xs text-rose-200/90 leading-relaxed max-w-2xl">
+              Bot crawler liar mendeteksi probe WordPress (seperti <code class="bg-black/30 px-1 py-0.5 rounded font-mono text-[10px]">/wp-login.php</code>, <code class="bg-black/30 px-1 py-0.5 rounded font-mono text-[10px]">/wp-admin</code>, <code class="bg-black/30 px-1 py-0.5 rounded font-mono text-[10px]">xmlrpc.php</code>). Website Disdukcapil dibangun murni menggunakan <strong>Laravel</strong> (bukan WordPress) sehingga seluruh permintaan ini otomatis diblokir / 404 dan tidak membahayakan server.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button 
+            type="button"
+            @click="confirmClearSecurityScans"
+            :disabled="clearScansLoading || summary.security_scans === 0"
+            class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Trash2 class="w-4 h-4" />
+            <span>Bersihkan Log Pemindaian ({{ summary.security_scans || 0 }})</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Visitor Data Table -->
       <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
@@ -524,13 +559,23 @@
 
                 <!-- Aksi -->
                 <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                  <button 
-                    @click="openDetailModal(log.id)"
-                    class="px-3 py-1.5 bg-primary-50 hover:bg-primary-100 dark:bg-primary-950/40 dark:hover:bg-primary-900/60 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1 mx-auto"
-                  >
-                    <Eye class="w-3.5 h-3.5" />
-                    Detail
-                  </button>
+                  <div class="flex items-center justify-center gap-1.5">
+                    <button 
+                      @click="openDetailModal(log.id)"
+                      class="px-2.5 py-1.5 bg-primary-50 hover:bg-primary-100 dark:bg-primary-950/40 dark:hover:bg-primary-900/60 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1"
+                      title="Lihat detail lengkap log"
+                    >
+                      <Eye class="w-3.5 h-3.5" />
+                      Detail
+                    </button>
+                    <button 
+                      @click="deleteSingleLog(log.id)"
+                      class="p-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 rounded-xl transition cursor-pointer"
+                      title="Hapus log ini dari database"
+                    >
+                      <Trash2 class="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -849,7 +894,15 @@
           </div>
 
           <!-- Modal Footer -->
-          <div class="p-4 bg-gray-50 dark:bg-zinc-800/80 border-t border-gray-100 dark:border-zinc-800 flex justify-end shrink-0">
+          <div class="p-4 bg-gray-50 dark:bg-zinc-800/80 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between shrink-0">
+            <button 
+              type="button"
+              @click="deleteSingleLog(selectedVisitor.id)"
+              class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-2xl transition cursor-pointer flex items-center gap-1.5 shadow-xs"
+            >
+              <Trash2 class="w-3.5 h-3.5" />
+              <span>Hapus Log Ini</span>
+            </button>
             <button @click="detailModalOpen = false" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-gray-800 dark:text-zinc-100 text-xs font-bold rounded-2xl transition cursor-pointer">
               Tutup Rincian
             </button>
@@ -1035,7 +1088,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import axios from 'axios';
 import { 
   Activity, Users, UserCheck, Eye, Radio, RotateCw, Download, Search, X, 
-  Globe, Laptop, Smartphone, Tablet, Bot, MapPin, AlertTriangle, ShieldCheck, ShieldAlert 
+  Globe, Laptop, Smartphone, Tablet, Bot, MapPin, AlertTriangle, ShieldCheck, ShieldAlert, Trash2 
 } from '@lucide/vue';
 
 const props = defineProps({
@@ -1162,6 +1215,33 @@ const retryGeolocation = async (id) => {
     });
   } catch (err) {
     console.error('Failed to retry geolocation', err);
+  }
+};
+
+const clearScansLoading = ref(false);
+
+const confirmClearSecurityScans = () => {
+  if (confirm('Apakah Anda yakin ingin menghapus dan membersihkan seluruh riwayat log pemindaian keamanan (security scanner)? Log ini aman dihapus untuk membersihkan database.')) {
+    clearScansLoading.value = true;
+    router.delete(route('admin.visitor-analytics.clear-security-scans'), {
+      preserveScroll: true,
+      onFinish: () => {
+        clearScansLoading.value = false;
+      }
+    });
+  }
+};
+
+const deleteSingleLog = (id) => {
+  if (confirm(`Apakah Anda yakin ingin menghapus log kunjungan #${id}?`)) {
+    router.delete(route('admin.visitor-analytics.destroy', id), {
+      preserveScroll: true,
+      onSuccess: () => {
+        if (detailModalOpen.value && selectedVisitor.value?.id === id) {
+          detailModalOpen.value = false;
+        }
+      }
+    });
   }
 };
 
