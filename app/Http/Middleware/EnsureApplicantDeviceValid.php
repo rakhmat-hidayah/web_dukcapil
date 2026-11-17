@@ -31,20 +31,28 @@ class EnsureApplicantDeviceValid
                 $request->session()->regenerateToken();
             }
 
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => 'LOGIN KHUSUS PERANGKAT MOBILE: Sesi akun pemohon hanya dapat digunakan melalui smartphone. Akses dari komputer/laptop ditolak demi keamanan sistem.',
-                ], 403);
+            // For GET navigations (web browser & Inertia SPA):
+            if ($request->isMethod('GET')) {
+                if ($request->expectsJson() && !$request->header('X-Inertia')) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'LOGIN KHUSUS PERANGKAT MOBILE: Sesi akun pemohon hanya dapat digunakan melalui smartphone. Akses dari komputer/laptop ditolak demi keamanan sistem.',
+                    ], 403);
+                }
+
+                return redirect()->route('applicant.login')
+                    ->with('desktop_restriction', true)
+                    ->with('warning', 'Layanan akun pemohon hanya dapat diakses melalui smartphone. Akses melalui komputer/laptop ditutup demi keamanan.');
             }
 
             if ($request->header('X-Inertia')) {
                 abort(403, 'LOGIN KHUSUS PERANGKAT MOBILE: Sesi akun pemohon hanya dapat digunakan melalui smartphone (HP). Akses melalui komputer/laptop ditolak.');
             }
 
-            return redirect()->route('applicant.login')
-                ->with('desktop_restriction', true)
-                ->with('warning', 'Layanan akun pemohon hanya dapat diakses melalui smartphone. Akses melalui komputer/laptop ditutup demi keamanan.');
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'LOGIN KHUSUS PERANGKAT MOBILE: Sesi akun pemohon hanya dapat digunakan melalui smartphone. Akses dari komputer/laptop ditolak demi keamanan sistem.',
+            ], 403);
         }
 
         // 1. If not authenticated via session, check persistent device cookie for auto-login
@@ -69,7 +77,7 @@ class EnsureApplicantDeviceValid
 
         // 2. If still unauthenticated, redirect to applicant login
         if (!$guard->check()) {
-            if ($request->expectsJson()) {
+            if ($request->expectsJson() && !$request->header('X-Inertia')) {
                 return response()->json(['message' => 'Unauthenticated.'], 401);
             }
             return redirect()->route('applicant.login')
@@ -103,16 +111,12 @@ class EnsureApplicantDeviceValid
             $request->session()->regenerateToken();
 
             return redirect()->route('applicant.login')
-                ->with('error', 'Sesi perangkat Anda tidak valid atau telah dicabut oleh administrator / proses pemulihan akun.')
+                ->with('error', 'Sesi Anda telah berakhir atau akun telah aktif di perangkat browser lain. Sistem hanya mengizinkan 1 perangkat aktif per akun.')
                 ->withCookie($this->deviceService->createExpiredCookie());
         }
 
-        // 5. Throttled update of last_seen_at (max once every 5 minutes per session)
-        $lastRecorded = session('applicant_device_last_seen', 0);
-        if (now()->timestamp - $lastRecorded > 300) {
-            $validDevice->update(['last_seen_at' => now()]);
-            session(['applicant_device_last_seen' => now()->timestamp]);
-        }
+        // 5. Update last seen timestamp of the active device
+        $validDevice->update(['last_seen_at' => now()]);
 
         return $next($request);
     }

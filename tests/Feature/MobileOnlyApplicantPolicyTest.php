@@ -117,6 +117,22 @@ class MobileOnlyApplicantPolicyTest extends TestCase
     }
 
     /**
+     * Skenario A7: Desktop clicking queue registration (via Inertia navigation) redirects gracefully to login with restriction notice.
+     */
+    public function test_desktop_clicking_queue_apply_via_inertia_redirects_to_login_page(): void
+    {
+        $version = (new \App\Http\Middleware\HandleInertiaRequests)->version(request());
+
+        $response = $this->withHeaders([
+            'User-Agent'        => $this->desktopUa,
+            'X-Inertia'         => 'true',
+            'X-Inertia-Version' => $version,
+        ])->get(route('queue.apply.create'));
+
+        $response->assertRedirect(route('applicant.login'));
+    }
+
+    /**
      * Skenario B1: Smartphone opens login page with device_policy.is_mobile = true.
      */
     public function test_smartphone_can_view_applicant_login_page_as_mobile(): void

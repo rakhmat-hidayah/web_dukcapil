@@ -34,12 +34,8 @@ class EnsureApplicantUsesMobileDevice
 
         $friendlyMessage = 'LOGIN KHUSUS PERANGKAT MOBILE: Untuk menjaga keamanan dan memastikan proses pengajuan layanan berjalan optimal, akses autentikasi akun pemohon hanya dapat dilakukan melalui smartphone (HP). Akses melalui komputer atau laptop tidak diperbolehkan.';
 
-        // 4. Handle JSON / API / AJAX / Inertia POST requests
-        if ($request->expectsJson() || $request->isXmlHttpRequest() || $request->isMethod('POST') || $request->isMethod('PUT') || $request->isMethod('DELETE')) {
-            if ($request->header('X-Inertia')) {
-                abort(403, $friendlyMessage);
-            }
-
+        // 4. For programmatic API clients expecting JSON (e.g., cURL, Postman) on GET requests:
+        if ($request->isMethod('GET') && $request->expectsJson() && !$request->header('X-Inertia')) {
             return response()->json([
                 'status'           => 'error',
                 'code'             => 403,
@@ -49,11 +45,27 @@ class EnsureApplicantUsesMobileDevice
             ], 403);
         }
 
-        // 5. Handle standard GET requests (e.g. attempting to open registration or dashboard from desktop)
-        // Redirect to the login page where friendly desktop notice is presented
-        return redirect()->route('applicant.login')
-            ->with('desktop_restriction', true)
-            ->with('warning', 'Layanan pemohon hanya dapat diakses melalui smartphone. Silakan gunakan HP Anda untuk login atau mendaftar.');
+        // 5. For page navigation (standard browser GET and Inertia SPA <Link> navigations):
+        // Redirect smoothly to applicant login where friendly desktop notice is presented
+        if ($request->isMethod('GET')) {
+            return redirect()->route('applicant.login')
+                ->with('desktop_restriction', true)
+                ->with('warning', 'Layanan pemohon hanya dapat diakses melalui smartphone. Silakan gunakan HP Anda untuk login atau mendaftar.');
+        }
+
+        // 6. For POST / PUT / DELETE mutation requests (login submission, registration, OTP):
+        // Strictly reject desktop mutations with HTTP 403
+        if ($request->header('X-Inertia')) {
+            abort(403, $friendlyMessage);
+        }
+
+        return response()->json([
+            'status'           => 'error',
+            'code'             => 403,
+            'message'          => $friendlyMessage,
+            'device_category'  => $detection['category'],
+            'rejection_reason' => $detection['rejection_reason'],
+        ], 403);
     }
 
     /**
