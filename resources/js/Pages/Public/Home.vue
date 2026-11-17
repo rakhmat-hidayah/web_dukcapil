@@ -148,10 +148,11 @@
             </Link>
 
             <Link 
-              href="/layanan/antrian" 
-              class="px-5 py-3.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs sm:text-sm font-bold rounded-2xl backdrop-blur-md transition flex items-center justify-center gap-1.5 flex-1 md:flex-initial"
+              href="/layanan" 
+              class="px-5 py-3.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs sm:text-sm font-bold rounded-2xl backdrop-blur-md transition flex items-center justify-center gap-1.5 flex-1 md:flex-initial cursor-pointer"
             >
-              <span>Cek Status &amp; Kuota</span>
+              <FileText class="w-4 h-4 text-white" />
+              <span>Cek Syarat Layanan</span>
             </Link>
           </div>
         </div>
