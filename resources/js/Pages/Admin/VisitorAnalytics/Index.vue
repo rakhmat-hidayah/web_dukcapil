@@ -25,7 +25,16 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex items-center gap-3 shrink-0">
+          <div class="flex items-center gap-3 shrink-0 flex-wrap">
+            <button 
+              @click="openOnlineModal"
+              class="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 backdrop-blur-md border border-emerald-400/40 text-emerald-200 text-xs font-bold rounded-2xl transition flex items-center gap-2 active:scale-95 cursor-pointer shadow-sm"
+              title="Lihat detail lengkap pengunjung online"
+            >
+              <Radio class="w-4 h-4 text-emerald-400 animate-pulse" />
+              <span>Detail Online ({{ summary.online_visitors || 0 }} Live)</span>
+            </button>
+
             <button 
               @click="refreshData" 
               :disabled="loading"
@@ -50,7 +59,11 @@
       <!-- Summary Cards Grid (6 Cards) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <!-- Card 1: Human Visitors (Isolated) -->
-        <div class="p-5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2">
+        <div 
+          @click="setTrafficType('human')"
+          class="p-5 bg-white dark:bg-zinc-900 border rounded-3xl shadow-sm space-y-2 cursor-pointer transition hover:border-emerald-400 hover:shadow-md"
+          :class="filterForm.traffic_type === 'human' ? 'ring-2 ring-emerald-500 border-emerald-400' : 'border-gray-100 dark:border-zinc-800'"
+        >
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Pengunjung Manusia</span>
             <div class="p-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl">
@@ -64,7 +77,10 @@
         </div>
 
         <!-- Card 2: Unique Humans -->
-        <div class="p-5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2">
+        <div 
+          @click="setTrafficType('human')"
+          class="p-5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2 cursor-pointer transition hover:border-blue-400 hover:shadow-md"
+        >
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Pengunjung Unik</span>
             <div class="p-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl">
@@ -78,10 +94,16 @@
         </div>
 
         <!-- Card 3: Online Visitors (Active Now) -->
-        <div class="p-5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2">
+        <div 
+          @click="openOnlineModal"
+          class="p-5 bg-white dark:bg-zinc-900 border rounded-3xl shadow-sm space-y-2 cursor-pointer transition-all hover:shadow-md group relative overflow-hidden"
+          :class="filterForm.traffic_type === 'online' 
+            ? 'border-emerald-500 ring-2 ring-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/20' 
+            : 'border-gray-100 dark:border-zinc-800 hover:border-emerald-400'"
+        >
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Pengunjung Aktif</span>
-            <div class="p-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl">
+            <div class="p-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl group-hover:scale-110 transition-transform">
               <Radio class="w-4 h-4 text-emerald-500 animate-pulse" />
             </div>
           </div>
@@ -94,11 +116,20 @@
               Live
             </span>
           </div>
-          <p class="text-[10px] text-gray-400 font-medium">Pengunjung aktif (5m terakhir)</p>
+          <div class="flex items-center justify-between pt-0.5">
+            <p class="text-[10px] text-gray-400 font-medium">Pengunjung aktif (5m terakhir)</p>
+            <span class="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform">
+              Detail Live →
+            </span>
+          </div>
         </div>
 
         <!-- Card 4: Bot Visitors -->
-        <div class="p-5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2">
+        <div 
+          @click="setTrafficType('bots')"
+          class="p-5 bg-white dark:bg-zinc-900 border rounded-3xl shadow-sm space-y-2 cursor-pointer transition hover:border-indigo-400 hover:shadow-md"
+          :class="filterForm.traffic_type === 'bots' ? 'ring-2 ring-indigo-500 border-indigo-400' : 'border-gray-100 dark:border-zinc-800'"
+        >
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Kunjungan Bot</span>
             <div class="p-2 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl">
@@ -112,7 +143,11 @@
         </div>
 
         <!-- Card 5: Security Scans -->
-        <div class="p-5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm space-y-2">
+        <div 
+          @click="setTrafficType('security')"
+          class="p-5 bg-white dark:bg-zinc-900 border rounded-3xl shadow-sm space-y-2 cursor-pointer transition hover:border-rose-400 hover:shadow-md"
+          :class="filterForm.traffic_type === 'security' ? 'ring-2 ring-rose-500 border-rose-400' : 'border-gray-100 dark:border-zinc-800'"
+        >
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Pemindaian Keamanan</span>
             <div class="p-2 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 rounded-xl">
@@ -142,6 +177,27 @@
 
       <!-- Traffic Category Tab Selector -->
       <div class="flex flex-wrap items-center gap-2 p-1.5 bg-gray-100 dark:bg-zinc-800/80 rounded-2xl w-fit border border-gray-200/60 dark:border-zinc-700/60">
+        <!-- TAB 1: PENGUNJUNG ONLINE LIVE -->
+        <button 
+          @click="setTrafficType('online')"
+          class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer relative"
+          :class="filterForm.traffic_type === 'online' 
+            ? 'bg-emerald-600 text-white shadow-md' 
+            : 'text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white'"
+        >
+          <Radio class="w-4 h-4 text-emerald-400 animate-pulse" />
+          <span>🟢 Pengunjung Online</span>
+          <span 
+            class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border"
+            :class="filterForm.traffic_type === 'online' 
+              ? 'bg-emerald-500/30 text-white border-emerald-400/40' 
+              : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-300/60 dark:border-emerald-800'"
+          >
+            {{ summary.online_visitors || 0 }} Live
+          </span>
+        </button>
+
+        <!-- TAB 2: PENGUNJUNG MANUSIA -->
         <button 
           @click="setTrafficType('human')"
           class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer"
@@ -151,6 +207,7 @@
           <span>👤 Pengunjung Manusia (Default)</span>
         </button>
 
+        <!-- TAB 3: BOTS -->
         <button 
           @click="setTrafficType('bots')"
           class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer"
@@ -160,6 +217,7 @@
           <span>🤖 Bot &amp; Perayap (Crawler)</span>
         </button>
 
+        <!-- TAB 4: SECURITY -->
         <button 
           @click="setTrafficType('security')"
           class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer"
@@ -169,6 +227,7 @@
           <span>🛡️ Pemindaian Keamanan</span>
         </button>
 
+        <!-- TAB 5: ALL TRAFFIC -->
         <button 
           @click="setTrafficType('all')"
           class="px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer"
@@ -273,6 +332,50 @@
         </div>
       </div>
 
+      <!-- Banner Khusus Mode Pantau Pengunjung Online -->
+      <div 
+        v-if="filterForm.traffic_type === 'online'" 
+        class="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-emerald-950 via-teal-950 to-slate-900 text-white shadow-lg border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in"
+      >
+        <div class="flex items-start sm:items-center gap-3">
+          <div class="p-3 bg-emerald-500/20 text-emerald-400 rounded-2xl border border-emerald-400/30 shrink-0">
+            <Radio class="w-6 h-6 animate-pulse" />
+          </div>
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-sm sm:text-base font-black">Mode Pantau Pengunjung Online (Live)</h3>
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500 text-emerald-950">
+                <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                {{ summary.online_visitors || 0 }} Aktif (5 Menit Terakhir)
+              </span>
+            </div>
+            <p class="text-xs text-emerald-200/80">
+              Tabel di bawah difilter khusus menampilkan riwayat kunjungan manusia asli yang aktif dalam 5 menit terakhir secara real-time.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button 
+            type="button"
+            @click="openOnlineModal"
+            class="px-4 py-2.5 rounded-xl bg-white text-emerald-950 font-black text-xs hover:bg-emerald-50 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            <Eye class="w-4 h-4 text-emerald-700" />
+            <span>Buka Detail Online</span>
+          </button>
+          <button 
+            type="button"
+            @click="refreshData" 
+            :disabled="loading"
+            class="p-2.5 rounded-xl bg-emerald-800/60 hover:bg-emerald-700/60 text-white border border-emerald-600/40 transition cursor-pointer"
+            title="Segarkan data live"
+          >
+            <RotateCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
+          </button>
+        </div>
+      </div>
+
       <!-- Visitor Data Table -->
       <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
@@ -307,9 +410,18 @@
                 <!-- Klasifikasi & Intelijen Traffic -->
                 <td class="py-3.5 px-4 whitespace-nowrap">
                   <!-- Human Badge -->
-                  <div v-if="log.is_human" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200/50">
-                    <UserCheck class="w-3 h-3 text-emerald-600" />
-                    👤 HUMAN
+                  <div v-if="log.is_human" class="flex flex-col items-start gap-1">
+                    <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200/50">
+                      <UserCheck class="w-3 h-3 text-emerald-600" />
+                      👤 HUMAN
+                    </div>
+                    <span 
+                      v-if="log.is_online" 
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700"
+                    >
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                      LIVE ONLINE
+                    </span>
                   </div>
 
                   <!-- Security Scanner Badge -->
@@ -745,11 +857,179 @@
         </div>
       </div>
     </transition>
+
+    <!-- MODAL DETAIL PENGUNJUNG ONLINE (LIVE) -->
+    <transition name="fade">
+      <div v-if="onlineModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs">
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[92vh] flex flex-col animate-scale-up">
+          <!-- Modal Header -->
+          <div class="p-4 sm:p-5 bg-gradient-to-r from-emerald-900 via-teal-950 to-slate-900 text-white flex justify-between items-center shrink-0">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 bg-emerald-500/20 text-emerald-300 rounded-2xl border border-emerald-400/30">
+                <Radio class="w-5 h-5 animate-pulse text-emerald-400" />
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm sm:text-base font-black">Detail Pengunjung Online</h3>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500 text-emerald-950">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                    {{ onlineVisitorsData.length }} Pengunjung Aktif
+                  </span>
+                </div>
+                <p class="text-[11px] text-emerald-200/80">
+                  Data aktivitas manusia asli dalam 5 menit terakhir (Pembaruan Real-Time)
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button 
+                type="button"
+                @click="fetchOnlineVisitors"
+                :disabled="onlineLoading"
+                class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-white/10"
+                title="Segarkan data pengunjung online"
+              >
+                <RotateCw class="w-3.5 h-3.5" :class="{ 'animate-spin': onlineLoading }" />
+                <span class="hidden sm:inline">Segarkan Data</span>
+              </button>
+              <button 
+                @click="onlineModalOpen = false" 
+                class="p-2 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition cursor-pointer"
+              >
+                <X class="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+            <!-- Loading Indicator -->
+            <div v-if="onlineLoading && onlineVisitorsData.length === 0" class="py-12 text-center text-gray-400 space-y-3">
+              <RotateCw class="w-8 h-8 animate-spin mx-auto text-emerald-500" />
+              <p class="text-xs font-bold">Memuat daftar pengunjung online terbaru...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else-if="onlineVisitorsData.length === 0" class="py-12 text-center text-gray-400 space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-zinc-800 text-gray-400 flex items-center justify-center mx-auto">
+                <Users class="w-6 h-6" />
+              </div>
+              <p class="text-xs font-bold text-gray-600 dark:text-zinc-300">Tidak ada pengunjung aktif saat ini</p>
+              <p class="text-[11px] text-gray-400">Belum ada aktivitas browsing dalam rentang 5 menit terakhir.</p>
+            </div>
+
+            <!-- Online Visitors List (Cards) -->
+            <div v-else class="space-y-3">
+              <div 
+                v-for="(visitor, idx) in onlineVisitorsData" 
+                :key="visitor.id || idx"
+                class="p-4 rounded-2xl border border-gray-200/80 dark:border-zinc-800 bg-gray-50/70 dark:bg-zinc-800/40 hover:border-emerald-300 dark:hover:border-emerald-700/60 transition space-y-3"
+              >
+                <!-- Top Row: Status, Active Time, Device -->
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200/50 dark:border-zinc-700/50 pb-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                      AKTIF SEKARANG
+                    </span>
+                    <span class="text-[11px] font-semibold text-slate-500 dark:text-zinc-400">
+                      {{ visitor.visited_time_ago }} ({{ visitor.visited_at }})
+                    </span>
+                  </div>
+
+                  <div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-700 dark:text-zinc-200">
+                    <Smartphone v-if="visitor.device_type === 'Mobile'" class="w-3.5 h-3.5 text-blue-500" />
+                    <Tablet v-else-if="visitor.device_type === 'Tablet'" class="w-3.5 h-3.5 text-purple-500" />
+                    <Laptop v-else class="w-3.5 h-3.5 text-slate-500" />
+                    <span>{{ visitor.browser }} &bull; {{ visitor.operating_system }}</span>
+                  </div>
+                </div>
+
+                <!-- Mid Row: IP & Geolocation / ISP -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                  <div class="space-y-1">
+                    <p class="text-[10px] uppercase font-bold text-gray-400">IP Address &amp; Sesi</p>
+                    <div class="flex items-center gap-2">
+                      <span class="font-mono text-xs font-bold text-slate-800 dark:text-zinc-100 bg-white dark:bg-zinc-900 px-2 py-0.5 rounded-lg border border-gray-200 dark:border-zinc-700">
+                        {{ visitor.full_ip || visitor.masked_ip }}
+                      </span>
+                      <span class="text-[10px] text-gray-400 font-mono truncate max-w-[120px]" :title="visitor.visitor_uuid">
+                        UUID: {{ (visitor.visitor_uuid || '').slice(0, 8) }}...
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="space-y-1">
+                    <p class="text-[10px] uppercase font-bold text-gray-400">Lokasi &amp; ISP Jaringan</p>
+                    <p class="font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-1.5">
+                      <MapPin class="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                      <span v-if="visitor.geolocation && (visitor.geolocation.city || visitor.geolocation.province)">
+                        {{ [visitor.geolocation.city, visitor.geolocation.province, visitor.geolocation.country].filter(Boolean).join(', ') }}
+                      </span>
+                      <span v-else class="text-gray-400 italic font-normal">
+                        Lokasi sedang diproses...
+                      </span>
+                    </p>
+                    <p v-if="visitor.geolocation?.isp && visitor.geolocation.isp !== '-'" class="text-[10px] text-gray-500 dark:text-zinc-400">
+                      ISP: {{ visitor.geolocation.isp }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Bottom Row: Halaman Sedang Dibuka & Aksi -->
+                <div class="pt-2 border-t border-gray-200/50 dark:border-zinc-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div class="flex-1 min-w-0">
+                    <p class="text-[10px] uppercase font-bold text-gray-400">Halaman Sedang Diakses</p>
+                    <a 
+                      :href="visitor.url" 
+                      target="_blank" 
+                      class="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 hover:underline truncate block"
+                      :title="visitor.url"
+                    >
+                      {{ visitor.url }}
+                    </a>
+                  </div>
+
+                  <button 
+                    type="button"
+                    @click="openDetailModal(visitor.id)"
+                    class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-zinc-700 dark:hover:bg-zinc-600 text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  >
+                    <Eye class="w-3.5 h-3.5" />
+                    <span>Rincian Lengkap</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="p-4 bg-gray-50 dark:bg-zinc-800/80 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between shrink-0">
+            <button 
+              type="button"
+              @click="viewAllOnlineInTable"
+              class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <Globe class="w-3.5 h-3.5" />
+              <span>Tampilkan Filter Online di Tabel Kunjungan</span>
+            </button>
+
+            <button 
+              @click="onlineModalOpen = false" 
+              class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-gray-800 dark:text-zinc-100 text-xs font-bold rounded-xl transition cursor-pointer"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </AdminLayout>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUpdated, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, onUpdated, nextTick } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import axios from 'axios';
@@ -764,12 +1044,47 @@ const props = defineProps({
   filters: Object,
   browserOptions: Array,
   deviceOptions: Array,
+  onlineVisitors: Array,
 });
 
 const loading = ref(false);
 const detailModalOpen = ref(false);
 const detailLoading = ref(false);
 const selectedVisitor = ref(null);
+
+const onlineModalOpen = ref(false);
+const onlineLoading = ref(false);
+const onlineVisitorsData = ref(props.onlineVisitors || []);
+
+watch(() => props.onlineVisitors, (newVal) => {
+  if (newVal) {
+    onlineVisitorsData.value = newVal;
+  }
+}, { immediate: true });
+
+const openOnlineModal = () => {
+  onlineModalOpen.value = true;
+  fetchOnlineVisitors();
+};
+
+const fetchOnlineVisitors = async () => {
+  onlineLoading.value = true;
+  try {
+    const res = await axios.get(route('admin.visitor-analytics.online'));
+    if (res.data?.success && Array.isArray(res.data.data)) {
+      onlineVisitorsData.value = res.data.data;
+    }
+  } catch (err) {
+    console.error('Failed to fetch online visitors', err);
+  } finally {
+    onlineLoading.value = false;
+  }
+};
+
+const viewAllOnlineInTable = () => {
+  onlineModalOpen.value = false;
+  setTrafficType('online');
+};
 
 const filterForm = ref({
   search: props.filters?.search || '',

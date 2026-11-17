@@ -280,6 +280,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('role:Super Administrator|Administrator Utama|Website Administrator|Administrator Website')->group(function () {
             Route::get('/visitor-analytics', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'index'])->name('visitor-analytics.index');
             Route::get('/visitor-analytics/export', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'export'])->name('visitor-analytics.export');
+            Route::get('/visitor-analytics/online', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'onlineVisitors'])->name('visitor-analytics.online');
             Route::get('/visitor-analytics/{id}', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'show'])->name('visitor-analytics.show');
             Route::post('/visitor-analytics/{id}/retry-geolocation', [\App\Http\Controllers\Admin\VisitorAnalyticsController::class, 'retryGeolocation'])->name('visitor-analytics.retry-geolocation');
 

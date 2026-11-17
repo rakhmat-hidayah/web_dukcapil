@@ -141,9 +141,18 @@ class VisitorAnalyticsController extends Controller
                 ? VisitorLog::with('geolocation')->orderBy('id', 'desc')
                 : VisitorLog::orderBy('id', 'desc');
 
-            // Apply Traffic Type Filter (human | bots | security | all) - Default: human
+            // Apply Traffic Type Filter (human | online | bots | security | all) - Default: human
             $trafficType = $request->get('traffic_type', 'human');
-            if ($hasIntelCols) {
+            if ($trafficType === 'online') {
+                $query->where('created_at', '>=', now()->subMinutes(5));
+                if ($hasIntelCols) {
+                    $query->where('is_human', true)
+                          ->where('is_robot', false)
+                          ->where(fn ($q) => $q->whereNull('visitor_category')->orWhere('visitor_category', 'human'));
+                } else {
+                    $query->where('is_robot', false);
+                }
+            } elseif ($hasIntelCols) {
                 if ($trafficType === 'human') {
                     $query->where('is_human', true)
                           ->where('is_robot', false)
@@ -216,6 +225,7 @@ class VisitorAnalyticsController extends Controller
                     'device_type'              => $log->device_type ?? $log->device ?? 'Desktop',
                     'is_robot'                 => (bool) $log->is_robot,
                     'is_human'                 => isset($log->is_human) ? (bool) $log->is_human : ! (bool) $log->is_robot,
+                    'is_online'                => $log->created_at ? (now()->diffInSeconds($log->created_at) <= 300) : false,
                     'visitor_category'         => $log->visitor_category ?? ((bool) $log->is_robot ? 'unknown_bot' : 'human'),
                     'bot_name'                 => $log->bot_name ?? null,
                     'detection_reason'         => $log->detection_reason ?? ((bool) $log->is_robot ? 'Matched User Agent: Robot' : 'Legitimate Human Session'),
@@ -266,6 +276,7 @@ class VisitorAnalyticsController extends Controller
         }
 
         $deviceOptions = ['Desktop', 'Mobile', 'Tablet', 'Robot'];
+        $onlineVisitors = self::getOnlineVisitorsList(60);
 
         return Inertia::render('Admin/VisitorAnalytics/Index', [
             'summary'        => $summary,
@@ -280,6 +291,86 @@ class VisitorAnalyticsController extends Controller
             ],
             'browserOptions' => $browserOptions,
             'deviceOptions'  => $deviceOptions,
+            'onlineVisitors' => $onlineVisitors,
+        ]);
+    }
+
+    /**
+     * Fetch active online visitors within last 5 minutes.
+     * Grouped by visitor_uuid with their latest activity and geolocation.
+     */
+    public static function getOnlineVisitorsList(int $limit = 60): array
+    {
+        try {
+            $fiveMinsAgo = now()->subMinutes(5);
+            $hasIntelCols = Schema::hasColumn('visitor_logs', 'visitor_category');
+
+            $query = self::geoTableExists()
+                ? VisitorLog::with('geolocation')
+                : VisitorLog::query();
+
+            $logs = $query->where('created_at', '>=', $fiveMinsAgo)
+                ->when($hasIntelCols, function ($q) {
+                    $q->where('is_human', true)
+                      ->where('is_robot', false)
+                      ->where(fn ($sq) => $sq->whereNull('visitor_category')->orWhere('visitor_category', 'human'));
+                }, function ($q) {
+                    $q->where('is_robot', false);
+                })
+                ->orderByDesc('id')
+                ->limit($limit * 3)
+                ->get();
+
+            return $logs->unique('visitor_uuid')->take($limit)->values()->map(function ($log) {
+                $geo = self::geoTableExists() ? ($log->geolocation ?? null) : null;
+                $createdAt = $log->created_at;
+                return [
+                    'id'                       => $log->id,
+                    'visitor_uuid'             => $log->visitor_uuid ?? 'N/A',
+                    'session_id'               => $log->session_id ?? 'N/A',
+                    'full_ip'                  => $log->ip_address,
+                    'masked_ip'                => $log->masked_ip,
+                    'url'                      => $log->url,
+                    'method'                   => $log->method,
+                    'browser'                  => $log->browser ?? 'Unknown',
+                    'browser_version'          => $log->browser_version,
+                    'operating_system'         => $log->operating_system ?? $log->platform ?? 'Unknown',
+                    'operating_system_version' => $log->operating_system_version,
+                    'device_type'              => $log->device_type ?? $log->device ?? 'Desktop',
+                    'visited_at'               => self::formatDate($log->visited_at ?? $log->created_at),
+                    'visited_time_ago'         => $createdAt
+                        ? ($createdAt instanceof \DateTimeInterface ? $createdAt->diffForHumans() : \Illuminate\Support\Carbon::parse($createdAt)->diffForHumans())
+                        : 'Baru saja',
+                    'seconds_ago'              => $createdAt ? max(1, now()->diffInSeconds($createdAt)) : 1,
+                    'geolocation'              => $geo ? [
+                        'status'       => $geo->status,
+                        'country'      => $geo->country,
+                        'country_code' => $geo->country_code,
+                        'province'     => $geo->province,
+                        'city'         => $geo->city,
+                        'district'     => $geo->district ?? '-',
+                        'isp'          => $geo->isp ?? '-',
+                        'asn'          => $geo->asn ?? '-',
+                    ] : null,
+                ];
+            })->all();
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Get JSON list of active online visitors (last 5 minutes) with real-time details.
+     */
+    public function onlineVisitors(): JsonResponse
+    {
+        $list = self::getOnlineVisitorsList(100);
+
+        return response()->json([
+            'success'     => true,
+            'count'       => count($list),
+            'data'        => $list,
+            'server_time' => now()->format('H:i:s'),
         ]);
     }
 
@@ -314,6 +405,7 @@ class VisitorAnalyticsController extends Controller
                     'device_type'              => $log->device_type ?? $log->device,
                     'is_robot'                 => (bool) $log->is_robot,
                     'is_human'                 => isset($log->is_human) ? (bool) $log->is_human : ! (bool) $log->is_robot,
+                    'is_online'                => $log->created_at ? (now()->diffInSeconds($log->created_at) <= 300) : false,
                     'visitor_category'         => $log->visitor_category ?? ((bool) $log->is_robot ? 'unknown_bot' : 'human'),
                     'bot_name'                 => $log->bot_name ?? null,
                     'detection_reason'         => $log->detection_reason ?? ((bool) $log->is_robot ? 'Matched User Agent: Robot' : 'Legitimate Human Session'),
@@ -358,6 +450,30 @@ class VisitorAnalyticsController extends Controller
         $query = self::geoTableExists()
             ? VisitorLog::with('geolocation')->orderBy('id', 'desc')
             : VisitorLog::orderBy('id', 'desc');
+
+        $trafficType = $request->get('traffic_type');
+        $hasIntelCols = Schema::hasColumn('visitor_logs', 'visitor_category');
+
+        if ($trafficType === 'online') {
+            $query->where('created_at', '>=', now()->subMinutes(5));
+            if ($hasIntelCols) {
+                $query->where('is_human', true)->where('is_robot', false);
+            } else {
+                $query->where('is_robot', false);
+            }
+        } elseif ($trafficType === 'human') {
+            if ($hasIntelCols) {
+                $query->where('is_human', true)->where('is_robot', false);
+            } else {
+                $query->where('is_robot', false);
+            }
+        } elseif ($trafficType === 'bots') {
+            $query->where(fn ($q) => $q->where('is_human', false)->orWhere('is_robot', true));
+        } elseif ($trafficType === 'security') {
+            if ($hasIntelCols) {
+                $query->where('visitor_category', 'security_scanner');
+            }
+        }
 
         if ($search = trim($request->get('search', ''))) {
             $query->where(function ($q) use ($search) {
