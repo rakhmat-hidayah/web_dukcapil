@@ -15,7 +15,7 @@
       </div>
 
       <!-- Account Overview Header -->
-      <div class="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="space-y-3">
           <div>
             <div class="flex items-center gap-2">
@@ -144,23 +144,23 @@
       </div>
 
       <!-- Card: Foto Selfie Wajah Pemohon (Biometrik Pendaftaran) -->
-      <div class="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-        <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-700">
-          <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-            <Camera class="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span>Foto Selfie Wajah Pemohon (Biometrik Pendaftaran)</span>
+      <div class="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3 border-slate-100 dark:border-slate-700">
+          <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2 min-w-0">
+            <Camera class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            <span class="leading-tight">Foto Selfie Wajah Pemohon (Biometrik Pendaftaran)</span>
           </h2>
           <span
             v-if="account.has_selfie"
-            class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900"
+            class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900 shrink-0 w-fit"
           >
             Tersimpan Sementara (Menunggu Verifikasi)
           </span>
           <span
             v-else-if="account.is_selfie_destroyed"
-            class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900 flex items-center gap-1"
+            class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900 flex items-center gap-1 shrink-0 w-fit"
           >
-            <ShieldCheck class="w-3.5 h-3.5" />
+            <ShieldCheck class="w-3.5 h-3.5 shrink-0" />
             <span>Foto Dimusnahkan Pasca Verifikasi (Aman)</span>
           </span>
         </div>
@@ -222,11 +222,11 @@
       <!-- Grid: Devices & Applications -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Card 1: Perangkat Terikat & Riwayat Perangkat -->
-        <div class="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-          <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-700">
-            <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <Smartphone class="w-4 h-4 text-purple-600" />
-              <span>Status Perangkat (One Account One Browser)</span>
+        <div class="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+          <div class="flex items-center justify-between gap-3 border-b pb-3 border-slate-100 dark:border-slate-700">
+            <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2 min-w-0">
+              <Smartphone class="w-4 h-4 text-purple-600 shrink-0" />
+              <span class="leading-tight">Status Perangkat (One Account One Browser)</span>
             </h2>
           </div>
 
@@ -278,13 +278,15 @@
         </div>
 
         <!-- Card 2: Permohonan Terkait -->
-        <div class="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-          <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-700">
-            <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <FileText class="w-4 h-4 text-blue-600" />
-              <span>Permohonan Pelayanan Terkait</span>
+        <div class="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+          <div class="flex items-center justify-between gap-3 border-b pb-3 border-slate-100 dark:border-slate-700">
+            <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2 min-w-0">
+              <FileText class="w-4 h-4 text-blue-600 shrink-0" />
+              <span class="leading-tight">Permohonan Pelayanan Terkait</span>
             </h2>
-            <span class="text-xs text-slate-500 font-bold">{{ applications.length }} Data</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 text-[11px] font-bold shrink-0 whitespace-nowrap">
+              {{ applications.length }} Data
+            </span>
           </div>
 
           <div v-if="applications.length === 0" class="text-xs text-slate-400 italic py-4 text-center">
@@ -311,13 +313,15 @@
       </div>
 
       <!-- Audit Trail Log Table -->
-      <div class="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-        <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-700">
-          <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-            <History class="w-4 h-4 text-slate-600 dark:text-slate-400" />
-            <span>Audit Log Keamanan Perangkat & Akun</span>
+      <div class="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+        <div class="flex items-center justify-between gap-3 border-b pb-3 border-slate-100 dark:border-slate-700">
+          <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2 min-w-0">
+            <History class="w-4 h-4 text-slate-600 dark:text-slate-400 shrink-0" />
+            <span class="leading-tight">Audit Log Keamanan Perangkat &amp; Akun</span>
           </h2>
-          <span class="text-xs text-slate-500 font-bold">{{ auditLogs.length }} Aktivitas</span>
+          <span class="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 text-[11px] font-bold shrink-0 whitespace-nowrap">
+            {{ auditLogs.length }} Aktivitas
+          </span>
         </div>
 
         <div class="overflow-x-auto">
