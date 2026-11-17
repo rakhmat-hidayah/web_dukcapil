@@ -17,6 +17,14 @@ use Tests\TestCase;
 
 class ApplicantDeviceBindingTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->defaultHeaders = [
+            'User-Agent' => 'Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36',
+        ];
+    }
+
     protected function createVerifiedAccount(string $nik = '5205011205950099', string $email = 'uji.device@gmail.com'): ApplicantAccount
     {
         ApplicantAccount::where('email_normalized', $email)->forceDelete();
@@ -227,6 +235,7 @@ class ApplicantDeviceBindingTest extends TestCase
         // Step 1: Request recovery OTP
         $this->post(route('applicant.recover.send-otp'), [
             'nik'      => '5205011205950020',
+            'email'    => 'device.test20@gmail.com',
             'password' => 'PasswordAman#123',
         ])->assertSessionHas('otpSent');
 

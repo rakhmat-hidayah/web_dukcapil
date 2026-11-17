@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Applicant\ApplicantAccount;
 use App\Models\Applicant\ApplicantDeviceAuditLog;
 use App\Models\Queue\QueueSetting;
+use App\Services\Applicant\ApplicantDeviceDetector;
 use App\Services\Applicant\ApplicantDeviceService;
 use App\Services\Applicant\ApplicantOtpService;
 use App\Services\Queue\QueueDocumentStorage;
@@ -269,14 +270,16 @@ class ApplicantAuthController extends Controller
 
     /**
      * Show applicant login page.
+     * Checks device category to present friendly desktop guidance if accessed from non-mobile.
      */
-    public function showLogin(): Response|RedirectResponse
+    public function showLogin(Request $request): Response|RedirectResponse
     {
         if (Auth::guard('applicant')->check()) {
             return redirect()->route('applicant.dashboard');
         }
 
         $isMaintenance = in_array((string) QueueSetting::get('queue.maintenance_mode', '0'), ['1', 'true'], true);
+        $deviceDetection = ApplicantDeviceDetector::detect($request);
 
         return Inertia::render('Public/Applicant/Login', [
             'maintenance' => [
@@ -285,14 +288,26 @@ class ApplicantAuthController extends Controller
                 'message'       => QueueSetting::get('queue.maintenance_message', 'Mohon maaf, saat ini pendaftaran dan antrian online KTP-el Dinas Dukcapil Kabupaten Dompu sedang dinonaktifkan sementara untuk pemeliharaan sistem.'),
                 'estimated_end' => QueueSetting::get('queue.maintenance_estimated_end', ''),
             ],
+            'device_policy' => [
+                'is_mobile'        => $deviceDetection['is_mobile'],
+                'category'         => $deviceDetection['category'],
+                'device_label'     => $deviceDetection['device_label'],
+                'rejection_reason' => $deviceDetection['rejection_reason'],
+            ],
         ]);
     }
 
     /**
      * Handle applicant login with NIK + Password and strict single device binding.
+     * Strictly enforces mobile smartphone requirement.
      */
     public function login(Request $request): RedirectResponse
     {
+        // Enforce Mobile-Only Policy on server (Defense in depth)
+        if (!ApplicantDeviceDetector::isMobileSmartphone($request)) {
+            abort(403, 'LOGIN KHUSUS PERANGKAT MOBILE: Untuk menjaga keamanan dan memastikan proses pengajuan layanan berjalan optimal, login akun pemohon hanya dapat dilakukan melalui smartphone (HP). Akses melalui komputer atau laptop tidak diperbolehkan.');
+        }
+
         $rawNik = preg_replace('/\D/', '', (string) $request->input('nik'));
         $password = (string) $request->input('password');
 

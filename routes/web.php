@@ -87,8 +87,8 @@ Route::prefix('layanan/antrian')->name('queue.')->group(function () {
     Route::get('/', [\App\Http\Controllers\Public\Queue\QueueInfoController::class, 'index'])->name('index');
     Route::post('/cek-status', [\App\Http\Controllers\Public\Queue\QueueInfoController::class, 'checkStatus'])->name('check');
 
-    // Application creation (Requires active applicant account & verified identity)
-    Route::middleware(['applicant.device', 'applicant.verified'])->group(function () {
+    // Application creation (Requires mobile device, active applicant account & verified identity)
+    Route::middleware(['applicant.mobile', 'applicant.device', 'applicant.verified'])->group(function () {
         Route::get('/daftar', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'create'])->name('apply.create');
         Route::post('/daftar', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'storeDraft'])->name('apply.store');
         Route::get('/daftar/{regNumber}/dokumen', [\App\Http\Controllers\Public\Queue\QueueApplicationController::class, 'showDocuments'])->name('apply.documents');
@@ -116,8 +116,8 @@ Route::prefix('layanan/antrian')->name('queue.')->group(function () {
     Route::get('/lacak/{code}', [\App\Http\Controllers\Public\Queue\QueueTrackController::class, 'track'])->where('code', '.*')->name('track');
 });
 
-// ── Applicant Authentication & Portal (NIK + Password, One Active Browser) ───
-Route::prefix('layanan/pemohon')->name('applicant.')->group(function () {
+// ── Applicant Authentication & Portal (NIK + Password, Mobile-Only Policy, One Active Browser) ───
+Route::prefix('layanan/pemohon')->name('applicant.')->middleware('applicant.mobile')->group(function () {
     Route::get('/masuk', [\App\Http\Controllers\Public\Applicant\ApplicantAuthController::class, 'showLogin'])->name('login');
     Route::post('/masuk', [\App\Http\Controllers\Public\Applicant\ApplicantAuthController::class, 'login'])->name('login.post');
     Route::get('/daftar', [\App\Http\Controllers\Public\Applicant\ApplicantAuthController::class, 'showRegister'])->name('register');

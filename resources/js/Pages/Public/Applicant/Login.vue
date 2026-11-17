@@ -134,98 +134,152 @@
           </div>
         </div>
 
-        <!-- Single Browser Active Security Info Pill -->
-        <div class="px-3 py-1.5 sm:py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-center gap-2 text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300">
-          <ShieldAlert class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-          <span class="leading-tight">Akses aman: 1 akun aktif pada <strong>1 perangkat/browser</strong>.</span>
-        </div>
-
-        <form @submit.prevent="submitLogin" class="space-y-3 sm:space-y-4">
-          <!-- NIK Input -->
-          <div class="space-y-1">
-            <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
-              Nomor Induk Kependudukan (NIK)
-            </label>
-            <div class="relative">
-              <input
-                v-model="form.nik"
-                type="text"
-                maxlength="16"
-                inputmode="numeric"
-                placeholder="16 digit angka sesuai KTP/KK..."
-                class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-mono text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+        <!-- RESTRICTION CARD: LOGIN KHUSUS PERANGKAT MOBILE (Desktop Visitor Notice) -->
+        <div
+          v-if="isDesktopVisitor"
+          class="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-blue-50/90 to-indigo-50/80 dark:from-slate-800/90 dark:to-blue-950/40 border-2 border-blue-200 dark:border-blue-800/80 shadow-md space-y-4 animate-fade-in text-slate-800 dark:text-slate-100"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md">
+              <Smartphone class="w-6 h-6 animate-pulse" />
             </div>
-            <div
-              v-if="form.errors.nik"
-              class="mt-1.5 p-2.5 rounded-xl text-xs font-medium leading-relaxed"
-              :class="form.errors.nik.includes('verifikasi') ? 'bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 flex items-start gap-2' : 'text-rose-500'"
-            >
-              <Clock v-if="form.errors.nik.includes('verifikasi')" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <span>{{ form.errors.nik }}</span>
+            <div>
+              <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700">
+                Pemberitahuan Akses
+              </span>
+              <h2 class="text-sm sm:text-base font-black text-slate-900 dark:text-white mt-0.5">
+                LOGIN KHUSUS PERANGKAT MOBILE
+              </h2>
             </div>
           </div>
 
-          <!-- Password Input -->
-          <div class="space-y-1">
-            <div class="flex items-center justify-between">
-              <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
-                Password
-              </label>
-              <Link
-                :href="route('applicant.recover')"
-                class="text-[10px] sm:text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                Ganti HP / Lupa Password?
-              </Link>
+          <div class="space-y-3 text-xs sm:text-[13px] leading-relaxed text-slate-700 dark:text-slate-200">
+            <p>
+              Untuk menjaga keamanan dan memastikan proses pengajuan layanan berjalan optimal, login akun pemohon hanya dapat dilakukan melalui smartphone.
+            </p>
+            <div class="p-3.5 rounded-xl bg-white/80 dark:bg-slate-800/70 border border-blue-200/80 dark:border-slate-700 space-y-1.5 shadow-2xs">
+              <p class="font-bold text-blue-900 dark:text-blue-300 flex items-center gap-2">
+                <span>📱 Silakan buka website ini menggunakan HP Anda untuk melanjutkan proses login dan pengajuan permohonan.</span>
+              </p>
             </div>
-            <div class="relative">
-              <input
-                v-model="form.password"
-                :type="showPassword ? 'text' : 'password'"
-                placeholder="Masukkan password Anda..."
-                class="w-full pl-3.5 pr-10 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <button
-                type="button"
-                @click="showPassword = !showPassword"
-                class="absolute right-3 top-2.5 sm:top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                <EyeOff v-if="showPassword" class="w-4 h-4" />
-                <Eye v-else class="w-4 h-4" />
-              </button>
-            </div>
-            <p v-if="form.errors.password" class="text-xs text-rose-500 font-semibold">
-              {{ form.errors.password }}
+            <p class="text-[11.5px] text-slate-500 dark:text-slate-400">
+              Halaman informasi layanan tetap dapat diakses melalui komputer atau laptop.
             </p>
           </div>
 
-          <button
-            type="submit"
-            :disabled="form.processing"
-            class="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm transition shadow-md shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-1"
-          >
-            <span v-if="form.processing">Memeriksa Kredensial...</span>
-            <span v-else>Masuk ke Layanan</span>
-            <ArrowRight class="w-4 h-4" />
-          </button>
-        </form>
-
-        <!-- Register Link (Restricted during maintenance) -->
-        <div class="pt-2.5 sm:pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-          <div v-if="maintenance?.is_active" class="p-2.5 sm:p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 font-semibold flex items-center justify-center gap-1.5">
-            <Lock class="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>Pendaftaran akun baru ditutup sementara selama masa pemeliharaan sistem.</span>
-          </div>
-          <template v-else>
-            <span>Belum memiliki akun pemohon? </span>
-            <Link :href="route('applicant.register')" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
-              Daftar Sekarang &rarr;
+          <!-- Quick Navigation Buttons for Desktop Users -->
+          <div class="pt-2 flex flex-col sm:flex-row gap-2 border-t border-blue-100 dark:border-slate-800">
+            <Link
+              :href="route('public.services.index')"
+              class="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs text-center transition shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <BookOpen class="w-4 h-4" />
+              <span>Lihat Informasi Layanan</span>
             </Link>
-          </template>
+            <Link
+              href="/"
+              class="py-2.5 px-4 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs text-center border border-slate-200 dark:border-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <ArrowLeft class="w-4 h-4" />
+              <span>Halaman Utama</span>
+            </Link>
+          </div>
         </div>
+
+        <template v-else>
+          <!-- Single Browser Active Security Info Pill -->
+          <div class="px-3 py-1.5 sm:py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex items-center gap-2 text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-300">
+            <ShieldAlert class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+            <span class="leading-tight">Akses aman: 1 akun aktif pada <strong>1 perangkat/browser</strong>.</span>
+          </div>
+
+          <form @submit.prevent="submitLogin" class="space-y-3 sm:space-y-4">
+            <!-- NIK Input -->
+            <div class="space-y-1">
+              <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
+                Nomor Induk Kependudukan (NIK)
+              </label>
+              <div class="relative">
+                <input
+                  v-model="form.nik"
+                  type="text"
+                  maxlength="16"
+                  inputmode="numeric"
+                  placeholder="16 digit angka sesuai KTP/KK..."
+                  class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-mono text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div
+                v-if="form.errors.nik"
+                class="mt-1.5 p-2.5 rounded-xl text-xs font-medium leading-relaxed"
+                :class="form.errors.nik.includes('verifikasi') ? 'bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 flex items-start gap-2' : 'text-rose-500'"
+              >
+                <Clock v-if="form.errors.nik.includes('verifikasi')" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <span>{{ form.errors.nik }}</span>
+              </div>
+            </div>
+
+            <!-- Password Input -->
+            <div class="space-y-1">
+              <div class="flex items-center justify-between">
+                <label class="block text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Password
+                </label>
+                <Link
+                  :href="route('applicant.recover')"
+                  class="text-[10px] sm:text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  Ganti HP / Lupa Password?
+                </Link>
+              </div>
+              <div class="relative">
+                <input
+                  v-model="form.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  placeholder="Masukkan password Anda..."
+                  class="w-full pl-3.5 pr-10 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute right-3 top-2.5 sm:top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  <EyeOff v-if="showPassword" class="w-4 h-4" />
+                  <Eye v-else class="w-4 h-4" />
+                </button>
+              </div>
+              <p v-if="form.errors.password" class="text-xs text-rose-500 font-semibold">
+                {{ form.errors.password }}
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              :disabled="form.processing"
+              class="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm transition shadow-md shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-1"
+            >
+              <span v-if="form.processing">Memeriksa Kredensial...</span>
+              <span v-else>Masuk ke Layanan</span>
+              <ArrowRight class="w-4 h-4" />
+            </button>
+          </form>
+
+          <!-- Register Link (Restricted during maintenance) -->
+          <div class="pt-2.5 sm:pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+            <div v-if="maintenance?.is_active" class="p-2.5 sm:p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 font-semibold flex items-center justify-center gap-1.5">
+              <Lock class="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span>Pendaftaran akun baru ditutup sementara selama masa pemeliharaan sistem.</span>
+            </div>
+            <template v-else>
+              <span>Belum memiliki akun pemohon? </span>
+              <Link :href="route('applicant.register')" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                Daftar Sekarang &rarr;
+              </Link>
+            </template>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -239,16 +293,27 @@ import { ref, computed, onMounted } from 'vue'
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
 import MobileFullscreenGuideModal from '@/Components/MobileFullscreenGuideModal.vue'
-import { ArrowRight, Lock, Eye, EyeOff, ShieldAlert, CheckCircle2, AlertCircle, Clock, Maximize2, Minimize2 } from '@lucide/vue'
+import { ArrowRight, Lock, Eye, EyeOff, ShieldAlert, CheckCircle2, AlertCircle, Clock, Maximize2, Minimize2, Smartphone, BookOpen, ArrowLeft, ExternalLink } from '@lucide/vue'
 
 const props = defineProps({
   maintenance: {
     type: Object,
     default: () => ({}),
   },
+  device_policy: {
+    type: Object,
+    default: () => ({ is_mobile: true, category: 'smartphone' }),
+  },
 })
 
 const page = usePage()
+
+const isDesktopVisitor = computed(() => {
+  if (props.device_policy && props.device_policy.is_mobile !== undefined) {
+    return !props.device_policy.is_mobile
+  }
+  return false
+})
 
 const maintenance = computed(() => {
   if (props.maintenance && props.maintenance.is_active !== undefined) {

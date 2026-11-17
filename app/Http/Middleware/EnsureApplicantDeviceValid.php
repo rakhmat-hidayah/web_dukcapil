@@ -23,6 +23,30 @@ class EnsureApplicantDeviceValid
     {
         $guard = Auth::guard('applicant');
 
+        // 0. Enforce Mobile-Only Policy: Even if cookie/session exists, desktop access is strictly rejected
+        if (!\App\Services\Applicant\ApplicantDeviceDetector::isMobileSmartphone($request)) {
+            if ($guard->check()) {
+                $guard->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'LOGIN KHUSUS PERANGKAT MOBILE: Sesi akun pemohon hanya dapat digunakan melalui smartphone. Akses dari komputer/laptop ditolak demi keamanan sistem.',
+                ], 403);
+            }
+
+            if ($request->header('X-Inertia')) {
+                abort(403, 'LOGIN KHUSUS PERANGKAT MOBILE: Sesi akun pemohon hanya dapat digunakan melalui smartphone (HP). Akses melalui komputer/laptop ditolak.');
+            }
+
+            return redirect()->route('applicant.login')
+                ->with('desktop_restriction', true)
+                ->with('warning', 'Layanan akun pemohon hanya dapat diakses melalui smartphone. Akses melalui komputer/laptop ditutup demi keamanan.');
+        }
+
         // 1. If not authenticated via session, check persistent device cookie for auto-login
         if (!$guard->check()) {
             $cookieToken = $request->cookie(ApplicantDeviceService::COOKIE_NAME);

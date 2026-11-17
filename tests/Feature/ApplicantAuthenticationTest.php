@@ -16,6 +16,14 @@ use Tests\TestCase;
 
 class ApplicantAuthenticationTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withHeaders([
+            'User-Agent' => 'Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36',
+        ]);
+    }
+
     /**
      * Test 1: Pendaftaran NIK baru berhasil.
      */
