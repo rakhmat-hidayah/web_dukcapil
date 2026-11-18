@@ -251,53 +251,162 @@
       <!-- Chart 14 Hari & Breakdown Operator -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Chart Penggunaan 14 Hari Terakhir -->
-        <div class="lg:col-span-7 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
+        <div class="lg:col-span-7 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-4.5 sm:p-6 shadow-sm space-y-4">
+          <!-- Header Card Chart -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 class="text-sm font-black text-gray-900 dark:text-zinc-100 tracking-tight">
-                Tren Penggunaan Blangko (14 Hari Terakhir)
-              </h3>
-              <p class="text-[11px] text-gray-500 dark:text-zinc-400">
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm sm:text-base font-black text-gray-900 dark:text-zinc-100 tracking-tight">
+                  Tren Penggunaan Blangko
+                </h3>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                  {{ chartPeriod === '7' ? '7 Hari Terakhir' : '14 Hari Terakhir' }}
+                </span>
+              </div>
+              <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-0.5">
                 Perbandingan pencetakan berhasil vs blangko rusak per hari
               </p>
             </div>
-            <div class="flex items-center gap-3 text-[11px] font-bold">
-              <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-md bg-blue-500"></span>
-                <span class="text-gray-600 dark:text-zinc-400">Digunakan</span>
+
+            <div class="flex items-center justify-between sm:justify-end gap-3 pt-1 sm:pt-0 border-t sm:border-t-0 border-gray-100 dark:border-zinc-800">
+              <!-- Period Toggle -->
+              <div class="inline-flex p-0.5 rounded-xl bg-gray-100 dark:bg-zinc-800 text-[11px] font-bold border border-gray-200/60 dark:border-zinc-700/60">
+                <button
+                  type="button"
+                  @click="setChartPeriod('7')"
+                  class="px-2.5 py-1 rounded-lg transition cursor-pointer"
+                  :class="chartPeriod === '7' ? 'bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-300 shadow-xs' : 'text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200'"
+                >
+                  7 Hari
+                </button>
+                <button
+                  type="button"
+                  @click="setChartPeriod('14')"
+                  class="px-2.5 py-1 rounded-lg transition cursor-pointer"
+                  :class="chartPeriod === '14' ? 'bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-300 shadow-xs' : 'text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200'"
+                >
+                  14 Hari
+                </button>
               </div>
-              <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-md bg-rose-500"></span>
-                <span class="text-gray-600 dark:text-zinc-400">Rusak</span>
+
+              <!-- Legend -->
+              <div class="flex items-center gap-2.5 text-[11px] font-bold">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-blue-500"></span>
+                  <span class="text-gray-600 dark:text-zinc-400 text-[10px] sm:text-xs">Digunakan</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-rose-500"></span>
+                  <span class="text-gray-600 dark:text-zinc-400 text-[10px] sm:text-xs">Rusak</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Simple Bar Chart Representation -->
-          <div class="h-48 flex items-end justify-between gap-1 sm:gap-2 pt-6 border-b border-gray-100 dark:border-zinc-800 pb-2">
+          <!-- Chart Container with Mobile Horizontal Scroll and Adaptive Width -->
+          <div ref="chartContainerRef" class="overflow-x-auto scrollbar-thin pb-2 pt-1">
             <div
-              v-for="(day, idx) in (summary?.daily_chart || [])"
-              :key="idx"
-              class="flex-1 flex flex-col items-center gap-1 h-full justify-end group relative"
+              :class="chartPeriod === '7' ? 'w-full' : 'min-w-[480px] sm:min-w-full'"
+              class="h-52 flex items-end justify-between gap-1.5 sm:gap-2 border-b border-gray-100 dark:border-zinc-800 pb-2.5 pt-4 transition-all"
             >
-              <!-- Tooltip on hover -->
-              <div class="absolute -top-10 hidden group-hover:flex flex-col items-center bg-gray-900 text-white text-[10px] py-1 px-2 rounded-lg whitespace-nowrap z-20 shadow-lg pointer-events-none">
-                <span>{{ day.label }}: {{ day.used }} digunakan, {{ day.damaged }} rusak</span>
-              </div>
+              <div
+                v-for="(day, idx) in displayedChart"
+                :key="day.date || idx"
+                @click="selectDay(day)"
+                class="flex-1 flex flex-col items-center gap-1 h-full justify-end group relative cursor-pointer"
+              >
+                <!-- Tooltip on hover (desktop) -->
+                <div class="absolute -top-10 hidden group-hover:flex flex-col items-center bg-gray-900 text-white text-[10px] py-1 px-2 rounded-lg whitespace-nowrap z-20 shadow-lg pointer-events-none">
+                  <span>{{ day.label }}: {{ day.used }} digunakan, {{ day.damaged }} rusak</span>
+                </div>
 
-              <!-- Bar stacks -->
-              <div class="w-full max-w-[24px] flex flex-col-reverse rounded-t overflow-hidden bg-gray-100 dark:bg-zinc-800 h-full max-h-[140px] justify-start">
+                <!-- Number badge above bar -->
+                <span
+                  v-if="(day.used + day.damaged) > 0"
+                  class="text-[9px] font-black font-mono text-blue-600 dark:text-blue-400 leading-none mb-1"
+                >
+                  {{ day.used + day.damaged }}
+                </span>
+                <span
+                  v-else
+                  class="text-[8px] text-gray-300 dark:text-zinc-700 leading-none mb-1 select-none"
+                >
+                  0
+                </span>
+
+                <!-- Bar stacks -->
                 <div
-                  class="bg-blue-500 transition-all duration-300"
-                  :style="{ height: getBarHeight(day.used) + '%' }"
-                ></div>
-                <div
-                  v-if="day.damaged > 0"
-                  class="bg-rose-500 transition-all duration-300"
-                  :style="{ height: getBarHeight(day.damaged) + '%' }"
-                ></div>
+                  class="w-full max-w-[24px] sm:max-w-[30px] flex flex-col-reverse rounded-t overflow-hidden bg-gray-100 dark:bg-zinc-800 h-full max-h-[135px] justify-start transition-all duration-200"
+                  :class="activeDay?.date === day.date ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-zinc-900 shadow-sm' : 'hover:opacity-85'"
+                >
+                  <div
+                    class="bg-blue-500 transition-all duration-300"
+                    :style="{ height: getBarHeight(day.used) + '%' }"
+                  ></div>
+                  <div
+                    v-if="day.damaged > 0"
+                    class="bg-rose-500 transition-all duration-300"
+                    :style="{ height: getBarHeight(day.damaged) + '%' }"
+                  ></div>
+                </div>
+
+                <!-- Stacked Clean Date Labels (No Truncation) -->
+                <div class="flex flex-col items-center leading-none text-center select-none pt-1">
+                  <span
+                    class="text-[10px] font-black transition"
+                    :class="activeDay?.date === day.date ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-zinc-300'"
+                  >
+                    {{ formatDayNum(day.date) }}
+                  </span>
+                  <span class="text-[8px] font-bold text-gray-400 dark:text-zinc-500 uppercase mt-0.5">
+                    {{ formatMonthShort(day.date) }}
+                  </span>
+                </div>
               </div>
-              <span class="text-[9px] font-bold text-gray-400 truncate max-w-[28px] text-center">{{ day.label }}</span>
+            </div>
+          </div>
+
+          <!-- Mobile Swipe Hint (When 14-day view is active on narrow screens) -->
+          <div
+            v-if="chartPeriod === '14'"
+            class="sm:hidden flex items-center justify-center gap-1.5 text-[10px] text-gray-400 dark:text-zinc-500 pt-0.5"
+          >
+            <ArrowLeftRight class="w-3 h-3 text-gray-400" />
+            <span>Geser grafik ke kiri / kanan untuk melihat semua hari</span>
+          </div>
+
+          <!-- Active Day Interactive Detail Pill -->
+          <div
+            v-if="activeDay"
+            class="p-3 rounded-2xl bg-gradient-to-r from-blue-50/70 to-sky-50/60 dark:from-blue-950/40 dark:to-sky-950/30 border border-blue-200/80 dark:border-blue-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs transition"
+          >
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
+              <span class="font-extrabold text-gray-900 dark:text-zinc-100">
+                {{ formatFullDate(activeDay.date) }}
+              </span>
+              <span
+                v-if="activeDay.date === todayDateStr"
+                class="text-[10px] font-black px-1.5 py-0.2 rounded-md bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
+              >
+                Hari Ini
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3 font-semibold text-[11px] sm:text-xs">
+              <div class="flex items-center gap-1 text-blue-700 dark:text-blue-300">
+                <span>Digunakan:</span>
+                <strong class="font-mono font-black">{{ formatNumber(activeDay.used) }}</strong>
+              </div>
+              <span class="text-gray-300 dark:text-zinc-700">|</span>
+              <div class="flex items-center gap-1 text-rose-700 dark:text-rose-300">
+                <span>Rusak:</span>
+                <strong class="font-mono font-black">{{ formatNumber(activeDay.damaged) }}</strong>
+              </div>
+              <span class="text-gray-300 dark:text-zinc-700">|</span>
+              <div class="font-mono font-black text-gray-900 dark:text-zinc-100">
+                Total: {{ formatNumber(activeDay.used + activeDay.damaged) }} keping
+              </div>
             </div>
           </div>
         </div>
@@ -430,12 +539,12 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { 
   Layers, Inbox, ClipboardList, FileSpreadsheet, Globe, AlertTriangle, 
-  CheckCircle2, Users, PackageCheck, History 
+  CheckCircle2, Users, PackageCheck, History, ArrowLeftRight 
 } from '@lucide/vue';
 
 const props = defineProps({
@@ -456,6 +565,88 @@ const isSuperOrAdmin = computed(() =>
   userRoles.value.includes('Supervisor Layanan KTP-el') ||
   userRoles.value.includes('Supervisor Persediaan Blangko')
 );
+
+// Chart mobile responsiveness & interactive states
+const chartPeriod = ref('14');
+const chartContainerRef = ref(null);
+const activeDay = ref(null);
+
+const todayDateStr = computed(() => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+});
+
+const displayedChart = computed(() => {
+  const chart = props.summary?.daily_chart || [];
+  if (chartPeriod.value === '7') {
+    return chart.slice(-7);
+  }
+  return chart;
+});
+
+const scrollToRight = () => {
+  nextTick(() => {
+    if (chartContainerRef.value) {
+      chartContainerRef.value.scrollLeft = chartContainerRef.value.scrollWidth;
+    }
+  });
+};
+
+const setChartPeriod = (period) => {
+  chartPeriod.value = period;
+  if (period === '14') {
+    scrollToRight();
+  }
+};
+
+const selectDay = (day) => {
+  activeDay.value = day;
+};
+
+const formatDayNum = (dateStr) => {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  return parts.length === 3 ? parts[2] : dateStr;
+};
+
+const formatMonthShort = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('id-ID', { month: 'short' });
+  } catch {
+    return '';
+  }
+};
+
+const formatFullDate = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  } catch {
+    return dateStr;
+  }
+};
+
+watch(
+  () => props.summary?.daily_chart,
+  (chart) => {
+    if (chart && chart.length > 0) {
+      const active = [...chart].reverse().find(d => (d.used + d.damaged) > 0) || chart[chart.length - 1];
+      activeDay.value = active;
+      scrollToRight();
+    }
+  },
+  { immediate: true }
+);
+
+onMounted(() => {
+  scrollToRight();
+});
 
 const currentStockStatus = computed(() => {
   return props.summary?.stock?.status || props.summary?.stock?.availability_status || 'STOK KOSONG';
@@ -518,7 +709,7 @@ const formatNumber = (num) => {
 
 const getBarHeight = (val) => {
   if (!val || val <= 0) return 4;
-  const list = props.summary?.daily_chart || [];
+  const list = displayedChart.value || [];
   const max = Math.max(...list.map(d => (d?.used || 0) + (d?.damaged || 0)), 50);
   return Math.min(100, Math.max(6, Math.round((val / max) * 100)));
 };
