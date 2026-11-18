@@ -615,6 +615,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/usage', [\App\Http\Controllers\Admin\BlankStock\BlankStockUsageController::class, 'store'])
                 ->middleware('role_or_permission:blank_stocks.usage.create')
                 ->name('usage.store');
+            Route::post('/usage/{report}', [\App\Http\Controllers\Admin\BlankStock\BlankStockUsageController::class, 'update'])
+                ->name('usage.update');
             Route::post('/usage/{report}/submit', [\App\Http\Controllers\Admin\BlankStock\BlankStockUsageController::class, 'submitDraft'])
                 ->middleware('role_or_permission:blank_stocks.usage.create')
                 ->name('usage.submit-draft');

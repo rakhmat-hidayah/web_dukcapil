@@ -97,7 +97,7 @@ class BlankStockUsageController extends Controller
                 'end_date'    => $endDate,
             ],
             'canViewAll'   => $canViewAll,
-            'canApprove'   => $user->can('blank_stocks.usage.approve') || $user->hasRole(['Super Administrator', 'Administrator Utama', 'Supervisor Layanan KTP-el']),
+            'canApprove'   => (bool) ($user->isSuperAdmin() || $user->can('blank_stocks.usage.approve') || $user->hasRole(['Super Administrator', 'Administrator Utama', 'Supervisor Layanan KTP-el', 'Supervisor Persediaan Blangko'])),
             'currentStock' => $stock->current_stock,
             'operators'    => $operators,
         ]);
@@ -137,6 +137,31 @@ class BlankStockUsageController extends Controller
             : "Laporan penggunaan {$report->quantity_used} keping dan kerusakan {$report->quantity_damaged} keping berhasil dicatat dan memotong persediaan resmi.";
 
         return redirect()->back()->with('success', $msg);
+    }
+
+    public function update(Request $request, KtpBlankUsageReport $report): RedirectResponse
+    {
+        $data = $request->validate([
+            'usage_date'         => 'required|date',
+            'session_name'       => 'nullable|string|max:50',
+            'quantity_used'      => 'required|integer|min:0',
+            'quantity_damaged'   => 'required|integer|min:0',
+            'damage_reason'      => 'required_if:quantity_damaged,1,2,3,4,5,6,7,8,9|nullable|string|max:500',
+            'damage_proof'       => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'notes'              => 'nullable|string|max:1000',
+            'submit_immediately' => 'nullable|boolean',
+        ], [
+            'damage_reason.required_if' => 'Keterangan alasan kerusakan wajib diisi jika terdapat blangko rusak.',
+        ]);
+
+        if ($request->hasFile('damage_proof')) {
+            $path = $request->file('damage_proof')->store('blank_damage_proofs', 'public');
+            $data['damage_proof_path'] = $path;
+        }
+
+        $this->stockService->updateUsageReport($report, $data, $request->user());
+
+        return redirect()->back()->with('success', "Laporan penggunaan [{$report->report_number}] berhasil diperbarui.");
     }
 
     public function submitDraft(Request $request, KtpBlankUsageReport $report): RedirectResponse

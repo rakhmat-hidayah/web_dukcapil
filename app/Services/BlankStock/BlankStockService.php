@@ -395,6 +395,143 @@ class BlankStockService
     }
 
     /**
+     * Update an existing usage report (Draft or Submitted).
+     *
+     * @throws ValidationException
+     */
+    public function updateUsageReport(KtpBlankUsageReport $report, array $data, User $actor): KtpBlankUsageReport
+    {
+        $isOwner = ($report->operator_id === $actor->id);
+        $isAdmin = ($actor->isSuperAdmin() || $actor->hasRole(['Super Administrator', 'Administrator Utama', 'Supervisor Layanan KTP-el', 'Supervisor Persediaan Blangko']));
+
+        if (!$isOwner && !$isAdmin) {
+            throw ValidationException::withMessages([
+                'general' => 'Anda tidak memiliki hak akses untuk mengubah laporan penggunaan operator lain.',
+            ]);
+        }
+
+        if ($report->status === KtpBlankUsageReport::STATUS_REVERSED) {
+            throw ValidationException::withMessages([
+                'general' => 'Laporan yang telah dibatalkan (reversal) tidak dapat diubah kembali.',
+            ]);
+        }
+
+        $used = isset($data['quantity_used']) ? (int) $data['quantity_used'] : $report->quantity_used;
+        $damaged = isset($data['quantity_damaged']) ? (int) $data['quantity_damaged'] : $report->quantity_damaged;
+        $total = $used + $damaged;
+
+        if ($used < 0 || $damaged < 0) {
+            throw ValidationException::withMessages([
+                'quantity_used' => 'Jumlah penggunaan tidak boleh bernilai negatif.',
+            ]);
+        }
+
+        if ($total <= 0) {
+            throw ValidationException::withMessages([
+                'quantity_used' => 'Total blangko yang dilaporkan (digunakan + rusak) harus lebih dari 0.',
+            ]);
+        }
+
+        if ($damaged > 0 && empty(trim($data['damage_reason'] ?? $report->damage_reason ?? ''))) {
+            throw ValidationException::withMessages([
+                'damage_reason' => 'Keterangan alasan kerusakan wajib diisi jika terdapat blangko rusak.',
+            ]);
+        }
+
+        return DB::transaction(function () use ($report, $data, $used, $damaged, $total, $actor) {
+            /** @var KtpBlankStock $stock */
+            $stock = KtpBlankStock::where('id', 1)->lockForUpdate()->firstOrFail();
+
+            if ($report->status === KtpBlankUsageReport::STATUS_DRAFT) {
+                $report->update([
+                    'usage_date'        => $data['usage_date'] ?? $report->usage_date,
+                    'session_name'      => $data['session_name'] ?? $report->session_name,
+                    'quantity_used'     => $used,
+                    'quantity_damaged'  => $damaged,
+                    'total_quantity'    => $total,
+                    'damage_reason'     => $damaged > 0 ? ($data['damage_reason'] ?? $report->damage_reason) : null,
+                    'damage_proof_path' => $data['damage_proof_path'] ?? $report->damage_proof_path,
+                    'notes'             => $data['notes'] ?? $report->notes,
+                ]);
+
+                if (!empty($data['submit_immediately'])) {
+                    return $this->submitDraftReport($report, $actor);
+                }
+            } elseif ($report->status === KtpBlankUsageReport::STATUS_SUBMITTED) {
+                $oldTotal = $report->total_quantity;
+                $diff = $total - $oldTotal;
+
+                if ($diff > 0 && $stock->current_stock < $diff) {
+                    throw ValidationException::withMessages([
+                        'quantity_used' => "Saldo persediaan blangko tidak mencukupi untuk penambahan mutasi. Tersedia saat ini: {$stock->current_stock} keping, dibutuhkan penambahan: {$diff} keping.",
+                    ]);
+                }
+
+                if ($diff > 0) {
+                    $stock->current_stock -= $diff;
+                } elseif ($diff < 0) {
+                    $stock->current_stock += abs($diff);
+                }
+
+                $usedDiff = $used - $report->quantity_used;
+                $damagedDiff = $damaged - $report->quantity_damaged;
+                $stock->total_used += $usedDiff;
+                $stock->total_damaged += $damagedDiff;
+                $stock->save();
+
+                // Update ledger transaction
+                $trx = KtpBlankTransaction::where('reference_type', KtpBlankUsageReport::class)
+                    ->where('reference_id', $report->id)
+                    ->first();
+                if ($trx) {
+                    $trx->qty_out_used = $used;
+                    $trx->qty_out_damaged = $damaged;
+                    $trx->balance_after = $stock->current_stock;
+                    $trx->notes = "Koreksi Laporan Penggunaan: {$report->report_number}" . (!empty($data['notes']) ? " - {$data['notes']}" : "");
+                    $trx->save();
+                }
+
+                $report->update([
+                    'usage_date'        => $data['usage_date'] ?? $report->usage_date,
+                    'session_name'      => $data['session_name'] ?? $report->session_name,
+                    'quantity_used'     => $used,
+                    'quantity_damaged'  => $damaged,
+                    'total_quantity'    => $total,
+                    'damage_reason'     => $damaged > 0 ? ($data['damage_reason'] ?? $report->damage_reason) : null,
+                    'damage_proof_path' => $data['damage_proof_path'] ?? $report->damage_proof_path,
+                    'notes'             => $data['notes'] ?? $report->notes,
+                    'balance_after'     => $stock->current_stock,
+                ]);
+
+                Cache::forget('public_blank_stock_summary');
+            } elseif ($report->status === KtpBlankUsageReport::STATUS_APPROVED) {
+                // If already approved, update metadata only
+                $report->update([
+                    'session_name'      => $data['session_name'] ?? $report->session_name,
+                    'damage_reason'     => $data['damage_reason'] ?? $report->damage_reason,
+                    'damage_proof_path' => $data['damage_proof_path'] ?? $report->damage_proof_path,
+                    'notes'             => $data['notes'] ?? $report->notes,
+                ]);
+            }
+
+            try {
+                ActivityLogger::log(
+                    "User {$actor->name} memperbarui laporan penggunaan blangko [{$report->report_number}]",
+                    $report,
+                    'blank_stock_usage_update',
+                    [
+                        'report_number' => $report->report_number,
+                        'total'         => $report->total_quantity,
+                        'status'        => $report->status,
+                    ]
+                );
+            } catch (\Throwable $e) {}
+
+            return $report->fresh();
+        });
+    }
+
+    /**
      * Approve a submitted usage report by Supervisor / Pimpinan.
      */
     public function approveUsageReport(KtpBlankUsageReport $report, User $supervisor): KtpBlankUsageReport
