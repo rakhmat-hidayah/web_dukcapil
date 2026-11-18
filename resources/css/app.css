@@ -250,3 +250,44 @@ article li, .prose li {
   border-radius: 0 0.75rem 0.75rem 0 !important;
   margin: 1.25rem 0 !important;
 }
+
+/* Universal Print Styling for Official Government Documents */
+@media print {
+  aside,
+  header,
+  nav,
+  .print\:hidden,
+  [class*="print:hidden"],
+  .hide-on-print {
+    display: none !important;
+  }
+  .print\:block,
+  [class*="print:block"] {
+    display: block !important;
+  }
+  .print\:grid,
+  [class*="print:grid"] {
+    display: grid !important;
+  }
+  .print\:flex,
+  [class*="print:flex"] {
+    display: flex !important;
+  }
+  body, #app, main, .min-h-screen {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: auto !important;
+  }
+  div[class*="pl-"] {
+    padding-left: 0 !important;
+  }
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  tr {
+    page-break-inside: avoid;
+  }
+}
