@@ -21,7 +21,7 @@
 
           <div class="flex items-center gap-3">
             <button
-              v-if="canCreate"
+              v-if="hasCreatePermission"
               @click="showCreateModal = true"
               class="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-2 cursor-pointer active:scale-95"
             >
@@ -148,12 +148,24 @@
                 <td class="py-3.5 px-4 text-center whitespace-nowrap">
                   <div class="inline-flex items-center gap-1.5">
                     <button
-                      v-if="adj.status === 'pending_approval' && canApprove"
-                      @click="approveAdjustment(adj)"
-                      class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] transition cursor-pointer"
+                      @click="openDetailModal(adj)"
+                      class="px-2.5 py-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/60 font-bold text-xs flex items-center gap-1 border border-sky-200 dark:border-sky-800 transition cursor-pointer shadow-2xs active:scale-95"
+                      title="Lihat Detail Usulan Penyesuaian"
                     >
-                      Setujui & Mutasi Stok
+                      <Eye class="w-3.5 h-3.5" />
+                      <span>Detail</span>
                     </button>
+
+                    <button
+                      v-if="adj.status === 'pending_approval' && (canApprove || isSuperOrAdmin)"
+                      @click="approveAdjustment(adj)"
+                      class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer shadow-xs active:scale-95"
+                      title="Setujui Usulan Koreksi & Terapkan Mutasi Persediaan"
+                    >
+                      <Check class="w-3.5 h-3.5" />
+                      <span>Setujui</span>
+                    </button>
+
                     <span v-else-if="adj.status === 'approved'" class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
                       Saldo: {{ formatNumber(adj.balance_after) }}
                     </span>
@@ -317,14 +329,144 @@
         </form>
       </div>
     </div>
+
+    <!-- Detail Adjustment Modal -->
+    <div
+      v-if="showDetailModal && selectedAdjustment"
+      class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs animate-fade-in overflow-y-auto"
+    >
+      <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 max-w-xl w-full shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-100 dark:border-amber-900">
+              <Layers class="w-5 h-5" />
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-zinc-100">
+                  Rincian Usulan Penyesuaian
+                </h3>
+                <span
+                  class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border"
+                  :class="getStatusBadgeClass(selectedAdjustment.status)"
+                >
+                  {{ selectedAdjustment.status_label }}
+                </span>
+              </div>
+              <p class="text-xs font-mono font-bold text-gray-500 dark:text-zinc-400 mt-0.5">
+                {{ selectedAdjustment.adjustment_number }}
+              </p>
+            </div>
+          </div>
+          <button
+            @click="showDetailModal = false"
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition cursor-pointer"
+          >
+            <X class="w-5 h-5" />
+          </button>
+        </div>
+
+        <!-- Metric Highlight -->
+        <div class="p-4 rounded-2xl border text-center" :class="selectedAdjustment.type === 'ADDITION' ? 'bg-emerald-50/60 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800' : 'bg-rose-50/60 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800'">
+          <span class="text-[11px] font-bold uppercase tracking-wider block" :class="selectedAdjustment.type === 'ADDITION' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'">
+            {{ selectedAdjustment.type === 'ADDITION' ? 'Penambahan Saldo Persediaan (+)' : 'Pengurangan Saldo Persediaan (-)' }}
+          </span>
+          <span class="text-3xl font-black font-mono block mt-1" :class="selectedAdjustment.type === 'ADDITION' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'">
+            {{ selectedAdjustment.type === 'ADDITION' ? '+' : '-' }}{{ formatNumber(selectedAdjustment.quantity) }}
+          </span>
+          <span class="text-xs text-gray-500 dark:text-zinc-400 font-semibold">Keping Blangko</span>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs bg-gray-50/50 dark:bg-zinc-800/40 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800">
+          <div>
+            <span class="text-gray-400 block text-[11px]">Tanggal Usulan:</span>
+            <span class="font-bold text-gray-800 dark:text-zinc-200">{{ selectedAdjustment.adjustment_date }}</span>
+          </div>
+          <div>
+            <span class="text-gray-400 block text-[11px]">Rujukan Opname Fisik:</span>
+            <span class="font-bold font-mono text-gray-800 dark:text-zinc-200">{{ selectedAdjustment.opname_number || 'Koreksi Administratif Langsung' }}</span>
+          </div>
+          <div>
+            <span class="text-gray-400 block text-[11px]">Pengusul:</span>
+            <span class="font-bold text-gray-800 dark:text-zinc-200">{{ selectedAdjustment.requester_name }}</span>
+          </div>
+          <div>
+            <span class="text-gray-400 block text-[11px]">Status Persetujuan:</span>
+            <span class="font-bold" :class="selectedAdjustment.status === 'approved' ? 'text-emerald-600' : 'text-amber-600'">
+              {{ selectedAdjustment.status_label }}
+            </span>
+          </div>
+          <div v-if="selectedAdjustment.balance_before !== null">
+            <span class="text-gray-400 block text-[11px]">Saldo Sebelum:</span>
+            <span class="font-mono font-bold text-gray-800 dark:text-zinc-200">{{ formatNumber(selectedAdjustment.balance_before) }} keping</span>
+          </div>
+          <div v-if="selectedAdjustment.balance_after !== null">
+            <span class="text-gray-400 block text-[11px]">Saldo Sesudah Mutasi:</span>
+            <span class="font-mono font-black text-emerald-600 dark:text-emerald-400">{{ formatNumber(selectedAdjustment.balance_after) }} keping</span>
+          </div>
+        </div>
+
+        <!-- Alasan Resmi -->
+        <div class="text-xs space-y-1">
+          <span class="text-gray-400 block text-[11px] font-bold">Alasan Resmi Penyesuaian:</span>
+          <p class="p-3.5 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-800 dark:text-zinc-200 leading-relaxed border border-gray-100 dark:border-zinc-800">
+            {{ selectedAdjustment.reason }}
+          </p>
+        </div>
+
+        <!-- Dokumen Lampiran / SK -->
+        <div v-if="selectedAdjustment.attachment_url" class="text-xs space-y-1.5">
+          <span class="text-gray-400 block text-[11px] font-bold">Dokumen Pendukung / Surat Keputusan:</span>
+          <a
+            :href="selectedAdjustment.attachment_url"
+            target="_blank"
+            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 font-bold hover:underline"
+          >
+            <ExternalLink class="w-4 h-4" />
+            <span>Buka / Unduh Berkas Lampiran</span>
+          </a>
+        </div>
+
+        <!-- Approver Info if approved -->
+        <div v-if="selectedAdjustment.approved_at" class="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-xs flex items-center gap-2.5 text-emerald-800 dark:text-emerald-200">
+          <CheckCircle2 class="w-4 h-4 text-emerald-600 shrink-0" />
+          <div>
+            <span class="font-bold">Disetujui oleh {{ selectedAdjustment.approver_name || 'Supervisor / Pimpinan' }}</span>
+            <span class="text-[11px] text-emerald-600 dark:text-emerald-400 block">pada {{ selectedAdjustment.approved_at }}</span>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-zinc-800">
+          <button
+            type="button"
+            @click="showDetailModal = false"
+            class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-800 text-xs font-bold transition cursor-pointer"
+          >
+            Tutup
+          </button>
+
+          <button
+            v-if="selectedAdjustment.status === 'pending_approval' && (canApprove || isSuperOrAdmin)"
+            @click="showDetailModal = false; approveAdjustment(selectedAdjustment)"
+            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <Check class="w-4 h-4" />
+            <span>Setujui Usulan & Terapkan Mutasi</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </AdminLayout>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Layers, Plus, Search, X } from '@lucide/vue';
+import { Layers, Plus, Search, X, Eye, Check, ExternalLink, CheckCircle2 } from '@lucide/vue';
 
 const props = defineProps({
   adjustments: {
@@ -353,7 +495,30 @@ const props = defineProps({
   },
 });
 
+const page = usePage();
+const userRoles = computed(() => page.props.auth?.roles || []);
+const isSuperAdmin = computed(() => page.props.auth?.is_super_admin || false);
+const isSuperOrAdmin = computed(() =>
+  isSuperAdmin.value ||
+  userRoles.value.some(r => [
+    'Super Administrator',
+    'Administrator Utama',
+    'Super Admin',
+    'Bendahara Barang',
+    'Supervisor Layanan KTP-el',
+    'Supervisor Persediaan Blangko'
+  ].includes(r))
+);
+const hasCreatePermission = computed(() => props.canCreate || isSuperOrAdmin.value);
+
 const showCreateModal = ref(false);
+const showDetailModal = ref(false);
+const selectedAdjustment = ref(null);
+
+const openDetailModal = (adj) => {
+  selectedAdjustment.value = adj;
+  showDetailModal.value = true;
+};
 
 const filterForm = ref({
   search: props.filters.search || '',

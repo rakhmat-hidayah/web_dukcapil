@@ -20,7 +20,13 @@ class BlankStockAdjustmentController extends Controller
 
     public function index(Request $request): Response
     {
-        $this->authorize('blank_stocks.adjustment.create');
+        $user = $request->user();
+        if (!$user->can('blank_stocks.adjustment.create') && 
+            !$user->can('blank_stocks.adjustment.approve') && 
+            !$user->isSuperAdmin() && 
+            !$user->hasRole(['Super Administrator', 'Administrator Utama', 'Supervisor Layanan KTP-el', 'Bendahara Barang'])) {
+            abort(403, 'Akses ditolak ke modul penyesuaian persediaan.');
+        }
 
         $search = $request->query('search', '');
         $status = $request->query('status', '');
@@ -66,6 +72,18 @@ class BlankStockAdjustmentController extends Controller
             ->limit(20)
             ->get(['id', 'opname_number', 'difference', 'opname_date']);
 
+        $canCreate = (bool) (
+            $user->isSuperAdmin() ||
+            $user->can('blank_stocks.adjustment.create') ||
+            $user->hasRole(['Super Administrator', 'Administrator Utama', 'Bendahara Barang'])
+        );
+
+        $canApprove = (bool) (
+            $user->isSuperAdmin() ||
+            $user->can('blank_stocks.adjustment.approve') ||
+            $user->hasRole(['Super Administrator', 'Administrator Utama', 'Supervisor Layanan KTP-el', 'Supervisor Persediaan Blangko'])
+        );
+
         return Inertia::render('Admin/BlankStock/Adjustments/Index', [
             'adjustments'     => $adjustments,
             'filters'         => [
@@ -74,7 +92,8 @@ class BlankStockAdjustmentController extends Controller
             ],
             'currentStock'    => $stock->current_stock,
             'approvedOpnames' => $approvedOpnames,
-            'canApprove'      => $request->user()->can('blank_stocks.adjustment.approve') || $request->user()->hasRole(['Super Administrator', 'Administrator Utama', 'Supervisor Layanan KTP-el']),
+            'canCreate'       => $canCreate,
+            'canApprove'      => $canApprove,
         ]);
     }
 

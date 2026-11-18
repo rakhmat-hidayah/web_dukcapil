@@ -58,6 +58,19 @@ class BlankStockOpnameController extends Controller
         });
 
         $stock = $this->stockService->getAuthoritativeStock();
+        $user = $request->user();
+
+        $canCreate = (bool) (
+            $user->isSuperAdmin() ||
+            $user->can('blank_stocks.opname.create') ||
+            $user->hasRole(['Super Administrator', 'Administrator Utama', 'Bendahara Barang'])
+        );
+
+        $canApprove = (bool) (
+            $user->isSuperAdmin() ||
+            $user->can('blank_stocks.opname.approve') ||
+            $user->hasRole(['Super Administrator', 'Administrator Utama', 'Supervisor Layanan KTP-el', 'Supervisor Persediaan Blangko'])
+        );
 
         return Inertia::render('Admin/BlankStock/Opname/Index', [
             'opnames'      => $opnames,
@@ -66,7 +79,8 @@ class BlankStockOpnameController extends Controller
                 'status' => $status,
             ],
             'currentStock' => $stock->current_stock,
-            'canApprove'   => $request->user()->can('blank_stocks.opname.approve') || $request->user()->hasRole(['Super Administrator', 'Administrator Utama', 'Supervisor Layanan KTP-el']),
+            'canCreate'    => $canCreate,
+            'canApprove'   => $canApprove,
         ]);
     }
 
