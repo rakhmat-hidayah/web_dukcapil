@@ -111,7 +111,7 @@
               {{ currentTabTitle }}
             </span>
             <p class="text-[11px] text-gray-500 dark:text-zinc-400 mt-1">
-              Periode: <strong>{{ filters.start_date }}</strong> s/d <strong>{{ filters.end_date }}</strong> | Saldo Saat Ini: <strong>{{ formatNumber(currentStock) }} keping</strong>
+              Periode: <strong>{{ formatDateDisplay(filters.start_date) }}</strong> s/d <strong>{{ formatDateDisplay(filters.end_date) }}</strong> | Saldo Saat Ini: <strong>{{ formatNumber(currentStock) }} keping</strong>
             </p>
           </div>
         </div>
@@ -133,20 +133,41 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
-              <tr v-if="!data || data.length === 0">
+              <tr v-if="reportRows.length === 0">
                 <td colspan="8" class="text-center py-8 text-gray-400">Tidak ada data untuk periode ini.</td>
               </tr>
-              <tr v-for="row in data" :key="row.id">
+              <tr v-for="row in reportRows" :key="row.id" class="hover:bg-gray-50/60 dark:hover:bg-zinc-800/40">
                 <td class="py-2.5 px-3 font-mono font-bold">{{ row.report_number }}</td>
                 <td class="py-2.5 px-3">{{ row.usage_date }}</td>
-                <td class="py-2.5 px-3 font-semibold">{{ row.operator ? row.operator.name : '-' }}</td>
+                <td class="py-2.5 px-3 font-semibold">{{ row.operator_name }}</td>
                 <td class="py-2.5 px-3">{{ row.session_name }}</td>
-                <td class="py-2.5 px-3 text-right font-mono font-bold text-blue-600">{{ formatNumber(row.quantity_used) }}</td>
-                <td class="py-2.5 px-3 text-right font-mono font-bold text-rose-600">{{ formatNumber(row.quantity_damaged) }}</td>
-                <td class="py-2.5 px-3 text-right font-mono font-black">{{ formatNumber(row.total_quantity) }}</td>
-                <td class="py-2.5 px-3 uppercase text-[10px] font-bold">{{ row.status }}</td>
+                <td class="py-2.5 px-3 text-right font-mono font-bold text-blue-600 dark:text-blue-400">{{ formatNumber(row.quantity_used) }}</td>
+                <td class="py-2.5 px-3 text-right font-mono font-bold text-rose-600 dark:text-rose-400">{{ formatNumber(row.quantity_damaged) }}</td>
+                <td class="py-2.5 px-3 text-right font-mono font-black text-gray-900 dark:text-zinc-100">{{ formatNumber(row.total_quantity) }}</td>
+                <td class="py-2.5 px-3 uppercase text-[10px] font-bold">
+                  <span class="px-2 py-0.5 rounded-full border text-[9px]" :class="getStatusBadgeClass(row.status)">
+                    {{ row.status_label || row.status }}
+                  </span>
+                </td>
               </tr>
             </tbody>
+            <tfoot v-if="reportRows.length > 0" class="bg-gray-50/80 dark:bg-zinc-800/70 font-extrabold border-t-2 border-gray-300 dark:border-zinc-700">
+              <tr>
+                <td colspan="4" class="py-3 px-3 text-right text-gray-700 dark:text-zinc-200 uppercase tracking-wider text-[11px]">
+                  TOTAL PENGGUNAAN PERIODE INI:
+                </td>
+                <td class="py-3 px-3 text-right font-mono text-blue-600 dark:text-blue-400 font-black">
+                  {{ formatNumber(reportSummary.total_used) }}
+                </td>
+                <td class="py-3 px-3 text-right font-mono text-rose-600 dark:text-rose-400 font-black">
+                  {{ formatNumber(reportSummary.total_damaged) }}
+                </td>
+                <td class="py-3 px-3 text-right font-mono text-gray-900 dark:text-zinc-100 font-black">
+                  {{ formatNumber(reportSummary.grand_total) }}
+                </td>
+                <td></td>
+              </tr>
+            </tfoot>
           </table>
 
           <!-- Type 2: receipts -->
@@ -163,19 +184,30 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
-              <tr v-if="!data || data.length === 0">
+              <tr v-if="reportRows.length === 0">
                 <td colspan="7" class="text-center py-8 text-gray-400">Tidak ada data penerimaan untuk periode ini.</td>
               </tr>
-              <tr v-for="row in data" :key="row.id">
+              <tr v-for="row in reportRows" :key="row.id" class="hover:bg-gray-50/60 dark:hover:bg-zinc-800/40">
                 <td class="py-2.5 px-3 font-mono font-bold">{{ row.receipt_number }}</td>
                 <td class="py-2.5 px-3">{{ row.received_date }}</td>
-                <td class="py-2.5 px-3 text-right font-mono font-black text-emerald-600">+{{ formatNumber(row.quantity) }}</td>
+                <td class="py-2.5 px-3 text-right font-mono font-black text-emerald-600 dark:text-emerald-400">+{{ formatNumber(row.quantity) }}</td>
                 <td class="py-2.5 px-3">{{ row.source }}</td>
                 <td class="py-2.5 px-3 font-mono">{{ row.document_number }}</td>
-                <td class="py-2.5 px-3">{{ row.receiver ? row.receiver.name : '-' }}</td>
+                <td class="py-2.5 px-3 font-semibold">{{ row.receiver_name }}</td>
                 <td class="py-2.5 px-3 text-right font-mono font-bold">{{ formatNumber(row.balance_after) }}</td>
               </tr>
             </tbody>
+            <tfoot v-if="reportRows.length > 0" class="bg-gray-50/80 dark:bg-zinc-800/70 font-extrabold border-t-2 border-gray-300 dark:border-zinc-700">
+              <tr>
+                <td colspan="2" class="py-3 px-3 text-right text-gray-700 dark:text-zinc-200 uppercase tracking-wider text-[11px]">
+                  TOTAL PENERIMAAN:
+                </td>
+                <td class="py-3 px-3 text-right font-mono text-emerald-600 dark:text-emerald-400 font-black">
+                  +{{ formatNumber(reportSummary.total_quantity) }}
+                </td>
+                <td colspan="4"></td>
+              </tr>
+            </tfoot>
           </table>
 
           <!-- Type 3: operator_usage -->
@@ -183,6 +215,7 @@
             <thead class="bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-zinc-200 font-extrabold text-[11px] uppercase">
               <tr>
                 <th class="py-2.5 px-3">Nama Operator</th>
+                <th class="py-2.5 px-3 text-center">Jumlah Laporan</th>
                 <th class="py-2.5 px-3 text-right">Total Berhasil Digunakan</th>
                 <th class="py-2.5 px-3 text-right">Total Rusak</th>
                 <th class="py-2.5 px-3 text-right">Total Keping Keluar</th>
@@ -190,19 +223,32 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
-              <tr v-if="!data || data.length === 0">
-                <td colspan="5" class="text-center py-8 text-gray-400">Tidak ada data pemakaian operator.</td>
+              <tr v-if="reportRows.length === 0">
+                <td colspan="6" class="text-center py-8 text-gray-400">Tidak ada data pemakaian operator.</td>
               </tr>
-              <tr v-for="(op, idx) in data" :key="idx">
+              <tr v-for="(op, idx) in reportRows" :key="idx" class="hover:bg-gray-50/60 dark:hover:bg-zinc-800/40">
                 <td class="py-2.5 px-3 font-bold">{{ op.operator_name }}</td>
-                <td class="py-2.5 px-3 text-right font-mono font-bold text-blue-600">{{ formatNumber(op.total_used) }}</td>
-                <td class="py-2.5 px-3 text-right font-mono font-bold text-rose-600">{{ formatNumber(op.total_damaged) }}</td>
-                <td class="py-2.5 px-3 text-right font-mono font-black">{{ formatNumber(op.total_out) }}</td>
+                <td class="py-2.5 px-3 text-center font-mono">{{ formatNumber(op.report_count) }}</td>
+                <td class="py-2.5 px-3 text-right font-mono font-bold text-blue-600 dark:text-blue-400">{{ formatNumber(op.total_used) }}</td>
+                <td class="py-2.5 px-3 text-right font-mono font-bold text-rose-600 dark:text-rose-400">{{ formatNumber(op.total_damaged) }}</td>
+                <td class="py-2.5 px-3 text-right font-mono font-black text-gray-900 dark:text-zinc-100">{{ formatNumber(op.total_out) }}</td>
                 <td class="py-2.5 px-3 text-right font-mono font-bold">
-                  {{ op.total_out > 0 ? ((op.total_damaged / op.total_out) * 100).toFixed(1) + '%' : '0%' }}
+                  {{ op.damage_ratio }}%
                 </td>
               </tr>
             </tbody>
+            <tfoot v-if="reportRows.length > 0" class="bg-gray-50/80 dark:bg-zinc-800/70 font-extrabold border-t-2 border-gray-300 dark:border-zinc-700">
+              <tr>
+                <td class="py-3 px-3 text-right text-gray-700 dark:text-zinc-200 uppercase tracking-wider text-[11px]">
+                  REKAP TOTAL:
+                </td>
+                <td class="py-3 px-3 text-center font-mono font-bold">{{ formatNumber(reportSummary.total_reports) }}</td>
+                <td class="py-3 px-3 text-right font-mono text-blue-600 dark:text-blue-400 font-black">{{ formatNumber(reportSummary.total_used) }}</td>
+                <td class="py-3 px-3 text-right font-mono text-rose-600 dark:text-rose-400 font-black">{{ formatNumber(reportSummary.total_damaged) }}</td>
+                <td class="py-3 px-3 text-right font-mono text-gray-900 dark:text-zinc-100 font-black">{{ formatNumber(reportSummary.grand_total) }}</td>
+                <td class="py-3 px-3 text-right font-mono font-black">{{ reportSummary.overall_ratio }}%</td>
+              </tr>
+            </tfoot>
           </table>
 
           <!-- Type 4: damage -->
@@ -217,17 +263,33 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
-              <tr v-if="!data || data.length === 0">
+              <tr v-if="reportRows.length === 0">
                 <td colspan="5" class="text-center py-8 text-gray-400">Tidak ada rekaman blangko rusak pada periode ini.</td>
               </tr>
-              <tr v-for="row in data" :key="row.id">
+              <tr v-for="row in reportRows" :key="row.id" class="hover:bg-gray-50/60 dark:hover:bg-zinc-800/40">
                 <td class="py-2.5 px-3 font-mono font-bold">{{ row.report_number }}</td>
                 <td class="py-2.5 px-3">{{ row.usage_date }}</td>
-                <td class="py-2.5 px-3 font-semibold">{{ row.operator ? row.operator.name : '-' }}</td>
-                <td class="py-2.5 px-3 text-right font-mono font-bold text-rose-600">{{ formatNumber(row.quantity_damaged) }}</td>
-                <td class="py-2.5 px-3 text-gray-700 dark:text-zinc-300">{{ row.damage_reason || '-' }}</td>
+                <td class="py-2.5 px-3 font-semibold">{{ row.operator_name }}</td>
+                <td class="py-2.5 px-3 text-right font-mono font-bold text-rose-600 dark:text-rose-400">{{ formatNumber(row.quantity_damaged) }}</td>
+                <td class="py-2.5 px-3 text-gray-700 dark:text-zinc-300">
+                  {{ row.damage_reason }}
+                  <a v-if="row.damage_proof_url" :href="row.damage_proof_url" target="_blank" class="ml-2 text-sky-500 hover:underline text-[11px] print:hidden">
+                    [Lihat Foto]
+                  </a>
+                </td>
               </tr>
             </tbody>
+            <tfoot v-if="reportRows.length > 0" class="bg-gray-50/80 dark:bg-zinc-800/70 font-extrabold border-t-2 border-gray-300 dark:border-zinc-700">
+              <tr>
+                <td colspan="3" class="py-3 px-3 text-right text-gray-700 dark:text-zinc-200 uppercase tracking-wider text-[11px]">
+                  TOTAL BLANGKO RUSAK:
+                </td>
+                <td class="py-3 px-3 text-right font-mono text-rose-600 dark:text-rose-400 font-black">
+                  {{ formatNumber(reportSummary.total_damaged) }}
+                </td>
+                <td></td>
+              </tr>
+            </tfoot>
           </table>
 
           <!-- Type 5: ledger -->
@@ -236,27 +298,49 @@
               <tr>
                 <th class="py-2.5 px-3">No. Transaksi</th>
                 <th class="py-2.5 px-3">Tanggal</th>
-                <th class="py-2.5 px-3">Jenis</th>
-                <th class="py-2.5 px-3 text-right">Masuk</th>
-                <th class="py-2.5 px-3 text-right">Keluar</th>
-                <th class="py-2.5 px-3 text-right">Saldo</th>
+                <th class="py-2.5 px-3">Jenis Mutasi</th>
+                <th class="py-2.5 px-3 text-right">Masuk (+)</th>
+                <th class="py-2.5 px-3 text-right">Keluar (-)</th>
+                <th class="py-2.5 px-3 text-right">Saldo Akhir</th>
                 <th class="py-2.5 px-3">Petugas</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
-              <tr v-if="!data || data.length === 0">
-                <td colspan="7" class="text-center py-8 text-gray-400">Tidak ada riwayat mutasi.</td>
+              <tr v-if="reportRows.length === 0">
+                <td colspan="7" class="text-center py-8 text-gray-400">Tidak ada riwayat mutasi kartu persediaan.</td>
               </tr>
-              <tr v-for="t in data" :key="t.id">
+              <tr v-for="t in reportRows" :key="t.id" class="hover:bg-gray-50/60 dark:hover:bg-zinc-800/40">
                 <td class="py-2.5 px-3 font-mono font-bold">{{ t.transaction_number }}</td>
                 <td class="py-2.5 px-3">{{ t.transaction_date }}</td>
-                <td class="py-2.5 px-3 uppercase text-[10px] font-bold">{{ t.transaction_type }}</td>
-                <td class="py-2.5 px-3 text-right font-mono text-emerald-600">{{ t.qty_in > 0 ? '+' + formatNumber(t.qty_in) : '-' }}</td>
-                <td class="py-2.5 px-3 text-right font-mono text-rose-600">{{ (t.qty_out_used + t.qty_out_damaged) > 0 ? '-' + formatNumber(t.qty_out_used + t.qty_out_damaged) : '-' }}</td>
-                <td class="py-2.5 px-3 text-right font-mono font-black">{{ formatNumber(t.balance_after) }}</td>
-                <td class="py-2.5 px-3">{{ t.user ? t.user.name : '-' }}</td>
+                <td class="py-2.5 px-3">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-zinc-200">
+                    {{ t.type_label || t.transaction_type }}
+                  </span>
+                </td>
+                <td class="py-2.5 px-3 text-right font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                  {{ t.qty_in > 0 ? '+' + formatNumber(t.qty_in) : '-' }}
+                </td>
+                <td class="py-2.5 px-3 text-right font-mono text-rose-600 dark:text-rose-400 font-bold">
+                  {{ t.total_out > 0 ? '-' + formatNumber(t.total_out) : '-' }}
+                </td>
+                <td class="py-2.5 px-3 text-right font-mono font-black text-gray-900 dark:text-zinc-100">{{ formatNumber(t.balance_after) }}</td>
+                <td class="py-2.5 px-3 font-semibold">{{ t.actor_name }}</td>
               </tr>
             </tbody>
+            <tfoot v-if="reportRows.length > 0" class="bg-gray-50/80 dark:bg-zinc-800/70 font-extrabold border-t-2 border-gray-300 dark:border-zinc-700">
+              <tr>
+                <td colspan="3" class="py-3 px-3 text-right text-gray-700 dark:text-zinc-200 uppercase tracking-wider text-[11px]">
+                  TOTAL MUTASI PERIODE INI:
+                </td>
+                <td class="py-3 px-3 text-right font-mono text-emerald-600 dark:text-emerald-400 font-black">
+                  +{{ formatNumber(reportSummary.total_in) }}
+                </td>
+                <td class="py-3 px-3 text-right font-mono text-rose-600 dark:text-rose-400 font-black">
+                  -{{ formatNumber(reportSummary.total_out) }}
+                </td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
           </table>
 
           <!-- Type 6: opname -->
@@ -273,21 +357,39 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
-              <tr v-if="!data || data.length === 0">
-                <td colspan="7" class="text-center py-8 text-gray-400">Tidak ada berita acara opname.</td>
+              <tr v-if="reportRows.length === 0">
+                <td colspan="7" class="text-center py-8 text-gray-400">Tidak ada berita acara opname untuk periode ini.</td>
               </tr>
-              <tr v-for="op in data" :key="op.id">
+              <tr v-for="op in reportRows" :key="op.id" class="hover:bg-gray-50/60 dark:hover:bg-zinc-800/40">
                 <td class="py-2.5 px-3 font-mono font-bold">{{ op.opname_number }}</td>
                 <td class="py-2.5 px-3">{{ op.opname_date }}</td>
                 <td class="py-2.5 px-3 text-right font-mono">{{ formatNumber(op.system_stock) }}</td>
                 <td class="py-2.5 px-3 text-right font-mono font-bold">{{ formatNumber(op.physical_stock) }}</td>
-                <td class="py-2.5 px-3 text-right font-mono font-black">
+                <td class="py-2.5 px-3 text-right font-mono font-black" :class="op.difference < 0 ? 'text-rose-600 dark:text-rose-400' : (op.difference > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500')">
                   {{ op.difference > 0 ? '+' : '' }}{{ formatNumber(op.difference) }}
                 </td>
-                <td class="py-2.5 px-3">{{ op.checker ? op.checker.name : '-' }}</td>
-                <td class="py-2.5 px-3 uppercase text-[10px] font-bold">{{ op.status }}</td>
+                <td class="py-2.5 px-3 font-semibold">{{ op.checker_name }}</td>
+                <td class="py-2.5 px-3 uppercase text-[10px] font-bold">
+                  <span class="px-2 py-0.5 rounded-full border text-[9px]" :class="op.status === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'">
+                    {{ op.status_label || op.status }}
+                  </span>
+                </td>
               </tr>
             </tbody>
+            <tfoot v-if="reportRows.length > 0" class="bg-gray-50/80 dark:bg-zinc-800/70 font-extrabold border-t-2 border-gray-300 dark:border-zinc-700">
+              <tr>
+                <td colspan="2" class="py-3 px-3 text-right text-gray-700 dark:text-zinc-200 uppercase tracking-wider text-[11px]">
+                  TOTAL BERITA ACARA: {{ formatNumber(reportSummary.total_opnames) }}
+                </td>
+                <td colspan="2" class="py-3 px-3 text-right text-gray-700 dark:text-zinc-200 uppercase tracking-wider text-[11px]">
+                  TOTAL AKUMULASI SELISIH FISIK:
+                </td>
+                <td class="py-3 px-3 text-right font-mono font-black" :class="(reportSummary.total_difference || 0) < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'">
+                  {{ (reportSummary.total_difference || 0) > 0 ? '+' : '' }}{{ formatNumber(reportSummary.total_difference) }}
+                </td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
           </table>
         </div>
 
@@ -330,7 +432,7 @@ const props = defineProps({
   },
   data: {
     type: [Array, Object],
-    default: () => [],
+    default: () => ({ rows: [], summary: {} }),
   },
   operators: {
     type: Array,
@@ -341,6 +443,31 @@ const props = defineProps({
     default: 0,
   },
 });
+
+const reportRows = computed(() => {
+  if (Array.isArray(props.data)) return props.data;
+  return props.data?.rows || [];
+});
+
+const reportSummary = computed(() => {
+  if (Array.isArray(props.data)) return {};
+  return props.data?.summary || props.data || {};
+});
+
+const getStatusBadgeClass = (status) => {
+  switch (status) {
+    case 'draft':
+      return 'bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border-gray-200 dark:border-zinc-700';
+    case 'submitted':
+      return 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800';
+    case 'approved':
+      return 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
+    case 'reversed':
+      return 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800 line-through';
+    default:
+      return 'bg-gray-100 text-gray-700 border-gray-200';
+  }
+};
 
 const reportTabs = [
   { id: 'daily_usage', label: 'Penggunaan Harian' },
@@ -397,5 +524,18 @@ const printReport = () => {
 const formatNumber = (num) => {
   if (num === null || num === undefined) return '0';
   return new Intl.NumberFormat('id-ID').format(num);
+};
+
+const formatDateDisplay = (dateStr) => {
+  if (!dateStr) return '-';
+  try {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateStr;
+  } catch (e) {
+    return dateStr;
+  }
 };
 </script>
