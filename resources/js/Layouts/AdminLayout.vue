@@ -1017,6 +1017,25 @@ const filteredMenuGroups = computed(() => {
         return userPermissions.value.some(p => p.startsWith('blank_stocks.'));
       }
 
+      // Generic permission-based access mapping for custom / dynamically configured roles
+      if (r === 'admin.news.index' && userPermissions.value.includes('manage_news')) return true;
+      if (r === 'admin.pages.index' && userPermissions.value.includes('manage_pages')) return true;
+      if (r === 'admin.announcements.index' && userPermissions.value.includes('manage_announcements')) return true;
+      if (r === 'admin.banners.index' && userPermissions.value.includes('manage_banners')) return true;
+      if (r === 'admin.gallery.index' && userPermissions.value.includes('manage_gallery')) return true;
+      if (r === 'admin.files.index' && userPermissions.value.includes('manage_file_manager')) return true;
+      if (r === 'admin.downloads.index' && userPermissions.value.includes('manage_downloads')) return true;
+      if (r === 'admin.faqs.index' && userPermissions.value.includes('manage_faq')) return true;
+      if ((r === 'admin.complaints.index' || r === 'admin.complaints.categories' || r === 'admin.surveys.index') && userPermissions.value.includes('manage_complaints')) return true;
+      if (r && r.startsWith('admin.ppid.') && userPermissions.value.includes('manage_ppid')) return true;
+      if (r && r.startsWith('admin.demographics.') && userPermissions.value.includes('manage_demographic')) return true;
+      if (r === 'admin.audit-logs.index' && userPermissions.value.includes('view_audit_logs')) return true;
+      if (r && r.startsWith('admin.visitor-analytics') && userPermissions.value.includes('view_analytics')) return true;
+      if (r === 'admin.users.index' && (userPermissions.value.includes('manage_users') || userPermissions.value.includes('manage_roles'))) return true;
+      if (r === 'admin.theme.index' && userPermissions.value.includes('manage_themes')) return true;
+      if (r === 'admin.notification-settings.index' && userPermissions.value.includes('notifications.manage')) return true;
+      if (r && r.startsWith('admin.profile.') && (userPermissions.value.includes('manage_pages') || userPermissions.value.includes('manage_settings'))) return true;
+
       return false;
     });
 

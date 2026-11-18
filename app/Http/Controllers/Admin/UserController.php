@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\AutoRoleSync;
+use App\Services\ModulePermissionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,16 +14,17 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of users.
+     * Display a listing of users and roles.
      */
     public function index(Request $request): InertiaResponse
     {
         // Auto-synchronize roles if missing or unmigrated
-        \App\Services\AutoRoleSync::sync();
+        AutoRoleSync::sync();
 
         $search = $request->get('search', '');
 
@@ -44,24 +47,32 @@ class UserController extends Controller
                 'is_active'          => $user->is_active,
                 'two_factor_enabled' => $user->hasTwoFactorEnabled(),
                 'role'               => $user->roles->first()?->name ?? 'Editor Konten',
-                'roles'      => $user->roles->pluck('name'),
-                'last_login_at' => $user->last_login_at?->format('d M Y H:i') ?? '—',
-                'created_at' => $user->created_at->format('d M Y'),
+                'roles'              => $user->roles->pluck('name')->toArray(),
+                'last_login_at'      => $user->last_login_at?->format('d M Y H:i') ?? '—',
+                'created_at'         => $user->created_at->format('d M Y'),
             ];
         });
 
-        $roles = Role::orderBy('name')->pluck('name')->map(fn($r) => \App\Services\AutoRoleSync::resolveRoleName($r))->unique()->values();
+        $protectedRoles = ModulePermissionService::getProtectedRoles();
 
-        // Always guarantee Supervisor Layanan KTP-el is in the list
-        if (!$roles->contains('Supervisor Layanan KTP-el')) {
-            $roles->push('Supervisor Layanan KTP-el');
-            $roles = $roles->sort()->values();
-        }
+        $roles = Role::with('permissions')->orderBy('name')->get()->map(function ($r) use ($protectedRoles) {
+            return [
+                'id'           => $r->id,
+                'name'         => $r->name,
+                'title'        => AutoRoleSync::resolveRoleName($r->name),
+                'is_protected' => in_array($r->name, $protectedRoles, true),
+                'users_count'  => $r->users()->count(),
+                'permissions'  => $r->permissions->pluck('name')->toArray(),
+            ];
+        });
+
+        $modules = ModulePermissionService::getModules();
 
         return Inertia::render('Admin/Users/Index', [
-            'users'  => $users,
-            'roles'  => $roles,
-            'search' => $search,
+            'users'   => $users,
+            'roles'   => $roles,
+            'modules' => $modules,
+            'search'  => $search,
         ]);
     }
 
@@ -70,7 +81,7 @@ class UserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        \App\Services\AutoRoleSync::sync();
+        AutoRoleSync::sync();
 
         $request->validate([
             'username' => [
@@ -84,7 +95,9 @@ class UserController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8',
-            'role'     => 'required|string',
+            'role'     => 'nullable|string',
+            'roles'    => 'nullable|array',
+            'roles.*'  => 'string|exists:roles,name',
         ], [
             'username.required' => 'Username wajib diisi.',
             'username.unique'   => 'Username sudah digunakan.',
@@ -93,23 +106,29 @@ class UserController extends Controller
         ]);
 
         $user = User::create([
-            'username' => $request->username,
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
+            'username'  => $request->username,
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
             'is_active' => true,
         ]);
 
-        $canonicalRole = \App\Services\AutoRoleSync::resolveRoleName($request->role);
-        \Spatie\Permission\Models\Role::firstOrCreate(['name' => $canonicalRole, 'guard_name' => 'web']);
-        $user->syncRoles([$canonicalRole]);
-        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        // Assign roles (supports array of roles or fallback single role)
+        if ($request->has('roles') && is_array($request->roles) && !empty($request->roles)) {
+            $user->syncRoles($request->roles);
+        } else {
+            $canonicalRole = AutoRoleSync::resolveRoleName($request->role ?? 'Editor Konten');
+            Role::firstOrCreate(['name' => $canonicalRole, 'guard_name' => 'web']);
+            $user->syncRoles([$canonicalRole]);
+        }
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         ActivityLogger::log(
             "Membuat user baru: {$user->username} ({$user->name})",
             $user,
             'create_user',
-            ['username' => $user->username, 'email' => $user->email, 'role' => $request->role]
+            ['username' => $user->username, 'email' => $user->email, 'roles' => $user->roles->pluck('name')->toArray()]
         );
 
         return redirect()->back()->with('success', "Operator '{$user->username}' berhasil dibuat.");
@@ -146,7 +165,9 @@ class UserController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
             'password'  => 'nullable|string|min:8',
-            'role'      => 'required|string',
+            'role'      => 'nullable|string',
+            'roles'     => 'nullable|array',
+            'roles.*'   => 'string|exists:roles,name',
             'is_active' => 'boolean',
         ], [
             'username.required' => 'Username wajib diisi.',
@@ -165,10 +186,20 @@ class UserController extends Controller
 
         $user->save();
 
-        $canonicalRole = \App\Services\AutoRoleSync::resolveRoleName($request->role);
-        \Spatie\Permission\Models\Role::firstOrCreate(['name' => $canonicalRole, 'guard_name' => 'web']);
-        $user->syncRoles([$canonicalRole]);
-        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        // Assign roles (supports array of roles or fallback single role)
+        if ($request->has('roles') && is_array($request->roles) && !empty($request->roles)) {
+            $roles = $request->roles;
+            if ($user->username === 'superadmin' && !in_array('Administrator Utama', $roles, true)) {
+                $roles[] = 'Administrator Utama';
+            }
+            $user->syncRoles($roles);
+        } elseif ($request->filled('role')) {
+            $canonicalRole = AutoRoleSync::resolveRoleName($request->role);
+            Role::firstOrCreate(['name' => $canonicalRole, 'guard_name' => 'web']);
+            $user->syncRoles([$canonicalRole]);
+        }
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         ActivityLogger::log(
             "Memperbarui user: {$user->username} ({$user->name})",
@@ -178,6 +209,41 @@ class UserController extends Controller
         );
 
         return redirect()->back()->with('success', "Operator '{$user->username}' berhasil diperbarui.");
+    }
+
+    /**
+     * Dedicated action to change/add/remove roles for a specific user.
+     */
+    public function syncRoles(Request $request, User $user): RedirectResponse
+    {
+        if ($user->username === 'superadmin' && $request->user()->username !== 'superadmin') {
+            return redirect()->back()->with('error', 'Anda tidak memiliki hak untuk mengubah peran Super Admin Utama.');
+        }
+
+        $request->validate([
+            'roles'   => 'required|array|min:1',
+            'roles.*' => 'string|exists:roles,name',
+        ], [
+            'roles.required' => 'Pilih minimal satu peran untuk operator ini.',
+            'roles.min'      => 'Pilih minimal satu peran untuk operator ini.',
+        ]);
+
+        $roles = $request->roles;
+        if ($user->username === 'superadmin' && !in_array('Administrator Utama', $roles, true)) {
+            $roles[] = 'Administrator Utama';
+        }
+
+        $user->syncRoles($roles);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        ActivityLogger::log(
+            "Memperbarui alokasi peran operator: {$user->username} menjadi [" . implode(', ', $roles) . "]",
+            $user,
+            'sync_user_roles',
+            ['username' => $user->username, 'roles' => $roles]
+        );
+
+        return redirect()->back()->with('success', "Peran operator '{$user->username}' berhasil diperbarui.");
     }
 
     /**

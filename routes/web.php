@@ -245,6 +245,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
             Route::post('/users/{user}/toggle-active', [\App\Http\Controllers\Admin\UserController::class, 'toggleActive'])->name('users.toggle-active');
             Route::post('/users/{user}/admin-reset-2fa', [\App\Http\Controllers\Admin\TwoFactorController::class, 'adminReset'])->name('users.admin-reset-2fa');
+            Route::put('/users/{user}/roles', [\App\Http\Controllers\Admin\UserController::class, 'syncRoles'])->name('users.sync-roles');
+
+            // Role & Module Permission Management CMS
+            Route::post('/roles', [\App\Http\Controllers\Admin\RoleController::class, 'store'])->name('roles.store');
+            Route::put('/roles/{role}', [\App\Http\Controllers\Admin\RoleController::class, 'update'])->name('roles.update');
+            Route::delete('/roles/{role}', [\App\Http\Controllers\Admin\RoleController::class, 'destroy'])->name('roles.destroy');
 
             // Theme Customizer CMS
             Route::get('/theme', [\App\Http\Controllers\Admin\ThemeController::class, 'index'])->name('theme.index');
