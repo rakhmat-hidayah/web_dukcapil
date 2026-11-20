@@ -116,8 +116,15 @@ class ApplicantHistoryController extends Controller
 
         if ($candidates->isEmpty()) {
             RateLimiter::hit($limiterKey, 60);
+
+            $hasAccount = \App\Models\Applicant\ApplicantAccount::where('nik_hash', \App\Models\Applicant\ApplicantAccount::computeNikHash($cleanNik))->exists();
+
+            $errorMsg = $hasAccount
+                ? 'Tidak ditemukan riwayat permohonan dengan NIK ini. Anda dapat mengajukan permohonan baru melalui Dashboard Pemohon.'
+                : 'Nomor Induk Kependudukan (NIK) belum terdaftar sebagai akun pemohon. Silakan buat akun terlebih dahulu.';
+
             return back()->withErrors([
-                'nik' => 'Tidak ditemukan permohonan dengan NIK ini. Periksa kembali NIK yang Anda masukkan.',
+                'nik' => $errorMsg,
             ])->withInput();
         }
 

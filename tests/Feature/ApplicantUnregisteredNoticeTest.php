@@ -69,4 +69,17 @@ class ApplicantUnregisteredNoticeTest extends TestCase
         $errors = session('errors')->get('nik');
         $this->assertStringContainsString('belum terdaftar', $errors[0]);
     }
+
+    public function test_history_verification_with_unregistered_nik_shows_not_registered_message(): void
+    {
+        $unregisteredNik = '5205022804040001';
+
+        $response = $this->post(route('queue.history.verify'), [
+            'nik' => $unregisteredNik,
+        ]);
+
+        $response->assertSessionHasErrors(['nik']);
+        $errors = session('errors')->get('nik');
+        $this->assertStringContainsString('belum terdaftar', $errors[0]);
+    }
 }
