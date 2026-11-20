@@ -66,10 +66,17 @@ class ApplicantRecoveryController extends Controller
 
         $account = ApplicantAccount::where('nik_hash', $nikHash)->first();
 
-        if (!$account || strtolower(trim((string) $account->email_normalized)) !== $rawEmail) {
+        if (!$account) {
             RateLimiter::hit($limiterKey, 300);
             throw ValidationException::withMessages([
-                'nik' => 'Nomor Induk Kependudukan (NIK) atau alamat email yang Anda masukkan salah.',
+                'nik' => 'Nomor Induk Kependudukan (NIK) belum terdaftar sebagai akun pemohon. Silakan buat akun terlebih dahulu.',
+            ]);
+        }
+
+        if (strtolower(trim((string) $account->email_normalized)) !== $rawEmail) {
+            RateLimiter::hit($limiterKey, 300);
+            throw ValidationException::withMessages([
+                'email' => 'Alamat email yang Anda masukkan tidak sesuai dengan email yang terdaftar untuk NIK ini.',
             ]);
         }
 

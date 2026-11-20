@@ -42,9 +42,35 @@
                 class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-mono text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500"
                 required
               />
-              <p v-if="step1Form.errors.nik" class="text-xs text-rose-500 font-semibold">
-                {{ step1Form.errors.nik }}
-              </p>
+              <!-- NIK Error / Belum Terdaftar Notification -->
+              <div
+                v-if="step1Form.errors.nik"
+                class="mt-1.5 p-3 rounded-xl border text-xs font-medium leading-relaxed space-y-2"
+                :class="step1Form.errors.nik.toLowerCase().includes('belum terdaftar')
+                  ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 text-amber-950 dark:text-amber-200'
+                  : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300'"
+              >
+                <div class="flex items-start gap-2">
+                  <AlertCircle
+                    class="w-4 h-4 shrink-0 mt-0.5"
+                    :class="step1Form.errors.nik.toLowerCase().includes('belum terdaftar') ? 'text-amber-600 dark:text-amber-400' : 'text-rose-500'"
+                  />
+                  <span class="leading-relaxed">{{ step1Form.errors.nik }}</span>
+                </div>
+                <div
+                  v-if="step1Form.errors.nik.toLowerCase().includes('belum terdaftar')"
+                  class="pt-2 border-t border-amber-200/80 dark:border-amber-800/60 flex items-center justify-between gap-2 flex-wrap"
+                >
+                  <span class="text-[11px] font-semibold text-amber-900 dark:text-amber-200">Belum punya akun?</span>
+                  <Link
+                    :href="route('applicant.register', step1Form.nik ? { nik: step1Form.nik } : {})"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+                  >
+                    <UserPlus class="w-3.5 h-3.5" />
+                    <span>Daftar Akun Baru</span>
+                  </Link>
+                </div>
+              </div>
             </div>
 
             <div class="space-y-1">
@@ -58,9 +84,13 @@
                 class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500"
                 required
               />
-              <p v-if="step1Form.errors.email" class="text-xs text-rose-500 font-semibold">
-                {{ step1Form.errors.email }}
-              </p>
+              <div
+                v-if="step1Form.errors.email"
+                class="mt-1.5 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs font-medium text-rose-700 dark:text-rose-300 flex items-start gap-2"
+              >
+                <AlertCircle class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                <span class="leading-relaxed">{{ step1Form.errors.email }}</span>
+              </div>
             </div>
 
             <button
@@ -143,12 +173,33 @@
           </form>
         </div>
 
-        <!-- Help Notice -->
-        <div class="pt-2.5 sm:pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-          <span>Tidak memiliki akses ke email terdaftar? </span>
-          <p class="mt-1 text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400">
-            Silakan datang langsung ke loket pelayanan Disdukcapil Kabupaten Dompu untuk verifikasi identitas fisik oleh petugas.
-          </p>
+        <!-- Help Notice & Navigation Links -->
+        <div class="pt-2.5 sm:pt-4 border-t border-slate-100 dark:border-slate-800 text-center space-y-2 text-[11px] sm:text-xs">
+          <div>
+            <span class="text-slate-500 dark:text-slate-400">Tidak memiliki akses ke email terdaftar? </span>
+            <p class="mt-1 text-[10.5px] sm:text-[11px] text-slate-600 dark:text-slate-400">
+              Silakan datang langsung ke loket pelayanan Disdukcapil Kabupaten Dompu untuk verifikasi identitas fisik oleh petugas.
+            </p>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex flex-col items-center gap-1.5 text-xs">
+            <p class="text-slate-500 dark:text-slate-400">
+              Belum pernah mendaftar akun?
+              <Link
+                :href="route('applicant.register', step1Form.nik ? { nik: step1Form.nik } : {})"
+                class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
+              >
+                <span>Daftar Akun Baru</span>
+                <ArrowRight class="w-3 h-3" />
+              </Link>
+            </p>
+            <p class="text-slate-400 dark:text-slate-500 text-[11px]">
+              Sudah ingat password Anda?
+              <Link :href="route('applicant.login')" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                Masuk di Sini
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -159,7 +210,7 @@
 import { ref, onMounted } from 'vue'
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
-import { ArrowRight, Smartphone, CheckCircle2, Eye, EyeOff } from '@lucide/vue'
+import { ArrowRight, Smartphone, CheckCircle2, Eye, EyeOff, AlertCircle, UserPlus } from '@lucide/vue'
 
 onMounted(() => {
   if (typeof window !== 'undefined') {

@@ -505,8 +505,15 @@ import {
   EyeOff
 } from '@lucide/vue'
 
+const props = defineProps({
+  initial_nik: {
+    type: String,
+    default: '',
+  },
+})
+
 const form = useForm({
-  nik: '',
+  nik: props.initial_nik || '',
   name: '',
   phone: '',
   email: '',

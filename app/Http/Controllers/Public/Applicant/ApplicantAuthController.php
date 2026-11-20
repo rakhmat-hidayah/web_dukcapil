@@ -31,7 +31,7 @@ class ApplicantAuthController extends Controller
     /**
      * Show registration page.
      */
-    public function showRegister(): Response|RedirectResponse
+    public function showRegister(Request $request): Response|RedirectResponse
     {
         if (Auth::guard('applicant')->check()) {
             return redirect()->route('applicant.dashboard');
@@ -42,7 +42,9 @@ class ApplicantAuthController extends Controller
                 ->with('warning', 'Pendaftaran akun pemohon baru sedang ditutup sementara karena layanan online sedang dalam pemeliharaan sistem.');
         }
 
-        return Inertia::render('Public/Applicant/Register');
+        return Inertia::render('Public/Applicant/Register', [
+            'initial_nik' => (string) $request->query('nik', ''),
+        ]);
     }
 
     /**
@@ -336,17 +338,23 @@ class ApplicantAuthController extends Controller
         // Look up applicant by HMAC blind index
         $account = ApplicantAccount::where('nik_hash', $nikHash)->first();
 
-        // Generic error message if user not found or password incorrect
-        if (!$account || !Hash::check($password, $account->password)) {
+        // Check if account exists
+        if (!$account) {
+            RateLimiter::hit($limiterKey, 300);
+            throw ValidationException::withMessages([
+                'nik' => 'Nomor Induk Kependudukan (NIK) ini belum terdaftar sebagai akun pemohon. Silakan buat akun terlebih dahulu.',
+            ]);
+        }
+
+        // Verify password
+        if (!Hash::check($password, $account->password)) {
             RateLimiter::hit($limiterKey, 300);
 
-            if ($account) {
-                ApplicantDeviceAuditLog::logEvent(
-                    applicantAccountId: $account->id,
-                    eventType: 'login_failed_bad_password',
-                    reason: 'Percobaan login gagal: password salah'
-                );
-            }
+            ApplicantDeviceAuditLog::logEvent(
+                applicantAccountId: $account->id,
+                eventType: 'login_failed_bad_password',
+                reason: 'Percobaan login gagal: password salah'
+            );
 
             throw ValidationException::withMessages([
                 'nik' => 'Nomor Induk Kependudukan (NIK) atau password yang Anda masukkan salah.',
