@@ -2,24 +2,24 @@
   <Head title="Daftar Pengajuan Antrian & Berkas - Admin Disdukcapil" />
 
   <AdminLayout>
-    <div class="space-y-6">
+    <div class="space-y-2.5">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 class="text-2xl font-black text-slate-900 dark:text-white">
+          <h1 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
             Pengajuan Antrian & Verifikasi Berkas
           </h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Daftar seluruh pendaftaran KTP-el online, pemeriksaan persyaratan dokumen, dan status pemanggilan.
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+            Daftar pendaftaran KTP-el online, pemeriksaan persyaratan dokumen, dan status pemanggilan.
           </p>
         </div>
 
         <div class="flex items-center gap-2">
           <Link
             :href="route('admin.queue.dashboard')"
-            class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5"
+            class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 0118 0z"/></svg>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 0118 0z"/></svg>
             Kembali ke Dashboard
           </Link>
         </div>
@@ -28,89 +28,89 @@
       <!-- Operator Special Reminders Banner -->
       <div
         v-if="(urgencyCounts?.overdue || 0) > 0 || (urgencyCounts?.new || 0) > 0"
-        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+        class="grid grid-cols-1 md:grid-cols-2 gap-2"
       >
         <!-- Overdue > 24 Hours Alert -->
         <div
           v-if="(urgencyCounts?.overdue || 0) > 0"
-          class="p-4 rounded-2xl bg-gradient-to-r from-rose-50 to-rose-100/80 dark:from-rose-950/40 dark:to-rose-900/20 border-2 border-rose-300 dark:border-rose-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
+          class="p-2.5 rounded-xl bg-gradient-to-r from-rose-50 to-rose-100/80 dark:from-rose-950/40 dark:to-rose-900/20 border border-rose-300 dark:border-rose-800 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 transition"
         >
-          <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-600/30">
-              <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <svg class="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
             <div>
-              <div class="flex items-center gap-2">
-                <h4 class="text-xs sm:text-sm font-black text-rose-900 dark:text-rose-200">
-                  {{ urgencyCounts.overdue }} Permohonan Belum Diverifikasi >1x24 Jam!
+              <div class="flex items-center gap-1.5">
+                <h4 class="text-xs font-black text-rose-900 dark:text-rose-200">
+                  {{ urgencyCounts.overdue }} Belum Diverifikasi >1x24 Jam!
                 </h4>
-                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white animate-pulse">
-                  Prioritas Utama
+                <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-rose-600 text-white animate-pulse">
+                  Prioritas
                 </span>
               </div>
-              <p class="text-[11px] text-rose-700 dark:text-rose-300/90 mt-0.5">
-                Melewati batas waktu standar pelayanan (SLA 24 jam). Harap segera selesaikan verifikasi berkas.
+              <p class="text-[10px] text-rose-700 dark:text-rose-300/90 leading-tight">
+                Melewati SLA 24 jam. Harap segera selesaikan verifikasi berkas.
               </p>
             </div>
           </div>
           <button
             @click="selectUrgency('overdue')"
-            class="px-3.5 py-2 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-600/20 transition whitespace-nowrap self-start sm:self-auto cursor-pointer flex items-center gap-1.5"
+            class="px-2.5 py-1 rounded-lg text-xs font-black bg-rose-600 hover:bg-rose-500 text-white shadow-xs transition whitespace-nowrap self-start sm:self-auto cursor-pointer flex items-center gap-1"
           >
-            <span>Verifikasi Sekarang ({{ urgencyCounts.overdue }})</span>
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <span>Verifikasi ({{ urgencyCounts.overdue }})</span>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </button>
         </div>
 
         <!-- New Incoming Unverified Alert -->
         <div
           v-if="(urgencyCounts?.new || 0) > 0"
-          class="p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-amber-100/80 dark:from-amber-950/40 dark:to-amber-900/20 border-2 border-amber-300 dark:border-amber-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
+          class="p-2.5 rounded-xl bg-gradient-to-r from-amber-50 to-amber-100/80 dark:from-amber-950/40 dark:to-amber-900/20 border border-amber-300 dark:border-amber-800 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 transition"
         >
-          <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
             <div>
-              <div class="flex items-center gap-2">
-                <h4 class="text-xs sm:text-sm font-black text-amber-900 dark:text-amber-200">
+              <div class="flex items-center gap-1.5">
+                <h4 class="text-xs font-black text-amber-900 dark:text-amber-200">
                   {{ urgencyCounts.new }} Permohonan Baru Masuk
                 </h4>
-                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white">
-                  Segera Diverifikasi
+                <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-amber-500 text-white">
+                  Baru
                 </span>
               </div>
-              <p class="text-[11px] text-amber-800 dark:text-amber-300/90 mt-0.5">
-                Dokumen digital baru diunggah oleh pemohon dan menunggu pra-verifikasi operator.
+              <p class="text-[10px] text-amber-800 dark:text-amber-300/90 leading-tight">
+                Dokumen digital baru diunggah dan menunggu pra-verifikasi operator.
               </p>
             </div>
           </div>
           <button
             @click="selectUrgency('new')"
-            class="px-3.5 py-2 rounded-xl text-xs font-black bg-amber-500 hover:bg-amber-400 text-white shadow-md shadow-amber-500/20 transition whitespace-nowrap self-start sm:self-auto cursor-pointer flex items-center gap-1.5"
+            class="px-2.5 py-1 rounded-lg text-xs font-black bg-amber-500 hover:bg-amber-400 text-white shadow-xs transition whitespace-nowrap self-start sm:self-auto cursor-pointer flex items-center gap-1"
           >
-            <span>Tinjau Berkas ({{ urgencyCounts.new }})</span>
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <span>Tinjau ({{ urgencyCounts.new }})</span>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </button>
         </div>
       </div>
 
       <!-- Filter Tabs by Status & Urgency -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
         <!-- All Status Tab -->
         <button
           @click="selectStatus('')"
           :class="[
-            'px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 cursor-pointer',
+            'px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer',
             activeStatus === '' && !activeUrgency
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+              ? 'bg-blue-600 text-white shadow-xs'
               : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700'
           ]"
         >
           <span>Semua Status</span>
           <span
             :class="[
-              'px-2 py-0.5 rounded-full text-[10px] font-mono',
+              'px-1.5 py-0.2 rounded-full text-[9.5px] font-mono',
               activeStatus === '' && !activeUrgency ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
             ]"
           >
@@ -122,19 +122,19 @@
         <button
           @click="selectUrgency('overdue')"
           :class="[
-            'px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 cursor-pointer',
+            'px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer',
             activeUrgency === 'overdue'
-              ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20 ring-2 ring-rose-300 dark:ring-rose-800'
+              ? 'bg-rose-600 text-white shadow-xs ring-1 ring-rose-400'
               : 'bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50'
           ]"
         >
-          <span class="flex items-center gap-1.5">
-            <span v-if="(urgencyCounts?.overdue || 0) > 0" class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+          <span class="flex items-center gap-1">
+            <span v-if="(urgencyCounts?.overdue || 0) > 0" class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
             <span>⚠️ Belum Diverifikasi >24 Jam</span>
           </span>
           <span
             :class="[
-              'px-2 py-0.5 rounded-full text-[10px] font-mono font-bold',
+              'px-1.5 py-0.2 rounded-full text-[9.5px] font-mono font-bold',
               activeUrgency === 'overdue' ? 'bg-rose-500 text-white' : 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300'
             ]"
           >
@@ -146,19 +146,19 @@
         <button
           @click="selectUrgency('new')"
           :class="[
-            'px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 cursor-pointer',
+            'px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer',
             activeUrgency === 'new'
-              ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20 ring-2 ring-amber-300 dark:ring-amber-800'
+              ? 'bg-amber-500 text-white shadow-xs ring-1 ring-amber-400'
               : 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50'
           ]"
         >
-          <span class="flex items-center gap-1.5">
-            <span v-if="(urgencyCounts?.new || 0) > 0" class="w-2 h-2 rounded-full bg-amber-500"></span>
+          <span class="flex items-center gap-1">
+            <span v-if="(urgencyCounts?.new || 0) > 0" class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
             <span>⚡ Baru Masuk (&lt;24 Jam)</span>
           </span>
           <span
             :class="[
-              'px-2 py-0.5 rounded-full text-[10px] font-mono font-bold',
+              'px-1.5 py-0.2 rounded-full text-[9.5px] font-mono font-bold',
               activeUrgency === 'new' ? 'bg-amber-400 text-white' : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
             ]"
           >
@@ -172,16 +172,16 @@
           :key="tab.value"
           @click="selectStatus(tab.value)"
           :class="[
-            'px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 cursor-pointer',
+            'px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer',
             isTabActive(tab.value)
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+              ? 'bg-blue-600 text-white shadow-xs'
               : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700'
           ]"
         >
           <span>{{ tab.label }}</span>
           <span
             :class="[
-              'px-2 py-0.5 rounded-full text-[10px] font-mono',
+              'px-1.5 py-0.2 rounded-full text-[9.5px] font-mono',
               isTabActive(tab.value) ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
             ]"
           >
@@ -191,17 +191,17 @@
       </div>
 
       <!-- Filters & Search Toolbar -->
-      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-        <div class="flex flex-1 flex-col sm:flex-row gap-3">
+      <div class="bg-white dark:bg-slate-800 p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row gap-2 items-stretch md:items-center justify-between">
+        <div class="flex flex-1 flex-col sm:flex-row gap-2">
           <!-- Search Input -->
           <div class="relative flex-1">
-            <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             <input
               v-model="searchQuery"
               @keyup.enter="applyFilters"
               type="text"
               placeholder="Cari No. Registrasi, NIK, Nama, No. HP, No. Antrian..."
-              class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
@@ -209,7 +209,7 @@
           <select
             v-model="selectedService"
             @change="applyFilters"
-            class="px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="">Semua Jenis Layanan</option>
             <option v-for="srv in services" :key="srv.id" :value="srv.id">
@@ -218,17 +218,17 @@
           </select>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5">
           <button
             @click="applyFilters"
-            class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition"
+            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition shadow-xs"
           >
             Terapkan Filter
           </button>
           <button
             v-if="searchQuery || selectedService || activeStatus || activeUrgency"
             @click="resetFilters"
-            class="px-3 py-2.5 text-xs text-slate-500 hover:text-rose-600 font-bold transition"
+            class="px-2 py-1.5 text-xs text-slate-500 hover:text-rose-600 font-bold transition"
           >
             Reset
           </button>
@@ -236,19 +236,19 @@
       </div>
 
       <!-- Application Table -->
-      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm !mt-3.5">
+      <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-2xs !mt-2">
         <div class="overflow-x-auto scrollbar-thin">
           <table class="w-full text-left text-xs min-w-[1020px]">
-            <thead class="bg-slate-50 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-700 select-none">
+            <thead class="bg-slate-50 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[9.5px] border-b border-slate-200 dark:border-slate-700 select-none">
               <tr>
-                <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">No. Registrasi / Antrian</th>
-                <th class="px-3 py-3 whitespace-nowrap min-w-[185px]">Identitas Akun</th>
-                <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">Pemilik Dokumen</th>
-                <th class="px-3 py-3 text-center whitespace-nowrap min-w-[115px]">Hubungan (SHDK)</th>
-                <th class="px-3 py-3 whitespace-nowrap min-w-[140px]">Jenis Layanan</th>
-                <th class="px-3 py-3 whitespace-nowrap min-w-[115px]">Jadwal Pelayanan</th>
-                <th class="px-3 py-3 text-center whitespace-nowrap min-w-[130px]">Status</th>
-                <th class="px-3 py-3 text-center whitespace-nowrap min-w-[175px]">Aksi</th>
+                <th class="px-2.5 py-2 whitespace-nowrap min-w-[130px]">No. Registrasi / Antrian</th>
+                <th class="px-2.5 py-2 whitespace-nowrap min-w-[160px]">Identitas Akun</th>
+                <th class="px-2.5 py-2 whitespace-nowrap min-w-[140px]">Pemilik Dokumen</th>
+                <th class="px-2 py-2 text-center whitespace-nowrap min-w-[110px]">Hubungan (SHDK)</th>
+                <th class="px-2.5 py-2 whitespace-nowrap min-w-[130px]">Jenis Layanan</th>
+                <th class="px-2.5 py-2 whitespace-nowrap min-w-[110px]">Jadwal Pelayanan</th>
+                <th class="px-2 py-2 text-center whitespace-nowrap min-w-[120px]">Status</th>
+                <th class="px-2 py-2 text-center whitespace-nowrap min-w-[160px]">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium text-slate-700 dark:text-slate-200">
@@ -265,84 +265,84 @@
                 ]"
               >
                 <!-- Reg & Queue Number -->
-                <td class="px-3 py-2.5 whitespace-nowrap min-w-[140px]">
+                <td class="px-2.5 py-1.5 whitespace-nowrap min-w-[130px]">
                   <div class="font-mono font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <span>{{ app.reg_number }}</span>
+                    <span class="text-xs">{{ app.reg_number }}</span>
                     <span
                       v-if="app.queue_number"
-                      class="px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[10.5px] font-black font-mono border border-emerald-300 dark:border-emerald-800"
+                      class="px-1 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[9.5px] font-black font-mono border border-emerald-300 dark:border-emerald-800"
                     >
                       {{ app.queue_number }}
                     </span>
                   </div>
-                  <p class="text-[10px] text-slate-400 mt-0.5">
+                  <p class="text-[9.5px] text-slate-400 mt-0">
                     Didaftarkan: {{ formatDate(app.submitted_at || app.created_at) }}
                   </p>
 
                   <!-- Urgent Reminder Badges -->
-                  <div v-if="app.verification_urgency === 'overdue'" class="mt-1 flex items-center gap-1">
-                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-rose-600 text-white shadow-xs animate-pulse">
+                  <div v-if="app.verification_urgency === 'overdue'" class="mt-0.5 flex items-center gap-1">
+                    <span class="inline-flex items-center gap-1 px-1 py-0.2 rounded text-[8.5px] font-black uppercase tracking-wider bg-rose-600 text-white shadow-2xs animate-pulse">
                       <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                      Belum Diverifikasi >24 Jam
+                      >24 Jam
                     </span>
-                    <span class="text-[9px] font-bold text-rose-600 dark:text-rose-400">
+                    <span class="text-[8.5px] font-bold text-rose-600 dark:text-rose-400">
                       ({{ app.waiting_time_human }})
                     </span>
                   </div>
-                  <div v-else-if="app.verification_urgency === 'new'" class="mt-1 flex items-center gap-1">
-                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-amber-500 text-white shadow-xs">
+                  <div v-else-if="app.verification_urgency === 'new'" class="mt-0.5 flex items-center gap-1">
+                    <span class="inline-flex items-center gap-1 px-1 py-0.2 rounded text-[8.5px] font-black uppercase tracking-wider bg-amber-500 text-white shadow-2xs">
                       <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                       Baru Masuk
                     </span>
-                    <span class="text-[9px] font-bold text-amber-700 dark:text-amber-400">
+                    <span class="text-[8.5px] font-bold text-amber-700 dark:text-amber-400">
                       ({{ app.waiting_time_human }})
                     </span>
                   </div>
                 </td>
 
                 <!-- Identitas Akun (Pemohon / Perwakilan) -->
-                <td class="px-3 py-2.5 min-w-[165px]">
-                  <div class="flex items-center gap-2.5">
+                <td class="px-2.5 py-1.5 min-w-[160px]">
+                  <div class="flex items-center gap-2">
                     <!-- Applicant Text Info -->
                     <div class="min-w-0">
                       <div class="flex items-center gap-1 flex-wrap">
-                        <span class="font-bold text-slate-900 dark:text-white truncate max-w-[115px]" :title="getApplicantName(app)">
+                        <span class="font-bold text-slate-900 dark:text-white truncate max-w-[115px] text-xs" :title="getApplicantName(app)">
                           {{ getApplicantName(app) }}
                         </span>
                         <span
                           v-if="isRepresented(app)"
-                          class="px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shrink-0"
+                          class="px-1 py-0.2 rounded text-[8px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shrink-0"
                           title="Mengajukan permohonan mewakili anggota keluarga"
                         >
                           Mewakili
                         </span>
                         <span
                           v-else
-                          class="px-1.5 py-0.2 rounded text-[8.5px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0"
+                          class="px-1 py-0.2 rounded text-[8px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0"
                         >
                           Diri Sendiri
                         </span>
                       </div>
-                      <div class="font-mono text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+                      <div class="font-mono text-[9.5px] text-slate-400 flex items-center gap-1 mt-0">
                         <span>NIK: {{ maskNik(getApplicantNik(app)) }}</span>
                       </div>
                       <!-- Keterangan nama yang diwakili -->
-                      <div v-if="isRepresented(app) && getDocumentOwnerName(app) && getDocumentOwnerName(app) !== getApplicantName(app)" class="mt-0.5">
-                        <span class="text-[9.5px] text-slate-500 dark:text-slate-400 italic leading-tight">
+                      <div v-if="isRepresented(app) && getDocumentOwnerName(app) && getDocumentOwnerName(app) !== getApplicantName(app)" class="mt-0 leading-tight">
+                        <span class="text-[9px] text-slate-500 dark:text-slate-400 italic">
                           mewakili <span class="font-semibold text-amber-700 dark:text-amber-400 not-italic">{{ getDocumentOwnerName(app) }}</span>
                         </span>
                       </div>
                       <!-- Biometric Verification Pill if verified and photo preview is active -->
-                      <div v-if="(app.selfie_thumbnail_url || app.selfie_url) && (app.selfie_verification || app.is_selfie_verified)" class="mt-1">
+                      <div v-if="(app.selfie_thumbnail_url || app.selfie_url) && (app.selfie_verification || app.is_selfie_verified)" class="mt-0.5">
                         <span
-                          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-tight border shadow-2xs"
+                          class="inline-flex items-center gap-1 px-1 py-0.2 rounded text-[7.5px] font-black uppercase tracking-tight border shadow-2xs"
                           :class="app.selfie_verification?.decision === 'MATCH'
                             ? 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
                             : 'bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800'"
                           :title="app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai (MATCH)' : 'Bukan Pemohon (MISMATCH)'"
                         >
-                          <svg v-if="app.selfie_verification?.decision === 'MATCH'" class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                          <svg v-else class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                          <svg v-if="app.selfie_verification?.decision === 'MATCH'" class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                          <svg v-else class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                           <span>{{ app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai' : 'Bukan Pemohon' }}</span>
                         </span>
                       </div>
@@ -351,23 +351,23 @@
                 </td>
 
                 <!-- Pemilik Dokumen (Yang Bersangkutan / YBS KTP-el) -->
-                <td class="px-3 py-2.5 min-w-[140px]">
-                  <div class="flex items-center gap-2.5">
+                <td class="px-2.5 py-1.5 min-w-[140px]">
+                  <div class="flex items-center gap-2">
                     <!-- Foto Selfie Pemilik Dokumen -->
                     <!-- Case 1: Photo Available -->
                     <div
                       v-if="app.selfie_thumbnail_url || app.selfie_url"
-                      class="group/photo relative w-9 h-9 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800 cursor-pointer"
+                      class="group/photo relative w-7 h-7 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shadow-2xs shrink-0 bg-slate-100 dark:bg-slate-800 cursor-pointer"
                       title="Foto selfie disamarkan demi privasi (Arahkan kursor untuk melihat jelas)"
                     >
                       <img
                         :src="app.selfie_thumbnail_url || app.selfie_url"
                         :alt="getDocumentOwnerName(app)"
-                        class="w-full h-full object-cover select-none pointer-events-none filter blur-[4px] group-hover/photo:blur-none transition-all duration-300 scale-110 group-hover/photo:scale-100"
+                        class="w-full h-full object-cover select-none pointer-events-none filter blur-[3px] group-hover/photo:blur-none transition-all duration-300 scale-110 group-hover/photo:scale-100"
                         loading="lazy"
                       />
                       <div class="absolute inset-0 flex items-center justify-center bg-black/15 group-hover/photo:opacity-0 transition-opacity pointer-events-none">
-                        <svg class="w-3.5 h-3.5 text-white drop-shadow-sm opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-3 h-3 text-white drop-shadow-sm opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>
                         </svg>
                       </div>
@@ -375,57 +375,57 @@
                     <!-- Case 2: Verified (file destroyed) -->
                     <div
                       v-else-if="app.selfie_verification || app.is_selfie_verified"
-                      class="relative w-9 h-9 rounded-xl border flex flex-col items-center justify-center shrink-0 shadow-xs select-none"
+                      class="relative w-7 h-7 rounded-lg border flex flex-col items-center justify-center shrink-0 shadow-2xs select-none"
                       :class="app.selfie_verification?.decision === 'MATCH'
                         ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800'
                         : 'bg-rose-50 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800'"
                       :title="app.selfie_verification?.decision === 'MATCH' ? 'Wajah Sesuai (MATCH)' : 'Bukan Pemilik (MISMATCH)'"
                     >
-                      <div class="w-3.5 h-3.5 rounded-full flex items-center justify-center" :class="app.selfie_verification?.decision === 'MATCH' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'">
+                      <div class="w-3 h-3 rounded-full flex items-center justify-center" :class="app.selfie_verification?.decision === 'MATCH' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'">
                         <svg v-if="app.selfie_verification?.decision === 'MATCH'" class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                         <svg v-else class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
                       </div>
-                      <span class="text-[7px] font-black uppercase tracking-tight leading-none mt-0.5" :class="app.selfie_verification?.decision === 'MATCH' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'">
+                      <span class="text-[6.5px] font-black uppercase tracking-tight leading-none mt-0.2" :class="app.selfie_verification?.decision === 'MATCH' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'">
                         {{ app.selfie_verification?.decision === 'MATCH' ? 'Sesuai' : 'Bukan' }}
                       </span>
                     </div>
                     <!-- Case 3: No Photo -->
                     <div
                       v-else
-                      class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 shrink-0 select-none"
+                      class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 shrink-0 select-none"
                       title="Belum ada foto selfie"
                     >
-                      <svg class="w-3.5 h-3.5 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                      <span class="text-[7px] font-bold text-slate-400 mt-0.5 leading-none">Kosong</span>
+                      <svg class="w-3 h-3 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                      <span class="text-[6.5px] font-bold text-slate-400 leading-none">Kosong</span>
                     </div>
 
                     <div class="min-w-0">
                     <div v-if="isRepresented(app)">
                       <div class="flex items-center gap-1 flex-wrap">
-                        <span class="font-bold text-slate-900 dark:text-white truncate max-w-[115px]" :title="getDocumentOwnerName(app)">
+                        <span class="font-bold text-slate-900 dark:text-white truncate max-w-[115px] text-xs" :title="getDocumentOwnerName(app)">
                           {{ getDocumentOwnerName(app) }}
                         </span>
                         <span
-                          class="px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0"
+                          class="px-1 py-0.2 rounded text-[8px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0"
                           title="Pemilik Dokumen KTP-el"
                         >
                           Pemilik KTP
                         </span>
                       </div>
-                      <div class="font-mono text-[10px] text-slate-400 mt-0.5">
+                      <div class="font-mono text-[9.5px] text-slate-400 mt-0">
                         NIK: {{ maskNik(getDocumentOwnerNik(app)) }}
                       </div>
                     </div>
                     <div v-else>
                       <div class="flex items-center gap-1 flex-wrap">
-                        <span class="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[115px]" :title="getDocumentOwnerName(app)">
+                        <span class="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[115px] text-xs" :title="getDocumentOwnerName(app)">
                           {{ getDocumentOwnerName(app) }}
                         </span>
-                        <span class="px-1.5 py-0.2 rounded text-[8.5px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0">
+                        <span class="px-1 py-0.2 rounded text-[8px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0">
                           Sama dgn Pemohon
                         </span>
                       </div>
-                      <div class="font-mono text-[10px] text-slate-400 mt-0.5">
+                      <div class="font-mono text-[9.5px] text-slate-400 mt-0">
                         NIK: {{ maskNik(getDocumentOwnerNik(app)) }}
                       </div>
                     </div>
@@ -434,12 +434,12 @@
                 </td>
 
                 <!-- Status Hubungan Dalam Keluarga (SHDK) -->
-                <td class="px-3 py-2.5 text-center whitespace-nowrap min-w-[115px]">
+                <td class="px-2 py-1.5 text-center whitespace-nowrap min-w-[110px]">
                   <div v-if="isRepresented(app)" class="inline-flex flex-col items-center">
-                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[8.5px] font-black uppercase bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
                       {{ getFamilyShdk(app) }}
                     </span>
-                    <span class="text-[9px] text-slate-400 mt-0.5 font-medium">
+                    <span class="text-[8.5px] text-slate-400 mt-0 font-medium">
                       {{ app.representative_kk_status === 'same_kk' || !app.representative_kk_status ? 'Dalam 1 KK' : 'Luar KK' }}
                     </span>
                   </div>
@@ -449,89 +449,88 @@
                 </td>
 
                 <!-- Service Type -->
-                <td class="px-3 py-2.5 whitespace-nowrap min-w-[140px]">
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[11px] font-semibold">
+                <td class="px-2.5 py-1.5 whitespace-nowrap min-w-[130px]">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] font-semibold">
                     {{ app.service_type?.name || 'Pelayanan KTP-el' }}
                   </span>
                 </td>
 
                 <!-- Schedule Date -->
-                <td class="px-3 py-2.5 whitespace-nowrap min-w-[115px]">
+                <td class="px-2.5 py-1.5 whitespace-nowrap min-w-[110px]">
                   <div v-if="app.slot?.schedule?.schedule_date">
-                    <p class="font-bold text-slate-900 dark:text-white text-xs">
+                    <p class="font-bold text-slate-900 dark:text-white text-[11px]">
                       {{ formatScheduleDate(app.slot.schedule.schedule_date) }}
                     </p>
-                    <p class="text-[10px] text-slate-400">
+                    <p class="text-[9.5px] text-slate-400 mt-0">
                       {{ app.slot.schedule.open_time?.substring(0, 5) }} - {{ app.slot.schedule.close_time?.substring(0, 5) }} WITA
                     </p>
                   </div>
-                  <span v-else class="text-slate-400 italic text-[11px]">
+                  <span v-else class="text-slate-400 italic text-[10px]">
                     Belum dijadwalkan
                   </span>
                 </td>
 
                 <!-- Status Badge -->
-                <td class="px-3 py-2.5 text-center whitespace-nowrap min-w-[130px]">
-                  <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                <td class="px-2 py-1.5 text-center whitespace-nowrap min-w-[120px]">
+                  <div v-if="app.status === 'DRAFT'" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping shrink-0"></span>
-                    <span>Draf (Sisa {{ app.draft_remaining_minutes !== undefined ? app.draft_remaining_minutes : (draftTimeoutMinutes || 15) }} mnt)</span>
+                    <span>Draf ({{ app.draft_remaining_minutes !== undefined ? app.draft_remaining_minutes : (draftTimeoutMinutes || 15) }}m)</span>
                   </div>
-                  <StatusBadge v-else :status="app.status" />
-                  <div v-if="app.verification_urgency === 'overdue'" class="mt-1">
-                    <span class="inline-block text-[8.5px] font-extrabold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-950/80 px-1.5 py-0.5 rounded-full">
-                      ⚠️ Terlambat SLA 1x24 Jam
+                  <StatusBadge v-else :status="app.status" size="sm" />
+                  <div v-if="app.verification_urgency === 'overdue'" class="mt-0.5">
+                    <span class="inline-block text-[8px] font-extrabold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-950/80 px-1.5 py-0 rounded-full">
+                      ⚠️ Lewat SLA
                     </span>
                   </div>
-                  <div v-else-if="app.verification_urgency === 'new'" class="mt-1">
-                    <span class="inline-block text-[8.5px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 px-1.5 py-0.5 rounded-full">
-                      ⚡ Butuh Verifikasi Segera
+                  <div v-else-if="app.verification_urgency === 'new'" class="mt-0.5">
+                    <span class="inline-block text-[8px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 px-1.5 py-0 rounded-full">
+                      ⚡ Butuh Verifikasi
                     </span>
                   </div>
                 </td>
 
                 <!-- Actions -->
-                <td class="px-2.5 py-2.5 text-center whitespace-nowrap min-w-[175px]">
+                <td class="px-2 py-1 text-center whitespace-nowrap min-w-[160px]">
                   <div class="flex items-center justify-center gap-1">
                     <!-- 1. Primary Action: Tinjau Berkas -->
                     <Link
                       v-if="app.verification_urgency === 'overdue'"
                       :href="route('admin.queue.applications.show', app.id)"
-                      class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-sm shadow-rose-600/30 transition shrink-0 animate-pulse"
+                      class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-[11px] shadow-2xs transition shrink-0 animate-pulse"
                       title="Verifikasi Permohonan Segera (Lewat SLA)"
                     >
                       <span>Verifikasi</span>
-                      <span class="hidden 2xl:inline">Sekarang</span>
                       <span>⚠️</span>
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </Link>
                     <Link
                       v-else-if="app.verification_urgency === 'new'"
                       :href="route('admin.queue.applications.show', app.id)"
-                      class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs shadow-sm shadow-amber-500/30 transition shrink-0"
+                      class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-white font-bold text-[11px] shadow-2xs transition shrink-0"
                       title="Tinjau Berkas Pemohon"
                     >
-                      <span>Tinjau Berkas</span>
+                      <span>Tinjau</span>
                       <span>⚡</span>
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </Link>
                     <Link
                       v-else
                       :href="route('admin.queue.applications.show', app.id)"
-                      class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm transition shrink-0"
+                      class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shadow-2xs transition shrink-0"
                       title="Tinjau Berkas Pemohon"
                     >
-                      <span>Tinjau Berkas</span>
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                      <span>Tinjau</span>
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </Link>
 
                     <!-- 2. Quick Status Escalation / Sync Button -->
                     <button
                       type="button"
                       @click="openEscalateModal(app)"
-                      class="inline-flex items-center gap-1 px-2 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white text-indigo-700 dark:text-indigo-300 font-bold text-xs shadow-2xs transition cursor-pointer shrink-0"
+                      class="inline-flex items-center gap-1 px-1.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white text-indigo-700 dark:text-indigo-300 font-bold text-[11px] shadow-2xs transition cursor-pointer shrink-0"
                       title="Eskalasi / Update Status Permohonan"
                     >
-                      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                      <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                       <span>Status</span>
                     </button>
 
@@ -540,10 +539,10 @@
                       v-if="isSuperAdmin"
                       type="button"
                       @click="confirmDelete(app)"
-                      class="inline-flex items-center justify-center p-1.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white text-rose-600 dark:text-rose-400 font-bold text-xs shadow-xs transition cursor-pointer shrink-0"
+                      class="inline-flex items-center justify-center p-1 rounded-lg border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white text-rose-600 dark:text-rose-400 font-bold text-xs shadow-2xs transition cursor-pointer shrink-0"
                       title="Hapus Permohonan (Khusus Super Admin)"
                     >
-                      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </button>
                   </div>
                 </td>
@@ -551,12 +550,12 @@
 
               <!-- Empty State -->
               <tr v-if="!applications.data || applications.data.length === 0">
-                <td colspan="8" class="px-6 py-16 text-center text-slate-400">
-                  <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center mx-auto mb-3 text-slate-400">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <td colspan="8" class="px-4 py-8 text-center text-slate-400">
+                  <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center mx-auto mb-2 text-slate-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                   </div>
-                  <p class="font-bold text-slate-600 dark:text-slate-300">Tidak ada pengajuan ditemukan</p>
-                  <p class="text-xs text-slate-400 mt-1">Coba sesuaikan filter atau kata kunci pencarian Anda.</p>
+                  <p class="font-bold text-slate-600 dark:text-slate-300 text-xs">Tidak ada pengajuan ditemukan</p>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Coba sesuaikan filter atau kata kunci pencarian Anda.</p>
                 </td>
               </tr>
             </tbody>
@@ -566,21 +565,21 @@
         <!-- Pagination with Per-Page Selector & Clean Page Numbers -->
         <div
           v-if="applications.total > 0"
-          class="px-4 py-3.5 border-t border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-center justify-between gap-3 select-none"
+          class="px-3 py-2 border-t border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-center justify-between gap-2 select-none"
         >
           <!-- Info & Per-Page Selector -->
-          <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+          <div class="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400">
             <span>
               Menampilkan <span class="font-bold text-slate-700 dark:text-slate-200">{{ applications.from || 0 }}</span> -
               <span class="font-bold text-slate-700 dark:text-slate-200">{{ applications.to || 0 }}</span> dari total
-              <span class="font-bold text-slate-700 dark:text-slate-200">{{ applications.total }}</span> pendaftar
+              <span class="font-bold text-slate-700 dark:text-slate-200">{{ applications.total }}</span>
             </span>
-            <div class="hidden sm:flex items-center gap-1.5 pl-3 border-l border-slate-200 dark:border-slate-700">
-              <span class="text-[11px] text-slate-400">Tampilkan:</span>
+            <div class="hidden sm:flex items-center gap-1 pl-2.5 border-l border-slate-200 dark:border-slate-700">
+              <span class="text-[11px] text-slate-400">Baris:</span>
               <select
                 v-model="perPage"
                 @change="changePerPage"
-                class="px-2 py-1 text-xs font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                class="px-1.5 py-0.5 text-xs font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
               >
                 <option value="10">10</option>
                 <option value="15">15</option>
@@ -594,7 +593,7 @@
           <!-- Page Buttons -->
           <div
             v-if="applications.links && applications.links.length > 3"
-            class="flex items-center gap-1 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-thin"
+            class="flex items-center gap-1 overflow-x-auto max-w-full pb-0.5 sm:pb-0 scrollbar-thin"
           >
             <!-- Tombol Sebelumnya -->
             <Link
@@ -602,16 +601,16 @@
               :href="applications.prev_page_url"
               preserve-scroll
               preserve-state
-              class="h-8 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs cursor-pointer active:scale-95"
+              class="h-7 px-2 rounded-md text-xs font-bold transition flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs cursor-pointer active:scale-95"
             >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
               <span>Prev</span>
             </Link>
             <span
               v-else
-              class="h-8 px-2.5 rounded-lg text-xs font-medium text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 cursor-not-allowed flex items-center gap-1 opacity-60"
+              class="h-7 px-2 rounded-md text-xs font-medium text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 cursor-not-allowed flex items-center gap-1 opacity-60"
             >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
               <span>Prev</span>
             </span>
 
@@ -619,7 +618,7 @@
             <template v-for="(link, i) in numericLinks" :key="i">
               <span
                 v-if="link.label === '...'"
-                class="w-8 h-8 flex items-center justify-center text-xs text-slate-400 font-bold"
+                class="w-7 h-7 flex items-center justify-center text-xs text-slate-400 font-bold"
               >
                 ...
               </span>
@@ -629,39 +628,33 @@
                 preserve-scroll
                 preserve-state
                 :class="[
-                  'w-8 h-8 rounded-lg text-xs font-bold transition flex items-center justify-center cursor-pointer active:scale-95',
+                  'w-7 h-7 rounded-md text-xs font-bold transition flex items-center justify-center cursor-pointer',
                   link.active
-                    ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-500'
+                    ? 'bg-blue-600 text-white shadow-2xs font-black'
                     : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs'
                 ]"
               >
                 {{ link.label }}
               </Link>
-              <span
-                v-else
-                class="w-8 h-8 rounded-lg text-xs font-bold flex items-center justify-center text-slate-400 bg-slate-100 dark:bg-slate-800 cursor-not-allowed"
-              >
-                {{ link.label }}
-              </span>
             </template>
 
-            <!-- Tombol Berikutnya -->
+            <!-- Tombol Selanjutnya -->
             <Link
               v-if="applications.next_page_url"
               :href="applications.next_page_url"
               preserve-scroll
               preserve-state
-              class="h-8 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs cursor-pointer active:scale-95"
+              class="h-7 px-2 rounded-md text-xs font-bold transition flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-2xs cursor-pointer active:scale-95"
             >
               <span>Next</span>
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </Link>
             <span
               v-else
-              class="h-8 px-2.5 rounded-lg text-xs font-medium text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 cursor-not-allowed flex items-center gap-1 opacity-60"
+              class="h-7 px-2 rounded-md text-xs font-medium text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 cursor-not-allowed flex items-center gap-1 opacity-60"
             >
               <span>Next</span>
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </span>
           </div>
         </div>

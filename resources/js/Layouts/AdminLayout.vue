@@ -335,7 +335,7 @@
       </div>
 
       <!-- Main Content Area -->
-      <main class="flex-1 p-6 md:p-8">
+      <main class="flex-1 p-2 sm:p-3 md:p-4">
         <slot />
       </main>
     </div>
