@@ -1,5 +1,5 @@
 <template>
-  <Head title="Pendaftaran Pelayanan KTP-el - Disdukcapil Kabupaten Dompu" />
+  <Head title="Pengajuan Pelayanan KTP-el - Disdukcapil Kabupaten Dompu" />
 
   <PublicLayout :hide-footer="true">
     <div class="py-8 sm:py-12 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

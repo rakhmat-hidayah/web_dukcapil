@@ -319,7 +319,7 @@
                 : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30'
             ]"
           >
-            <span>{{ isSubmitting ? 'Mengirim Pendaftaran...' : 'Kirim Berkas untuk Pra-Verifikasi' }}</span>
+            <span>{{ isSubmitting ? 'Mengirim Pengajuan...' : 'Kirim Berkas untuk Pra-Verifikasi' }}</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </button>
         </div>
@@ -344,7 +344,7 @@
               Dokumen Persyaratan Belum Lengkap!
             </h3>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-              Anda belum dapat mengirimkan pendaftaran karena masih ada persyaratan wajib yang belum diunggah atau belum dicentang:
+              Anda belum dapat mengirimkan pengajuan karena masih ada persyaratan wajib yang belum diunggah atau belum dicentang:
             </p>
           </div>
           <button
@@ -800,7 +800,7 @@ function scrollToDoc(elementId) {
 
 async function handleSubmitApplication() {
   if (missingDocsList.value.length > 0) {
-    errorMessage.value = 'Harap lengkapi semua dokumen bertanda Wajib dan centang pernyataan sebelum mengirimkan pendaftaran.';
+    errorMessage.value = 'Harap lengkapi semua dokumen bertanda Wajib dan centang pernyataan sebelum mengirimkan pengajuan.';
     showIncompleteDocsModal.value = true;
     return;
   }
@@ -937,7 +937,7 @@ async function handleSubmitApplication() {
     step: 'submitting',
     current: totalStaged,
     total: totalStaged,
-    label: 'Memfinalisasi pendaftaran & menerbitkan nomor antrean Anda...',
+    label: 'Memfinalisasi pengajuan & menerbitkan nomor antrean Anda...',
     percent: 98,
   };
 
@@ -968,7 +968,7 @@ async function handleSubmitApplication() {
       onError: (errors) => {
         isSubmitting.value = false;
         const msg =
-          errors.documents || errors.statement_agreed || Object.values(errors)[0] || 'Terjadi kesalahan saat memfinalisasi pendaftaran.';
+          errors.documents || errors.statement_agreed || Object.values(errors)[0] || 'Terjadi kesalahan saat memfinalisasi pengajuan.';
         errorMessage.value = msg;
         uploadProgress.value = {
           active: true,

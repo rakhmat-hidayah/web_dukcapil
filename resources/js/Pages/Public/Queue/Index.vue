@@ -375,14 +375,14 @@
               class="flex-1 px-5 py-3 rounded-2xl bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-black text-xs transition shadow-md shadow-amber-600/25 flex items-center justify-center gap-2 cursor-pointer"
             >
               <AlertCircle class="w-4 h-4" />
-              <span>Pendaftaran Ditutup Sementara (Lihat Info)</span>
+              <span>Pengajuan Ditutup Sementara (Lihat Info)</span>
             </button>
             <Link
               v-else
               :href="route('queue.apply.create', { layanan: selectedService.slug })"
               class="flex-1 px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-black text-xs transition shadow-md shadow-blue-600/25 flex items-center justify-center gap-2"
             >
-              <span>Mulai Pendaftaran Sekarang</span>
+              <span>Mulai Pengajuan Sekarang</span>
               <ArrowRight class="w-4 h-4" />
             </Link>
           </div>
