@@ -252,11 +252,11 @@ class ApplicantManagementController extends Controller
             'status_reason'  => $reason,
         ]);
 
-        // If suspending or locking account, revoke active device immediately
-        if (in_array($status, [ApplicantAccount::STATUS_SUSPENDED, ApplicantAccount::STATUS_LOCKED])) {
+        // If deactivating, suspending or locking account, revoke active device immediately
+        if ($status !== ApplicantAccount::STATUS_ACTIVE) {
             $this->deviceService->revokeActiveDevice(
                 account: $account,
-                reason: "Pencabutan otomatis karena status akun: {$status} ({$reason})",
+                reason: "Pencabutan otomatis karena status akun diubah menjadi: {$status} ({$reason})",
                 actorType: 'admin',
                 actorId: Auth::id()
             );

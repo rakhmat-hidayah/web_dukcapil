@@ -65,10 +65,7 @@ class EnsureApplicantDeviceValid
                     ->with('account')
                     ->first();
 
-                if ($device && $device->account && in_array($device->account->account_status, [
-                    ApplicantAccount::STATUS_ACTIVE,
-                    ApplicantAccount::STATUS_IDENTITY_PENDING,
-                ])) {
+                if ($device && $device->account && $device->account->isActive() && $device->account->isIdentityVerified()) {
                     $guard->login($device->account);
                     $device->update(['last_seen_at' => now()]);
                 }
@@ -87,15 +84,17 @@ class EnsureApplicantDeviceValid
         /** @var ApplicantAccount $account */
         $account = $guard->user();
 
-        // 3. Check account suspension or lock
-        if ($account->isSuspended() || $account->isLocked()) {
+        // 3. Check account suspension, lock, or inactive status
+        if ($account->isSuspended() || $account->isLocked() || !$account->isActive() || !$account->isIdentityVerified()) {
             $guard->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             $msg = $account->isSuspended()
                 ? 'Akun Anda sedang ditangguhkan oleh administrator. Hubungi kantor Disdukcapil untuk informasi lebih lanjut.'
-                : 'Akun Anda sedang dikunci untuk keamanan sistem.';
+                : ($account->isLocked()
+                    ? 'Akun Anda sedang dikunci untuk keamanan sistem.'
+                    : 'Akun Anda belum aktif atau masih dalam proses verifikasi identitas oleh petugas.');
 
             return redirect()->route('applicant.login')
                 ->with('error', $msg)

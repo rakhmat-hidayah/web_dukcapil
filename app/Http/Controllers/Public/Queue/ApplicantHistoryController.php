@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public\Queue;
 
 use App\Http\Controllers\Controller;
+use App\Models\Applicant\ApplicantAccount;
 use App\Models\Queue\QueueApplication;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -73,8 +74,11 @@ class ApplicantHistoryController extends Controller
                 ];
             });
 
+        $nikHash = ApplicantAccount::computeNikHash($verifiedNik);
+        $account = ApplicantAccount::where('nik_hash', $nikHash)->first();
+
         $firstApp = $applications->first();
-        $applicantName = $firstApp ? $firstApp['applicant_name'] : 'Pemohon';
+        $applicantName = $account?->name ?: ($firstApp ? $firstApp['applicant_name'] : 'Pemohon');
 
         $maskedNik = strlen($verifiedNik) >= 16
             ? substr($verifiedNik, 0, 6) . '******' . substr($verifiedNik, 12)
@@ -112,15 +116,41 @@ class ApplicantHistoryController extends Controller
 
         $cleanNik = preg_replace('/[^0-9]/', '', $validated['nik']);
 
+        // 1. Cek status akun pemohon jika terdaftar dalam sistem
+        $nikHash = ApplicantAccount::computeNikHash($cleanNik);
+        $account = ApplicantAccount::where('nik_hash', $nikHash)->first();
+
+        if ($account) {
+            if ($account->isSuspended()) {
+                RateLimiter::hit($limiterKey, 60);
+                return back()->withErrors([
+                    'nik' => 'Akun pemohon dengan NIK ini sedang ditangguhkan oleh administrator. Riwayat permohonan tidak dapat diakses.',
+                ])->withInput();
+            }
+
+            if ($account->isLocked()) {
+                RateLimiter::hit($limiterKey, 60);
+                return back()->withErrors([
+                    'nik' => 'Akun pemohon dengan NIK ini sedang dikunci untuk keamanan sistem.',
+                ])->withInput();
+            }
+
+            if (!$account->isActive() || $account->identity_status !== ApplicantAccount::IDENTITY_VERIFIED) {
+                RateLimiter::hit($limiterKey, 60);
+                return back()->withErrors([
+                    'nik' => 'Akun pemohon dengan NIK ini belum aktif atau masih dalam proses verifikasi identitas oleh petugas Disdukcapil.',
+                ])->withInput();
+            }
+        }
+
+        // 2. Cek apakah ada riwayat permohonan antrian
         $candidates = QueueApplication::where('applicant_nik', $cleanNik)->get();
 
         if ($candidates->isEmpty()) {
             RateLimiter::hit($limiterKey, 60);
 
-            $hasAccount = \App\Models\Applicant\ApplicantAccount::where('nik_hash', \App\Models\Applicant\ApplicantAccount::computeNikHash($cleanNik))->exists();
-
-            $errorMsg = $hasAccount
-                ? 'Tidak ditemukan riwayat permohonan dengan NIK ini. Anda dapat mengajukan permohonan baru melalui Dashboard Pemohon.'
+            $errorMsg = $account
+                ? 'Tidak ditemukan riwayat permohonan dengan NIK ini. Anda dapat mengajukan permohonan baru melalui Portal Pemohon.'
                 : 'Nomor Induk Kependudukan (NIK) belum terdaftar sebagai akun pemohon. Silakan buat akun terlebih dahulu.';
 
             return back()->withErrors([
@@ -159,13 +189,15 @@ class ApplicantHistoryController extends Controller
 
     /**
      * Resolve verified NIK from active session or encrypted 30-day cookie.
+     * Enforces that if an ApplicantAccount exists, it must be ACTIVE and VERIFIED.
+     * If account is SUSPENDED, LOCKED, or NOT ACTIVE, session/cookie is revoked.
      */
     protected function resolveVerifiedNik(Request $request): ?string
     {
         // 1. Check direct session
         $sessionNik = $request->session()->get('applicant_verified_nik');
         if (!empty($sessionNik) && strlen($sessionNik) === 16) {
-            return $sessionNik;
+            return $this->validateAccountStatusForNik($request, $sessionNik);
         }
 
         // 2. Check encrypted remember cookie
@@ -175,10 +207,7 @@ class ApplicantHistoryController extends Controller
                 $payload = decrypt($cookieValue);
                 if (is_array($payload) && !empty($payload['nik']) && isset($payload['expires_at'])) {
                     if (now()->timestamp <= $payload['expires_at']) {
-                        // Restore into session
-                        $request->session()->put('applicant_verified_nik', $payload['nik']);
-                        $request->session()->put('applicant_verified_at', now()->timestamp);
-                        return $payload['nik'];
+                        return $this->validateAccountStatusForNik($request, $payload['nik']);
                     }
                 }
             } catch (\Throwable $e) {
@@ -187,5 +216,44 @@ class ApplicantHistoryController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * Validate that if an applicant account exists for the given NIK,
+     * it must be active and not suspended/locked. If inactive or suspended,
+     * immediately flush the session and cookie.
+     */
+    protected function validateAccountStatusForNik(Request $request, string $nik): ?string
+    {
+        $nikHash = ApplicantAccount::computeNikHash($nik);
+        $account = ApplicantAccount::where('nik_hash', $nikHash)->first();
+
+        if ($account) {
+            // Jika akun ada tapi tidak aktif (SUSPENDED, LOCKED, belum diverifikasi identitas, atau status bukan ACTIVE)
+            if (
+                !$account->isActive()
+                || $account->isSuspended()
+                || $account->isLocked()
+                || $account->identity_status !== ApplicantAccount::IDENTITY_VERIFIED
+            ) {
+                $request->session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
+                Cookie::queue(Cookie::forget('applicant_device_auth'));
+                return null;
+            }
+        }
+
+        // Jika tidak ada akun terdaftar DAN juga tidak ada permohonan antrian (sesi yatim / draf usang), bersihkan sesi
+        $hasApplications = QueueApplication::where('applicant_nik', $nik)->exists();
+        if (!$account && !$hasApplications) {
+            $request->session()->forget(['applicant_verified_nik', 'applicant_verified_at']);
+            Cookie::queue(Cookie::forget('applicant_device_auth'));
+            return null;
+        }
+
+        // Pastikan tersimpan di session
+        $request->session()->put('applicant_verified_nik', $nik);
+        $request->session()->put('applicant_verified_at', now()->timestamp);
+
+        return $nik;
     }
 }
