@@ -165,7 +165,7 @@ class ApplicantAuthController extends Controller
         $account->phone = $rawPhone;
         $account->nik = $rawNik; // Mutator automatically encrypts and sets blind index
         $account->selfie_path = $selfiePath;
-        $account->password = Hash::make($request->password);
+        $account->password = $request->password; // Cast 'hashed' di model otomatis melakukan Hash::make(); jangan double-hash
         $account->identity_status = ApplicantAccount::IDENTITY_PENDING;
         $account->account_status = ApplicantAccount::STATUS_EMAIL_PENDING;
         $account->save();
