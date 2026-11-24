@@ -390,17 +390,41 @@
         <div v-if="archives && archives.length > 0" class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-8 shadow-sm space-y-6">
           <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight border-b border-gray-100 dark:border-zinc-800 pb-4">Arsip Laporan IKM Periode Sebelumnya</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div v-for="arc in archives" :key="arc.id" class="p-5 rounded-2xl bg-gray-50 dark:bg-zinc-800/80 border border-gray-100 dark:border-zinc-800 space-y-3 flex flex-col justify-between">
+            <div
+              v-for="arc in archives"
+              :key="arc.id"
+              class="p-5 rounded-2xl border space-y-3 flex flex-col justify-between"
+              :class="arc.has_score === false
+                ? 'bg-amber-50/60 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/40'
+                : 'bg-gray-50 dark:bg-zinc-800/80 border-gray-100 dark:border-zinc-800'"
+            >
               <div>
-                <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Tahun {{ arc.year }} — Semester {{ arc.semester }}</span>
-                <h4 class="text-xs font-bold text-gray-900 dark:text-zinc-100 mt-1 leading-snug">{{ arc.title }}</h4>
-              </div>
-              <div class="flex items-center justify-between pt-2 border-t border-gray-200/60 dark:border-zinc-700">
-                <div>
-                  <span class="text-xl font-black text-blue-600 dark:text-blue-400 font-mono">{{ arc.ikm_score }}</span>
-                  <span class="text-[10px] font-bold text-gray-400 ml-1 font-mono">({{ arc.quality_category }})</span>
+                <div class="flex items-center justify-between gap-1 mb-1">
+                  <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Tahun {{ arc.year }} — Semester {{ arc.semester }}</span>
+                  <!-- Badge panrb -->
+                  <span
+                    v-if="arc.survey_mechanism === 'panrb'"
+                    class="px-1.5 py-0.5 bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900/50 text-[8px] font-black uppercase rounded tracking-wider shrink-0"
+                  >KemenPAN-RB</span>
                 </div>
-                <span class="text-[10px] font-medium text-gray-500">{{ arc.respondents }} Responden</span>
+                <h4 class="text-xs font-bold text-gray-900 dark:text-zinc-100 mt-0.5 leading-snug">{{ arc.title }}</h4>
+              </div>
+              <div class="pt-2 border-t border-gray-200/60 dark:border-zinc-700">
+                <!-- Has Score -->
+                <div v-if="arc.has_score !== false" class="flex items-center justify-between">
+                  <div>
+                    <span class="text-xl font-black text-blue-600 dark:text-blue-400 font-mono">{{ arc.ikm_score }}</span>
+                    <span class="text-[10px] font-bold text-gray-400 ml-1 font-mono">({{ arc.quality_category }})</span>
+                  </div>
+                  <span class="text-[10px] font-medium text-gray-500">{{ arc.respondents }} Responden</span>
+                </div>
+                <!-- No Score Yet (Survei Belum Tuntas) -->
+                <div v-else class="flex items-center justify-between">
+                  <span class="px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-[9px] font-black uppercase rounded tracking-wider">
+                    ⏳ Survei Belum Tuntas
+                  </span>
+                  <span class="text-[10px] font-medium text-gray-400">— Responden</span>
+                </div>
               </div>
             </div>
           </div>
