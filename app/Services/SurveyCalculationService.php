@@ -62,10 +62,11 @@ class SurveyCalculationService
 
         // If survey mechanism is external PAN-RB (skm.go.id)
         if ($period->survey_mechanism === 'panrb') {
-            $ikmVal = $period->external_ikm_value !== null ? (float) $period->external_ikm_value : 0;
+            $hasScore = ($period->external_ikm_value !== null && (float) $period->external_ikm_value > 0);
+            $ikmVal = $hasScore ? (float) $period->external_ikm_value : 0;
             $catInfo = self::classifyIkmCategory($ikmVal);
-            $quality = $period->external_service_quality ?: $catInfo['category'];
-            $totalResp = $period->external_total_respondents !== null ? (int) $period->external_total_respondents : $period->responses->count();
+            $quality = $hasScore ? ($period->external_service_quality ?: $catInfo['category']) : '-';
+            $totalResp = $period->external_total_respondents !== null ? (int) $period->external_total_respondents : 0;
 
             return SurveyResultStatistic::updateOrCreate(
                 ['survey_period_id' => $surveyPeriodId],

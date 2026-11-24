@@ -224,7 +224,7 @@ class HomeController extends Controller
                     'semester' => $activeSurvey->semester,
                     'score' => $score,
                     'category' => $qualityCategory,
-                    'category_label' => $cat['label'],
+                    'category_label' => ($score > 0) ? $cat['label'] : ($isPanRb ? 'Survei Belum Tuntas' : $cat['label']),
                     'total_respondents' => $totalRespondents,
                     'survey_mechanism' => $activeSurvey->survey_mechanism ?? 'internal',
                     'external_survey_url' => $activeSurvey->external_survey_url,

@@ -739,15 +739,20 @@
                 </div>
               </div>
 
-              <div v-else class="space-y-1 pt-1">
-                <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-50">{{ ikmWidget.period_title }}</h4>
-                <div class="p-2.5 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900/40">
-                  <p class="text-[11px] font-bold text-blue-800 dark:text-blue-300 flex items-center gap-1.5">
+              <div v-else class="space-y-2 pt-1">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-50">{{ ikmWidget.period_title }}</h4>
+                  <span class="px-2 py-0.5 bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50 text-[9px] font-black uppercase rounded tracking-wider">
+                    Survei Belum Tuntas
+                  </span>
+                </div>
+                <div class="p-3 bg-blue-50/70 dark:bg-blue-950/40 rounded-2xl border border-blue-100 dark:border-blue-900/40 space-y-1">
+                  <p class="text-[11px] font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
                     <Globe class="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Penilaian Terpusat di KemenPAN-RB</span>
+                    <span>Penilaian Berlangsung di KemenPAN-RB</span>
                   </p>
-                  <p class="text-[10px] text-blue-900/70 dark:text-blue-300/70 mt-0.5 leading-snug">
-                    Evaluasi mutu pelayanan publik diolah langsung di sistem Kementerian PAN-RB secara transparan.
+                  <p class="text-[10px] text-blue-800/80 dark:text-blue-300/80 leading-relaxed">
+                    Nilai IKM belum terbit karena survei periode ini masih berjalan di portal Kementerian PAN-RB. Berikan opini &amp; penilaian Anda melalui tombol di bawah.
                   </p>
                 </div>
               </div>

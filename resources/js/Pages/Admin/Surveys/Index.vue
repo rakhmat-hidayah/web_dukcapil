@@ -154,25 +154,52 @@
           <!-- Current IKM Score -->
           <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 space-y-2">
             <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Nilai IKM</span>
-            <p class="text-2xl font-black text-primary-600 dark:text-primary-400 font-mono">{{ activePeriod?.statistic?.ikm_value || 0 }}</p>
-            <span v-if="(activePeriod?.statistic?.ikm_value || 0) > 0" class="text-[11px] font-bold text-gray-500">Mutu Pelayanan {{ activePeriod?.statistic?.service_quality_category || 'A' }}</span>
-            <span v-else class="text-[11px] font-semibold text-amber-600">Dalam Evaluasi</span>
+            <template v-if="(activePeriod?.statistic?.ikm_value || activePeriod?.external_ikm_value || 0) > 0">
+              <p class="text-2xl font-black text-primary-600 dark:text-primary-400 font-mono">
+                {{ activePeriod?.statistic?.ikm_value || activePeriod?.external_ikm_value }}
+              </p>
+              <span class="text-[11px] font-bold text-gray-500">Mutu Pelayanan {{ activePeriod?.statistic?.service_quality_category || activePeriod?.external_service_quality || 'A' }}</span>
+            </template>
+            <template v-else>
+              <p class="text-2xl font-black text-amber-500 font-mono">-</p>
+              <span class="px-2 py-0.5 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 rounded font-black text-[10px] uppercase">
+                Survei Belum Tuntas
+              </span>
+            </template>
           </div>
 
           <!-- Total Respondents -->
           <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 space-y-2">
             <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Jumlah Responden</span>
-            <p class="text-2xl font-black text-gray-900 dark:text-zinc-100 font-mono">{{ activePeriod?.statistic?.total_respondents || 0 }}</p>
-            <span class="text-[11px] font-bold text-gray-500">Pemohon Terverifikasi</span>
+            <template v-if="(activePeriod?.statistic?.total_respondents || activePeriod?.external_total_respondents || 0) > 0">
+              <p class="text-2xl font-black text-gray-900 dark:text-zinc-100 font-mono">
+                {{ activePeriod?.statistic?.total_respondents || activePeriod?.external_total_respondents }}
+              </p>
+              <span class="text-[11px] font-bold text-gray-500">
+                {{ activePeriod?.survey_mechanism === 'panrb' ? 'Responden di skm.go.id' : 'Pemohon Terverifikasi' }}
+              </span>
+            </template>
+            <template v-else>
+              <p class="text-2xl font-black text-gray-400 font-mono">-</p>
+              <span class="text-[11px] font-semibold text-gray-500">
+                {{ activePeriod?.survey_mechanism === 'panrb' ? 'Pengumpulan di skm.go.id' : 'Belum Ada Responden' }}
+              </span>
+            </template>
           </div>
 
-          <!-- Response Rate -->
+          <!-- Response Rate / Status -->
           <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 space-y-2">
-            <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Response Rate</span>
-            <p class="text-2xl font-black text-amber-500 font-mono">
-              {{ activePeriod && activePeriod.target_respondents > 0 ? Math.round(((activePeriod.statistic?.total_respondents || 0) / activePeriod.target_respondents) * 100) : 100 }}%
-            </p>
-            <span class="text-[11px] font-bold text-gray-500">Target {{ activePeriod?.target_respondents }} Pemohon</span>
+            <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Status Pelaksanaan</span>
+            <template v-if="(activePeriod?.statistic?.ikm_value || activePeriod?.external_ikm_value || 0) > 0">
+              <p class="text-2xl font-black text-emerald-600 font-mono">100%</p>
+              <span class="text-[11px] font-bold text-gray-500">Hasil Evaluasi Diterbitkan</span>
+            </template>
+            <template v-else>
+              <p class="text-base font-black text-blue-600 dark:text-blue-400 mt-1">Sedang Berjalan</p>
+              <span class="text-[11px] font-semibold text-gray-500">
+                {{ activePeriod?.survey_mechanism === 'panrb' ? 'Terbuka di skm.go.id' : 'Menunggu Partisipasi' }}
+              </span>
+            </template>
           </div>
         </div>
 
@@ -574,54 +601,121 @@
               </div>
 
               <div class="pt-2 border-t border-blue-200/60 dark:border-blue-900/40 space-y-3">
-                <p class="text-[11px] font-extrabold text-blue-950 dark:text-blue-200">
-                  Data Capaian Hasil Rilis KemenPAN-RB (Opsional):
-                </p>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Nilai IKM Terbitan</label>
+                <div class="flex items-center justify-between">
+                  <p class="text-[11px] font-extrabold text-blue-950 dark:text-blue-200">
+                    Status Hasil &amp; Rilis Nilai SKM PAN-RB:
+                  </p>
+                  <span class="text-[10px] text-gray-500 font-medium">Pilih kondisi survei saat ini</span>
+                </div>
+
+                <!-- 2 Option Radio Cards for Status Nilai -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <!-- Option 1: Belum Ada Nilai (Survei Belum Tuntas) -->
+                  <div 
+                    @click="setHasOfficialResult(false)" 
+                    class="p-3 rounded-xl border-2 transition cursor-pointer flex items-start gap-2.5"
+                    :class="!hasOfficialResult 
+                      ? 'border-amber-500 bg-amber-50/80 dark:bg-amber-950/40 shadow-xs' 
+                      : 'border-gray-200 dark:border-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600 bg-white/70 dark:bg-zinc-800/60'"
+                  >
                     <input 
-                      v-model="periodForm.external_ikm_value" 
-                      type="number" 
-                      step="0.01" 
-                      min="0" 
-                      max="100" 
-                      placeholder="Contoh: 88.50" 
-                      class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-bold" 
+                      type="radio" 
+                      :value="false" 
+                      :checked="!hasOfficialResult" 
+                      class="mt-0.5 text-amber-600 focus:ring-amber-500" 
                     />
+                    <div>
+                      <p class="text-xs font-black text-amber-950 dark:text-amber-200 flex items-center gap-1.5">
+                        <span>⏳ Nilai Belum Ada (Survei Belum Tuntas)</span>
+                      </p>
+                      <p class="text-[10px] text-amber-900/80 dark:text-amber-300/80 mt-0.5 leading-snug">
+                        Survei masih berjalan di skm.go.id, nilai belum terbit karena survei belum tuntas.
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Kategori Mutu</label>
-                    <select 
-                      v-model="periodForm.external_service_quality" 
-                      class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-bold"
-                    >
-                      <option value="A">Mutu A (Sangat Baik)</option>
-                      <option value="B">Mutu B (Baik)</option>
-                      <option value="C">Mutu C (Kurang Baik)</option>
-                      <option value="D">Mutu D (Tidak Baik)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Total Responden PAN-RB</label>
+                  <!-- Option 2: Sudah Ada Rilis Resmi Nilai IKM -->
+                  <div 
+                    @click="setHasOfficialResult(true)" 
+                    class="p-3 rounded-xl border-2 transition cursor-pointer flex items-start gap-2.5"
+                    :class="hasOfficialResult 
+                      ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/40 shadow-xs' 
+                      : 'border-gray-200 dark:border-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600 bg-white/70 dark:bg-zinc-800/60'"
+                  >
                     <input 
-                      v-model="periodForm.external_total_respondents" 
-                      type="number" 
-                      min="0" 
-                      placeholder="Contoh: 250" 
-                      class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-bold" 
+                      type="radio" 
+                      :value="true" 
+                      :checked="hasOfficialResult" 
+                      class="mt-0.5 text-blue-600 focus:ring-blue-500" 
                     />
+                    <div>
+                      <p class="text-xs font-black text-blue-950 dark:text-blue-200 flex items-center gap-1.5">
+                        <span>📊 Sudah Ada Rilis Resmi Nilai IKM</span>
+                      </p>
+                      <p class="text-[10px] text-blue-900/80 dark:text-blue-300/80 mt-0.5 leading-snug">
+                        Input angka Nilai IKM, Mutu, dan Jumlah Responden hasil evaluasi KemenPAN-RB.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Inputs if already released -->
+                <div v-if="hasOfficialResult" class="space-y-3 pt-1">
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Nilai IKM Terbitan</label>
+                      <input 
+                        v-model="periodForm.external_ikm_value" 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        max="100" 
+                        placeholder="Contoh: 88.50" 
+                        class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-bold" 
+                      />
+                    </div>
+
+                    <div>
+                      <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Kategori Mutu</label>
+                      <select 
+                        v-model="periodForm.external_service_quality" 
+                        class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-bold"
+                      >
+                        <option value="A">Mutu A (Sangat Baik)</option>
+                        <option value="B">Mutu B (Baik)</option>
+                        <option value="C">Mutu C (Kurang Baik)</option>
+                        <option value="D">Mutu D (Tidak Baik)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Total Responden PAN-RB</label>
+                      <input 
+                        v-model="periodForm.external_total_respondents" 
+                        type="number" 
+                        min="0" 
+                        placeholder="Contoh: 250" 
+                        class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-bold" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Info Banner when Survey Belum Tuntas -->
+                <div v-else class="p-3 bg-amber-100/70 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-900/60 rounded-xl flex items-start gap-2.5">
+                  <span class="text-base leading-none mt-0.5">💡</span>
+                  <div class="text-[11px] text-amber-950 dark:text-amber-200 leading-snug">
+                    <strong class="block font-bold">Keterangan Publik: "Nilai Belum Ada (Survei Belum Tuntas)"</strong>
+                    Website di Beranda &amp; Halaman Survei akan otomatis menampilkan status bahwa survei periode ini sedang berjalan di portal Kementerian PAN-RB dan mengajak warga mengisi kuesioner tanpa menampilkan angka nilai buatan.
                   </div>
                 </div>
 
                 <div>
-                  <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Catatan / Evaluasi Ringkas KemenPAN-RB</label>
+                  <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Catatan / Keterangan Status Evaluasi</label>
                   <textarea 
                     v-model="periodForm.external_notes" 
                     rows="2" 
-                    placeholder="Catatan resmi atau deskripsi capaian evaluasi pelayanan dari KemenPAN-RB..." 
+                    placeholder="Catatan resmi atau deskripsi status evaluasi pelayanan dari KemenPAN-RB..." 
                     class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs"
                   ></textarea>
                 </div>
@@ -992,6 +1086,24 @@ const followUpForm = useForm({
   status: 'on_track',
 })
 
+const hasOfficialResult = ref(false)
+
+function setHasOfficialResult(val) {
+  hasOfficialResult.value = val
+  if (!val) {
+    periodForm.external_ikm_value = ''
+    periodForm.external_total_respondents = ''
+    periodForm.external_service_quality = ''
+    if (!periodForm.external_notes || periodForm.external_notes === 'Survei Kepuasan Masyarakat terintegrasi resmi dengan Kementerian PAN-RB (skm.go.id)') {
+      periodForm.external_notes = 'Survei Kepuasan Masyarakat sedang berjalan di sistem Kementerian PAN-RB (skm.go.id). Nilai resmi belum diterbitkan karena survei belum tuntas.'
+    }
+  } else {
+    if (!periodForm.external_service_quality) {
+      periodForm.external_service_quality = 'A'
+    }
+  }
+}
+
 // Action Modal Handlers
 function openPeriodModal(period = null) {
   editingPeriod.value = period
@@ -1010,6 +1122,7 @@ function openPeriodModal(period = null) {
     periodForm.external_service_quality = period.external_service_quality || 'B'
     periodForm.external_total_respondents = period.external_total_respondents ?? ''
     periodForm.external_notes = period.external_notes || ''
+    hasOfficialResult.value = Boolean(period.external_ikm_value && Number(period.external_ikm_value) > 0)
   } else {
     periodForm.reset()
     periodForm.survey_mechanism = 'internal'
@@ -1019,6 +1132,7 @@ function openPeriodModal(period = null) {
     periodForm.target_respondents = 250
     periodForm.status = 'published'
     periodForm.is_active = true
+    hasOfficialResult.value = false
   }
   showPeriodModal.value = true
 }

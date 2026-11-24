@@ -230,14 +230,17 @@
           </div>
 
           <!-- WHEN IN EVALUATION / PENDING RELEASE -->
-          <div v-else class="p-6 bg-white dark:bg-zinc-900 border border-sky-100 dark:border-zinc-800 rounded-3xl shadow-sm flex flex-col sm:flex-row items-center gap-5">
-            <div class="w-14 h-14 rounded-2xl bg-sky-100 dark:bg-sky-950/80 flex items-center justify-center shrink-0 text-sky-600 dark:text-sky-400">
-              <Globe class="w-7 h-7" />
+          <div v-else class="p-6 bg-gradient-to-r from-amber-50/70 via-sky-50/50 to-blue-50/50 dark:from-amber-950/20 dark:via-zinc-900 dark:to-zinc-900 border border-amber-200/70 dark:border-zinc-800 rounded-3xl shadow-sm flex flex-col sm:flex-row items-center gap-5">
+            <div class="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-950/80 flex items-center justify-center shrink-0 text-amber-700 dark:text-amber-400 font-bold text-2xl shadow-xs">
+              ⏳
             </div>
-            <div class="space-y-1 text-center sm:text-left flex-1">
-              <h4 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">Pengumpulan Partisipasi Masyarakat Sedang Berlangsung</h4>
-              <p class="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
-                Penilaian masyarakat secara aktif dikumpulkan langsung melalui portal SKM Online KemenPAN-RB. Hasil rekapitulasi nilai indeks dan mutu pelayanan akan dipublikasikan secara berkala setelah evaluasi resmi dari Kementerian PAN-RB.
+            <div class="space-y-1.5 text-center sm:text-left flex-1">
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-200/60 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 text-[10px] font-black uppercase tracking-wider rounded-md">
+                Survei Belum Tuntas (Sedang Berjalan)
+              </div>
+              <h4 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">Nilai IKM Belum Tersedia / Dalam Proses Pengumpulan di KemenPAN-RB</h4>
+              <p class="text-xs text-gray-600 dark:text-zinc-400 leading-relaxed">
+                Nilai capaian IKM resmi belum diterbitkan karena proses survei periode ini belum tuntas dan sedang aktif dikumpulkan langsung melalui portal SKM Online KemenPAN-RB. Mari berpartisipasi dengan mengisi kuesioner resmi.
               </p>
             </div>
             <a
@@ -245,9 +248,9 @@
               :href="activeSurvey.external_survey_url"
               target="_blank"
               rel="noopener noreferrer"
-              class="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs rounded-xl shadow-sm shrink-0 transition flex items-center gap-1.5 cursor-pointer"
+              class="px-5 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-sm shrink-0 transition flex items-center gap-1.5 cursor-pointer"
             >
-              <span>Isi Penilaian ↗</span>
+              <span>Isi Penilaian di SKM PAN-RB ↗</span>
             </a>
           </div>
 
