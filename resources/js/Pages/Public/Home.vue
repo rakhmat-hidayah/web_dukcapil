@@ -812,6 +812,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Splash Screen Popup -->
+    <SplashScreen v-if="splashScreen" :splash="splashScreen" :ikm-widget="ikmWidget" />
   </PublicLayout>
 </template>
 
@@ -820,6 +823,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import InformasiLayananWidget from '@/Components/InformasiLayananWidget.vue';
+import SplashScreen from '@/Components/SplashScreen.vue';
 import { storageUrl } from '@/utils/storage';
 import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar, Download, FileText, ArrowRight, Ticket, CreditCard, Clock, ExternalLink } from '@lucide/vue';
 
@@ -833,6 +837,7 @@ const props = defineProps({
   stats: Object,
   ikmWidget: Object,
   blankStock: Object,
+  splashScreen: Object,
 });
 
 const safeBanners = computed(() => Array.isArray(props.banners) ? props.banners : []);

@@ -8,6 +8,7 @@ use App\Models\Announcement;
 use App\Models\News;
 use App\Models\Download;
 use App\Models\SurveyPeriod;
+use App\Models\SplashScreen;
 use App\Services\SurveyCalculationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -244,6 +245,12 @@ class HomeController extends Controller
             \Illuminate\Support\Facades\Log::warning('HomeController blank stock summary error: ' . $e->getMessage());
         }
 
+        // 9. Active Splash Screen for homepage opening popup
+        $activeSplash = SplashScreen::currentlyActive()
+            ->orderBy('sort_order')
+            ->orderByDesc('created_at')
+            ->first();
+
         return Inertia::render('Public/Home', [
             'banners' => $banners,
             'tickers' => $tickers,
@@ -254,6 +261,7 @@ class HomeController extends Controller
             'stats' => $demographicSummary,
             'ikmWidget' => $ikmWidget,
             'blankStock' => $blankStock,
+            'splashScreen' => $activeSplash,
         ]);
     }
 }

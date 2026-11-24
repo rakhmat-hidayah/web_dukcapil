@@ -740,6 +740,7 @@ const menuGroups = [
       { label: 'Berita & Artikel', route: 'admin.news.index', icon: LibraryBig },
       { label: 'Pengumuman', route: 'admin.announcements.index', icon: BellRing },
       { label: 'Banner Slider', route: 'admin.banners.index', icon: Image },
+      { label: 'Splash Screen', route: 'admin.splash-screens.index', icon: Layers },
       { label: 'Galeri Foto & Video', route: 'admin.gallery.index', icon: LibraryBig },
     ]
   },
@@ -900,6 +901,7 @@ const filteredMenuGroups = computed(() => {
           'admin.news.index',
           'admin.announcements.index',
           'admin.banners.index',
+          'admin.splash-screens.index',
           'admin.gallery.index',
           'admin.downloads.index',
           'admin.faqs.index',
@@ -1022,6 +1024,7 @@ const filteredMenuGroups = computed(() => {
       if (r === 'admin.pages.index' && userPermissions.value.includes('manage_pages')) return true;
       if (r === 'admin.announcements.index' && userPermissions.value.includes('manage_announcements')) return true;
       if (r === 'admin.banners.index' && userPermissions.value.includes('manage_banners')) return true;
+      if (r === 'admin.splash-screens.index' && (userPermissions.value.includes('manage_banners') || userPermissions.value.includes('manage_announcements'))) return true;
       if (r === 'admin.gallery.index' && userPermissions.value.includes('manage_gallery')) return true;
       if (r === 'admin.files.index' && userPermissions.value.includes('manage_file_manager')) return true;
       if (r === 'admin.downloads.index' && userPermissions.value.includes('manage_downloads')) return true;

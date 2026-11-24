@@ -351,6 +351,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('/banners', \App\Http\Controllers\Admin\BannerController::class)->only(['index', 'store', 'update', 'destroy']);
             Route::post('/banners/reorder', [\App\Http\Controllers\Admin\BannerController::class, 'reorder'])->name('banners.reorder');
 
+            // Splash Screen CMS
+            Route::get('/splash-screens', [\App\Http\Controllers\Admin\SplashScreenController::class, 'index'])->name('splash-screens.index');
+            Route::post('/splash-screens', [\App\Http\Controllers\Admin\SplashScreenController::class, 'store'])->name('splash-screens.store');
+            Route::put('/splash-screens/{splashScreen}', [\App\Http\Controllers\Admin\SplashScreenController::class, 'update'])->name('splash-screens.update');
+            Route::delete('/splash-screens/{splashScreen}', [\App\Http\Controllers\Admin\SplashScreenController::class, 'destroy'])->name('splash-screens.destroy');
+            Route::post('/splash-screens/{splashScreen}/toggle', [\App\Http\Controllers\Admin\SplashScreenController::class, 'toggleActive'])->name('splash-screens.toggle');
+
             Route::get('/gallery', [\App\Http\Controllers\Admin\GalleryController::class, 'index'])->name('gallery.index');
             Route::get('/gallery/{galleryAlbum}', [\App\Http\Controllers\Admin\GalleryController::class, 'show'])->name('gallery.show');
             Route::post('/gallery/album', [\App\Http\Controllers\Admin\GalleryController::class, 'storeAlbum'])->name('gallery.album.store');
