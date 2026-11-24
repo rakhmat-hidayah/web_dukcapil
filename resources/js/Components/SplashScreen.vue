@@ -11,40 +11,41 @@
     >
       <div
         v-if="visible"
-        class="fixed inset-0 z-[999] flex items-center justify-center p-4"
+        class="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6"
         @click.self="close"
       >
         <!-- Backdrop -->
-        <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" @click="close"></div>
+        <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" @click="close"></div>
 
         <!-- Modal Card -->
-        <div class="relative z-10 w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden animate-fadeIn">
+        <div class="relative z-10 w-full max-w-[440px] bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden animate-fadeIn">
 
           <!-- Close Button -->
           <button
             @click="close"
-            class="absolute top-3 right-3 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-zinc-800/90 text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 shadow transition cursor-pointer border border-gray-200 dark:border-zinc-700"
+            class="absolute top-3.5 right-3.5 z-30 w-8 h-8 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 text-white/90 hover:text-white backdrop-blur-md shadow transition cursor-pointer border border-white/20"
+            title="Tutup"
           >
             <X class="w-4 h-4" />
           </button>
 
           <!-- ===== IKM Widget Type ===== -->
           <template v-if="splash.content_type === 'ikm_widget' && ikmWidget">
-            <!-- Header dark -->
-            <div class="bg-gradient-to-br from-slate-800 to-slate-950 p-5 text-white">
-              <div class="flex items-center justify-between mb-3">
-                <span class="px-2 py-0.5 bg-blue-500/30 text-blue-200 text-[9px] font-black uppercase tracking-widest rounded flex items-center gap-1">
+            <!-- Header dark with ample right padding for close button -->
+            <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 p-5 sm:p-6 pr-14 text-white">
+              <div class="flex items-center gap-2 mb-2.5">
+                <span class="px-2.5 py-0.5 bg-blue-500/25 border border-blue-400/30 text-blue-200 text-[10px] font-black uppercase tracking-wider rounded-md flex items-center gap-1.5 shrink-0">
                   <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse inline-block"></span>
                   {{ ikmWidget.survey_mechanism === 'panrb' ? 'SKM Online KemenPAN-RB' : 'Indeks Kepuasan Masyarakat' }}
                 </span>
-                <span class="text-[10px] text-slate-400 font-mono">Tahun {{ ikmWidget.year }}</span>
+                <span class="text-[10px] text-slate-400 font-mono shrink-0">Tahun {{ ikmWidget.year }}</span>
               </div>
-              <h2 class="text-sm font-extrabold text-white leading-snug">{{ splash.title }}</h2>
-              <p v-if="splash.subtitle" class="text-xs text-slate-300 mt-1">{{ splash.subtitle }}</p>
+              <h2 class="text-base font-extrabold text-white leading-snug">{{ splash.title }}</h2>
+              <p v-if="splash.subtitle" class="text-xs text-slate-300 mt-1.5 leading-relaxed">{{ splash.subtitle }}</p>
             </div>
 
             <!-- IKM Score Body -->
-            <div class="p-5 space-y-4">
+            <div class="p-5 sm:p-6 space-y-4">
               <!-- panrb with score -->
               <template v-if="ikmWidget.survey_mechanism === 'panrb' && ikmWidget.score > 0">
                 <div class="flex items-center justify-between">
@@ -66,10 +67,10 @@
                 <div class="space-y-3">
                   <div class="flex items-center justify-between">
                     <p class="text-xs font-bold text-gray-700 dark:text-zinc-300">{{ ikmWidget.period_title }}</p>
-                    <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-[9px] font-black uppercase rounded tracking-wider">Survei Belum Tuntas</span>
+                    <span class="px-2.5 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-[10px] font-black uppercase rounded-md tracking-wider">Survei Belum Tuntas</span>
                   </div>
-                  <div class="p-3 bg-blue-50 dark:bg-blue-950/40 rounded-2xl border border-blue-100 dark:border-blue-900/40 text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                    <p class="font-bold flex items-center gap-1.5 mb-1">🌐 Penilaian Berlangsung di KemenPAN-RB</p>
+                  <div class="p-3.5 bg-blue-50/80 dark:bg-blue-950/40 rounded-2xl border border-blue-100 dark:border-blue-900/40 text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                    <p class="font-bold flex items-center gap-1.5 mb-1 text-blue-900 dark:text-blue-200">🌐 Penilaian Berlangsung di KemenPAN-RB</p>
                     <p>Nilai IKM belum terbit. Berikan opini & penilaian Anda melalui portal SKM KemenPAN-RB.</p>
                   </div>
                 </div>
@@ -93,30 +94,31 @@
               </template>
 
               <!-- CTA Buttons -->
-              <div class="space-y-2">
+              <div class="space-y-2.5 pt-1">
                 <a
                   v-if="ikmWidget.survey_mechanism === 'panrb' && ikmWidget.external_survey_url && !ikmWidget.score"
                   :href="ikmWidget.external_survey_url"
                   target="_blank" rel="noopener noreferrer"
                   @click="close"
-                  class="w-full block text-center py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer"
+                  class="w-full py-3 px-5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-extrabold rounded-2xl transition shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2.5 cursor-pointer text-center leading-snug"
                 >
-                  <span>{{ splash.button_label || 'Beri Penilaian di SKM PAN-RB' }}</span>
-                  <ExternalLink class="w-3.5 h-3.5" />
+                  <span class="text-center">{{ splash.button_label || 'Beri Penilaian di SKM PAN-RB' }}</span>
+                  <ExternalLink class="w-4 h-4 shrink-0 text-white/90" />
                 </a>
                 <a
                   v-else-if="splash.button_url"
                   :href="splash.button_url"
                   :target="splash.button_external ? '_blank' : '_self'"
                   @click="close"
-                  class="w-full block text-center py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-500 hover:to-primary-600 text-white text-xs font-black rounded-xl transition shadow cursor-pointer"
+                  class="w-full py-3 px-5 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-500 hover:to-primary-600 text-white text-xs sm:text-sm font-extrabold rounded-2xl transition shadow-lg shadow-primary-600/25 flex items-center justify-center gap-2.5 cursor-pointer text-center leading-snug"
                 >
-                  {{ splash.button_label || 'Lihat Selengkapnya' }}
+                  <span class="text-center">{{ splash.button_label || 'Lihat Selengkapnya' }}</span>
+                  <ExternalLink v-if="splash.button_external" class="w-4 h-4 shrink-0 text-white/90" />
                 </a>
                 <Link
                   href="/layanan/survei"
                   @click="close"
-                  class="w-full block text-center py-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 text-[11px] font-extrabold rounded-xl transition border border-gray-200 dark:border-zinc-700 cursor-pointer"
+                  class="w-full block text-center py-2.5 px-4 bg-gray-50 dark:bg-zinc-800/80 hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 text-xs font-bold rounded-2xl transition border border-gray-200/80 dark:border-zinc-700 cursor-pointer"
                 >
                   Lihat Detail Survei IKM →
                 </Link>
@@ -126,23 +128,24 @@
 
           <!-- ===== Announcement Type ===== -->
           <template v-else-if="splash.content_type === 'announcement'">
-            <div class="bg-gradient-to-br from-amber-500 to-orange-600 p-5 text-white">
+            <div class="bg-gradient-to-br from-amber-500 to-orange-600 p-5 sm:p-6 pr-14 text-white">
               <span class="text-xs font-black uppercase tracking-widest opacity-80">📢 Pengumuman</span>
               <h2 class="text-base font-extrabold mt-1 leading-snug">{{ splash.title }}</h2>
-              <p v-if="splash.subtitle" class="text-xs opacity-80 mt-1">{{ splash.subtitle }}</p>
+              <p v-if="splash.subtitle" class="text-xs opacity-80 mt-1 leading-relaxed">{{ splash.subtitle }}</p>
             </div>
-            <div class="p-5 space-y-4">
+            <div class="p-5 sm:p-6 space-y-4">
               <p class="text-sm text-gray-700 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">{{ splash.custom_content }}</p>
-              <div v-if="splash.button_label && splash.button_url" class="flex gap-2">
+              <div v-if="splash.button_label && splash.button_url" class="flex gap-2.5 pt-1">
                 <a :href="splash.button_url" :target="splash.button_external ? '_blank' : '_self'" @click="close"
-                  class="flex-1 text-center py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-xl transition cursor-pointer">
-                  {{ splash.button_label }}
+                  class="flex-1 text-center py-3 px-4 bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-extrabold rounded-2xl transition cursor-pointer shadow-md shadow-amber-500/20 flex items-center justify-center gap-2">
+                  <span>{{ splash.button_label }}</span>
+                  <ExternalLink v-if="splash.button_external" class="w-4 h-4 shrink-0 text-white/90" />
                 </a>
-                <button @click="close" class="px-4 py-2.5 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 text-xs font-bold rounded-xl transition cursor-pointer">
+                <button @click="close" class="px-5 py-3 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 text-xs font-bold rounded-2xl transition cursor-pointer">
                   Tutup
                 </button>
               </div>
-              <button v-else @click="close" class="w-full py-2.5 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 text-xs font-bold rounded-xl transition cursor-pointer">
+              <button v-else @click="close" class="w-full py-3 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 text-xs font-bold rounded-2xl transition cursor-pointer">
                 Tutup
               </button>
             </div>
@@ -152,32 +155,34 @@
           <template v-else-if="splash.content_type === 'image' && splash.image_path">
             <div class="relative">
               <img :src="`/storage/${splash.image_path}`" class="w-full object-cover max-h-80" :alt="splash.title" />
-              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                <h2 class="text-sm font-extrabold text-white">{{ splash.title }}</h2>
-                <p v-if="splash.subtitle" class="text-xs text-white/80 mt-0.5">{{ splash.subtitle }}</p>
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-5 pt-8">
+                <h2 class="text-base font-extrabold text-white leading-snug">{{ splash.title }}</h2>
+                <p v-if="splash.subtitle" class="text-xs text-white/85 mt-1">{{ splash.subtitle }}</p>
               </div>
             </div>
-            <div v-if="splash.button_label && splash.button_url" class="p-4">
+            <div v-if="splash.button_label && splash.button_url" class="p-5 sm:p-6">
               <a :href="splash.button_url" :target="splash.button_external ? '_blank' : '_self'" @click="close"
-                class="w-full block text-center py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-black rounded-xl transition cursor-pointer">
-                {{ splash.button_label }}
+                class="w-full py-3 px-5 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-extrabold rounded-2xl transition cursor-pointer shadow-lg shadow-primary-600/20 flex items-center justify-center gap-2 text-center">
+                <span>{{ splash.button_label }}</span>
+                <ExternalLink v-if="splash.button_external" class="w-4 h-4 shrink-0 text-white/90" />
               </a>
             </div>
           </template>
 
           <!-- ===== Custom HTML Type ===== -->
           <template v-else-if="splash.content_type === 'custom'">
-            <div class="p-5">
-              <h2 class="text-base font-extrabold text-gray-900 dark:text-zinc-50 mb-1">{{ splash.title }}</h2>
-              <p v-if="splash.subtitle" class="text-xs text-gray-500 dark:text-zinc-400 mb-3">{{ splash.subtitle }}</p>
+            <div class="p-5 sm:p-6 pr-14">
+              <h2 class="text-base font-extrabold text-gray-900 dark:text-zinc-50 mb-1 leading-snug">{{ splash.title }}</h2>
+              <p v-if="splash.subtitle" class="text-xs text-gray-500 dark:text-zinc-400 mb-3 leading-relaxed">{{ splash.subtitle }}</p>
               <!-- eslint-disable-next-line vue/no-v-html -->
-              <div class="prose prose-sm dark:prose-invert max-w-none" v-html="splash.custom_content"></div>
-              <div class="mt-4 flex gap-2">
+              <div class="prose prose-sm dark:prose-invert max-w-none text-xs leading-relaxed" v-html="splash.custom_content"></div>
+              <div class="mt-4 flex gap-2.5">
                 <a v-if="splash.button_label && splash.button_url" :href="splash.button_url" :target="splash.button_external ? '_blank' : '_self'" @click="close"
-                  class="flex-1 text-center py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-black rounded-xl transition cursor-pointer">
-                  {{ splash.button_label }}
+                  class="flex-1 text-center py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-sm font-extrabold rounded-2xl transition cursor-pointer shadow-md flex items-center justify-center gap-2">
+                  <span>{{ splash.button_label }}</span>
+                  <ExternalLink v-if="splash.button_external" class="w-4 h-4 shrink-0 text-white/90" />
                 </a>
-                <button @click="close" class="flex-1 py-2.5 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-xs font-bold rounded-xl cursor-pointer hover:bg-gray-200 transition">
+                <button @click="close" class="flex-1 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-xs font-bold rounded-2xl cursor-pointer hover:bg-gray-200 transition">
                   Tutup
                 </button>
               </div>
@@ -185,17 +190,20 @@
           </template>
 
           <!-- Fallback close -->
-          <div v-else class="p-5 text-center">
+          <div v-else class="p-6 text-center">
             <h2 class="text-sm font-bold text-gray-900 dark:text-zinc-50">{{ splash.title }}</h2>
             <p v-if="splash.subtitle" class="text-xs text-gray-500 mt-1">{{ splash.subtitle }}</p>
-            <button @click="close" class="mt-4 px-6 py-2 bg-gray-100 dark:bg-zinc-800 rounded-xl text-xs font-bold cursor-pointer">Tutup</button>
+            <button @click="close" class="mt-4 px-6 py-2.5 bg-gray-100 dark:bg-zinc-800 rounded-2xl text-xs font-bold cursor-pointer hover:bg-gray-200 transition">Tutup</button>
           </div>
 
           <!-- Footer hint -->
-          <div class="border-t border-gray-100 dark:border-zinc-800 px-5 py-2.5 flex items-center justify-between">
-            <span class="text-[10px] text-gray-400 dark:text-zinc-500">Disdukcapil Kabupaten Dompu</span>
-            <button @click="close" class="text-[10px] text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 cursor-pointer underline underline-offset-2">
-              Tutup &amp; Jangan Tampilkan Lagi Hari Ini
+          <div class="border-t border-gray-100 dark:border-zinc-800/80 bg-gray-50/60 dark:bg-zinc-900/60 px-5 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-2">
+            <span class="text-[10px] sm:text-[11px] text-gray-400 dark:text-zinc-500 truncate">Disdukcapil Kabupaten Dompu</span>
+            <button
+              @click="close"
+              class="text-[10px] sm:text-[11px] text-gray-400 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 cursor-pointer underline underline-offset-2 transition shrink-0"
+            >
+              Tutup &amp; Jangan Tampilkan Hari Ini
             </button>
           </div>
         </div>
