@@ -197,13 +197,13 @@
           </div>
 
           <!-- Footer hint -->
-          <div class="border-t border-gray-100 dark:border-zinc-800/80 bg-gray-50/60 dark:bg-zinc-900/60 px-5 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-2">
-            <span class="text-[10px] sm:text-[11px] text-gray-400 dark:text-zinc-500 truncate">Disdukcapil Kabupaten Dompu</span>
+          <div class="border-t border-gray-100 dark:border-zinc-800/80 bg-gray-50/60 dark:bg-zinc-900/60 px-5 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <span class="text-[10px] sm:text-[11px] text-gray-400 dark:text-zinc-500 shrink-0">Disdukcapil Kabupaten Dompu</span>
             <button
               @click="close"
-              class="text-[10px] sm:text-[11px] text-gray-400 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 cursor-pointer underline underline-offset-2 transition shrink-0"
+              class="text-[10px] sm:text-[11px] text-gray-400 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 cursor-pointer underline underline-offset-2 transition whitespace-nowrap"
             >
-              Tutup &amp; Jangan Tampilkan Hari Ini
+              Tutup &amp; Jangan Tampilkan Lagi Hari Ini
             </button>
           </div>
         </div>
