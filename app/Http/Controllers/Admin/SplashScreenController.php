@@ -27,6 +27,11 @@ class SplashScreenController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $request->merge([
+            'button_external' => $request->boolean('button_external'),
+            'is_active' => $request->boolean('is_active'),
+        ]);
+
         $data = $request->validate([
             'title'          => 'required|string|max:255',
             'subtitle'       => 'nullable|string|max:500',
@@ -56,6 +61,11 @@ class SplashScreenController extends Controller
 
     public function update(Request $request, SplashScreen $splashScreen): RedirectResponse
     {
+        $request->merge([
+            'button_external' => $request->boolean('button_external'),
+            'is_active' => $request->boolean('is_active'),
+        ]);
+
         $data = $request->validate([
             'title'          => 'required|string|max:255',
             'subtitle'       => 'nullable|string|max:500',

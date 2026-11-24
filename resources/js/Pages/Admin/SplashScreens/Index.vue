@@ -391,7 +391,11 @@ function submitForm() {
 
   const data = new FormData()
   Object.entries(form).forEach(([k, v]) => {
-    if (v !== null && v !== undefined && v !== '') data.append(k, v)
+    if (typeof v === 'boolean') {
+      data.append(k, v ? '1' : '0')
+    } else if (v !== null && v !== undefined && v !== '') {
+      data.append(k, v)
+    }
   })
   if (imageFile.value) data.append('image', imageFile.value)
 
