@@ -779,8 +779,11 @@
               <div class="flex items-center justify-between pt-1">
                 <div>
                   <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-50">{{ ikmWidget.period_title }}</h4>
-                  <p class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  <p v-if="ikmWidget.score > 0" class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
                     Mutu {{ ikmWidget.category }} — {{ ikmWidget.category_label }}
+                  </p>
+                  <p v-else class="text-[11px] font-semibold text-amber-600 dark:text-amber-400 mt-0.5">
+                    {{ ikmWidget.category_label || 'Dalam Evaluasi' }}
                   </p>
                 </div>
 

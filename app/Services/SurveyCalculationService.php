@@ -13,6 +13,15 @@ class SurveyCalculationService
      */
     public static function classifyIkmCategory(float $score): array
     {
+        if ($score <= 0) {
+            return [
+                'category' => '-',
+                'label' => 'Dalam Evaluasi',
+                'description' => 'Dalam Pengumpulan / Evaluasi Data',
+                'color' => 'gray',
+            ];
+        }
+
         if ($score >= 88.31) {
             return [
                 'category' => 'A',

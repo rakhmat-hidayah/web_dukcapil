@@ -201,10 +201,22 @@ class HomeController extends Controller
                 ->where('status', 'published')
                 ->first();
 
-            if ($activeSurvey && $activeSurvey->statistic) {
-                $score = (float) $activeSurvey->statistic->ikm_value;
+            if ($activeSurvey) {
+                $isPanRb = ($activeSurvey->survey_mechanism === 'panrb');
+                $score = $isPanRb && $activeSurvey->external_ikm_value !== null
+                    ? (float) $activeSurvey->external_ikm_value
+                    : (float) ($activeSurvey->statistic?->ikm_value ?? 0);
+
                 $cat = SurveyCalculationService::classifyIkmCategory($score);
-                $qualityCategory = $activeSurvey->statistic->service_quality_category ?: $cat['category'];
+                $qualityCategory = ($score > 0)
+                    ? ($isPanRb && $activeSurvey->external_service_quality
+                        ? $activeSurvey->external_service_quality
+                        : ($activeSurvey->statistic?->service_quality_category ?: $cat['category']))
+                    : '-';
+
+                $totalRespondents = $isPanRb && $activeSurvey->external_total_respondents !== null
+                    ? (int) $activeSurvey->external_total_respondents
+                    : (int) ($activeSurvey->statistic?->total_respondents ?? 0);
 
                 return [
                     'period_title' => $activeSurvey->title,
@@ -213,10 +225,10 @@ class HomeController extends Controller
                     'score' => $score,
                     'category' => $qualityCategory,
                     'category_label' => $cat['label'],
-                    'total_respondents' => $activeSurvey->statistic->total_respondents,
+                    'total_respondents' => $totalRespondents,
                     'survey_mechanism' => $activeSurvey->survey_mechanism ?? 'internal',
                     'external_survey_url' => $activeSurvey->external_survey_url,
-                    'is_external' => ($activeSurvey->survey_mechanism === 'panrb'),
+                    'is_external' => $isPanRb,
                     'external_notes' => $activeSurvey->external_notes,
                 ];
             }

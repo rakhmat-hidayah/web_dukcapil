@@ -103,29 +103,43 @@
             </p>
           </div>
 
-          <div v-if="activePeriod?.survey_mechanism === 'panrb' && activePeriod?.external_survey_url" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 w-full md:w-auto">
-            <a 
-              :href="activePeriod.external_survey_url" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <span>Buka Link Penilaian</span>
-              <ExternalLink class="w-3.5 h-3.5" />
-            </a>
-            <button 
-              @click="copyUrl(activePeriod.external_survey_url)" 
-              class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl transition border border-white/20 flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Copy class="w-3.5 h-3.5" />
-              <span>{{ copied ? 'Tersalin!' : 'Salin Link' }}</span>
-            </button>
-            <button 
-              @click="openPeriodModal(activePeriod)" 
-              class="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1 cursor-pointer"
-            >
-              Ubah Pengaturan
-            </button>
+          <div v-if="activePeriod" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 w-full md:w-auto">
+            <template v-if="activePeriod.survey_mechanism === 'panrb'">
+              <a 
+                v-if="activePeriod.external_survey_url"
+                :href="activePeriod.external_survey_url" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span>Buka Link Penilaian</span>
+                <ExternalLink class="w-3.5 h-3.5" />
+              </a>
+              <button 
+                v-if="activePeriod.external_survey_url"
+                @click="copyUrl(activePeriod.external_survey_url)" 
+                class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl transition border border-white/20 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Copy class="w-3.5 h-3.5" />
+                <span>{{ copied ? 'Tersalin!' : 'Salin Link' }}</span>
+              </button>
+              <button 
+                @click="openPeriodModal(activePeriod)" 
+                class="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <Globe class="w-3.5 h-3.5" />
+                <span>Kelola SKM / Link</span>
+              </button>
+            </template>
+            <template v-else>
+              <button 
+                @click="openPeriodModal(activePeriod)" 
+                class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-95"
+              >
+                <Globe class="w-4 h-4" />
+                <span>Ganti ke SKM Online PAN-RB</span>
+              </button>
+            </template>
           </div>
         </div>
 
@@ -141,7 +155,8 @@
           <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 space-y-2">
             <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Nilai IKM</span>
             <p class="text-2xl font-black text-primary-600 dark:text-primary-400 font-mono">{{ activePeriod?.statistic?.ikm_value || 0 }}</p>
-            <span class="text-[11px] font-bold text-gray-500">Mutu Pelayanan {{ activePeriod?.statistic?.service_quality_category || 'B' }}</span>
+            <span v-if="(activePeriod?.statistic?.ikm_value || 0) > 0" class="text-[11px] font-bold text-gray-500">Mutu Pelayanan {{ activePeriod?.statistic?.service_quality_category || 'A' }}</span>
+            <span v-else class="text-[11px] font-semibold text-amber-600">Dalam Evaluasi</span>
           </div>
 
           <!-- Total Respondents -->
