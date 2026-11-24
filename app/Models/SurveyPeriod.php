@@ -21,6 +21,12 @@ class SurveyPeriod extends Model
         'is_active',
         'target_respondents',
         'created_by',
+        'survey_mechanism',
+        'external_survey_url',
+        'external_ikm_value',
+        'external_service_quality',
+        'external_total_respondents',
+        'external_notes',
     ];
 
     protected $casts = [
@@ -28,7 +34,14 @@ class SurveyPeriod extends Model
         'end_date' => 'date',
         'is_active' => 'boolean',
         'target_respondents' => 'integer',
+        'external_ikm_value' => 'float',
+        'external_total_respondents' => 'integer',
     ];
+
+    public function isExternalPanRb(): bool
+    {
+        return $this->survey_mechanism === 'panrb';
+    }
 
     public function questions(): HasMany
     {

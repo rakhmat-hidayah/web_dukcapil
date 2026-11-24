@@ -204,15 +204,20 @@ class HomeController extends Controller
             if ($activeSurvey && $activeSurvey->statistic) {
                 $score = (float) $activeSurvey->statistic->ikm_value;
                 $cat = SurveyCalculationService::classifyIkmCategory($score);
+                $qualityCategory = $activeSurvey->statistic->service_quality_category ?: $cat['category'];
 
                 return [
                     'period_title' => $activeSurvey->title,
                     'year' => $activeSurvey->year,
                     'semester' => $activeSurvey->semester,
                     'score' => $score,
-                    'category' => $cat['category'],
+                    'category' => $qualityCategory,
                     'category_label' => $cat['label'],
                     'total_respondents' => $activeSurvey->statistic->total_respondents,
+                    'survey_mechanism' => $activeSurvey->survey_mechanism ?? 'internal',
+                    'external_survey_url' => $activeSurvey->external_survey_url,
+                    'is_external' => ($activeSurvey->survey_mechanism === 'panrb'),
+                    'external_notes' => $activeSurvey->external_notes,
                 ];
             }
 

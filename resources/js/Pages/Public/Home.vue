@@ -705,33 +705,98 @@
 
           <!-- Indeks Kepuasan Masyarakat (IKM) Widget Card -->
           <div v-if="ikmWidget" class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="px-2 py-0.5 bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40 text-[9px] font-black uppercase rounded tracking-wider">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <span 
+                v-if="ikmWidget.survey_mechanism === 'panrb'" 
+                class="px-2 py-0.5 bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900/50 text-[9px] font-black uppercase rounded tracking-wider flex items-center gap-1 shadow-xs"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+                SKM Online KemenPAN-RB
+              </span>
+              <span 
+                v-else 
+                class="px-2 py-0.5 bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40 text-[9px] font-black uppercase rounded tracking-wider"
+              >
                 Indeks Kepuasan Masyarakat
               </span>
               <span class="text-[10px] font-mono font-extrabold text-gray-400">Tahun {{ ikmWidget.year }}</span>
             </div>
 
-            <div class="flex items-center justify-between pt-1">
-              <div>
+            <!-- If Mechanism is PAN-RB -->
+            <template v-if="ikmWidget.survey_mechanism === 'panrb'">
+              <div v-if="ikmWidget.score > 0" class="flex items-center justify-between pt-1">
+                <div>
+                  <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-50">{{ ikmWidget.period_title }}</h4>
+                  <p class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    Mutu {{ ikmWidget.category }} — {{ ikmWidget.category_label }}
+                  </p>
+                  <span class="text-[9px] text-blue-600 dark:text-blue-400 font-mono font-bold">Terintegrasi skm.go.id</span>
+                </div>
+
+                <div class="text-right shrink-0 ml-3">
+                  <span class="text-3xl font-black text-blue-600 dark:text-blue-400 font-mono tracking-tight">{{ ikmWidget.score }}</span>
+                  <span class="text-[9px] block text-gray-400 font-mono">Skala 25-100</span>
+                </div>
+              </div>
+
+              <div v-else class="space-y-1 pt-1">
                 <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-50">{{ ikmWidget.period_title }}</h4>
-                <p class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  Mutu {{ ikmWidget.category }} — {{ ikmWidget.category_label }}
-                </p>
+                <div class="p-2.5 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900/40">
+                  <p class="text-[11px] font-bold text-blue-800 dark:text-blue-300 flex items-center gap-1.5">
+                    <Globe class="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                    <span>Penilaian Terpusat di KemenPAN-RB</span>
+                  </p>
+                  <p class="text-[10px] text-blue-900/70 dark:text-blue-300/70 mt-0.5 leading-snug">
+                    Evaluasi mutu pelayanan publik diolah langsung di sistem Kementerian PAN-RB secara transparan.
+                  </p>
+                </div>
               </div>
 
-              <div class="text-right shrink-0 ml-3">
-                <span class="text-3xl font-black text-primary-600 dark:text-primary-400 font-mono tracking-tight">{{ ikmWidget.score }}</span>
-                <span class="text-[9px] block text-gray-400 font-mono">Skala 25-100</span>
-              </div>
-            </div>
+              <!-- Action buttons for PAN-RB -->
+              <div class="space-y-2 pt-1">
+                <a 
+                  v-if="ikmWidget.external_survey_url"
+                  :href="ikmWidget.external_survey_url" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl transition shadow-sm hover:shadow flex items-center justify-center gap-2 cursor-pointer text-center"
+                >
+                  <span>Beri Penilaian di SKM PAN-RB</span>
+                  <ExternalLink class="w-3.5 h-3.5" />
+                </a>
 
-            <Link 
-              href="/layanan/survei" 
-              class="w-full block text-center py-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-900 dark:text-zinc-100 text-xs font-extrabold rounded-xl transition border border-gray-200 dark:border-zinc-700"
-            >
-              Lihat Detail Survei IKM →
-            </Link>
+                <Link 
+                  href="/layanan/survei" 
+                  class="w-full block text-center py-2 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 text-[11px] font-extrabold rounded-xl transition border border-gray-200 dark:border-zinc-700"
+                >
+                  Informasi &amp; Mekanisme SKM →
+                </Link>
+              </div>
+            </template>
+
+            <!-- If Mechanism is Internal -->
+            <template v-else>
+              <div class="flex items-center justify-between pt-1">
+                <div>
+                  <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-50">{{ ikmWidget.period_title }}</h4>
+                  <p class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    Mutu {{ ikmWidget.category }} — {{ ikmWidget.category_label }}
+                  </p>
+                </div>
+
+                <div class="text-right shrink-0 ml-3">
+                  <span class="text-3xl font-black text-primary-600 dark:text-primary-400 font-mono tracking-tight">{{ ikmWidget.score }}</span>
+                  <span class="text-[9px] block text-gray-400 font-mono">Skala 25-100</span>
+                </div>
+              </div>
+
+              <Link 
+                href="/layanan/survei" 
+                class="w-full block text-center py-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-900 dark:text-zinc-100 text-xs font-extrabold rounded-xl transition border border-gray-200 dark:border-zinc-700"
+              >
+                Lihat Detail Survei IKM →
+              </Link>
+            </template>
           </div>
 
           <!-- Dynamic Informasi Layanan Widget (Mobil Pelayanan & Bantuan Cepat) -->
@@ -748,7 +813,7 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import InformasiLayananWidget from '@/Components/InformasiLayananWidget.vue';
 import { storageUrl } from '@/utils/storage';
-import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar, Download, FileText, ArrowRight, Ticket, CreditCard, Clock } from '@lucide/vue';
+import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar, Download, FileText, ArrowRight, Ticket, CreditCard, Clock, ExternalLink } from '@lucide/vue';
 
 const props = defineProps({
   banners: [Array, Object],

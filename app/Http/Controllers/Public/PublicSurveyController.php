@@ -64,6 +64,12 @@ class PublicSurveyController extends Controller
                 'start_date' => $activeSurvey->start_date?->format('Y-m-d'),
                 'end_date' => $activeSurvey->end_date?->format('Y-m-d'),
                 'target_respondents' => $activeSurvey->target_respondents,
+                'survey_mechanism' => $activeSurvey->survey_mechanism ?? 'internal',
+                'external_survey_url' => $activeSurvey->external_survey_url,
+                'external_ikm_value' => $activeSurvey->external_ikm_value,
+                'external_service_quality' => $activeSurvey->external_service_quality,
+                'external_total_respondents' => $activeSurvey->external_total_respondents,
+                'external_notes' => $activeSurvey->external_notes,
                 'questions' => $activeSurvey->questions->map(fn($q) => [
                     'id' => $q->id,
                     'question_text' => $q->question_text,

@@ -13,6 +13,7 @@ use App\Services\ActivityLogger;
 use App\Services\SurveyArchiveService;
 use App\Services\SurveyCalculationService;
 use App\Services\SurveyChartService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -97,6 +98,12 @@ class SurveyController extends Controller
             'target_respondents' => 'required|integer|min:10',
             'status' => 'required|in:draft,published,closed',
             'is_active' => 'required|boolean',
+            'survey_mechanism' => 'required|in:internal,panrb',
+            'external_survey_url' => 'nullable|required_if:survey_mechanism,panrb|url|max:500',
+            'external_ikm_value' => 'nullable|numeric|min:0|max:100',
+            'external_service_quality' => 'nullable|in:A,B,C,D',
+            'external_total_respondents' => 'nullable|integer|min:0',
+            'external_notes' => 'nullable|string',
         ]);
 
         if ($data['is_active']) {
@@ -105,7 +112,11 @@ class SurveyController extends Controller
 
         $period = SurveyPeriod::create($data);
 
-        ActivityLogger::log("Membuat periode survei IKM baru: {$period->title}", null, 'create_survey_period');
+        // Recalculate stats for the new period
+        $this->calcService->calculatePeriodStats($period->id);
+        Cache::forget('home_ikm_widget');
+
+        ActivityLogger::log("Membuat periode survei IKM baru ({$period->survey_mechanism}): {$period->title}", null, 'create_survey_period');
 
         return redirect()->back()->with('success', 'Periode Survei IKM berhasil ditambahkan.');
     }
@@ -124,6 +135,12 @@ class SurveyController extends Controller
             'target_respondents' => 'required|integer|min:10',
             'status' => 'required|in:draft,published,closed',
             'is_active' => 'required|boolean',
+            'survey_mechanism' => 'required|in:internal,panrb',
+            'external_survey_url' => 'nullable|required_if:survey_mechanism,panrb|url|max:500',
+            'external_ikm_value' => 'nullable|numeric|min:0|max:100',
+            'external_service_quality' => 'nullable|in:A,B,C,D',
+            'external_total_respondents' => 'nullable|integer|min:0',
+            'external_notes' => 'nullable|string',
         ]);
 
         if ($data['is_active']) {
@@ -132,7 +149,11 @@ class SurveyController extends Controller
 
         $period->update($data);
 
-        ActivityLogger::log("Memperbarui periode survei IKM: {$period->title}", null, 'update_survey_period');
+        // Recalculate stats & refresh widget cache
+        $this->calcService->calculatePeriodStats($period->id);
+        Cache::forget('home_ikm_widget');
+
+        ActivityLogger::log("Memperbarui periode survei IKM ({$period->survey_mechanism}): {$period->title}", null, 'update_survey_period');
 
         return redirect()->back()->with('success', 'Periode Survei IKM berhasil diperbarui.');
     }
@@ -329,6 +350,7 @@ class SurveyController extends Controller
     public function recalculate(SurveyPeriod $period): RedirectResponse
     {
         $this->calcService->calculatePeriodStats($period->id);
+        Cache::forget('home_ikm_widget');
 
         return redirect()->back()->with('success', 'Kalkulasi Ulang Nilai IKM PermenPANRB Berhasil.');
     }

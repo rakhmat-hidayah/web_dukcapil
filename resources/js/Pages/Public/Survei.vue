@@ -11,65 +11,346 @@
           <div class="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
           <div class="relative z-10 space-y-4 max-w-3xl">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="px-3 py-1 bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider rounded-lg">PermenPANRB No. 14 Tahun 2017</span>
+              <span v-if="activeSurvey?.survey_mechanism === 'panrb'" class="px-3 py-1 bg-sky-500 text-white text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow-sm">
+                <Globe class="w-3.5 h-3.5" />
+                SKM Online KemenPAN-RB
+              </span>
+              <span v-else class="px-3 py-1 bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider rounded-lg">
+                PermenPANRB No. 14 Tahun 2017
+              </span>
               <span class="px-3 py-1 bg-white/10 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg border border-white/10">Transparan &amp; Akuntabel</span>
+              <span v-if="activeSurvey?.survey_mechanism === 'panrb'" class="px-3 py-1 bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-emerald-400/30">
+                Terintegrasi skm.go.id
+              </span>
             </div>
+
             <h1 class="text-3xl md:text-5xl font-black tracking-tight leading-tight">
-              Survei Kepuasan Masyarakat <span class="text-amber-400">(IKM)</span>
+              Survei Kepuasan Masyarakat <span :class="activeSurvey?.survey_mechanism === 'panrb' ? 'text-sky-400' : 'text-amber-400'">(SKM)</span>
             </h1>
-            <p class="text-xs md:text-sm text-blue-100/90 leading-relaxed">
+
+            <p v-if="activeSurvey?.survey_mechanism === 'panrb'" class="text-xs md:text-sm text-blue-100/90 leading-relaxed">
+              Pengukuran mutu dan evaluasi pelayanan administrasi kependudukan di Kabupaten Dompu kini terintegrasi langsung dengan platform nasional <strong>SKM Online Kementerian Pendayagunaan Aparatur Negara dan Reformasi Birokrasi (KemenPAN-RB)</strong> melalui portal <strong>skm.go.id</strong>.
+            </p>
+            <p v-else class="text-xs md:text-sm text-blue-100/90 leading-relaxed">
               Laporan pengukuran secara berkala atas tingkat kepuasan masyarakat terhadap mutu dan kualitas pelayanan administrasi kependudukan di Kabupaten Dompu.
             </p>
+
             <div class="pt-2 flex items-center gap-4 flex-wrap">
-              <!-- Already submitted -->
-              <div v-if="alreadySubmitted" class="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 border border-emerald-400/40 rounded-xl">
-                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span class="text-sm font-bold text-emerald-200">Anda sudah mengisi survei ini. Terima kasih!</span>
-              </div>
-              <template v-else>
-                <button @click="startSurvey" class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl transition shadow-lg active:scale-95 flex items-center gap-2 cursor-pointer">
-                  <span>Isi Survei Sekarang</span>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              <!-- When mechanism is panrb -->
+              <template v-if="activeSurvey?.survey_mechanism === 'panrb'">
+                <a 
+                  v-if="activeSurvey.external_survey_url"
+                  :href="activeSurvey.external_survey_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="px-6 py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-black rounded-xl transition shadow-xl shadow-sky-900/40 active:scale-95 flex items-center gap-2 cursor-pointer"
+                >
+                  <Globe class="w-4 h-4" />
+                  <span>Beri Penilaian di SKM PAN-RB</span>
+                  <ExternalLink class="w-3.5 h-3.5" />
+                </a>
+                <button
+                  v-if="activeSurvey.external_survey_url"
+                  type="button"
+                  @click="copyUrl(activeSurvey.external_survey_url)"
+                  class="px-4 py-3.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl transition border border-white/15 flex items-center gap-2 cursor-pointer"
+                >
+                  <Copy v-if="!copiedUrl" class="w-3.5 h-3.5" />
+                  <Check v-else class="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{{ copiedUrl ? 'Tautan Tersalin!' : 'Salin Tautan' }}</span>
                 </button>
-                <a href="#hasil-ikm" class="px-5 py-3 bg-white/10 hover:bg-white/20 text-white text-xs font-extrabold rounded-xl transition border border-white/15">Lihat Statistik ↓</a>
+                <a href="#mekanisme-panrb" class="px-5 py-3.5 bg-white/10 hover:bg-white/20 text-white text-xs font-extrabold rounded-xl transition border border-white/15">
+                  Informasi Integrasi ↓
+                </a>
+              </template>
+
+              <!-- When mechanism is internal -->
+              <template v-else>
+                <!-- Already submitted -->
+                <div v-if="alreadySubmitted" class="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 border border-emerald-400/40 rounded-xl">
+                  <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span class="text-sm font-bold text-emerald-200">Anda sudah mengisi survei ini. Terima kasih!</span>
+                </div>
+                <template v-else>
+                  <button @click="startSurvey" class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl transition shadow-lg active:scale-95 flex items-center gap-2 cursor-pointer">
+                    <span>Isi Survei Sekarang</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  </button>
+                  <a href="#hasil-ikm" class="px-5 py-3 bg-white/10 hover:bg-white/20 text-white text-xs font-extrabold rounded-xl transition border border-white/15">Lihat Statistik ↓</a>
+                </template>
               </template>
             </div>
           </div>
         </div>
 
-        <!-- IKM SCORE CARD -->
-        <div v-if="stats && categoryInfo" id="hasil-ikm" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div class="lg:col-span-8 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="space-y-2 text-center md:text-left">
-              <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono">Nilai Indeks Terbaru</span>
-              <h2 class="text-2xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">{{ activeSurvey ? activeSurvey.title : 'Survei Kepuasan Masyarakat' }}</h2>
-              <p class="text-xs text-gray-500 dark:text-zinc-400">Berdasarkan {{ stats.total_respondents }} responden terverifikasi.</p>
+        <!-- ============================================== -->
+        <!-- PAN-RB MECHANISM SECTION (WHEN MECHANISM IS PANRB) -->
+        <!-- ============================================== -->
+        <div v-if="activeSurvey?.survey_mechanism === 'panrb'" id="mekanisme-panrb" class="space-y-6">
+          
+          <!-- PORTAL INTEGRATION HERO CARD -->
+          <div class="bg-gradient-to-br from-white via-sky-50/40 to-blue-50/30 dark:from-zinc-900 dark:via-zinc-900 dark:to-blue-950/20 border border-sky-100 dark:border-zinc-800 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-gray-100 dark:border-zinc-800">
+              <div class="space-y-2 max-w-2xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-sky-100 dark:bg-sky-950/70 text-sky-800 dark:text-sky-300 text-[10px] font-black uppercase tracking-wider rounded-lg border border-sky-200 dark:border-sky-800">
+                  <ShieldCheck class="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                  Sistem Resmi Terpusat Kementerian PAN-RB
+                </div>
+                <h2 class="text-xl md:text-2xl font-black text-gray-900 dark:text-zinc-50 tracking-tight">
+                  SKM Online Terintegrasi (skm.go.id)
+                </h2>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-zinc-400 leading-relaxed">
+                  Untuk menjamin transparansi, integritas, dan akuntabilitas publik tanpa manipulasi data, seluruh penilaian kepuasan masyarakat terhadap layanan Disdukcapil Kabupaten Dompu dialirkan langsung ke platform nasional SKM Online Kementerian PAN-RB.
+                </p>
+              </div>
+
+              <!-- Quick Action Card -->
+              <div class="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 lg:w-72">
+                <a
+                  v-if="activeSurvey.external_survey_url"
+                  :href="activeSurvey.external_survey_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="px-5 py-3.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2 text-center cursor-pointer"
+                >
+                  <Globe class="w-4 h-4" />
+                  <span>Buka Portal Penilaian</span>
+                  <ExternalLink class="w-3.5 h-3.5" />
+                </a>
+                <button
+                  v-if="activeSurvey.external_survey_url"
+                  type="button"
+                  @click="copyUrl(activeSurvey.external_survey_url)"
+                  class="px-5 py-3 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 border border-gray-200 dark:border-zinc-700 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Copy v-if="!copiedUrl" class="w-3.5 h-3.5 text-gray-400" />
+                  <Check v-else class="w-3.5 h-3.5 text-emerald-500" />
+                  <span>{{ copiedUrl ? 'Tautan Berhasil Disalin!' : 'Salin Tautan Kuesioner' }}</span>
+                </button>
+              </div>
             </div>
-            <div class="flex flex-col items-center p-6 bg-gray-50 dark:bg-zinc-800/80 rounded-2xl border border-gray-100 dark:border-zinc-700 min-w-[14rem]">
-              <span class="text-5xl font-black text-blue-600 dark:text-blue-400 font-mono">{{ stats.ikm_value }}</span>
-              <span class="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-wider">Skala (25 - 100)</span>
-              <div class="mt-3 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border"
-                :class="categoryInfo.category === 'A' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : categoryInfo.category === 'B' ? 'bg-blue-50 text-blue-600 border-blue-200' : categoryInfo.category === 'C' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-rose-50 text-rose-600 border-rose-200'"
-              >Mutu {{ categoryInfo.category }} — {{ categoryInfo.label }}</div>
+
+            <!-- URL Display Bar -->
+            <div v-if="activeSurvey.external_survey_url" class="p-3.5 bg-gray-50 dark:bg-zinc-800/80 rounded-2xl border border-gray-200 dark:border-zinc-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5 overflow-hidden">
+                <Globe class="w-4 h-4 text-sky-600 shrink-0" />
+                <span class="text-[11px] font-bold text-gray-500 shrink-0">Tautan Resmi:</span>
+                <span class="text-xs font-mono font-bold text-blue-700 dark:text-blue-400 truncate select-all">{{ activeSurvey.external_survey_url }}</span>
+              </div>
+              <a 
+                :href="activeSurvey.external_survey_url" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="text-xs font-black text-sky-600 dark:text-sky-400 hover:underline shrink-0 flex items-center gap-1 self-end sm:self-auto"
+              >
+                Kunjungi Portal ↗
+              </a>
+            </div>
+
+            <!-- 3 Pillar Feature Highlights -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              <div class="p-4 rounded-2xl bg-white dark:bg-zinc-800/60 border border-gray-100 dark:border-zinc-800 space-y-2">
+                <div class="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/80 flex items-center justify-center text-blue-700 dark:text-blue-400 font-black text-xs">
+                  01
+                </div>
+                <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-100">Transparan &amp; Terpusat</h4>
+                <p class="text-[11px] text-gray-500 dark:text-zinc-400 leading-relaxed">
+                  Setiap penilaian dari masyarakat langsung tersimpan di server KemenPAN-RB tanpa melalui perantara, menjaga keaslian opini warga.
+                </p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-white dark:bg-zinc-800/60 border border-gray-100 dark:border-zinc-800 space-y-2">
+                <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-black text-xs">
+                  02
+                </div>
+                <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-100">Evaluasi Nyata &amp; Akuntabel</h4>
+                <p class="text-[11px] text-gray-500 dark:text-zinc-400 leading-relaxed">
+                  Hasil pengolahan indeks dipakai secara resmi dalam evaluasi Penyelenggaraan Pelayanan Publik dan Indeks Reformasi Birokrasi nasional.
+                </p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-white dark:bg-zinc-800/60 border border-gray-100 dark:border-zinc-800 space-y-2">
+                <div class="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/80 flex items-center justify-center text-amber-700 dark:text-amber-400 font-black text-xs">
+                  03
+                </div>
+                <h4 class="text-xs font-extrabold text-gray-900 dark:text-zinc-100">Cepat Lewat Smartphone</h4>
+                <p class="text-[11px] text-gray-500 dark:text-zinc-400 leading-relaxed">
+                  Masyarakat dapat mengisi penilaian kuesioner kapan saja dalam 3-5 menit melalui smartphone saat mengurus berkas kependudukan.
+                </p>
+              </div>
+            </div>
+
+            <!-- Notes from Admin / PAN-RB -->
+            <div v-if="activeSurvey.external_notes" class="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/50 flex items-start gap-3">
+              <Info class="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+              <div class="text-xs text-sky-900 dark:text-sky-200 leading-relaxed">
+                <span class="font-bold">Catatan Penyelenggara: </span>
+                {{ activeSurvey.external_notes }}
+              </div>
             </div>
           </div>
-          <div class="lg:col-span-4 grid grid-cols-2 gap-4">
-            <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
-              <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Total Responden</span>
-              <span class="text-3xl font-black text-gray-900 dark:text-zinc-50 font-mono mt-2">{{ stats.total_respondents }}</span>
-              <span class="text-[11px] text-gray-500 mt-1">Pemohon Pelayanan</span>
+
+          <!-- PAN-RB SCORE CARD (IF RELEASED) -->
+          <div v-if="stats && (stats.ikm_value > 0 || activeSurvey.external_ikm_value)" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-8 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+              <div class="space-y-2 text-center md:text-left">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 text-[10px] font-black uppercase tracking-wider rounded-md">
+                  <CheckCircle2 class="w-3 h-3 text-emerald-600" />
+                  Rilis Hasil Evaluasi KemenPAN-RB
+                </div>
+                <h2 class="text-2xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">{{ activeSurvey.title }}</h2>
+                <p class="text-xs text-gray-500 dark:text-zinc-400">
+                  Berdasarkan penilaian {{ stats.total_respondents || activeSurvey.external_total_respondents || 0 }} responden di portal SKM Online KemenPAN-RB.
+                </p>
+              </div>
+              <div class="flex flex-col items-center p-6 bg-sky-50/50 dark:bg-zinc-800/80 rounded-2xl border border-sky-100 dark:border-zinc-700 min-w-[14rem]">
+                <span class="text-5xl font-black text-sky-600 dark:text-sky-400 font-mono">{{ stats.ikm_value || activeSurvey.external_ikm_value }}</span>
+                <span class="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-wider">Skala (25 - 100)</span>
+                <div 
+                  class="mt-3 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border"
+                  :class="categoryInfo.category === 'A' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : categoryInfo.category === 'B' ? 'bg-blue-50 text-blue-600 border-blue-200' : categoryInfo.category === 'C' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-rose-50 text-rose-600 border-rose-200'"
+                >
+                  Mutu {{ categoryInfo.category }} — {{ categoryInfo.label }}
+                </div>
+              </div>
             </div>
-            <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
-              <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Response Rate</span>
-              <span class="text-3xl font-black text-amber-500 font-mono mt-2">{{ stats.response_rate }}%</span>
-              <span class="text-[11px] text-gray-500 mt-1">Capaian Target</span>
+
+            <div class="lg:col-span-4 grid grid-cols-2 gap-4">
+              <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
+                <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Total Responden</span>
+                <span class="text-3xl font-black text-gray-900 dark:text-zinc-50 font-mono mt-2">{{ stats.total_respondents || activeSurvey.external_total_respondents || 0 }}</span>
+                <span class="text-[11px] text-gray-500 mt-1">Pemohon di skm.go.id</span>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
+                <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Status Sistem</span>
+                <span class="text-lg font-black text-sky-600 dark:text-sky-400 mt-2">Terintegrasi</span>
+                <span class="text-[11px] text-gray-500 mt-1">skm.go.id PAN-RB</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- WHEN IN EVALUATION / PENDING RELEASE -->
+          <div v-else class="p-6 bg-white dark:bg-zinc-900 border border-sky-100 dark:border-zinc-800 rounded-3xl shadow-sm flex flex-col sm:flex-row items-center gap-5">
+            <div class="w-14 h-14 rounded-2xl bg-sky-100 dark:bg-sky-950/80 flex items-center justify-center shrink-0 text-sky-600 dark:text-sky-400">
+              <Globe class="w-7 h-7" />
+            </div>
+            <div class="space-y-1 text-center sm:text-left flex-1">
+              <h4 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">Pengumpulan Partisipasi Masyarakat Sedang Berlangsung</h4>
+              <p class="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
+                Penilaian masyarakat secara aktif dikumpulkan langsung melalui portal SKM Online KemenPAN-RB. Hasil rekapitulasi nilai indeks dan mutu pelayanan akan dipublikasikan secara berkala setelah evaluasi resmi dari Kementerian PAN-RB.
+              </p>
+            </div>
+            <a
+              v-if="activeSurvey.external_survey_url"
+              :href="activeSurvey.external_survey_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs rounded-xl shadow-sm shrink-0 transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Isi Penilaian ↗</span>
+            </a>
+          </div>
+
+          <!-- 9 SERVICE ELEMENTS STANDARD (PAN-RB SCOPE) -->
+          <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-8 shadow-sm space-y-6">
+            <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
+              <div>
+                <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">
+                  9 Ruang Lingkup Unsur Pelayanan yang Dinilai
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
+                  Standar penilaian mutu pelayanan publik pada portal SKM Online mengacu pada PermenPAN-RB No. 14 Tahun 2017:
+                </p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div v-for="(unsur, uIdx) in panrbElements" :key="uIdx" class="p-4 rounded-2xl bg-gray-50/70 dark:bg-zinc-800/60 border border-gray-100 dark:border-zinc-800 space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-black text-sky-700 dark:text-sky-400 font-mono">U{{ uIdx + 1 }}</span>
+                  <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest font-mono">PermenPAN-RB</span>
+                </div>
+                <h4 class="text-xs font-black text-gray-900 dark:text-zinc-100">{{ unsur.name }}</h4>
+                <p class="text-[11px] text-gray-500 dark:text-zinc-400 leading-relaxed">{{ unsur.desc }}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- METHODOLOGY CARDS -->
+        <!-- ============================================== -->
+        <!-- INTERNAL SURVEY SECTION (WHEN MECHANISM IS INTERNAL) -->
+        <!-- ============================================== -->
+        <template v-else>
+          <!-- IKM SCORE CARD -->
+          <div v-if="stats && categoryInfo" id="hasil-ikm" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-8 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+              <div class="space-y-2 text-center md:text-left">
+                <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono">Nilai Indeks Terbaru</span>
+                <h2 class="text-2xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">{{ activeSurvey ? activeSurvey.title : 'Survei Kepuasan Masyarakat' }}</h2>
+                <p class="text-xs text-gray-500 dark:text-zinc-400">Berdasarkan {{ stats.total_respondents }} responden terverifikasi.</p>
+              </div>
+              <div class="flex flex-col items-center p-6 bg-gray-50 dark:bg-zinc-800/80 rounded-2xl border border-gray-100 dark:border-zinc-700 min-w-[14rem]">
+                <span class="text-5xl font-black text-blue-600 dark:text-blue-400 font-mono">{{ stats.ikm_value }}</span>
+                <span class="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-wider">Skala (25 - 100)</span>
+                <div class="mt-3 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border"
+                  :class="categoryInfo.category === 'A' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : categoryInfo.category === 'B' ? 'bg-blue-50 text-blue-600 border-blue-200' : categoryInfo.category === 'C' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-rose-50 text-rose-600 border-rose-200'"
+                >Mutu {{ categoryInfo.category }} — {{ categoryInfo.label }}</div>
+              </div>
+            </div>
+            <div class="lg:col-span-4 grid grid-cols-2 gap-4">
+              <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
+                <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Total Responden</span>
+                <span class="text-3xl font-black text-gray-900 dark:text-zinc-50 font-mono mt-2">{{ stats.total_respondents }}</span>
+                <span class="text-[11px] text-gray-500 mt-1">Pemohon Pelayanan</span>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
+                <span class="text-[10px] font-black uppercase text-gray-400 font-mono">Response Rate</span>
+                <span class="text-3xl font-black text-amber-500 font-mono mt-2">{{ stats.response_rate }}%</span>
+                <span class="text-[11px] text-gray-500 mt-1">Capaian Target</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESULT BREAKDOWN TABLE -->
+          <div v-if="chartData && chartData.breakdown && chartData.breakdown.length > 0" class="space-y-6">
+            <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
+              <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">Breakdown Unsur Pelayanan IKM</h3>
+            </div>
+            <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-gray-100 dark:border-zinc-800 text-[11px] font-black uppercase text-gray-400 font-mono">
+                      <th class="py-3 px-4">No</th>
+                      <th class="py-3 px-4">Unsur Pelayanan</th>
+                      <th class="py-3 px-4 text-center">Rata-Rata</th>
+                      <th class="py-3 px-4 text-center">Nilai IKM</th>
+                      <th class="py-3 px-4 text-center">Kategori</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-50 dark:divide-zinc-800 text-xs font-medium">
+                    <tr v-for="(item, idx) in chartData.breakdown" :key="idx" class="hover:bg-gray-50 dark:hover:bg-zinc-800/50">
+                      <td class="py-3 px-4 font-mono font-bold text-gray-400">U{{ idx + 1 }}</td>
+                      <td class="py-3 px-4 font-bold text-gray-800 dark:text-zinc-200">{{ item.category }}</td>
+                      <td class="py-3 px-4 text-center font-mono font-bold text-gray-700 dark:text-zinc-300">{{ item.average_rating }}</td>
+                      <td class="py-3 px-4 text-center font-mono font-black text-blue-600 dark:text-blue-400">{{ item.ikm_unsur }}</td>
+                      <td class="py-3 px-4 text-center">
+                        <span class="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase"
+                          :class="item.ikm_unsur >= 88.31 ? 'bg-emerald-50 text-emerald-700' : (item.ikm_unsur >= 76.61 ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700')">
+                          {{ item.ikm_unsur >= 88.31 ? 'A' : (item.ikm_unsur >= 76.61 ? 'B' : 'C') }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- METHODOLOGY CARDS (APPLIES TO BOTH) -->
         <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-8 shadow-sm space-y-4">
-          <h3 class="text-xs font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">Metodologi &amp; Klasifikasi Kategori PermenPANRB</h3>
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">Metodologi &amp; Klasifikasi Kategori PermenPANRB No. 14 Tahun 2017</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
             <div class="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 space-y-1">
               <div class="flex items-center justify-between">
@@ -102,42 +383,6 @@
           </div>
         </div>
 
-        <!-- RESULT BREAKDOWN TABLE -->
-        <div v-if="chartData" class="space-y-6">
-          <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
-            <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">Breakdown Unsur Pelayanan IKM</h3>
-          </div>
-          <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="border-b border-gray-100 dark:border-zinc-800 text-[11px] font-black uppercase text-gray-400 font-mono">
-                    <th class="py-3 px-4">No</th>
-                    <th class="py-3 px-4">Unsur Pelayanan</th>
-                    <th class="py-3 px-4 text-center">Rata-Rata</th>
-                    <th class="py-3 px-4 text-center">Nilai IKM</th>
-                    <th class="py-3 px-4 text-center">Kategori</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50 dark:divide-zinc-800 text-xs font-medium">
-                  <tr v-for="(item, idx) in chartData.breakdown" :key="idx" class="hover:bg-gray-50 dark:hover:bg-zinc-800/50">
-                    <td class="py-3 px-4 font-mono font-bold text-gray-400">U{{ idx + 1 }}</td>
-                    <td class="py-3 px-4 font-bold text-gray-800 dark:text-zinc-200">{{ item.category }}</td>
-                    <td class="py-3 px-4 text-center font-mono font-bold text-gray-700 dark:text-zinc-300">{{ item.average_rating }}</td>
-                    <td class="py-3 px-4 text-center font-mono font-black text-blue-600 dark:text-blue-400">{{ item.ikm_unsur }}</td>
-                    <td class="py-3 px-4 text-center">
-                      <span class="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase"
-                        :class="item.ikm_unsur >= 88.31 ? 'bg-emerald-50 text-emerald-700' : (item.ikm_unsur >= 76.61 ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700')">
-                        {{ item.ikm_unsur >= 88.31 ? 'A' : (item.ikm_unsur >= 76.61 ? 'B' : 'C') }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
         <!-- ARCHIVE -->
         <div v-if="archives && archives.length > 0" class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-8 shadow-sm space-y-6">
           <h3 class="text-base font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight border-b border-gray-100 dark:border-zinc-800 pb-4">Arsip Laporan IKM Periode Sebelumnya</h3>
@@ -161,9 +406,9 @@
       </div>
 
       <!-- ======================== -->
-      <!-- SURVEY WIZARD MODAL -->
+      <!-- SURVEY WIZARD MODAL (FOR INTERNAL SURVEY ONLY) -->
       <!-- ======================== -->
-      <div v-if="showWizard" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
+      <div v-if="showWizard && activeSurvey?.survey_mechanism !== 'panrb'" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
         <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl max-w-2xl w-full shadow-2xl my-8 overflow-hidden">
 
           <!-- WIZARD HEADER -->
@@ -429,7 +674,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
-import axios from 'axios'
+import { Globe, ExternalLink, Copy, Check, ShieldCheck, CheckCircle2, Award, Info, FileText } from '@lucide/vue'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
 
 const props = defineProps({
@@ -448,12 +693,50 @@ const alreadySubmitted = ref(false)
 const submittedName = ref('')
 const submittedService = ref('')
 const isSubmitting = ref(false)
+const copiedUrl = ref(false)
 
 const STORAGE_KEY = 'ikm_submitted_' + (props.activeSurvey ? props.activeSurvey.id : 'survey')
 
 onMounted(() => {
   alreadySubmitted.value = !!localStorage.getItem(STORAGE_KEY)
 })
+
+function copyUrl(url) {
+  if (!url) return
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      copiedUrl.value = true
+      setTimeout(() => { copiedUrl.value = false }, 2500)
+    }).catch(() => {
+      fallbackCopy(url)
+    })
+  } else {
+    fallbackCopy(url)
+  }
+}
+
+function fallbackCopy(url) {
+  const el = document.createElement('textarea')
+  el.value = url
+  document.body.appendChild(el)
+  el.select()
+  document.execCommand('copy')
+  document.body.removeChild(el)
+  copiedUrl.value = true
+  setTimeout(() => { copiedUrl.value = false }, 2500)
+}
+
+const panrbElements = [
+  { name: 'Persyaratan Pelayanan', desc: 'Syarat administratif dan teknis yang harus dipenuhi oleh pemohon layanan kependudukan.' },
+  { name: 'Sistem, Mekanisme, dan Prosedur', desc: 'Kemudahan tahapan tata cara pelayanan yang dibakukan bagi pihak pemberi dan penerima layanan.' },
+  { name: 'Waktu Penyelesaian', desc: 'Jangka waktu yang diperlukan untuk menyelesaikan seluruh proses pelayanan dokumen hingga terbit.' },
+  { name: 'Biaya / Tarif Pelayanan', desc: 'Seluruh pelayanan adminduk Disdukcapil Dompu tidak dipungut biaya apapun (Gratis / Rp 0,-).' },
+  { name: 'Produk Spesifikasi Jenis Pelayanan', desc: 'Hasil pelayanan yang diterima sesuai dengan ketentuan (KTP-el, KK, Akta, dsb).' },
+  { name: 'Kompetensi Pelaksana', desc: 'Kemampuan, keahlian, keterampilan, dan pengalaman petugas dalam memberikan pelayanan.' },
+  { name: 'Perilaku Pelaksana', desc: 'Sikap petugas dalam memberikan pelayanan: ramah, sopan, bersahabat, dan responsif.' },
+  { name: 'Penanganan Pengaduan & Saran', desc: 'Kecepatan dan kejelasan tindak lanjut atas saran, keluhan, dan konsultasi dari warga.' },
+  { name: 'Sarana dan Prasarana', desc: 'Kondisi fasilitas fisik, ruang tunggu, loket, kebersihan, dan kemudahan akses portal digital.' },
+]
 
 const steps = [
   { title: 'Data Responden', desc: 'Nama, Umur, Jenis Kelamin, Pekerjaan, dan Pendidikan' },
@@ -498,6 +781,10 @@ const step1Errors = reactive({ age: false, gender: false, phone: false, domicile
 const step2Errors = reactive({})
 
 function startSurvey() {
+  if (props.activeSurvey?.survey_mechanism === 'panrb' && props.activeSurvey?.external_survey_url) {
+    window.open(props.activeSurvey.external_survey_url, '_blank', 'noopener,noreferrer')
+    return
+  }
   if (alreadySubmitted.value) return
   currentStep.value = 1
   Object.keys(step1Errors).forEach(k => { step1Errors[k] = false })
@@ -576,6 +863,13 @@ function handleSubmit() {
   })
 }
 </script>
+
+<style scoped>
+.toast-enter-active { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.toast-leave-active { transition: all 0.3s ease-in; }
+.toast-enter-from { opacity: 0; transform: translateY(20px) scale(0.95); }
+.toast-leave-to { opacity: 0; transform: translateY(10px); }
+</style>
 
 <style scoped>
 .toast-enter-active { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }

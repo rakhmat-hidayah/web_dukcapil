@@ -14,7 +14,12 @@ class SurveyChartService
     {
         $period = SurveyPeriod::with(['questions', 'statistic', 'responses'])->findOrFail($surveyPeriodId);
         $statistic = $period->statistic;
-        $breakdown = $statistic ? ($statistic->index_breakdown_json ?? []) : [];
+        $rawBreakdown = $statistic ? ($statistic->index_breakdown_json ?? []) : [];
+
+        // Ensure breakdown is a sequential list of unsur items with category key
+        $breakdown = (is_array($rawBreakdown) && array_is_list($rawBreakdown) && !empty($rawBreakdown) && is_array($rawBreakdown[0]) && isset($rawBreakdown[0]['category']))
+            ? $rawBreakdown
+            : [];
 
         // 1. Bar Chart (Nilai per Unsur)
         $barChart = [
@@ -25,7 +30,7 @@ class SurveyChartService
         // 2. Radar Chart (Visualisasi Multi Unsur)
         $radarChart = [
             'indicators' => array_map(function ($b) {
-                return ['name' => $b['category'], 'max' => 100];
+                return ['name' => $b['category'] ?? '', 'max' => 100];
             }, $breakdown),
             'values' => array_column($breakdown, 'ikm_unsur'),
         ];
@@ -51,7 +56,9 @@ class SurveyChartService
 
         // 5. Comparison Chart (Unsur Tertinggi vs Terendah)
         $sortedBreakdown = $breakdown;
-        usort($sortedBreakdown, fn($a, $b) => $b['ikm_unsur'] <=> $a['ikm_unsur']);
+        if (!empty($sortedBreakdown)) {
+            usort($sortedBreakdown, fn($a, $b) => ($b['ikm_unsur'] ?? 0) <=> ($a['ikm_unsur'] ?? 0));
+        }
 
         $topUnsur = array_slice($sortedBreakdown, 0, 3);
         $lowestUnsur = array_slice($sortedBreakdown, -3);

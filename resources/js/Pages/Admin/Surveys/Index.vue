@@ -55,6 +55,80 @@
 
       <!-- TAB 1: DASHBOARD OVERVIEW -->
       <div v-if="activeTab === 'dashboard'" class="space-y-6">
+
+        <!-- Active Mechanism Status Banner -->
+        <div 
+          class="p-5 rounded-2xl border transition shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+          :class="activePeriod?.survey_mechanism === 'panrb' 
+            ? 'bg-gradient-to-r from-blue-950 via-indigo-950 to-slate-950 text-white border-blue-800/60 shadow-lg' 
+            : 'bg-white dark:bg-zinc-900 border-gray-100 dark:border-zinc-800'"
+        >
+          <div class="space-y-1.5 max-w-2xl">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span 
+                v-if="activePeriod?.survey_mechanism === 'panrb'" 
+                class="px-2.5 py-0.5 bg-blue-500 text-white text-[10px] font-black uppercase rounded-lg tracking-wider flex items-center gap-1 shadow-sm"
+              >
+                <Globe class="w-3 h-3" />
+                SKM Online Terintegrasi KemenPAN-RB
+              </span>
+              <span 
+                v-else 
+                class="px-2.5 py-0.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 text-[10px] font-black uppercase rounded-lg tracking-wider"
+              >
+                Kuesioner Mandiri (Sistem Internal)
+              </span>
+              <span class="text-xs font-mono opacity-70">
+                Tahun {{ activePeriod?.year }} Semester {{ activePeriod?.semester }}
+              </span>
+            </div>
+
+            <h3 
+              class="text-base font-extrabold tracking-tight" 
+              :class="activePeriod?.survey_mechanism === 'panrb' ? 'text-white' : 'text-gray-900 dark:text-zinc-50'"
+            >
+              {{ activePeriod?.title }}
+            </h3>
+
+            <p 
+              class="text-xs leading-relaxed" 
+              :class="activePeriod?.survey_mechanism === 'panrb' ? 'text-blue-100/90' : 'text-gray-500 dark:text-zinc-400'"
+            >
+              <template v-if="activePeriod?.survey_mechanism === 'panrb'">
+                Survei diarahkan langsung ke portal evaluasi pelayanan publik Kementerian PAN-RB (<strong class="text-amber-300">skm.go.id</strong>). Hasil penilaian masyarakat tercatat transparan, akuntabel, dan menjadi bahan evaluasi terpadu.
+              </template>
+              <template v-else>
+                Survei dikumpulkan melalui form mandiri website Disdukcapil Dompu berdasarkan 9 Unsur Pelayanan PermenPAN-RB No. 14 Tahun 2017.
+              </template>
+            </p>
+          </div>
+
+          <div v-if="activePeriod?.survey_mechanism === 'panrb' && activePeriod?.external_survey_url" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 w-full md:w-auto">
+            <a 
+              :href="activePeriod.external_survey_url" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-xl transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span>Buka Link Penilaian</span>
+              <ExternalLink class="w-3.5 h-3.5" />
+            </a>
+            <button 
+              @click="copyUrl(activePeriod.external_survey_url)" 
+              class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl transition border border-white/20 flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Copy class="w-3.5 h-3.5" />
+              <span>{{ copied ? 'Tersalin!' : 'Salin Link' }}</span>
+            </button>
+            <button 
+              @click="openPeriodModal(activePeriod)" 
+              class="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1 cursor-pointer"
+            >
+              Ubah Pengaturan
+            </button>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <!-- Active Survey Card -->
           <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 space-y-2">
@@ -121,6 +195,7 @@
             <thead>
               <tr class="border-b border-gray-100 dark:border-zinc-800 text-[10px] font-mono text-gray-400 uppercase">
                 <th class="py-2.5 px-3">Judul Periode</th>
+                <th class="py-2.5 px-3">Mekanisme</th>
                 <th class="py-2.5 px-3">Semester / Tahun</th>
                 <th class="py-2.5 px-3">Jadwal</th>
                 <th class="py-2.5 px-3">Status</th>
@@ -131,7 +206,21 @@
             </thead>
             <tbody class="divide-y divide-gray-50 dark:divide-zinc-800">
               <tr v-for="p in periods" :key="p.id">
-                <td class="py-3 px-3 font-bold text-gray-900 dark:text-zinc-100">{{ p.title }}</td>
+                <td class="py-3 px-3">
+                  <div class="font-bold text-gray-900 dark:text-zinc-100">{{ p.title }}</div>
+                  <a v-if="p.external_survey_url" :href="p.external_survey_url" target="_blank" class="text-[10px] text-blue-600 dark:text-blue-400 font-mono hover:underline truncate max-w-xs block">
+                    {{ p.external_survey_url }}
+                  </a>
+                </td>
+                <td class="py-3 px-3">
+                  <span v-if="p.survey_mechanism === 'panrb'" class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/40 font-bold rounded text-[10px] whitespace-nowrap">
+                    <Globe class="w-3 h-3 text-blue-600 shrink-0" />
+                    SKM PAN-RB
+                  </span>
+                  <span v-else class="px-2 py-0.5 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300 font-medium rounded text-[10px] whitespace-nowrap">
+                    Internal
+                  </span>
+                </td>
                 <td class="py-3 px-3 font-mono font-semibold">{{ p.year }} Sem {{ p.semester }}</td>
                 <td class="py-3 px-3 font-mono text-gray-500">{{ p.start_date }} s/d {{ p.end_date }}</td>
                 <td class="py-3 px-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-600 font-bold rounded text-[10px] uppercase">{{ p.status }}</span></td>
@@ -150,6 +239,23 @@
 
       <!-- TAB 3: SURVEY QUESTIONS BUILDER -->
       <div v-if="activeTab === 'questions'" class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl p-6 space-y-6">
+        <!-- SKM PAN-RB Notice if active -->
+        <div v-if="activePeriod?.survey_mechanism === 'panrb'" class="p-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 rounded-2xl flex items-start gap-3">
+          <div class="p-2 bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 rounded-xl shrink-0 mt-0.5">
+            <Globe class="w-4 h-4" />
+          </div>
+          <div>
+            <h4 class="text-xs font-black text-blue-900 dark:text-blue-200 uppercase tracking-wider">Mekanisme SKM Online Kementerian PAN-RB Aktif</h4>
+            <p class="text-xs text-blue-800/90 dark:text-blue-300/90 mt-0.5 leading-relaxed">
+              Periode survei aktif ini menggunakan platform terpusat <strong>skm.go.id</strong> Kementerian PAN-RB. Kuesioner pertanyaan serta pengumpulan data responden langsung terintegrasi pada sistem nasional.
+            </p>
+            <a v-if="activePeriod?.external_survey_url" :href="activePeriod.external_survey_url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline mt-1.5">
+              <span>Buka Form Penilaian di skm.go.id</span>
+              <ExternalLink class="w-3 h-3" />
+            </a>
+          </div>
+        </div>
+
         <div class="flex items-center justify-between gap-3 flex-wrap">
           <h3 class="text-xs font-black uppercase tracking-wider text-gray-400">Pengaturan Pertanyaan Unsur PermenPANRB</h3>
           <div class="flex items-center gap-2">
@@ -194,6 +300,19 @@
 
       <!-- TAB: RESPONDENTS -->
       <div v-if="activeTab === 'respondents'" class="space-y-4">
+        <!-- SKM PAN-RB Notice if active -->
+        <div v-if="activePeriod?.survey_mechanism === 'panrb'" class="p-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 rounded-2xl flex items-start gap-3">
+          <div class="p-2 bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 rounded-xl shrink-0 mt-0.5">
+            <Globe class="w-4 h-4" />
+          </div>
+          <div>
+            <h4 class="text-xs font-black text-blue-900 dark:text-blue-200 uppercase tracking-wider">Mekanisme SKM Online Kementerian PAN-RB</h4>
+            <p class="text-xs text-blue-800/90 dark:text-blue-300/90 mt-0.5 leading-relaxed">
+              Responden mengisi penilaian langsung pada portal <strong>skm.go.id</strong>. Nilai dan jumlah responden terdata dapat dipantau melalui dashboard Kementerian PAN-RB dan diinputkan ke sistem CMS ini sebagai hasil rilis resmi evaluasi pelayanan publik.
+            </p>
+          </div>
+        </div>
+
         <!-- Summary Bar -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div class="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-sm space-y-1">
@@ -357,14 +476,143 @@
       </div>
 
       <!-- MODAL 1: PERIODE SURVEI MODAL -->
-      <div v-if="showPeriodModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div v-if="showPeriodModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl max-w-2xl w-full p-6 shadow-2xl space-y-4 my-8">
           <div class="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-3">
-            <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">{{ editingPeriod ? 'Edit Periode Survei' : 'Tambah Periode Survei Baru' }}</h3>
-            <button @click="showPeriodModal = false" class="text-gray-400 hover:text-gray-600 font-bold">&times;</button>
+            <div>
+              <h3 class="text-sm font-extrabold text-gray-900 dark:text-zinc-50">{{ editingPeriod ? 'Edit Periode Survei' : 'Tambah Periode Survei Baru' }}</h3>
+              <p class="text-xs text-gray-400 mt-0.5">Atur identitas periode, target capaian, dan mekanisme pelaksanaan survei</p>
+            </div>
+            <button @click="showPeriodModal = false" class="text-gray-400 hover:text-gray-600 font-bold text-xl cursor-pointer">&times;</button>
           </div>
 
           <form @submit.prevent="submitPeriod" class="space-y-4">
+            <!-- PILIHAN MEKANISME SURVEI -->
+            <div class="space-y-2 p-3.5 bg-gray-50 dark:bg-zinc-800/60 rounded-2xl border border-gray-200 dark:border-zinc-700">
+              <label class="block text-xs font-black text-gray-800 dark:text-zinc-200 uppercase tracking-wider">
+                Mekanisme Pelaksanaan Survei <span class="text-red-500">*</span>
+              </label>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <!-- Option 1: Internal -->
+                <div 
+                  @click="periodForm.survey_mechanism = 'internal'"
+                  class="p-3.5 rounded-xl border-2 transition cursor-pointer flex items-start gap-3"
+                  :class="periodForm.survey_mechanism === 'internal' 
+                    ? 'border-primary-600 bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-primary-500' 
+                    : 'border-gray-200 dark:border-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600 bg-white/70 dark:bg-zinc-900/60'"
+                >
+                  <input type="radio" value="internal" v-model="periodForm.survey_mechanism" class="mt-0.5 text-primary-600" />
+                  <div>
+                    <p class="text-xs font-black text-gray-900 dark:text-zinc-100">Kuesioner Mandiri (Internal)</p>
+                    <p class="text-[10px] text-gray-500 dark:text-zinc-400 mt-0.5 leading-snug">
+                      Formulir pertanyaan 9 unsur PermenPAN-RB dikelola & dinilai langsung melalui form website Disdukcapil.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Option 2: PAN-RB -->
+                <div 
+                  @click="periodForm.survey_mechanism = 'panrb'"
+                  class="p-3.5 rounded-xl border-2 transition cursor-pointer flex items-start gap-3"
+                  :class="periodForm.survey_mechanism === 'panrb' 
+                    ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/40 shadow-sm ring-1 ring-blue-500' 
+                    : 'border-gray-200 dark:border-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600 bg-white/70 dark:bg-zinc-900/60'"
+                >
+                  <input type="radio" value="panrb" v-model="periodForm.survey_mechanism" class="mt-0.5 text-blue-600" />
+                  <div>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <p class="text-xs font-black text-blue-950 dark:text-blue-100">SKM Online KemenPAN-RB</p>
+                      <span class="px-1.5 py-0.5 bg-blue-600 text-white text-[9px] font-black rounded font-mono">skm.go.id</span>
+                    </div>
+                    <p class="text-[10px] text-blue-900/80 dark:text-blue-300/80 mt-0.5 leading-snug">
+                      Terintegrasi langsung dengan platform evaluasi Kementerian PAN-RB. Transparan & akuntabel.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DYNAMIC FIELDS FOR PAN-RB -->
+            <div v-if="periodForm.survey_mechanism === 'panrb'" class="p-4 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 rounded-2xl space-y-4">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+                <span class="text-xs font-black text-blue-900 dark:text-blue-200 uppercase tracking-wider">Integrasi SKM Online Kementerian PAN-RB</span>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gray-800 dark:text-zinc-200 mb-1">
+                  Link Penilaian SKM Online (skm.go.id) <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <input 
+                    v-model="periodForm.external_survey_url" 
+                    type="url" 
+                    required 
+                    placeholder="https://skm.go.id/share/instansi/9bf2f5e6-f779-451e-b07e-a6fb6c955f85/1" 
+                    class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-blue-300 dark:border-blue-800 rounded-xl text-xs font-mono text-blue-700 dark:text-blue-300 focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <p class="text-[10px] text-blue-700 dark:text-blue-400 mt-1">
+                  💡 Masukkan link kuesioner resmi instansi dari portal skm.go.id. Contoh: <code>https://skm.go.id/share/instansi/...</code>
+                </p>
+              </div>
+
+              <div class="pt-2 border-t border-blue-200/60 dark:border-blue-900/40 space-y-3">
+                <p class="text-[11px] font-extrabold text-blue-950 dark:text-blue-200">
+                  Data Capaian Hasil Rilis KemenPAN-RB (Opsional):
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Nilai IKM Terbitan</label>
+                    <input 
+                      v-model="periodForm.external_ikm_value" 
+                      type="number" 
+                      step="0.01" 
+                      min="0" 
+                      max="100" 
+                      placeholder="Contoh: 88.50" 
+                      class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-bold" 
+                    />
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Kategori Mutu</label>
+                    <select 
+                      v-model="periodForm.external_service_quality" 
+                      class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-bold"
+                    >
+                      <option value="A">Mutu A (Sangat Baik)</option>
+                      <option value="B">Mutu B (Baik)</option>
+                      <option value="C">Mutu C (Kurang Baik)</option>
+                      <option value="D">Mutu D (Tidak Baik)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Total Responden PAN-RB</label>
+                    <input 
+                      v-model="periodForm.external_total_respondents" 
+                      type="number" 
+                      min="0" 
+                      placeholder="Contoh: 250" 
+                      class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-bold" 
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[11px] font-semibold text-gray-700 dark:text-zinc-300 mb-1">Catatan / Evaluasi Ringkas KemenPAN-RB</label>
+                  <textarea 
+                    v-model="periodForm.external_notes" 
+                    rows="2" 
+                    placeholder="Catatan resmi atau deskripsi capaian evaluasi pelayanan dari KemenPAN-RB..." 
+                    class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
             <div>
               <label class="block text-xs font-bold text-gray-700 dark:text-zinc-300 mb-1">Judul Periode Survei</label>
               <input v-model="periodForm.title" type="text" required placeholder="Contoh: Survei IKM Semester II 2026" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs" />
@@ -419,8 +667,8 @@
             </div>
 
             <div class="flex justify-end gap-3 pt-3 border-t border-gray-100 dark:border-zinc-800">
-              <button type="button" @click="showPeriodModal = false" class="px-4 py-2 text-xs font-bold text-gray-500">Batal</button>
-              <button type="submit" :disabled="periodForm.processing" class="px-5 py-2 bg-primary-600 text-white font-bold text-xs rounded-xl shadow-sm">
+              <button type="button" @click="showPeriodModal = false" class="px-4 py-2 text-xs font-bold text-gray-500 cursor-pointer hover:text-gray-700">Batal</button>
+              <button type="submit" :disabled="periodForm.processing" class="px-5 py-2 bg-primary-600 hover:bg-primary-500 text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer transition">
                 {{ editingPeriod ? 'Simpan Perubahan' : 'Tambah Periode' }}
               </button>
             </div>
@@ -624,7 +872,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
-import { RefreshCw } from '@lucide/vue'
+import { RefreshCw, Globe, ExternalLink, Copy, Check, Info } from '@lucide/vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps({
@@ -675,6 +923,15 @@ const selectedSourcePeriod = computed(() =>
   otherPeriods.value.find(p => p.id == copyForm.source_period_id) || null
 )
 
+// Copy URL Helper
+const copied = ref(false)
+function copyUrl(url) {
+  if (!url) return
+  navigator.clipboard.writeText(url)
+  copied.value = true
+  setTimeout(() => { copied.value = false }, 2000)
+}
+
 // Inertia Forms
 const periodForm = useForm({
   title: '',
@@ -685,6 +942,12 @@ const periodForm = useForm({
   target_respondents: 250,
   status: 'published',
   is_active: true,
+  survey_mechanism: 'internal',
+  external_survey_url: '',
+  external_ikm_value: '',
+  external_service_quality: 'B',
+  external_total_respondents: '',
+  external_notes: '',
 })
 
 const questionForm = useForm({
@@ -726,8 +989,21 @@ function openPeriodModal(period = null) {
     periodForm.target_respondents = period.target_respondents
     periodForm.status = period.status
     periodForm.is_active = Boolean(period.is_active)
+    periodForm.survey_mechanism = period.survey_mechanism || 'internal'
+    periodForm.external_survey_url = period.external_survey_url || ''
+    periodForm.external_ikm_value = period.external_ikm_value ?? ''
+    periodForm.external_service_quality = period.external_service_quality || 'B'
+    periodForm.external_total_respondents = period.external_total_respondents ?? ''
+    periodForm.external_notes = period.external_notes || ''
   } else {
     periodForm.reset()
+    periodForm.survey_mechanism = 'internal'
+    periodForm.year = 2026
+    periodForm.start_date = '2026-01-01'
+    periodForm.end_date = '2026-06-30'
+    periodForm.target_respondents = 250
+    periodForm.status = 'published'
+    periodForm.is_active = true
   }
   showPeriodModal.value = true
 }

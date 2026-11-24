@@ -50,6 +50,30 @@ class SurveyCalculationService
     public function calculatePeriodStats(int $surveyPeriodId): SurveyResultStatistic
     {
         $period = SurveyPeriod::with(['questions.answers', 'responses.answers'])->findOrFail($surveyPeriodId);
+
+        // If survey mechanism is external PAN-RB (skm.go.id)
+        if ($period->survey_mechanism === 'panrb') {
+            $ikmVal = $period->external_ikm_value !== null ? (float) $period->external_ikm_value : 0;
+            $catInfo = self::classifyIkmCategory($ikmVal);
+            $quality = $period->external_service_quality ?: $catInfo['category'];
+            $totalResp = $period->external_total_respondents !== null ? (int) $period->external_total_respondents : $period->responses->count();
+
+            return SurveyResultStatistic::updateOrCreate(
+                ['survey_period_id' => $surveyPeriodId],
+                [
+                    'total_respondents' => $totalResp,
+                    'average_score' => round($ikmVal / 25, 2),
+                    'ikm_value' => $ikmVal,
+                    'service_quality_category' => $quality,
+                    'index_breakdown_json' => [
+                        'source' => 'Kementerian PAN-RB (skm.go.id)',
+                        'url' => $period->external_survey_url,
+                        'notes' => $period->external_notes,
+                    ],
+                ]
+            );
+        }
+
         $responses = $period->responses;
 
         $totalRespondents = $responses->count();
