@@ -279,6 +279,7 @@ class BlankStockService
                 ]);
 
                 Cache::forget('public_blank_stock_summary');
+                Cache::forget('public_blank_usage_reports');
             }
 
             // Audit Trail Logging
@@ -376,6 +377,7 @@ class BlankStockService
             ]);
 
             Cache::forget('public_blank_stock_summary');
+            Cache::forget('public_blank_usage_reports');
 
             try {
                 ActivityLogger::log(
@@ -504,6 +506,7 @@ class BlankStockService
                 ]);
 
                 Cache::forget('public_blank_stock_summary');
+                Cache::forget('public_blank_usage_reports');
             } elseif ($report->status === KtpBlankUsageReport::STATUS_APPROVED) {
                 // If already approved, update metadata only
                 $report->update([
@@ -621,6 +624,7 @@ class BlankStockService
                 ]);
 
                 Cache::forget('public_blank_stock_summary');
+                Cache::forget('public_blank_usage_reports');
             }
 
             $report->update([
@@ -852,6 +856,7 @@ class BlankStockService
             ]);
 
             Cache::forget('public_blank_stock_summary');
+            Cache::forget('public_blank_usage_reports');
 
             try {
                 ActivityLogger::log(
@@ -1095,12 +1100,61 @@ class BlankStockService
                 'month_used'             => $monthUsed,
                 'used_this_month'        => $monthUsed,
                 'month_damaged'          => $monthDamaged,
+                'damaged_this_month'     => $monthDamaged,
+                'total_out_this_month'   => $monthUsed + $monthDamaged,
                 'month_name'             => now()->translatedFormat('F Y'),
                 'last_updated_at'        => Carbon::parse($lastUpdated)->translatedFormat('d F Y, H:i') . ' WITA',
                 'last_updated_formatted' => Carbon::parse($lastUpdated)->translatedFormat('d F Y, H:i') . ' WITA',
                 'office_name'            => 'Dinas Kependudukan dan Pencatatan Sipil Kabupaten Dompu',
                 'office_address'         => 'Jl. Soekarno Hatta No. 09, Kabupaten Dompu, NTB',
             ];
+        });
+    }
+
+    /**
+     * Get safe public usage report details for transparency page.
+     * Excludes internal operator PII and proof images.
+     */
+    public function getPublicUsageReports(int $limit = 15): array
+    {
+        return Cache::remember('public_blank_usage_reports', 300, function () use ($limit) {
+            return KtpBlankUsageReport::whereIn('status', [
+                    KtpBlankUsageReport::STATUS_SUBMITTED,
+                    KtpBlankUsageReport::STATUS_APPROVED,
+                ])
+                ->orderByDesc('usage_date')
+                ->orderByDesc('id')
+                ->limit($limit)
+                ->get([
+                    'id',
+                    'report_number',
+                    'usage_date',
+                    'session_name',
+                    'quantity_used',
+                    'quantity_damaged',
+                    'total_quantity',
+                    'damage_reason',
+                    'status',
+                ])
+                ->map(function (KtpBlankUsageReport $report) {
+                    return [
+                        'id'                   => $report->id,
+                        'report_number'        => $report->report_number,
+                        'usage_date'           => $report->usage_date?->format('Y-m-d'),
+                        'usage_date_formatted' => $report->usage_date
+                            ? Carbon::parse($report->usage_date)->translatedFormat('d M Y')
+                            : '-',
+                        'session_name'         => $report->session_name ?: 'Sesi Harian',
+                        'quantity_used'        => (int) $report->quantity_used,
+                        'quantity_damaged'     => (int) $report->quantity_damaged,
+                        'total_quantity'       => (int) $report->total_quantity,
+                        'damage_reason'        => $report->damage_reason,
+                        'status'               => $report->status,
+                        'status_label'         => $report->status_label,
+                    ];
+                })
+                ->values()
+                ->all();
         });
     }
 }

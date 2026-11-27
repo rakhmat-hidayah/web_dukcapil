@@ -17,6 +17,7 @@ class PublicBlankStockController extends Controller
     public function index(): Response
     {
         $summary = $this->stockService->getPublicStockSummary();
+        $usageReports = $this->stockService->getPublicUsageReports(15);
 
         // Safe SEO Metadata
         $seo = [
@@ -25,8 +26,9 @@ class PublicBlankStockController extends Controller
         ];
 
         return Inertia::render('Public/BlankStock/Index', [
-            'summary' => $summary,
-            'seo'     => $seo,
+            'summary'      => $summary,
+            'usageReports' => $usageReports,
+            'seo'          => $seo,
         ]);
     }
 }

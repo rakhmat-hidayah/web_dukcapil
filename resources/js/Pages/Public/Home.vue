@@ -295,47 +295,92 @@
         </div>
       </div>
 
-      <!-- Informasi Ketersediaan Blangko KTP-el Real-Time Widget -->
+      <!-- Informasi Ketersediaan Blangko KTP-el Real-Time Widget (Executive GovTech Design) -->
       <div 
         v-if="blankStock && blankStock.is_active"
-        class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 shadow-lg shadow-gray-100/70 dark:shadow-none space-y-5 text-left relative overflow-hidden"
+        class="relative bg-gradient-to-b from-white via-white to-slate-50/70 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950/80 border border-slate-200/90 dark:border-zinc-800 rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-9 shadow-xl shadow-slate-200/40 dark:shadow-black/40 space-y-6 text-left relative overflow-hidden transition-all"
       >
-        <!-- Top Status Bar -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-zinc-800">
-          <div class="flex items-center gap-2">
-            <span 
-              class="w-2.5 h-2.5 rounded-full animate-pulse"
-              :class="{
-                'bg-emerald-500': blankStock.status === 'TERSEDIA',
-                'bg-amber-500': blankStock.status === 'PERSEDIAAN TERBATAS',
-                'bg-rose-500': blankStock.status === 'STOK KOSONG',
-              }"
-            ></span>
+        <!-- Top Multi-Tone Accent Gradient Line -->
+        <div 
+          class="absolute top-0 inset-x-0 h-1.5"
+          :class="{
+            'bg-gradient-to-r from-emerald-500 via-teal-400 to-sky-500': blankStock.status === 'TERSEDIA',
+            'bg-gradient-to-r from-amber-500 via-orange-400 to-yellow-500': blankStock.status === 'PERSEDIAAN TERBATAS',
+            'bg-gradient-to-r from-rose-500 via-red-500 to-pink-500': blankStock.status === 'STOK KOSONG',
+          }"
+        ></div>
+
+        <!-- Watermark Graphic: Oversized CreditCard SVG in Background -->
+        <div class="absolute -right-8 -bottom-10 pointer-events-none opacity-[0.035] dark:opacity-[0.06] transform -rotate-12 select-none">
+          <CreditCard class="w-80 h-80 sm:w-96 sm:h-96 text-emerald-900 dark:text-emerald-300" />
+        </div>
+
+        <!-- Ambient Color Radial Glow -->
+        <div 
+          class="absolute -top-16 right-1/4 w-72 h-72 rounded-full blur-3xl pointer-events-none opacity-20 dark:opacity-15"
+          :class="{
+            'bg-emerald-400': blankStock.status === 'TERSEDIA',
+            'bg-amber-400': blankStock.status === 'PERSEDIAAN TERBATAS',
+            'bg-rose-400': blankStock.status === 'STOK KOSONG',
+          }"
+        ></div>
+
+        <!-- Top Status & Timestamp Live Bar -->
+        <div class="relative z-10 flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-zinc-800/80">
+          <div class="flex items-center gap-2.5">
+            <!-- Pulsing Status Radar Indicator -->
+            <span class="relative flex h-3 w-3">
+              <span 
+                class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                :class="{
+                  'bg-emerald-400': blankStock.status === 'TERSEDIA',
+                  'bg-amber-400': blankStock.status === 'PERSEDIAAN TERBATAS',
+                  'bg-rose-400': blankStock.status === 'STOK KOSONG',
+                }"
+              ></span>
+              <span 
+                class="relative inline-flex rounded-full h-3 w-3"
+                :class="{
+                  'bg-emerald-500': blankStock.status === 'TERSEDIA',
+                  'bg-amber-500': blankStock.status === 'PERSEDIAAN TERBATAS',
+                  'bg-rose-500': blankStock.status === 'STOK KOSONG',
+                }"
+              ></span>
+            </span>
+
             <div class="flex items-center gap-2">
               <CreditCard class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <h4 class="text-xs font-black text-gray-800 dark:text-zinc-200 uppercase tracking-widest font-mono">
+              <h4 class="text-xs sm:text-sm font-black text-slate-800 dark:text-zinc-100 uppercase tracking-widest font-mono">
                 Ketersediaan Blangko KTP-el
               </h4>
             </div>
+
+            <!-- Live SIAK Badge -->
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 hidden sm:inline-flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              SIAK Terpadu
+            </span>
           </div>
 
-          <div class="flex items-center gap-2 text-[10px] sm:text-xs font-mono text-gray-400 dark:text-zinc-500">
-            <Clock class="w-3.5 h-3.5 text-gray-400" />
-            <span>Pembaruan: <strong class="text-gray-600 dark:text-zinc-300 font-bold">{{ blankStock.last_updated_formatted }}</strong></span>
+          <!-- Timestamp Pill -->
+          <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100/80 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 text-[10.5px] sm:text-xs font-mono text-slate-500 dark:text-zinc-400">
+            <Clock class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span>Pembaruan: <strong class="text-slate-700 dark:text-zinc-200 font-bold">{{ blankStock.last_updated_formatted }}</strong></span>
           </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          <!-- Left: Stock Number & Status (Col 7) -->
-          <div class="lg:col-span-7 space-y-3">
+        <!-- Main Content Grid -->
+        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+          <!-- Left: Stock Number, Badges, Visual Stock Health Level Bar (Col 7) -->
+          <div class="lg:col-span-7 space-y-4">
             <div class="flex items-center gap-2 flex-wrap">
+              <!-- Status Pill with Glow -->
               <span 
-                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border shadow-2xs"
+                class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider border shadow-xs"
                 :class="{
-                  'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800': blankStock.status === 'TERSEDIA',
-                  'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800': blankStock.status === 'PERSEDIAAN TERBATAS',
-                  'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800': blankStock.status === 'STOK KOSONG',
+                  'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800 shadow-emerald-500/10': blankStock.status === 'TERSEDIA',
+                  'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800 shadow-amber-500/10': blankStock.status === 'PERSEDIAAN TERBATAS',
+                  'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800 shadow-rose-500/10': blankStock.status === 'STOK KOSONG',
                 }"
               >
                 <span 
@@ -349,24 +394,58 @@
                 <span>STATUS: {{ blankStock.status }}</span>
               </span>
 
-              <span class="text-[10px] text-gray-400 font-semibold font-mono">
+              <!-- Verified Institution Pill -->
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-zinc-800 text-[10px] text-slate-600 dark:text-zinc-400 font-semibold font-mono border border-slate-200 dark:border-zinc-700">
+                <ShieldCheck class="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                 Disdukcapil Kabupaten Dompu
               </span>
             </div>
 
-            <!-- Big Number -->
-            <div class="flex items-baseline gap-3 pt-1">
-              <span class="text-4xl sm:text-6xl font-black font-mono tracking-tight text-gray-900 dark:text-zinc-50">
+            <!-- Hero Big Number Display -->
+            <div class="flex items-baseline gap-3.5 pt-1">
+              <span class="text-5xl sm:text-7xl font-black font-mono tracking-tight text-slate-900 dark:text-white leading-none">
                 {{ formatNumber(blankStock.available_stock || blankStock.current_stock) }}
               </span>
-              <div class="text-left">
-                <span class="text-base sm:text-xl font-bold font-sans text-gray-800 dark:text-zinc-200 block">Keping Blangko</span>
-                <span class="text-[10px] text-gray-400 dark:text-zinc-500 font-semibold">Persediaan Fisik Siap Cetak</span>
+              <div class="text-left space-y-0.5">
+                <span class="text-lg sm:text-2xl font-black font-sans text-slate-800 dark:text-zinc-200 block leading-tight">
+                  Keping Blangko
+                </span>
+                <span class="text-[11px] sm:text-xs text-slate-500 dark:text-zinc-400 font-medium">
+                  Persediaan Fisik Siap Cetak
+                </span>
+              </div>
+            </div>
+
+            <!-- Visual Stock Health Meter Bar -->
+            <div class="pt-1 space-y-1.5 max-w-lg">
+              <div class="flex items-center justify-between text-[11px] font-bold">
+                <span 
+                  class="flex items-center gap-1.5"
+                  :class="{
+                    'text-emerald-700 dark:text-emerald-400': blankStock.status === 'TERSEDIA',
+                    'text-amber-700 dark:text-amber-400': blankStock.status === 'PERSEDIAAN TERBATAS',
+                    'text-rose-700 dark:text-rose-400': blankStock.status === 'STOK KOSONG',
+                  }"
+                >
+                  <ShieldCheck class="w-3.5 h-3.5" />
+                  <span>Kondisi Persediaan: {{ blankStock.status === 'TERSEDIA' ? 'Sangat Aman & Terpenuhi' : (blankStock.status === 'PERSEDIAAN TERBATAS' ? 'Terbatas / Prioritas' : 'Kosong') }}</span>
+                </span>
+                <span class="font-mono text-slate-400 text-[10.5px]">Kapasitas Pelayanan Normal</span>
+              </div>
+              <div class="h-2.5 w-full bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden p-0.5 border border-slate-200/80 dark:border-zinc-700">
+                <div 
+                  class="h-full rounded-full transition-all duration-1000"
+                  :class="{
+                    'bg-gradient-to-r from-emerald-500 to-teal-400 w-full shadow-xs shadow-emerald-500/50': blankStock.status === 'TERSEDIA',
+                    'bg-gradient-to-r from-amber-500 to-orange-400 w-2/5 shadow-xs shadow-amber-500/50': blankStock.status === 'PERSEDIAAN TERBATAS',
+                    'bg-gradient-to-r from-rose-500 to-red-500 w-0': blankStock.status === 'STOK KOSONG',
+                  }"
+                ></div>
               </div>
             </div>
 
             <!-- Advisory message -->
-            <p class="text-xs sm:text-sm text-gray-600 dark:text-zinc-400 leading-relaxed font-medium">
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed font-medium">
               <template v-if="blankStock.status === 'TERSEDIA'">
                 Persediaan blangko KTP-el mencukupi untuk melayani seluruh permohonan baru, rusak, dan perubahan elemen data di kantor Disdukcapil Kabupaten Dompu.
               </template>
@@ -379,25 +458,58 @@
             </p>
           </div>
 
-          <!-- Right: Monthly Highlights & Actions (Col 5) -->
-          <div class="lg:col-span-5 flex flex-col justify-between gap-4 bg-gray-50/70 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800/60 rounded-2xl p-4 sm:p-5">
-            <div class="grid grid-cols-2 gap-3 text-center sm:text-left">
+          <!-- Right: Elevated Highlights & Action Buttons (Col 5) -->
+          <div class="lg:col-span-5 flex flex-col justify-between gap-4 bg-slate-50/90 dark:bg-zinc-850/60 border border-slate-200/90 dark:border-zinc-800/80 rounded-2xl p-4 sm:p-5 shadow-xs">
+            <div class="grid grid-cols-2 gap-3 text-left">
               <!-- Penerimaan Bulan Ini -->
-              <div class="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-2xs">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider font-mono block">Masuk ({{ blankStock.month_name }})</span>
-                <p class="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
+              <div class="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-emerald-100 dark:border-emerald-950/50 shadow-xs relative overflow-hidden group hover:border-emerald-300 transition">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">Masuk ({{ blankStock.month_name }})</span>
+                  <div class="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <ArrowDownLeft class="w-3.5 h-3.5" />
+                  </div>
+                </div>
+                <p class="text-lg sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono mt-1 tracking-tight">
                   +{{ formatNumber(blankStock.month_received || blankStock.received_this_month || 0) }}
                 </p>
-                <span class="text-[9px] text-gray-400 font-medium">Keping Diterima</span>
+                <span class="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Keping Diterima</span>
               </div>
 
               <!-- Penggunaan Bulan Ini -->
-              <div class="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-2xs">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider font-mono block">Cetak ({{ blankStock.month_name }})</span>
-                <p class="text-lg sm:text-xl font-black text-blue-600 dark:text-blue-400 font-mono mt-0.5">
+              <div class="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-blue-100 dark:border-blue-950/50 shadow-xs relative overflow-hidden group hover:border-blue-300 transition">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">Cetak ({{ blankStock.month_name }})</span>
+                  <div class="w-6 h-6 rounded-lg bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                    <Printer class="w-3.5 h-3.5" />
+                  </div>
+                </div>
+                <p class="text-lg sm:text-2xl font-black text-blue-600 dark:text-blue-400 font-mono mt-1 tracking-tight">
                   -{{ formatNumber(blankStock.month_used || blankStock.used_this_month || 0) }}
                 </p>
-                <span class="text-[9px] text-gray-400 font-medium">Keping Tercetak</span>
+                <span class="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Keping Tercetak</span>
+              </div>
+
+              <!-- Blangko Rusak / Cacat Bulan Ini -->
+              <div class="col-span-2 p-3 sm:p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-rose-100 dark:border-rose-950/50 shadow-xs flex items-center justify-between gap-3 hover:border-rose-300 transition">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/70 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                    <AlertTriangle class="w-4 h-4" />
+                  </div>
+                  <div class="min-w-0">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono block truncate">
+                      Blangko Rusak ({{ blankStock.month_name }})
+                    </span>
+                    <span class="text-[10.5px] text-slate-500 dark:text-zinc-400 font-medium block truncate">
+                      Total Penggunaan: <strong class="font-mono text-slate-700 dark:text-zinc-200">{{ formatNumber((blankStock.month_used || blankStock.used_this_month || 0) + (blankStock.month_damaged || blankStock.damaged_this_month || 0)) }}</strong> keping
+                    </span>
+                  </div>
+                </div>
+                <div class="text-right shrink-0">
+                  <span class="text-base sm:text-lg font-black text-rose-600 dark:text-rose-400 font-mono tracking-tight block leading-none">
+                    -{{ formatNumber(blankStock.month_damaged || blankStock.damaged_this_month || 0) }}
+                  </span>
+                  <span class="text-[9.5px] text-slate-400 dark:text-zinc-500 font-medium">Keping Rusak</span>
+                </div>
               </div>
             </div>
 
@@ -405,17 +517,17 @@
             <div class="flex flex-col sm:flex-row items-center gap-2 pt-1">
               <Link
                 href="/layanan/ketersediaan-blangko"
-                class="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-white dark:bg-zinc-900 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-800 dark:text-zinc-200 font-bold text-xs text-center transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-2xs"
+                class="w-full sm:flex-1 py-3 px-4 rounded-xl bg-white dark:bg-zinc-900 hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-800 dark:text-zinc-200 font-bold text-xs text-center transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-xs"
               >
                 <span>Detail Ketersediaan</span>
-                <ArrowRight class="w-3.5 h-3.5 text-gray-500" />
+                <ArrowRight class="w-3.5 h-3.5 text-slate-400" />
               </Link>
 
               <Link
                 href="/layanan/antrian/daftar"
-                class="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs text-center shadow-sm shadow-emerald-600/20 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+                class="w-full sm:flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs text-center shadow-md shadow-emerald-600/25 transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
               >
-                <Ticket class="w-3.5 h-3.5 text-white" />
+                <Ticket class="w-4 h-4 text-white" />
                 <span>Daftar Layanan</span>
               </Link>
             </div>
@@ -825,7 +937,7 @@ import PublicLayout from '@/Layouts/PublicLayout.vue';
 import InformasiLayananWidget from '@/Components/InformasiLayananWidget.vue';
 import SplashScreen from '@/Components/SplashScreen.vue';
 import { storageUrl } from '@/utils/storage';
-import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar, Download, FileText, ArrowRight, Ticket, CreditCard, Clock, ExternalLink } from '@lucide/vue';
+import { Users, User, UserRound, Home as HomeIcon, Globe, ArrowUpRight, Monitor, Calendar, Download, FileText, ArrowRight, Ticket, CreditCard, Clock, ExternalLink, ArrowDownLeft, Printer, ShieldCheck, Check, Activity, Sparkles, AlertTriangle } from '@lucide/vue';
 
 const props = defineProps({
   banners: [Array, Object],

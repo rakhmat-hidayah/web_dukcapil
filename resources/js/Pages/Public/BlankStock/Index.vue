@@ -104,14 +104,14 @@
       </div>
 
       <!-- Public Monthly Statistics Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <!-- Penerimaan Bulan Berjalan -->
-        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm flex items-center gap-4">
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-sm flex items-center gap-4">
           <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-900">
             <CheckCircle2 class="w-6 h-6" />
           </div>
           <div>
-            <span class="text-xs font-bold text-gray-500 dark:text-zinc-400 block">Penerimaan Blangko Bulan Ini</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-zinc-400 block">Penerimaan Bulan Ini</span>
             <div class="text-2xl sm:text-3xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
               +{{ formatNumber(summary?.received_this_month ?? summary?.month_received ?? 0) }} <span class="text-xs font-bold text-gray-400">keping</span>
             </div>
@@ -119,16 +119,120 @@
         </div>
 
         <!-- Pemakaian Bulan Berjalan -->
-        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm flex items-center gap-4">
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-sm flex items-center gap-4">
           <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900">
-            <CreditCard class="w-6 h-6" />
+            <Printer class="w-6 h-6" />
           </div>
           <div>
             <span class="text-xs font-bold text-gray-500 dark:text-zinc-400 block">KTP-el Dicetak Bulan Ini</span>
-            <div class="text-2xl sm:text-3xl font-black font-mono text-gray-900 dark:text-zinc-100 mt-0.5">
+            <div class="text-2xl sm:text-3xl font-black font-mono text-blue-600 dark:text-blue-400 mt-0.5">
               {{ formatNumber(summary?.used_this_month ?? summary?.month_used ?? 0) }} <span class="text-xs font-bold text-gray-400">keping</span>
             </div>
           </div>
+        </div>
+
+        <!-- Blangko Rusak Bulan Berjalan -->
+        <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-5 sm:p-6 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-100 dark:border-rose-900">
+            <AlertTriangle class="w-6 h-6" />
+          </div>
+          <div>
+            <span class="text-xs font-bold text-gray-500 dark:text-zinc-400 block">Blangko Rusak Bulan Ini</span>
+            <div class="text-2xl sm:text-3xl font-black font-mono text-rose-600 dark:text-rose-400 mt-0.5">
+              {{ formatNumber(summary?.month_damaged ?? summary?.damaged_this_month ?? 0) }} <span class="text-xs font-bold text-gray-400">keping</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Laporan Penggunaan Blangko -->
+      <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-zinc-800 pb-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-gray-950 dark:text-white tracking-tight flex items-center gap-2">
+              <FileText class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <span>Detail Laporan Penggunaan Blangko</span>
+            </h2>
+            <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
+              Rekapitulasi pencetakan KTP-el dan catatan blangko rusak / gagal cetak yang telah diverifikasi
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <span class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-[11px] font-bold text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700">
+              Total Terpakai ({{ summary?.month_name || 'Bulan Ini' }}):
+              <strong class="font-mono text-slate-950 dark:text-white ml-1">{{ formatNumber(totalMonthlyOut) }} keping</strong>
+            </span>
+            <span class="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-[11px] font-bold text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60">
+              Rasio Rusak: <strong class="font-mono ml-0.5">{{ damageRatio }}%</strong>
+            </span>
+          </div>
+        </div>
+
+        <div v-if="usageReports.length === 0" class="py-10 text-center text-xs text-gray-400 dark:text-zinc-500 bg-gray-50/70 dark:bg-zinc-800/30 rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800">
+          Belum ada laporan penggunaan blangko yang tercatat.
+        </div>
+
+        <div v-else class="overflow-x-auto -mx-2 sm:mx-0">
+          <table class="w-full text-left border-collapse min-w-[680px]">
+            <thead>
+              <tr class="border-b border-gray-200 dark:border-zinc-800 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-zinc-400 bg-gray-50/80 dark:bg-zinc-800/50">
+                <th class="py-3 px-4 rounded-tl-xl">Tanggal &amp; No. Laporan</th>
+                <th class="py-3 px-3">Sesi Pelayanan</th>
+                <th class="py-3 px-3 text-right">Tercetak</th>
+                <th class="py-3 px-3 text-right">Blangko Rusak</th>
+                <th class="py-3 px-3 text-right">Total</th>
+                <th class="py-3 px-3">Keterangan Kerusakan</th>
+                <th class="py-3 px-4 text-center rounded-tr-xl">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-zinc-800/80 text-xs">
+              <tr
+                v-for="item in usageReports"
+                :key="item.id"
+                class="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40 transition-colors"
+              >
+                <td class="py-3.5 px-4 whitespace-nowrap">
+                  <div class="font-bold text-gray-900 dark:text-zinc-100">{{ item.usage_date_formatted }}</div>
+                  <div class="text-[10.5px] font-mono text-gray-400 dark:text-zinc-500 mt-0.5">{{ item.report_number }}</div>
+                </td>
+                <td class="py-3.5 px-3 text-gray-700 dark:text-zinc-300 font-medium">
+                  {{ item.session_name }}
+                </td>
+                <td class="py-3.5 px-3 text-right whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg font-mono font-bold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-900/50">
+                    {{ formatNumber(item.quantity_used) }}
+                  </span>
+                </td>
+                <td class="py-3.5 px-3 text-right whitespace-nowrap">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-lg font-mono font-bold border"
+                    :class="item.quantity_damaged > 0
+                      ? 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900/60'
+                      : 'bg-gray-50 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 border-gray-200 dark:border-zinc-700'"
+                  >
+                    {{ formatNumber(item.quantity_damaged) }}
+                  </span>
+                </td>
+                <td class="py-3.5 px-3 text-right whitespace-nowrap font-mono font-black text-gray-900 dark:text-white">
+                  {{ formatNumber(item.total_quantity) }}
+                </td>
+                <td class="py-3.5 px-3 text-gray-600 dark:text-zinc-400 max-w-[220px]">
+                  <span v-if="item.damage_reason" class="line-clamp-2">{{ item.damage_reason }}</span>
+                  <span v-else class="text-gray-300 dark:text-zinc-600">-</span>
+                </td>
+                <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                  <span
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border"
+                    :class="item.status === 'APPROVED'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
+                      : 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800/60'"
+                  >
+                    {{ item.status_label }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -192,13 +296,17 @@ import { Head, Link } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { 
   Home, CreditCard, Clock, Ticket, Search, MessageSquare, 
-  CheckCircle2, HelpCircle 
+  CheckCircle2, HelpCircle, AlertTriangle, FileText, Printer 
 } from '@lucide/vue';
 
 const props = defineProps({
   summary: {
     type: Object,
     required: true,
+  },
+  usageReports: {
+    type: Array,
+    default: () => [],
   },
   seo: {
     type: Object,
@@ -262,6 +370,18 @@ const advisoryMessage = computed(() => {
     default:
       return 'Persediaan blangko KTP-el fisik saat ini sedang kosong menunggu alokasi penerimaan baru dari Ditjen Dukcapil Kemendagri / Provinsi NTB. Sebagai alternatif dokumen sah, warga dapat mengaktifkan Identitas Kependudukan Digital (IKD) atau meminta Surat Keterangan resmi pengganti KTP-el.';
   }
+});
+
+const totalMonthlyOut = computed(() => {
+  const used = Number(props.summary?.used_this_month ?? props.summary?.month_used ?? 0);
+  const damaged = Number(props.summary?.month_damaged ?? props.summary?.damaged_this_month ?? 0);
+  return used + damaged;
+});
+
+const damageRatio = computed(() => {
+  const damaged = Number(props.summary?.month_damaged ?? props.summary?.damaged_this_month ?? 0);
+  if (totalMonthlyOut.value <= 0) return '0.0';
+  return ((damaged / totalMonthlyOut.value) * 100).toFixed(1);
 });
 
 const formatNumber = (num) => {
