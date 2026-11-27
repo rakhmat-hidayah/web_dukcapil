@@ -4,9 +4,9 @@
   </Head>
 
   <PublicLayout>
-    <div class="min-h-screen py-3 sm:py-12 px-3 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-3 sm:space-y-8">
+    <div class="w-full min-h-screen py-3 sm:py-12 px-0 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-3 sm:space-y-8">
       <!-- Breadcrumb Navigation -->
-      <nav class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10.5px] sm:text-xs text-gray-500 dark:text-zinc-400">
+      <nav class="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 text-[10.5px] sm:text-xs text-gray-500 dark:text-zinc-400">
         <Link href="/" class="hover:text-primary-600 transition flex items-center gap-1 shrink-0">
           <Home class="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           <span>Beranda</span>
@@ -42,8 +42,8 @@
         <div class="hidden sm:block absolute -right-20 -bottom-20 w-80 h-80 rounded-full blur-3xl pointer-events-none opacity-20"
              :class="glowColorClass"></div>
 
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-6">
-          <div class="space-y-2 sm:space-y-4 max-w-xl">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+          <div class="space-y-2.5 sm:space-y-4 max-w-xl mx-auto md:mx-0 text-center md:text-left flex flex-col items-center md:items-start">
             <!-- Availability Badge -->
             <div class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10.5px] sm:text-sm font-black uppercase tracking-wider shadow-sm"
                  :class="badgeStyles">
@@ -56,8 +56,8 @@
               <span class="text-[10.5px] sm:text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-zinc-400 block">
                 Jumlah Persediaan Blangko
               </span>
-              <div class="text-3xl sm:text-6xl font-black font-mono tracking-tight text-gray-950 dark:text-white mt-0.5 sm:mt-1">
-                {{ formatNumber(summary?.current_stock) }}
+              <div class="text-3xl sm:text-6xl font-black font-mono tracking-tight text-gray-950 dark:text-white mt-0.5 sm:mt-1 flex items-baseline justify-center md:justify-start gap-1.5">
+                <span>{{ formatNumber(summary?.current_stock) }}</span>
                 <span class="text-sm sm:text-xl font-bold font-sans text-gray-500 dark:text-zinc-400">Keping</span>
               </div>
             </div>
@@ -68,7 +68,7 @@
             </p>
 
             <!-- Valid Timestamp -->
-            <div class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-gray-500 dark:text-zinc-400">
+            <div class="flex items-center justify-center md:justify-start gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-gray-500 dark:text-zinc-400">
               <Clock class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400 shrink-0" />
               <span>Diperbarui: <strong>{{ summary?.last_updated_formatted || '-' }}</strong></span>
             </div>
@@ -106,7 +106,7 @@
       </div>
 
       <!-- Public Monthly Statistics Cards - Horizontal scroll on mobile -->
-      <div class="flex sm:grid sm:grid-cols-3 gap-2.5 sm:gap-4 overflow-x-auto sm:overflow-visible -mx-3 px-3 sm:mx-0 sm:px-0 pb-1 sm:pb-0 snap-x snap-mandatory sm:snap-none">
+      <div class="w-full flex sm:grid sm:grid-cols-3 gap-2.5 sm:gap-4 overflow-x-auto sm:overflow-visible pb-1 sm:pb-0 snap-x snap-mandatory sm:snap-none">
         <!-- Penerimaan Bulan Berjalan -->
         <div class="min-w-[200px] sm:min-w-0 snap-start bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl sm:rounded-3xl p-3 sm:p-6 shadow-sm flex items-center gap-2.5 sm:gap-4">
           <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-900">
